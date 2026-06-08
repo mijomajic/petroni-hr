@@ -1,12 +1,15 @@
 import { json } from '@sveltejs/kit';
 import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { SUPABASE_SERVICE_KEY } from '$env/static/private';
+import { env as pub } from '$env/dynamic/public';
+import { env as priv } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request }) => {
   const body = await request.json();
-  const supabase = createClient(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_KEY);
+  const supabase = createClient(
+    pub.PUBLIC_SUPABASE_URL ?? '',
+    priv.SUPABASE_SERVICE_KEY ?? ''
+  );
 
   const { data, error } = await supabase.from('bookings').insert({
     vehicle_id: body.selectedVehicle?.id,

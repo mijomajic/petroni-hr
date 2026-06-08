@@ -1,16 +1,18 @@
 import { json } from '@sveltejs/kit';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-import { STRIPE_SECRET_KEY, SUPABASE_SERVICE_KEY } from '$env/static/private';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { env as priv } from '$env/dynamic/private';
+import { env as pub } from '$env/dynamic/public';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request }) => {
   const body = await request.json();
+  const stripeKey = priv.STRIPE_SECRET_KEY ?? '';
+  const supabaseUrl = pub.PUBLIC_SUPABASE_URL ?? '';
+  const serviceKey = priv.SUPABASE_SERVICE_KEY ?? '';
 
-  if (!STRIPE_SECRET_KEY || STRIPE_SECRET_KEY === 'sk_test_placeholder') {
-    // Dev mode: simulate success
-    const supabase = createClient(PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_KEY);
+  if (!stripeKey || stripeKey === 'sk_test_placeholder') {
+    const supabase = createClient(supabaseUrl, serviceKey);
     await supabase.from('orders').insert({
       customer_name: body.customer.name,
       customer_email: body.customer.email,
@@ -25,7 +27,7 @@ export const POST: RequestHandler = async ({ request }) => {
     return json({ success: true, mode: 'dev' });
   }
 
-  const stripe = new Stripe(STRIPE_SECRET_KEY);
+  const stripe = new Stripe(stripeKey);
   const amount = Math.round(body.total * 100);
 
   const paymentIntent = await stripe.paymentIntents.create({

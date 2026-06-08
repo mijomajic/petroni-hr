@@ -1,33 +1,31 @@
 import { json } from '@sveltejs/kit';
-import { PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET } from '$env/static/private';
+import { env as priv } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
-
-async function getPayPalToken() {
-  const res = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`)}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: 'grant_type=client_credentials',
-  });
-  const data = await res.json();
-  return data.access_token;
-}
 
 export const POST: RequestHandler = async ({ request }) => {
   const { amount } = await request.json();
+  const clientId = priv.PAYPAL_CLIENT_ID ?? '';
+  const clientSecret = priv.PAYPAL_CLIENT_SECRET ?? '';
 
-  if (!PAYPAL_CLIENT_ID || PAYPAL_CLIENT_ID === 'placeholder-paypal-client-id') {
+  if (!clientId || clientId === 'placeholder-paypal-client-id') {
     return json({ success: false, error: 'PayPal not configured' }, { status: 503 });
   }
 
   try {
-    const token = await getPayPalToken();
+    const tokenRes = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'grant_type=client_credentials',
+    });
+    const { access_token } = await tokenRes.json();
+
     const res = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${access_token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

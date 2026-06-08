@@ -1,5 +1,7 @@
 import { json } from '@sveltejs/kit';
-import { supabase } from '$lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+import { env as pub } from '$env/dynamic/public';
+import { env as priv } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url }) => {
@@ -10,6 +12,8 @@ export const GET: RequestHandler = async ({ url }) => {
   if (!vehicleId || !pickupDate || !dropoffDate) {
     return json({ available: false, error: 'Missing parameters' }, { status: 400 });
   }
+
+  const supabase = createClient(pub.PUBLIC_SUPABASE_URL ?? '', priv.SUPABASE_SERVICE_KEY ?? '');
 
   const [{ data: bookingConflicts }, { data: blockedConflicts }] = await Promise.all([
     supabase
