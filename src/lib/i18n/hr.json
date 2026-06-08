@@ -1,0 +1,99 @@
+{
+  "nav": {
+    "home": "Naslovnica",
+    "vehicles": "Vozila",
+    "rental": "Najam kampera",
+    "sale": "Vozila za prodaju",
+    "film": "Vozila za filmske produkcije",
+    "shop": "Shop",
+    "news": "Novosti",
+    "about": "O nama",
+    "contact": "Kontakt",
+    "book": "Rezerviraj"
+  },
+  "hero": {
+    "headline": "PUTUJTE BEZ GRANICA, ŽIVITE BEZ OGRANIČENJA",
+    "subtext": "Otkrijte slobodu ceste s vrhunskim kamperima i karavanima. Vaša avantura počinje ovdje.",
+    "cta": "REZERVIRAJ"
+  },
+  "vehicles": {
+    "title": "NAŠA VOZILA",
+    "subtitle": "PRIHVATITE IZAZOV, DOŽIVITE AVANTURU",
+    "viewAll": "Pogledajte sva vozila",
+    "perDay": "/ dan",
+    "select": "Odaberi",
+    "seats": "Sjedala",
+    "bags": "Torbe",
+    "available": "Dostupno",
+    "notAvailable": "Nije dostupno"
+  },
+  "sale": {
+    "title": "VOZILA ZA PRODAJU",
+    "subtitle": "PRONAĐITE SAVRŠENO VOZILO ZA SEBE"
+  },
+  "whyUs": {
+    "title": "ZAŠTO PETRONI?",
+    "item1Title": "Bez skrivenih troškova",
+    "item1Desc": "Transparentne cijene, bez iznenađenja. Sve je uključeno u cijenu najma.",
+    "item2Title": "Diljem Hrvatske i Europe",
+    "item2Desc": "Preuzimanje i povrat na 11+ lokacija diljem Hrvatske i Europe.",
+    "item3Title": "100% zadovoljstvo",
+    "item3Desc": "19 godina iskustva, stotine zadovoljnih klijenata svake sezone."
+  },
+  "stats": {
+    "users": "ZADOVOLJNIH KORISNIKA",
+    "years": "GODINA PUTOVANJA",
+    "vehicles": "RASPOLOŽIVIH VOZILA"
+  },
+  "services": {
+    "title": "SVE ZA BEZBRIŽAN ODMOR",
+    "subtitle": "Kompletna oprema i pribor za kamping i karavaning",
+    "cta": "Posjetite shop"
+  },
+  "booking": {
+    "title": "REZERVACIJA",
+    "step1": "Datumi",
+    "step2": "Vozilo",
+    "step3": "Vozač",
+    "step4": "Pregled i plaćanje",
+    "pickupLocation": "Lokacija preuzimanja",
+    "dropoffLocation": "Lokacija povrata",
+    "pickupDate": "Datum preuzimanja",
+    "dropoffDate": "Datum povrata",
+    "pickupTime": "Vrijeme preuzimanja",
+    "dropoffTime": "Vrijeme povrata",
+    "driverAge": "Dob vozača",
+    "search": "Pretraži vozila",
+    "select": "Odaberi vozilo",
+    "back": "Natrag",
+    "continue": "Nastavi",
+    "confirmBook": "Potvrdi rezervaciju",
+    "payStripe": "Plati karticom",
+    "payPayPal": "Plati PayPalom",
+    "successTitle": "Rezervacija potvrđena!",
+    "successText": "Vaša rezervacija je uspješno primljena. Detalji su poslani na vašu email adresu."
+  },
+  "shop": {
+    "title": "SHOP",
+    "addToCart": "Dodaj u košaricu",
+    "inStock": "Na zalihi",
+    "outOfStock": "Nema na zalihi",
+    "categories": "Kategorije"
+  },
+  "cart": {
+    "title": "KOŠARICA",
+    "empty": "Vaša košarica je prazna",
+    "subtotal": "Međuzbroj",
+    "shipping": "Dostava",
+    "total": "Ukupno",
+    "checkout": "Naruči",
+    "remove": "Ukloni",
+    "continueShopping": "Nastavi kupovinu"
+  },
+  "footer": {
+    "privacy": "Privatnost",
+    "payment": "Načini plaćanja",
+    "complaints": "Reklamacije",
+    "copyright": "© 2024 Petroni. Sva prava pridržana."
+  }
+}
