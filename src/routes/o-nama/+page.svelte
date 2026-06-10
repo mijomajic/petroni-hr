@@ -1,55 +1,99 @@
+<script lang="ts">
+  import { locale } from '$lib/stores/locale';
+
+  const testimonials = $derived($locale === 'hr' ? [
+    'Vrhunsko iskustvo od prvog kontakta do povratka kampera. Sve preporuke!',
+    'Profesionalan tim i besprijekorno održavano vozilo. Putovanje za pamćenje.',
+    'Najam je bio jednostavan, a podrška dostupna u svakom trenutku. Hvala!',
+  ] : [
+    'A top experience from first contact to returning the camper. Highly recommended!',
+    'Professional team and an impeccably maintained vehicle. A trip to remember.',
+    'Renting was simple and support was available at all times. Thank you!',
+  ]);
+</script>
+
 <svelte:head><title>O nama — Petroni</title></svelte:head>
 
-<div class="min-h-[100dvh] pt-28 pb-20" style="background: #0a0a0a">
-  <div class="max-w-5xl mx-auto px-4 md:px-6">
-    <div class="mb-16">
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-5" style="background: rgba(245,197,24,0.1); color: #F5C518; border: 1px solid rgba(245,197,24,0.2)">Petroni d.o.o.</span>
-      <h1 class="text-5xl md:text-6xl font-black uppercase tracking-tight text-white mb-4">O NAMA</h1>
-      <p class="text-lg leading-relaxed max-w-2xl" style="color: #9ca3af">
-        Vaš pouzdani partner za kamping i karavaning od 2005. godine.
+<!-- Hero banner -->
+<section class="relative h-[320px] md:h-[380px] flex items-center justify-center overflow-hidden">
+  <img src="https://www.petroni.hr/wp-content/uploads/2025/02/hero-image-petroni-camping-and-caravaning-rental10-1.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" />
+  <div class="absolute inset-0" style="background:rgba(0,0,0,0.45)"></div>
+  <h1 class="relative z-10 text-white text-4xl md:text-5xl font-extrabold uppercase tracking-wide">{$locale === 'hr' ? 'O nama' : 'About us'}</h1>
+</section>
+
+<!-- Story 1 -->
+<section class="section">
+  <div class="container-x grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <span class="eyebrow mb-3">{$locale === 'hr' ? 'Tko smo' : 'Who we are'}</span>
+      <h2 class="text-[28px] font-bold text-[#2b2b2b] mb-4">{$locale === 'hr' ? 'Obiteljska tradicija' : 'A family tradition'}</h2>
+      <p class="text-[14px] leading-relaxed text-[#6b7178] mb-4">
+        {$locale === 'hr'
+          ? 'Petroni d.o.o. hrvatska je tvrtka specijalizirana za najam i prodaju kampera, karavana i opreme za kamping. S više od 19 godina iskustva, mi smo Vaš pouzdani partner za sva kamping putovanja.'
+          : 'Petroni d.o.o. is a Croatian company specialised in the rental and sale of campers, caravans and camping equipment. With over 19 years of experience, we are your reliable partner for every camping trip.'}
+      </p>
+      <p class="text-[14px] leading-relaxed text-[#6b7178]">
+        {$locale === 'hr'
+          ? 'Naša misija je pružiti Vam slobodu ceste uz maksimalnu udobnost i sigurnost. Svako naše vozilo prolazi strog tehnički pregled prije iznajmljivanja.'
+          : 'Our mission is to give you the freedom of the road with maximum comfort and safety. Every vehicle undergoes a strict technical inspection before rental.'}
       </p>
     </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
-      <div class="space-y-6">
-        <p class="text-sm leading-relaxed" style="color: #9ca3af">
-          Petroni d.o.o. je hrvatska tvrtka specijalizirana za najam i prodaju kampera, karavana i opreme za kamping. S više od 19 godina iskustva, mi smo vaš pouzdani partner za sva kamping putovanja.
-        </p>
-        <p class="text-sm leading-relaxed" style="color: #9ca3af">
-          Naša misija je pružiti vam slobodu ceste uz maksimalnu udobnost i sigurnost. Svako naše vozilo prolazi strog tehnički pregled prije iznajmljivanja, a naš tim stoji vam na raspolaganju 24/7.
-        </p>
-        <p class="text-sm leading-relaxed" style="color: #9ca3af">
-          Osim najma, nudimo i kompletan asortiman kamping opreme u našem online shopu — od elektrike i plinske opreme do namještaja i sanitarija.
-        </p>
-      </div>
-      <div class="rounded-[2rem] overflow-hidden aspect-square" style="border: 1px solid #2a2a2a">
-        <img src="https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp" alt="Petroni" class="w-full h-full object-cover" />
-      </div>
+    <div class="card overflow-hidden aspect-[4/3]">
+      <img src="https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg" alt="Petroni" class="w-full h-full object-cover" />
     </div>
+  </div>
+</section>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-3 gap-6 mb-20">
-      {#each [['19+', 'Godina iskustva'], ['546+', 'Zadovoljnih klijenata'], ['20+', 'Vozila u floti']] as [num, label]}
-        <div class="text-center p-8 rounded-[2rem]" style="background: #111; border: 1px solid #1a1a1a">
-          <div class="text-5xl font-black mb-2" style="color: #F5C518">{num}</div>
-          <div class="text-xs font-bold uppercase tracking-widest" style="color: #9ca3af">{label}</div>
-        </div>
-      {/each}
+<!-- Story 2 -->
+<section class="pb-4">
+  <div class="container-x grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div class="card overflow-hidden aspect-[4/3] order-2 lg:order-1">
+      <img src="https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp" alt="Petroni" class="w-full h-full object-cover" />
     </div>
+    <div class="order-1 lg:order-2">
+      <span class="eyebrow mb-3">{$locale === 'hr' ? 'Naše iskustvo' : 'Our experience'}</span>
+      <h2 class="text-[28px] font-bold text-[#2b2b2b] mb-4">{$locale === 'hr' ? '19 godina putovanja' : '19 years of travelling'}</h2>
+      <p class="text-[14px] leading-relaxed text-[#6b7178]">
+        {$locale === 'hr'
+          ? 'Kroz godine smo izgradili povjerenje stotina zadovoljnih korisnika. Osim najma, nudimo i kompletan asortiman kamping opreme u našem online shopu — od elektrike i plinske opreme do namještaja i sanitarija. Naš tim stoji Vam na raspolaganju za savjet i podršku tijekom cijelog putovanja.'
+          : 'Over the years we have earned the trust of hundreds of satisfied customers. Besides rentals, we offer a complete range of camping equipment in our online shop — from electrical and gas equipment to furniture and sanitary products. Our team is available for advice and support throughout your trip.'}
+      </p>
+    </div>
+  </div>
+</section>
 
-    <!-- Team / Values -->
+<!-- Testimonials -->
+<section class="section mt-8" style="background:#fafbfc">
+  <div class="container-x">
+    <div class="text-center mb-12">
+      <span class="eyebrow mb-3">{$locale === 'hr' ? 'Povjerenje' : 'Trust'}</span>
+      <h2 class="section-title">{$locale === 'hr' ? 'Mišljenja naših korisnika' : 'What our customers say'}</h2>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {#each [
-        { icon: '🏆', title: 'Kvaliteta', desc: 'Sva naša vozila održavaju se prema najvišim standardima i prolaze redovite tehničke preglede.' },
-        { icon: '🤝', title: 'Pouzdanost', desc: 'Transparentne cijene, bez skrivenih troškova. Točno ono što piše u ponudi — bez iznenađenja.' },
-        { icon: '❤️', title: 'Podrška', desc: 'Naš tim je dostupan 24/7 za sve vaše potrebe tijekom putovanja.' },
-      ] as val}
-        <div class="p-6 rounded-2xl" style="background: #111; border: 1px solid #1a1a1a">
-          <div class="text-3xl mb-4">{val.icon}</div>
-          <h3 class="font-bold text-white mb-2">{val.title}</h3>
-          <p class="text-sm leading-relaxed" style="color: #9ca3af">{val.desc}</p>
+      {#each testimonials as quote}
+        <div class="card p-7">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="#f5c518" class="mb-4"><path d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z"/></svg>
+          <p class="text-[14px] leading-relaxed text-[#5b6168] italic">"{quote}"</p>
         </div>
       {/each}
     </div>
   </div>
-</div>
+</section>
+
+<!-- CTA -->
+<section class="section">
+  <div class="container-x grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div class="card overflow-hidden aspect-[4/3]">
+      <img src="https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg" alt="Petroni" class="w-full h-full object-cover" />
+    </div>
+    <div>
+      <h2 class="section-title mb-4">{$locale === 'hr' ? 'S kamperom nema žurbe' : 'No rush with a camper'}</h2>
+      <p class="text-[14px] leading-relaxed text-[#6b7178] mb-6">
+        {$locale === 'hr'
+          ? 'Otkrijte slobodu putovanja bez rasporeda i ograničenja. Bilo da planirate vikend izlet ili dugo putovanje Europom — mi smo tu da Vaše putovanje učinimo bezbrižnim.'
+          : 'Discover the freedom of travelling without a schedule or limits. Whether you are planning a weekend getaway or a long journey across Europe — we are here to make your trip carefree.'}
+      </p>
+      <a href="/rezerviraj" class="btn btn-primary px-8 py-3.5">{$locale === 'hr' ? 'Rezerviraj' : 'Book now'}</a>
+    </div>
+  </div>
+</section>

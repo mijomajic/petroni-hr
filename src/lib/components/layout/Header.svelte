@@ -1,21 +1,15 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { cart } from '$lib/stores/cart';
-  import { locale, toggleLocale } from '$lib/stores/locale';
+  import { locale } from '$lib/stores/locale';
   import { _ } from 'svelte-i18n';
   import CartDrawer from '$lib/components/ui/CartDrawer.svelte';
 
   let mobileOpen = $state(false);
   let cartOpen = $state(false);
-  let scrolled = $state(false);
+  let vozilaOpen = $state(false);
 
   const cartCount = $derived($cart.reduce((acc, i) => acc + i.qty, 0));
-
-  $effect(() => {
-    const handler = () => { scrolled = window.scrollY > 50; };
-    window.addEventListener('scroll', handler, { passive: true });
-    return () => window.removeEventListener('scroll', handler);
-  });
 
   const navLinks = [
     { href: '/', label: () => $_('nav.home') },
@@ -31,146 +25,154 @@
     { href: '/o-nama', label: () => $_('nav.about') },
     { href: '/kontakt', label: () => $_('nav.contact') },
   ];
+
+  function isActive(href: string): boolean {
+    const path = $page.url.pathname;
+    if (href === '/') return path === '/';
+    return path === href || path.startsWith(href + '/');
+  }
 </script>
 
-<header class="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4 md:px-6">
-  <nav
-    class="w-full max-w-7xl rounded-full border transition-all duration-700"
-    style="background: {scrolled ? 'rgba(0,0,0,0.7)' : 'transparent'}; backdrop-filter: {scrolled ? 'blur(20px)' : 'none'}; border-color: {scrolled ? 'rgba(42,42,42,0.8)' : 'transparent'}"
-  >
-    <div class="flex items-center justify-between px-4 py-3 md:px-6">
-      <!-- Logo -->
-      <a href="/" class="flex-shrink-0">
-        <img
-          src="https://www.petroni.hr/wp-content/uploads/2024/03/Logo-Petroni-Yellow-New.png"
-          alt="Petroni"
-          class="h-8 md:h-10 w-auto"
-        />
-      </a>
+<header class="sticky top-0 left-0 right-0 z-50 bg-white border-b border-[#eceef1] shadow-[0_1px_12px_rgba(16,24,40,0.05)]">
+  <div class="container-x flex items-center justify-between gap-4 h-[72px]">
+    <!-- Logo -->
+    <a href="/" class="flex-shrink-0" aria-label="Petroni">
+      <img
+        src="https://www.petroni.hr/wp-content/uploads/2024/03/Logo-Petroni-Yellow-New.png"
+        alt="Petroni"
+        class="h-9 w-auto"
+        onerror={(e) => { const el = e.currentTarget as HTMLImageElement; el.replaceWith(Object.assign(document.createElement('span'), { textContent: 'PETRONI', className: 'text-2xl font-extrabold tracking-tight', style: 'color:#f5c518' })); }}
+      />
+    </a>
 
-      <!-- Desktop nav -->
-      <ul class="hidden lg:flex items-center gap-1">
-        {#each navLinks as link}
-          <li class="relative group">
-            <a
-              href={link.href}
-              class="px-3 py-2 text-sm font-medium tracking-wide transition-colors duration-300 rounded-full hover:bg-white/10"
-              class:text-accent={$page.url.pathname === link.href || $page.url.pathname.startsWith(link.href + '/')}
-              class:text-white={!($page.url.pathname === link.href || $page.url.pathname.startsWith(link.href + '/'))}
-              style="color: {($page.url.pathname === link.href || ($page.url.pathname.startsWith(link.href + '/') && link.href !== '/')) ? '#F5C518' : 'white'}"
-            >
-              {link.label()}
-            </a>
+    <!-- Desktop nav -->
+    <nav class="hidden lg:flex items-center gap-1">
+      {#each navLinks as link}
+        <div class="relative" role="none"
+             onmouseenter={() => { if (link.children) vozilaOpen = true; }}
+             onmouseleave={() => { if (link.children) vozilaOpen = false; }}>
+          <a
+            href={link.href}
+            class="flex items-center gap-1 px-3.5 py-2 text-[13px] font-semibold uppercase tracking-wide rounded transition-colors duration-200"
+            style="{isActive(link.href)
+              ? 'background:#f5c518;color:#2b2b2b'
+              : 'color:#3a3f45'}"
+            class:hover:text-[#b5890a]={!isActive(link.href)}
+          >
+            {link.label()}
             {#if link.children}
-              <div class="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                <div class="bg-[#111] border border-[#2a2a2a] rounded-2xl p-2 min-w-[220px] shadow-xl">
-                  {#each link.children as child}
-                    <a
-                      href={child.href}
-                      class="block px-4 py-2 text-sm text-[#9ca3af] hover:text-white hover:bg-white/5 rounded-xl transition-colors duration-200"
-                    >
-                      {child.label()}
-                    </a>
-                  {/each}
-                </div>
-              </div>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
             {/if}
-          </li>
-        {/each}
-      </ul>
+          </a>
 
-      <!-- Right actions -->
-      <div class="flex items-center gap-2">
-        <!-- Language toggle -->
-        <button
-          onclick={toggleLocale}
-          class="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase transition-all duration-300 border border-[#2a2a2a] hover:border-[#F5C518] text-[#9ca3af] hover:text-white"
-        >
-          {$locale === 'hr' ? 'EN' : 'HR'}
-        </button>
-
-        <!-- Cart -->
-        <button
-          onclick={() => cartOpen = true}
-          class="relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 hover:bg-white/10"
-          aria-label="Cart"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-white">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
-          </svg>
-          {#if cartCount > 0}
-            <span class="absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center text-black" style="background: #F5C518">
-              {cartCount}
-            </span>
+          {#if link.children}
+            <div class="absolute top-full left-0 pt-2 transition-all duration-200 {vozilaOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-1'}">
+              <div class="bg-white rounded-lg border border-[#eceef1] shadow-xl py-2 min-w-[240px]">
+                {#each link.children as child}
+                  <a
+                    href={child.href}
+                    class="block px-5 py-2.5 text-[13px] font-medium transition-colors duration-150 hover:bg-[#faf6e6] hover:text-[#b5890a]"
+                    style="color:{isActive(child.href) ? '#b5890a' : '#3a3f45'}"
+                  >
+                    {child.label()}
+                  </a>
+                {/each}
+              </div>
+            </div>
           {/if}
-        </button>
-
-        <!-- Book CTA -->
-        <a
-          href="/rezerviraj"
-          class="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm uppercase tracking-widest text-black transition-all duration-500 active:scale-95"
-          style="background: #F5C518"
-        >
-          {$_('nav.book')}
-          <span class="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-0.5">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </span>
-        </a>
-
-        <!-- Mobile hamburger -->
-        <button
-          onclick={() => mobileOpen = !mobileOpen}
-          class="lg:hidden flex flex-col gap-1.5 w-10 h-10 items-center justify-center"
-          aria-label="Menu"
-        >
-          <span class="block w-5 h-0.5 bg-white transition-all duration-300" class:rotate-45={mobileOpen} class:translate-y-2={mobileOpen}></span>
-          <span class="block w-5 h-0.5 bg-white transition-all duration-300" class:opacity-0={mobileOpen}></span>
-          <span class="block w-5 h-0.5 bg-white transition-all duration-300" class:-rotate-45={mobileOpen} class:-translate-y-2={mobileOpen}></span>
-        </button>
-      </div>
-    </div>
-  </nav>
-</header>
-
-<!-- Mobile menu overlay -->
-{#if mobileOpen}
-  <div
-    class="fixed inset-0 z-40 backdrop-blur-2xl flex flex-col pt-24 pb-10 px-6"
-    style="background: rgba(10,10,10,0.95)"
-    onclick={() => mobileOpen = false}
-  >
-    <nav class="flex flex-col gap-2">
-      {#each navLinks as link, i}
-        <a
-          href={link.href}
-          onclick={() => mobileOpen = false}
-          class="text-3xl font-bold uppercase tracking-widest py-3 border-b transition-all duration-300"
-          style="border-color: #2a2a2a; animation-delay: {i * 60}ms; color: {$page.url.pathname === link.href ? '#F5C518' : 'white'}"
-        >
-          {link.label()}
-        </a>
+        </div>
       {/each}
     </nav>
 
-    <div class="mt-auto flex items-center gap-4">
-      <button onclick={toggleLocale} class="px-4 py-2 rounded-full border text-sm font-bold uppercase tracking-widest" style="border-color: #2a2a2a; color: #9ca3af">
-        {$locale === 'hr' ? 'EN' : 'HR'}
-      </button>
-      <a
-        href="/rezerviraj"
-        onclick={() => mobileOpen = false}
-        class="flex-1 text-center py-3 rounded-full font-bold uppercase tracking-widest text-black"
-        style="background: #F5C518"
-      >
-        Rezerviraj
+    <!-- Right actions -->
+    <div class="flex items-center gap-2 md:gap-3">
+      <!-- Language flags -->
+      <div class="hidden sm:flex items-center gap-1.5">
+        <button onclick={() => locale.set('hr')} aria-label="Hrvatski"
+          class="w-6 h-[18px] rounded-sm overflow-hidden transition-all duration-200"
+          style="opacity:{$locale === 'hr' ? '1' : '0.4'}; outline:{$locale === 'hr' ? '2px solid #f5c518' : 'none'}; outline-offset:1px">
+          <img src="https://flagcdn.com/h40/hr.png" alt="HR" class="w-full h-full object-cover" />
+        </button>
+        <button onclick={() => locale.set('en')} aria-label="English"
+          class="w-6 h-[18px] rounded-sm overflow-hidden transition-all duration-200"
+          style="opacity:{$locale === 'en' ? '1' : '0.4'}; outline:{$locale === 'en' ? '2px solid #f5c518' : 'none'}; outline-offset:1px">
+          <img src="https://flagcdn.com/h40/gb.png" alt="EN" class="w-full h-full object-cover" />
+        </button>
+      </div>
+
+      <!-- Book CTA -->
+      <a href="/rezerviraj" class="hidden md:inline-flex btn btn-primary px-5 py-2.5 text-[12px]">
+        {$_('nav.book')}
       </a>
+
+      <!-- Cart -->
+      <button onclick={() => cartOpen = true} class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 hover:bg-[#f3f4f6]" aria-label="Košarica">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b2b2b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        {#if cartCount > 0}
+          <span class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center text-white" style="background:#f5c518">{cartCount}</span>
+        {/if}
+      </button>
+
+      <!-- Account -->
+      <a href="/admin/login" class="hidden sm:flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 hover:bg-[#f3f4f6]" aria-label="Račun">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b2b2b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+      </a>
+
+      <!-- Search -->
+      <a href="/shop" class="hidden sm:flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 hover:bg-[#f3f4f6]" aria-label="Pretraga">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b2b2b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </a>
+
+      <!-- Mobile hamburger -->
+      <button onclick={() => mobileOpen = !mobileOpen} class="lg:hidden flex flex-col gap-[5px] w-10 h-10 items-center justify-center" aria-label="Izbornik">
+        <span class="block w-5 h-0.5 bg-[#2b2b2b] transition-all duration-300" class:rotate-45={mobileOpen} class:translate-y-[7px]={mobileOpen}></span>
+        <span class="block w-5 h-0.5 bg-[#2b2b2b] transition-all duration-300" class:opacity-0={mobileOpen}></span>
+        <span class="block w-5 h-0.5 bg-[#2b2b2b] transition-all duration-300" class:-rotate-45={mobileOpen} class:-translate-y-[7px]={mobileOpen}></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile menu -->
+{#if mobileOpen}
+  <div class="fixed inset-0 z-40 bg-white flex flex-col pt-24 pb-10 px-6 lg:hidden overflow-y-auto">
+    <nav class="flex flex-col">
+      {#each navLinks as link}
+        <a href={link.href} onclick={() => mobileOpen = false}
+           class="text-lg font-semibold uppercase tracking-wide py-4 border-b border-[#eceef1]"
+           style="color:{isActive(link.href) ? '#b5890a' : '#2b2b2b'}">
+          {link.label()}
+        </a>
+        {#if link.children}
+          {#each link.children as child}
+            <a href={child.href} onclick={() => mobileOpen = false}
+               class="text-sm py-2.5 pl-4 border-b border-[#f3f4f6]" style="color:#6b7178">
+              — {child.label()}
+            </a>
+          {/each}
+        {/if}
+      {/each}
+    </nav>
+
+    <div class="mt-8 flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <button onclick={() => locale.set('hr')} class="w-7 h-5 rounded-sm overflow-hidden" style="opacity:{$locale === 'hr' ? '1' : '0.4'}">
+          <img src="https://flagcdn.com/h40/hr.png" alt="HR" class="w-full h-full object-cover" />
+        </button>
+        <button onclick={() => locale.set('en')} class="w-7 h-5 rounded-sm overflow-hidden" style="opacity:{$locale === 'en' ? '1' : '0.4'}">
+          <img src="https://flagcdn.com/h40/gb.png" alt="EN" class="w-full h-full object-cover" />
+        </button>
+      </div>
+      <a href="/rezerviraj" onclick={() => mobileOpen = false} class="btn btn-primary flex-1">{$_('nav.book')}</a>
     </div>
   </div>
 {/if}
 
-<!-- Cart drawer -->
 <CartDrawer bind:open={cartOpen} />

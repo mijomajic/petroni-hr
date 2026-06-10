@@ -1,80 +1,56 @@
 <script lang="ts">
   import { cart, updateQty, removeFromCart } from '$lib/stores/cart';
+  import { locale } from '$lib/stores/locale';
 
   const total = $derived($cart.reduce((acc, i) => acc + i.price * i.qty, 0));
 </script>
 
 <svelte:head><title>Košarica — Petroni</title></svelte:head>
 
-<div class="min-h-[100dvh] pt-28 pb-20" style="background: #0a0a0a">
-  <div class="max-w-5xl mx-auto px-4 md:px-6">
-    <h1 class="text-5xl font-black uppercase tracking-tight text-white mb-12">KOŠARICA</h1>
+<div class="section">
+  <div class="container-x max-w-5xl mx-auto">
+    <h1 class="section-title mb-10">{$locale === 'hr' ? 'Košarica' : 'Cart'}</h1>
 
     {#if $cart.length === 0}
-      <div class="text-center py-20 rounded-[2rem]" style="background: #111; border: 1px solid #1a1a1a">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="mx-auto mb-6" style="color: #2a2a2a">
-          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
-        </svg>
-        <p class="text-sm mb-6" style="color: #9ca3af">Vaša košarica je prazna</p>
-        <a href="/shop" class="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm uppercase tracking-widest text-black" style="background: #F5C518">
-          Nastavi kupovinu
-        </a>
+      <div class="text-center py-20 card">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#d7dade" stroke-width="1.2" class="mx-auto mb-5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <p class="text-[#7a7f86] mb-6">{$locale === 'hr' ? 'Vaša košarica je prazna' : 'Your cart is empty'}</p>
+        <a href="/shop" class="btn btn-primary px-7 py-3">{$locale === 'hr' ? 'Nastavi kupovinu' : 'Continue shopping'}</a>
       </div>
     {:else}
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Items -->
         <div class="lg:col-span-2 space-y-4">
-          {#each $cart as item}
-            <div class="flex gap-4 p-5 rounded-2xl" style="background: #111; border: 1px solid #1a1a1a">
-              <div class="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0" style="background: #1a1a1a">
-                {#if item.images?.[0]}
-                  <img src={item.images[0]} alt={item.name_hr} class="w-full h-full object-contain p-2" />
-                {/if}
+          {#each $cart as item (item.id)}
+            <div class="card flex gap-4 p-5">
+              <div class="w-24 h-24 rounded-md overflow-hidden flex-shrink-0 bg-[#f6f7f9] flex items-center justify-center">
+                {#if item.images?.[0]}<img src={item.images[0]} alt="" class="w-full h-full object-contain p-2" />{/if}
               </div>
               <div class="flex-1">
-                <p class="font-bold text-white mb-1">{item.name_hr}</p>
-                <p class="text-sm font-bold mb-3" style="color: #F5C518">€{(item.price * item.qty).toFixed(2)}</p>
+                <p class="font-medium text-[#2b2b2b] mb-1">{$locale === 'hr' ? item.name_hr : (item.name_en || item.name_hr)}</p>
+                <p class="font-semibold mb-3" style="color:#b5890a">{(item.price * item.qty).toFixed(2)} €</p>
                 <div class="flex items-center gap-3">
-                  <div class="flex items-center rounded-xl overflow-hidden" style="background: #1a1a1a; border: 1px solid #2a2a2a">
-                    <button onclick={() => updateQty(item.id, item.qty - 1)} class="px-3 py-2 font-bold hover:bg-white/10 text-white">-</button>
-                    <span class="px-3 text-sm font-bold text-white">{item.qty}</span>
-                    <button onclick={() => updateQty(item.id, item.qty + 1)} class="px-3 py-2 font-bold hover:bg-white/10 text-white">+</button>
+                  <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
+                    <button onclick={() => updateQty(item.id, item.qty - 1)} class="px-3 py-2 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9]">−</button>
+                    <span class="px-3 text-sm font-semibold text-[#2b2b2b]">{item.qty}</span>
+                    <button onclick={() => updateQty(item.id, item.qty + 1)} class="px-3 py-2 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9]">+</button>
                   </div>
-                  <button onclick={() => removeFromCart(item.id)} class="text-xs underline transition-colors hover:text-white" style="color: #9ca3af">Ukloni</button>
+                  <button onclick={() => removeFromCart(item.id)} class="text-xs text-[#8b9099] hover:text-[#e11d48] underline">{$locale === 'hr' ? 'Ukloni' : 'Remove'}</button>
                 </div>
               </div>
             </div>
           {/each}
         </div>
 
-        <!-- Summary -->
-        <div class="lg:col-span-1">
-          <div class="p-6 rounded-2xl sticky top-28" style="background: #111; border: 1px solid #1a1a1a">
-            <h2 class="text-lg font-bold uppercase tracking-widest text-white mb-6">Sažetak</h2>
-            <div class="space-y-3 mb-6">
-              <div class="flex justify-between text-sm">
-                <span style="color: #9ca3af">Međuzbroj</span>
-                <span class="text-white">€{total.toFixed(2)}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span style="color: #9ca3af">Dostava</span>
-                <span class="text-white">Izračun pri naplati</span>
-              </div>
-              <div class="pt-3 flex justify-between font-bold text-lg" style="border-top: 1px solid #2a2a2a">
-                <span class="text-white">Ukupno</span>
-                <span style="color: #F5C518">€{total.toFixed(2)}</span>
-              </div>
+        <div>
+          <div class="card p-6 sticky top-24">
+            <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Sažetak' : 'Summary'}</h2>
+            <div class="space-y-3 mb-5">
+              <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Međuzbroj' : 'Subtotal'}</span><span class="text-[#2b2b2b]">{total.toFixed(2)} €</span></div>
+              <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Dostava' : 'Shipping'}</span><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Izračun pri naplati' : 'At checkout'}</span></div>
+              <div class="pt-3 flex justify-between font-bold text-lg border-t border-[#ededf0]"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span><span style="color:#b5890a">{total.toFixed(2)} €</span></div>
             </div>
-            <a
-              href="/checkout"
-              class="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-black transition-all duration-300 hover:brightness-110 active:scale-95"
-              style="background: #F5C518"
-            >
-              Naruči
-            </a>
-            <a href="/shop" class="mt-3 flex items-center justify-center w-full py-3 text-sm font-medium transition-colors hover:text-white" style="color: #9ca3af">
-              Nastavi kupovinu
-            </a>
+            <a href="/checkout" class="btn btn-primary w-full">{$locale === 'hr' ? 'Naruči' : 'Checkout'}</a>
+            <a href="/shop" class="mt-2 flex items-center justify-center w-full py-2.5 text-sm font-medium text-[#7a7f86] hover:text-[#2b2b2b]">{$locale === 'hr' ? 'Nastavi kupovinu' : 'Continue shopping'}</a>
           </div>
         </div>
       </div>

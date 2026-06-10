@@ -1,15 +1,18 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-bg-primary: #0a0a0a;
-  --color-bg-secondary: #111111;
-  --color-bg-card: #1a1a1a;
-  --color-accent: #F5C518;
-  --color-accent-hover: #e5b408;
-  --color-text-primary: #ffffff;
-  --color-text-muted: #9ca3af;
-  --color-border: #2a2a2a;
-  --font-family-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  /* Light brand palette — matches petroni.hr */
+  --color-bg: #ffffff;
+  --color-bg-soft: #f6f7f9;
+  --color-bg-dark: #2b2b2b;
+  --color-accent: #f5c518;
+  --color-accent-hover: #e6b50c;
+  --color-ink: #2b2b2b;
+  --color-text: #5b6168;
+  --color-muted: #8b9099;
+  --color-border: #e7e8eb;
+  --color-card: #ffffff;
+  --font-family-sans: 'Poppins', system-ui, -apple-system, sans-serif;
 }
 
 *,
@@ -24,44 +27,224 @@ html {
 
 body {
   font-family: var(--font-family-sans);
-  background-color: #0a0a0a;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #5b6168;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+}
+
+main {
+  min-height: 60vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #2b2b2b;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
 ::selection {
-  background-color: #F5C518;
-  color: #000000;
+  background-color: #f5c518;
+  color: #2b2b2b;
 }
 
-/* Custom scrollbar */
+/* ── Custom scrollbar ─────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #111111;
+  background: #f1f2f4;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
-  border-radius: 3px;
+  background: #d2d5da;
+  border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #F5C518;
+  background: #f5c518;
 }
 
-/* Scroll animation base */
-.reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s cubic-bezier(0.32, 0.72, 0, 1), transform 0.8s cubic-bezier(0.32, 0.72, 0, 1);
+/* ════════════════════════════════════════════════════
+   Reusable layout primitives
+   ════════════════════════════════════════════════════ */
+.container-x {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
 }
-.reveal.visible {
+
+.section {
+  padding-block: 4.5rem;
+}
+@media (min-width: 768px) {
+  .section { padding-block: 5.5rem; }
+}
+
+/* Yellow uppercase caption that sits above section titles */
+.eyebrow {
+  display: block;
+  color: #f5c518;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  color: #2b2b2b;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  line-height: 1.12;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.lead {
+  color: #6b7178;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* ── Buttons ──────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 5px;
+  padding: 0.8rem 1.6rem;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background-color .25s ease, color .25s ease, border-color .25s ease, transform .15s ease, box-shadow .25s ease;
+  line-height: 1;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: #f5c518;
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(245, 197, 24, 0.28);
+}
+.btn-primary:hover {
+  background: #e6b50c;
+  box-shadow: 0 8px 22px rgba(245, 197, 24, 0.4);
+}
+
+.btn-dark {
+  background: #2b2b2b;
+  color: #ffffff;
+}
+.btn-dark:hover { background: #000000; }
+
+.btn-outline {
+  background: transparent;
+  color: #2b2b2b;
+  border-color: #2b2b2b;
+}
+.btn-outline:hover {
+  background: #2b2b2b;
+  color: #ffffff;
+}
+
+.btn-ghost {
+  background: #fff;
+  color: #2b2b2b;
+  border-color: #e7e8eb;
+}
+.btn-ghost:hover { border-color: #f5c518; color: #b5890a; }
+
+/* ── Cards ────────────────────────────────────────── */
+.card {
+  background: #ffffff;
+  border: 1px solid #ededf0;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: box-shadow .35s ease, transform .35s ease;
+}
+.card:hover {
+  box-shadow: 0 18px 40px rgba(16, 24, 40, 0.12);
+  transform: translateY(-4px);
+}
+
+/* ── Form fields ──────────────────────────────────── */
+.field-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8b9099;
+  margin-bottom: 0.4rem;
+}
+.field {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e2e4e8;
+  border-radius: 6px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.9rem;
+  color: #2b2b2b;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.field::placeholder { color: #aeb3ba; }
+.field:focus {
+  outline: none;
+  border-color: #f5c518;
+  box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.18);
+}
+
+/* ════════════════════════════════════════════════════
+   Scroll reveal — robust (defaults visible without JS)
+   ════════════════════════════════════════════════════ */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform;
+}
+.js .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* Yellow glow utility */
-.glow-yellow {
-  box-shadow: 0 0 30px rgba(245, 197, 24, 0.2);
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .marquee-track { animation: none !important; }
+}
+
+/* ── Marquee (logo strips) ────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee {
+  overflow: hidden;
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 32s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }

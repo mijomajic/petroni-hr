@@ -11,52 +11,31 @@
     loading = true;
     error = '';
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-    if (err) {
-      error = err.message;
-    } else {
-      goto('/admin');
-    }
+    if (err) error = err.message;
+    else goto('/admin');
     loading = false;
   }
 </script>
 
-<svelte:head><title>Admin Login — Petroni</title></svelte:head>
+<svelte:head><title>Admin Prijava — Petroni</title></svelte:head>
 
-<div class="min-h-[100dvh] flex items-center justify-center px-4" style="background: #0a0a0a">
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-16" style="background:#fafbfc">
   <div class="w-full max-w-md">
-    <div class="text-center mb-10">
-      <img src="https://www.petroni.hr/wp-content/uploads/2024/03/Logo-Petroni-Yellow-New.png" alt="Petroni" class="h-10 w-auto mx-auto mb-6" />
-      <h1 class="text-2xl font-black uppercase tracking-widest text-white">Admin Panel</h1>
+    <div class="text-center mb-8">
+      <img src="https://www.petroni.hr/wp-content/uploads/2024/03/Logo-Petroni-Yellow-New.png" alt="Petroni" class="h-9 w-auto mx-auto mb-5" />
+      <h1 class="text-xl font-bold uppercase tracking-wide text-[#2b2b2b]">Admin Panel</h1>
     </div>
 
-    <div class="p-8 rounded-[2rem]" style="background: #111; border: 1px solid #2a2a2a">
-      <div class="space-y-4">
-        {#each [{ label: 'Email', type: 'email', bind: email }, { label: 'Lozinka', type: 'password', bind: password }] as field}
-          <div class="space-y-2">
-            <label class="text-xs uppercase tracking-widest font-bold" style="color: #9ca3af">{field.label}</label>
-            <input
-              type={field.type}
-              class="w-full px-4 py-3 rounded-xl text-white text-sm focus:outline-none"
-              style="background: #1a1a1a; border: 1px solid #2a2a2a"
-              bind:value={field.bind}
-              onkeydown={e => e.key === 'Enter' && handleLogin()}
-            />
-          </div>
-        {/each}
-
+    <div class="card p-8">
+      <div class="space-y-5">
+        <div><span class="field-label">Email</span><input type="email" class="field" bind:value={email} onkeydown={e => e.key === 'Enter' && handleLogin()} /></div>
+        <div><span class="field-label">Lozinka</span><input type="password" class="field" bind:value={password} onkeydown={e => e.key === 'Enter' && handleLogin()} /></div>
         {#if error}
-          <p class="text-sm p-3 rounded-xl" style="background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2)">{error}</p>
+          <p class="text-sm p-3 rounded-md" style="background:#fdecec;color:#e11d48">{error}</p>
         {/if}
-
-        <button
-          onclick={handleLogin}
-          disabled={loading || !email || !password}
-          class="w-full py-4 rounded-full font-black text-sm uppercase tracking-widest text-black transition-all duration-300 hover:brightness-110 active:scale-95 disabled:opacity-40"
-          style="background: #F5C518"
-        >
-          {loading ? 'Prijava...' : 'Prijava'}
-        </button>
+        <button onclick={handleLogin} disabled={loading || !email || !password} class="btn btn-primary w-full disabled:opacity-50">{loading ? 'Prijava…' : 'Prijava'}</button>
       </div>
     </div>
+    <a href="/" class="block text-center mt-5 text-sm text-[#8b9099] hover:text-[#2b2b2b]">← Natrag na stranicu</a>
   </div>
 </div>

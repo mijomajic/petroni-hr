@@ -1,68 +1,56 @@
 <script lang="ts">
   import { cart, updateQty, removeFromCart } from '$lib/stores/cart';
-  import { _ } from 'svelte-i18n';
+  import { locale } from '$lib/stores/locale';
+  import { fly, fade } from 'svelte/transition';
 
   type Props = { open: boolean };
   let { open = $bindable() }: Props = $props();
 
   const total = $derived($cart.reduce((acc, i) => acc + i.price * i.qty, 0));
+  const t = $derived($locale === 'hr'
+    ? { title: 'Košarica', empty: 'Vaša košarica je prazna', shop: 'Nastavi kupovinu', subtotal: 'Međuzbroj', ship: 'Dostava se računa pri naplati', checkout: 'Naruči', view: 'Pregled košarice', remove: 'Ukloni' }
+    : { title: 'Cart', empty: 'Your cart is empty', shop: 'Continue shopping', subtotal: 'Subtotal', ship: 'Shipping calculated at checkout', checkout: 'Checkout', view: 'View cart', remove: 'Remove' });
 </script>
 
 {#if open}
-  <!-- Backdrop -->
-  <div
-    class="fixed inset-0 z-50 transition-opacity duration-500"
-    style="background: rgba(0,0,0,0.7); backdrop-filter: blur(4px)"
-    onclick={() => open = false}
-    role="button"
-    tabindex="-1"
-  ></div>
+  <div class="fixed inset-0 z-[60]" style="background:rgba(20,22,26,0.45)" transition:fade={{ duration: 250 }}
+       onclick={() => open = false} onkeydown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') open = false; }}
+       role="button" tabindex="-1" aria-label="Close"></div>
 
-  <!-- Drawer -->
-  <div class="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md flex flex-col transition-transform duration-500" style="background: #111; border-left: 1px solid #2a2a2a">
+  <div class="fixed right-0 top-0 bottom-0 z-[61] w-full max-w-md flex flex-col bg-white shadow-2xl"
+       transition:fly={{ x: 420, duration: 350 }}>
     <!-- Header -->
-    <div class="flex items-center justify-between p-6" style="border-bottom: 1px solid #1a1a1a">
-      <h2 class="font-bold text-xl uppercase tracking-widest">{$_('cart.title')}</h2>
-      <button
-        onclick={() => open = false}
-        class="w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-200 hover:bg-white/10"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
+    <div class="flex items-center justify-between px-6 py-5 border-b border-[#eceef1]">
+      <h2 class="font-bold text-lg uppercase tracking-wide text-[#2b2b2b]">{t.title}</h2>
+      <button onclick={() => open = false} class="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-[#f3f4f6]" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2b2b2b" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
 
     <!-- Items -->
-    <div class="flex-1 overflow-y-auto p-6 space-y-4">
+    <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
       {#if $cart.length === 0}
-        <div class="flex flex-col items-center justify-center h-full gap-4" style="color: #9ca3af">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
-          </svg>
-          <p class="text-sm">{$_('cart.empty')}</p>
-          <button onclick={() => open = false} class="text-sm font-medium underline" style="color: #F5C518">{$_('cart.continueShopping')}</button>
+        <div class="flex flex-col items-center justify-center h-full gap-4 text-[#8b9099]">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <p class="text-sm">{t.empty}</p>
+          <button onclick={() => open = false} class="text-sm font-semibold" style="color:#b5890a">{t.shop}</button>
         </div>
       {:else}
-        {#each $cart as item}
-          <div class="flex gap-4 p-4 rounded-2xl" style="background: #1a1a1a; border: 1px solid #2a2a2a">
-            <div class="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+        {#each $cart as item (item.id)}
+          <div class="flex gap-4 p-3 rounded-lg border border-[#eceef1]">
+            <div class="w-20 h-20 rounded-md overflow-hidden flex-shrink-0 bg-[#f6f7f9] flex items-center justify-center">
               {#if item.images?.[0]}
-                <img src={item.images[0]} alt={item.name_hr} class="w-full h-full object-cover" />
-              {:else}
-                <div class="w-full h-full" style="background: #2a2a2a"></div>
+                <img src={item.images[0]} alt={item.name_hr} class="w-full h-full object-contain p-1" />
               {/if}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="font-medium text-sm text-white truncate mb-1">{item.name_hr}</p>
-              <p class="font-bold text-white">€{(item.price * item.qty).toFixed(2)}</p>
-              <div class="flex items-center gap-2 mt-2">
-                <button onclick={() => updateQty(item.id, item.qty - 1)} class="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition-colors hover:bg-white/10" style="background: #2a2a2a">-</button>
-                <span class="text-sm w-6 text-center">{item.qty}</span>
-                <button onclick={() => updateQty(item.id, item.qty + 1)} class="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition-colors hover:bg-white/10" style="background: #2a2a2a">+</button>
-                <button onclick={() => removeFromCart(item.id)} class="ml-auto text-xs transition-colors duration-200 hover:text-white" style="color: #9ca3af">{$_('cart.remove')}</button>
+              <p class="font-medium text-sm text-[#2b2b2b] line-clamp-2 mb-1">{$locale === 'hr' ? item.name_hr : (item.name_en || item.name_hr)}</p>
+              <p class="font-semibold text-[#2b2b2b] mb-2">{(item.price * item.qty).toFixed(2)} €</p>
+              <div class="flex items-center gap-2">
+                <button onclick={() => updateQty(item.id, item.qty - 1)} class="w-7 h-7 rounded border border-[#e2e4e8] flex items-center justify-center font-bold text-[#2b2b2b] hover:border-[#f5c518]">−</button>
+                <span class="text-sm w-6 text-center text-[#2b2b2b]">{item.qty}</span>
+                <button onclick={() => updateQty(item.id, item.qty + 1)} class="w-7 h-7 rounded border border-[#e2e4e8] flex items-center justify-center font-bold text-[#2b2b2b] hover:border-[#f5c518]">+</button>
+                <button onclick={() => removeFromCart(item.id)} class="ml-auto text-xs text-[#8b9099] hover:text-[#e11d48]">{t.remove}</button>
               </div>
             </div>
           </div>
@@ -72,28 +60,14 @@
 
     <!-- Footer -->
     {#if $cart.length > 0}
-      <div class="p-6" style="border-top: 1px solid #1a1a1a">
-        <div class="flex justify-between mb-2">
-          <span class="text-sm" style="color: #9ca3af">{$_('cart.subtotal')}</span>
-          <span class="font-semibold">€{total.toFixed(2)}</span>
+      <div class="px-6 py-5 border-t border-[#eceef1]">
+        <div class="flex justify-between mb-1">
+          <span class="text-sm text-[#7a7f86]">{t.subtotal}</span>
+          <span class="font-semibold text-[#2b2b2b]">{total.toFixed(2)} €</span>
         </div>
-        <p class="text-xs mb-4" style="color: #9ca3af">Dostava seračuna pri naplati</p>
-        <a
-          href="/checkout"
-          onclick={() => open = false}
-          class="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold uppercase tracking-widest text-black transition-all duration-300 hover:brightness-110 active:scale-98"
-          style="background: #F5C518"
-        >
-          {$_('cart.checkout')} — €{total.toFixed(2)}
-        </a>
-        <a
-          href="/kosarica"
-          onclick={() => open = false}
-          class="mt-3 flex items-center justify-center w-full py-3 rounded-2xl text-sm font-medium transition-colors hover:bg-white/5"
-          style="color: #9ca3af"
-        >
-          Pregled košarice
-        </a>
+        <p class="text-xs text-[#8b9099] mb-4">{t.ship}</p>
+        <a href="/checkout" onclick={() => open = false} class="btn btn-primary w-full">{t.checkout} — {total.toFixed(2)} €</a>
+        <a href="/kosarica" onclick={() => open = false} class="mt-2 flex items-center justify-center w-full py-2.5 text-sm font-medium text-[#7a7f86] hover:text-[#2b2b2b] transition-colors">{t.view}</a>
       </div>
     {/if}
   </div>

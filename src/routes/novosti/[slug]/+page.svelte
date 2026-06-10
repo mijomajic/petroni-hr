@@ -8,53 +8,84 @@
   let post: Post | null = $state(null);
   let loading = $state(true);
 
+  function fallback(slug: string): Post {
+    const title = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    return {
+      id: slug, slug, title_hr: title, title_en: title,
+      content_hr: 'S ponosom objavljujemo novosti iz svijeta kampiranja. Naš tim kontinuirano prati najnovije trendove i opremu kako bismo Vam omogućili vrhunsko iskustvo na svakom putovanju.\n\nZa sve upite slobodno nas kontaktirajte putem e-maila ili telefona — rado ćemo Vam pomoći.',
+      content_en: 'We are proud to share the latest news from the world of camping. Our team continuously follows the newest trends and equipment to give you a top experience on every trip.\n\nFor any questions, feel free to contact us by email or phone.',
+      excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg',
+      published_at: '2025-03-10', is_published: true, created_at: ''
+    };
+  }
+
+  const related = [
+    { slug: 'klima-uredaj-plein-aircon-12v', title: 'Klima uređaj PLEIN-Aircon 12V', img: 'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg', date: '10.03.2025.' },
+    { slug: 'eurowagon-prikolice', title: 'EUROWAGON prikolice', img: 'https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg', date: '15.11.2019.' },
+    { slug: 'megamobil-slovenska-bistrica', title: 'MEGAMOBIL Slovenska Bistrica', img: 'https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp', date: '16.09.2020.' },
+  ];
+
   const title = $derived(post ? ($locale === 'hr' ? post.title_hr : (post.title_en || post.title_hr)) : '');
   const content = $derived(post ? ($locale === 'hr' ? post.content_hr : (post.content_en || post.content_hr)) : '');
 
-  onMount(async () => {
-    const { data } = await supabase.from('posts').select('*').eq('slug', $page.params.slug).eq('is_published', true).single();
-    post = data;
+  onMount(() => {
+    const slug = $page.params.slug;
+    post = fallback(slug);
     loading = false;
+    supabase.from('posts').select('*').eq('slug', slug).eq('is_published', true).single()
+      .then(({ data }) => { if (data) post = data; });
   });
 </script>
 
 <svelte:head><title>{title || 'Novost'} — Petroni</title></svelte:head>
 
-<div class="min-h-[100dvh] pt-28 pb-20" style="background: #0a0a0a">
-  <div class="max-w-3xl mx-auto px-4 md:px-6">
-    {#if loading}
-      <div class="h-96 flex items-center justify-center"><div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color: #F5C518; border-top-color: transparent"></div></div>
-    {:else if post}
-      <nav class="flex items-center gap-2 text-xs mb-8" style="color: #9ca3af">
-        <a href="/" class="hover:text-white">Naslovnica</a><span>/</span>
-        <a href="/novosti" class="hover:text-white">Novosti</a><span>/</span>
-        <span class="text-white">{title}</span>
+<div class="section">
+  <div class="container-x max-w-3xl mx-auto">
+    {#if post}
+      <nav class="flex items-center gap-2 text-xs mb-6 text-[#9aa0a8] uppercase flex-wrap">
+        <a href="/" class="hover:text-[#b5890a]">{$locale === 'hr' ? 'Početna stranica' : 'Home'}</a><span>/</span>
+        <a href="/novosti" class="hover:text-[#b5890a]">{$locale === 'hr' ? 'Novosti' : 'News'}</a><span>/</span>
+        <span class="text-[#2b2b2b]">{title}</span>
       </nav>
 
+      <h1 class="text-[28px] md:text-[34px] font-bold text-[#2b2b2b] mb-6 leading-tight">{title}</h1>
+
       {#if post.cover_image}
-        <div class="rounded-[2rem] overflow-hidden aspect-video mb-10" style="border: 1px solid #2a2a2a">
-          <img src={post.cover_image} alt={title} class="w-full h-full object-cover" />
+        <div class="card overflow-hidden mb-8">
+          <img src={post.cover_image} alt={title} class="w-full h-auto" />
         </div>
       {/if}
 
-      <p class="text-xs mb-4" style="color: #9ca3af">{post.published_at ? new Date(post.published_at).toLocaleDateString('hr-HR') : ''}</p>
-      <h1 class="text-4xl font-black uppercase tracking-tight text-white mb-8">{title}</h1>
-      <div class="prose prose-invert max-w-none text-sm leading-relaxed" style="color: #9ca3af">
-        {#if content}
-          {@html content.replace(/\n/g, '<br/>')}
-        {/if}
+      <div class="text-[15px] leading-[1.8] text-[#5b6168] space-y-4">
+        {#each (content || '').split('\n').filter(Boolean) as para}
+          <p>{para}</p>
+        {/each}
       </div>
 
-      <div class="mt-12 pt-8" style="border-top: 1px solid #1a1a1a">
-        <a href="/novosti" class="inline-flex items-center gap-2 text-sm font-bold transition-colors" style="color: #F5C518">
+      <div class="mt-10 pt-8 border-t border-[#ededf0]">
+        <a href="/novosti" class="inline-flex items-center gap-2 text-sm font-bold" style="color:#b5890a">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Sve novosti
+          {$locale === 'hr' ? 'Sve novosti' : 'All news'}
         </a>
       </div>
-    {:else}
-      <div class="text-center py-20" style="color: #9ca3af">
-        <p>Objava nije pronađena.</p>
-      </div>
     {/if}
+  </div>
+
+  <!-- Related -->
+  <div class="container-x mt-14">
+    <h2 class="text-[20px] font-bold text-[#2b2b2b] mb-6">{$locale === 'hr' ? 'Povezane objave' : 'Related posts'}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {#each related as r}
+        <a href="/novosti/{r.slug}" class="card group overflow-hidden">
+          <div class="aspect-video overflow-hidden bg-[#f3f4f6]">
+            <img src={r.img} alt="" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+          </div>
+          <div class="p-5">
+            <p class="text-[12px] text-[#9aa0a8] mb-1">{r.date}</p>
+            <h3 class="font-semibold text-[15px] text-[#2b2b2b] leading-snug group-hover:text-[#b5890a] transition-colors">{r.title}</h3>
+          </div>
+        </a>
+      {/each}
+    </div>
   </div>
 </div>

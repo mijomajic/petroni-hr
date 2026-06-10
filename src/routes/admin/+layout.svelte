@@ -39,24 +39,24 @@
 {#if isLoginPage}
   {@render children()}
 {:else if checking}
-  <div class="min-h-screen flex items-center justify-center" style="background: #0a0a0a">
-    <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color: #F5C518; border-top-color: transparent"></div>
+  <div class="min-h-screen flex items-center justify-center" style="background:#fafbfc">
+    <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color:#f5c518;border-top-color:transparent"></div>
   </div>
 {:else if user}
-  <div class="min-h-screen flex" style="background: #0a0a0a">
+  <div class="min-h-screen flex" style="background:#fafbfc">
     <!-- Sidebar -->
-    <aside class="w-64 flex-shrink-0 fixed left-0 top-0 bottom-0 flex flex-col" style="background: #080808; border-right: 1px solid #1a1a1a">
-      <div class="p-6 mb-4" style="border-bottom: 1px solid #1a1a1a">
+    <aside class="w-64 flex-shrink-0 fixed left-0 top-0 bottom-0 flex flex-col bg-white border-r border-[#eceef1]">
+      <div class="p-6 mb-2 border-b border-[#eceef1]">
         <img src="https://www.petroni.hr/wp-content/uploads/2024/03/Logo-Petroni-Yellow-New.png" alt="Petroni" class="h-8 w-auto" />
-        <p class="text-xs mt-2" style="color: #9ca3af">Admin Panel</p>
+        <p class="text-xs mt-2 text-[#8b9099]">Admin Panel</p>
       </div>
 
-      <nav class="flex-1 px-3 space-y-1">
+      <nav class="flex-1 px-3 space-y-1 py-2">
         {#each navItems as item}
           <a
             href={item.href}
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200"
-            style="{$page.url.pathname === item.href || ($page.url.pathname.startsWith(item.href + '/') && item.href !== '/admin') ? 'background: rgba(245,197,24,0.1); color: #F5C518' : 'color: #9ca3af'} hover:color: white"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-200 hover:bg-[#f6f7f9]"
+            style="{$page.url.pathname === item.href || ($page.url.pathname.startsWith(item.href + '/') && item.href !== '/admin') ? 'background:#fff7e0;color:#b5890a' : 'color:#5b6168'}"
           >
             <span>{item.icon}</span>
             {item.label}
@@ -64,21 +64,15 @@
         {/each}
       </nav>
 
-      <div class="p-4" style="border-top: 1px solid #1a1a1a">
-        <p class="text-xs truncate mb-3" style="color: #9ca3af">{user.email}</p>
-        <button
-          onclick={logout}
-          class="w-full py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors hover:bg-white/10"
-          style="color: #9ca3af; border: 1px solid #2a2a2a"
-        >
-          Odjava
-        </button>
-        <a href="/" class="block mt-2 text-center text-xs transition-colors hover:text-white" style="color: #9ca3af">← Na stranicu</a>
+      <div class="p-4 border-t border-[#eceef1]">
+        <p class="text-xs truncate mb-3 text-[#8b9099]">{user.email}</p>
+        <button onclick={logout} class="w-full py-2 rounded-md text-xs font-bold uppercase tracking-wide text-[#5b6168] border border-[#e2e4e8] hover:bg-[#f6f7f9]">Odjava</button>
+        <a href="/" class="block mt-2 text-center text-xs text-[#8b9099] hover:text-[#2b2b2b]">← Na stranicu</a>
       </div>
     </aside>
 
     <!-- Main -->
-    <main class="flex-1 ml-64 p-8">
+    <main class="flex-1 ml-64 p-8 text-[#2b2b2b]">
       {@render children()}
     </main>
   </div>

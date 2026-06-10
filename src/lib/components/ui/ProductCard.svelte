@@ -8,6 +8,7 @@
 
   const name = $derived($locale === 'hr' ? product.name_hr : (product.name_en || product.name_hr));
   const img = $derived(product.images?.[0] || '');
+  const addLabel = $derived($locale === 'hr' ? 'Dodaj u košaricu' : 'Add to cart');
 
   let added = $state(false);
 
@@ -25,43 +26,38 @@
   }
 </script>
 
-<div class="group rounded-[1.5rem] overflow-hidden transition-all duration-500 hover:scale-[1.02]"
-     style="background: #1a1a1a; border: 1px solid #2a2a2a">
-  <a href="/product/{product.slug}" class="block">
-    <div class="p-2">
-      <div class="relative overflow-hidden rounded-xl aspect-square">
-        {#if img}
-          <img src={img} alt={name} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-        {:else}
-          <div class="w-full h-full flex items-center justify-center" style="background: #111">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: #2a2a2a">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-              <polyline points="21 15 16 10 5 21"/>
-            </svg>
-          </div>
-        {/if}
-      </div>
-    </div>
-    <div class="px-4 pb-2">
-      <p class="text-xs mb-1" style="color: #9ca3af">{product.sku || ''}</p>
-      <h3 class="font-semibold text-sm text-white leading-tight line-clamp-2 mb-2">{name}</h3>
+<div class="card flex flex-col overflow-hidden h-full text-center">
+  <a href="/product/{product.slug}" class="block group">
+    <div class="aspect-square p-4 flex items-center justify-center bg-white overflow-hidden">
+      {#if img}
+        <img src={img} alt={name} loading="lazy" class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105" />
+      {:else}
+        <div class="w-full h-full flex items-center justify-center text-[#dfe1e5]">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+      {/if}
     </div>
   </a>
 
-  <div class="px-4 pb-4 flex items-center justify-between">
-    <span class="text-lg font-bold text-white">€{product.price.toFixed(2)}</span>
+  <div class="px-3 pb-4 flex flex-col flex-1">
+    <a href="/product/{product.slug}">
+      <h3 class="text-[13px] font-medium text-[#3a3f45] leading-snug line-clamp-2 min-h-[2.4em] mb-2 hover:text-[#b5890a] transition-colors">{name}</h3>
+    </a>
+    <p class="text-[15px] font-semibold text-[#2b2b2b] mb-3">{product.price.toFixed(2)} €</p>
     <button
       onclick={handleAdd}
       disabled={product.stock === 0}
-      class="flex items-center gap-1.5 px-3 py-2 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-      style="background: {added ? '#16a34a' : '#F5C518'}; color: black"
+      class="btn w-full mt-auto text-[11px] py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+      style="background:{added ? '#16a34a' : '#f5c518'};color:#fff"
     >
       {#if added}
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Dodano
+        {$locale === 'hr' ? 'Dodano ✓' : 'Added ✓'}
+      {:else if product.stock === 0}
+        {$locale === 'hr' ? 'Nedostupno' : 'Out of stock'}
       {:else}
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-        Dodaj
+        {addLabel}
       {/if}
     </button>
   </div>

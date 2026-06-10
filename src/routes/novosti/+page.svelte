@@ -4,56 +4,50 @@
   import type { Post } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
 
-  let posts: Post[] = $state([]);
-  let loading = $state(true);
+  const seed: Post[] = [
+    { id: '1', slug: 'camping-center-petroni-alde-servis', title_hr: 'Camping Center Petroni postao ovlašteni servis za Alde grijanje u Hrvatskoj', title_en: 'Camping Center Petroni — authorised Alde service in Croatia', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg', published_at: '2025-03-10', is_published: true, created_at: '' },
+    { id: '2', slug: 'klima-uredaj-plein-aircon-12v', title_hr: 'Klima uređaj PLEIN-Aircon 12V', title_en: 'PLEIN-Aircon 12V air conditioner', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg', published_at: '2025-02-22', is_published: true, created_at: '' },
+    { id: '3', slug: 'katalog-remo-2024', title_hr: 'Katalog REMO 2024', title_en: 'REMO 2024 catalogue', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp', published_at: '2024-12-01', is_published: true, created_at: '' },
+    { id: '4', slug: 'camper-trolley', title_hr: 'Camper Trolley za jednostavno manevriranje sa prikolicama', title_en: 'Camper Trolley for easy trailer manoeuvring', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg', published_at: '2024-10-15', is_published: true, created_at: '' },
+    { id: '5', slug: 'priprema-kamp-prikolice-za-zimu', title_hr: 'Priprema kamp prikolice za "zimski san"', title_en: 'Preparing your caravan for winter', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg', published_at: '2024-10-01', is_published: true, created_at: '' },
+    { id: '6', slug: 'priprema-kampera-za-zimu', title_hr: 'Priprema kampera za zimu', title_en: 'Preparing your camper for winter', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp', published_at: '2024-09-20', is_published: true, created_at: '' },
+  ];
 
-  onMount(async () => {
-    const { data } = await supabase.from('posts').select('*').eq('is_published', true).order('published_at', { ascending: false });
-    posts = data ?? [];
-    loading = false;
+  let posts: Post[] = $state(seed);
+
+  onMount(() => {
+    supabase.from('posts').select('*').eq('is_published', true).order('published_at', { ascending: false })
+      .then(({ data }) => { if (data?.length) posts = data; });
   });
 </script>
 
 <svelte:head><title>Novosti — Petroni</title></svelte:head>
 
-<div class="min-h-[100dvh] pt-28 pb-20" style="background: #0a0a0a">
-  <div class="max-w-7xl mx-auto px-4 md:px-6">
-    <div class="mb-16">
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-5" style="background: rgba(245,197,24,0.1); color: #F5C518; border: 1px solid rgba(245,197,24,0.2)">Blog</span>
-      <h1 class="text-5xl font-black uppercase tracking-tight text-white">NOVOSTI</h1>
+<div class="section">
+  <div class="container-x">
+    <div class="text-center mb-12">
+      <span class="eyebrow mb-3">{$locale === 'hr' ? 'Aktualno iz svijeta kampiranja' : 'News from the world of camping'}</span>
+      <h1 class="section-title">{$locale === 'hr' ? 'Novosti' : 'News'}</h1>
     </div>
 
-    {#if loading}
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {#each [1,2,3] as _}<div class="rounded-2xl aspect-[4/3] animate-pulse" style="background: #1a1a1a"></div>{/each}
-      </div>
-    {:else if posts.length === 0}
-      <div class="text-center py-20" style="color: #9ca3af">
-        <p>Nema objavljenih novosti.</p>
-      </div>
-    {:else}
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {#each posts as post}
-          <a href="/novosti/{post.slug}" class="group block rounded-[2rem] overflow-hidden transition-all duration-500 hover:scale-[1.02]" style="background: #111; border: 1px solid #1a1a1a">
-            <div class="aspect-video overflow-hidden">
-              {#if post.cover_image}
-                <img src={post.cover_image} alt={$locale === 'hr' ? post.title_hr : (post.title_en || post.title_hr)} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              {:else}
-                <div class="w-full h-full" style="background: #1a1a1a"></div>
-              {/if}
-            </div>
-            <div class="p-6">
-              <p class="text-xs mb-3" style="color: #9ca3af">{post.published_at ? new Date(post.published_at).toLocaleDateString('hr-HR') : ''}</p>
-              <h3 class="font-bold text-white text-lg leading-tight mb-2">
-                {$locale === 'hr' ? post.title_hr : (post.title_en || post.title_hr)}
-              </h3>
-              <p class="text-sm line-clamp-2" style="color: #9ca3af">
-                {$locale === 'hr' ? (post.excerpt_hr || '') : (post.excerpt_en || post.excerpt_hr || '')}
-              </p>
-            </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+      {#each posts as post}
+        <div class="card flex flex-col overflow-hidden">
+          <div class="px-5 pt-5">
+            <h3 class="font-semibold text-[16px] leading-snug text-[#2b2b2b] mb-3 min-h-[3em]">
+              {$locale === 'hr' ? post.title_hr : (post.title_en || post.title_hr)}
+            </h3>
+          </div>
+          <a href="/novosti/{post.slug}" class="block aspect-video overflow-hidden bg-[#f3f4f6] group">
+            {#if post.cover_image}
+              <img src={post.cover_image} alt="" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            {/if}
           </a>
-        {/each}
-      </div>
-    {/if}
+          <div class="px-5 py-5 mt-auto">
+            <a href="/novosti/{post.slug}" class="btn btn-primary">{$locale === 'hr' ? 'Vidi više' : 'Read more'}</a>
+          </div>
+        </div>
+      {/each}
+    </div>
   </div>
 </div>
