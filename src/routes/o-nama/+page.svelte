@@ -15,10 +15,13 @@
 <svelte:head><title>O nama — Petroni</title></svelte:head>
 
 <!-- Hero banner -->
-<section class="relative h-[320px] md:h-[380px] flex items-center justify-center overflow-hidden">
-  <img src="https://www.petroni.hr/wp-content/uploads/2025/02/hero-image-petroni-camping-and-caravaning-rental10-1.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" />
-  <div class="absolute inset-0" style="background:rgba(0,0,0,0.45)"></div>
-  <h1 class="relative z-10 text-white text-4xl md:text-5xl font-extrabold uppercase tracking-wide">{$locale === 'hr' ? 'O nama' : 'About us'}</h1>
+<section class="relative h-[320px] md:h-[400px] flex items-center justify-center overflow-hidden">
+  <img src="https://www.petroni.hr/wp-content/uploads/2024/03/DSC_0001-768x512.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" />
+  <div class="absolute inset-0" style="background:rgba(0,0,0,0.65)"></div>
+  <div class="relative z-10 text-center px-4">
+    <span class="block text-[11px] font-bold uppercase tracking-[0.22em] mb-4" style="color:#f5c518">{$locale === 'hr' ? 'Upoznajte nas' : 'Get to know us'}</span>
+    <h1 class="text-4xl md:text-6xl font-extrabold uppercase tracking-wide" style="color:#ffffff; text-shadow:0 2px 20px rgba(0,0,0,0.9), 0 0 60px rgba(0,0,0,0.5)">{$locale === 'hr' ? 'O nama' : 'About us'}</h1>
+  </div>
 </section>
 
 <!-- Story 1 -->

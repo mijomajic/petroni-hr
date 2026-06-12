@@ -32,19 +32,53 @@
 
 <svelte:head><title>Shop — Petroni</title></svelte:head>
 
+<!-- Hero banner -->
+<section class="relative h-[220px] md:h-[280px] flex items-center overflow-hidden">
+  <img src="https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" />
+  <div class="absolute inset-0" style="background:linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.18) 100%)"></div>
+  <div class="container-x relative z-10">
+    <span class="block text-[11px] font-bold uppercase tracking-[0.2em] mb-3" style="color:#f5c518">{$locale === 'hr' ? 'Kamping oprema' : 'Camping equipment'}</span>
+    <h1 class="text-[32px] md:text-[46px] font-extrabold uppercase tracking-tight" style="color:#ffffff; text-shadow:0 2px 20px rgba(0,0,0,0.8)">Shop</h1>
+    <p class="mt-2 text-[14px]" style="color:rgba(255,255,255,0.82)">{$locale === 'hr' ? 'Sve što trebate za savršeno kamping iskustvo' : 'Everything you need for the perfect camping experience'}</p>
+  </div>
+</section>
+
+<!-- Info strip -->
+<div class="border-b border-[#ededf0]" style="background:#fafbfc">
+  <div class="container-x py-4">
+    <div class="flex flex-wrap gap-6 items-center text-[12px] text-[#6b7178]">
+      <span class="flex items-center gap-2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        {$locale === 'hr' ? 'Dostava unutar EU' : 'Delivery across EU'}
+      </span>
+      <span class="flex items-center gap-2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        {$locale === 'hr' ? 'Sigurno plaćanje' : 'Secure payment'}
+      </span>
+      <span class="flex items-center gap-2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        {$locale === 'hr' ? 'Povrat u 14 dana' : '14-day returns'}
+      </span>
+      <span class="ml-auto text-[#9aa0a8]">{$locale === 'hr' ? `${categories.length} kategorija` : `${categories.length} categories`}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Categories -->
 <div class="section">
   <div class="container-x">
-    <div class="text-center mb-12">
-      <span class="eyebrow mb-3">{$locale === 'hr' ? 'Kamping oprema' : 'Camping equipment'}</span>
-      <h1 class="section-title">Shop</h1>
-      <p class="lead mt-3">{$locale === 'hr' ? 'Sve što trebate za savršeno kamping iskustvo' : 'Everything you need for the perfect camping experience'}</p>
+    <div class="flex items-center gap-4 mb-8">
+      <h2 class="text-[20px] font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Kategorije' : 'Categories'}</h2>
+      <div class="flex-1 h-px bg-[#ededf0]"></div>
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {#each categories as cat}
-        <a href="/shop/{cat.slug}" class="card group flex items-center justify-between gap-3 p-5 hover:border-[#f5c518]">
-          <span class="text-[14px] font-semibold text-[#3a3f45] leading-snug">{$locale === 'hr' ? cat.name_hr : (cat.name_en || cat.name_hr)}</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="2.5" class="flex-shrink-0 transition-transform group-hover:translate-x-1"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <a href="/shop/{cat.slug}" class="card group flex items-center justify-between gap-3 p-5 hover:border-[#f5c518] hover:shadow-lg transition-all">
+          <span class="text-[14px] font-semibold text-[#3a3f45] leading-snug group-hover:text-[#2b2b2b]">{$locale === 'hr' ? cat.name_hr : (cat.name_en || cat.name_hr)}</span>
+          <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all" style="background:#f6f7f9; group-hover:background:#fff8d6">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="2.5" class="transition-transform group-hover:translate-x-0.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
         </a>
       {/each}
     </div>

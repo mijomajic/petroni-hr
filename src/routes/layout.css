@@ -38,9 +38,12 @@ main {
   min-height: 60vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  color: #2b2b2b;
-  margin: 0;
+/* Keep in @layer base so Tailwind utility classes (text-white etc.) can override */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    color: #2b2b2b;
+    margin: 0;
+  }
 }
 
 a {

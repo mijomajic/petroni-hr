@@ -17,10 +17,6 @@
 </script>
 
 <div class="card flex flex-col overflow-hidden h-full">
-  <div class="px-5 pt-5">
-    <h3 class="font-semibold text-[17px] leading-snug text-[#2b2b2b] mb-3">{vehicle.name}</h3>
-  </div>
-
   <a href={href} class="block overflow-hidden group">
     <div class="aspect-[4/3] overflow-hidden bg-[#f3f4f6]">
       <img
@@ -33,7 +29,11 @@
     </div>
   </a>
 
-  <div class="px-5 py-5 flex flex-col flex-1">
+  <div class="px-5 pt-5 pb-1 flex items-center justify-center min-h-[72px] text-center">
+    <h3 class="font-semibold text-[17px] leading-snug text-[#2b2b2b] text-center">{vehicle.name}</h3>
+  </div>
+
+  <div class="px-5 py-5 flex flex-col flex-1 items-center text-center">
     {#if desc}
       <p class="text-[13.5px] leading-relaxed text-[#7a7f86] mb-5 line-clamp-3">{desc}</p>
     {:else}
@@ -41,6 +41,6 @@
         {vehicle.name} — {$locale === 'hr' ? 'detalji o vozilu, oprema i udobnost.' : 'vehicle details, equipment and comfort.'}
       </p>
     {/if}
-    <a href={href} class="btn btn-primary self-start mt-auto">{moreLabel}</a>
+    <a href={href} class="btn btn-primary mt-auto">{moreLabel}</a>
   </div>
 </div>

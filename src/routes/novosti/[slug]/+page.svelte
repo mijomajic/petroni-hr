@@ -48,10 +48,14 @@
         <span class="text-[#2b2b2b]">{title}</span>
       </nav>
 
-      <h1 class="text-[28px] md:text-[34px] font-bold text-[#2b2b2b] mb-6 leading-tight">{title}</h1>
+      <h1 class="text-[28px] md:text-[36px] font-bold text-[#2b2b2b] mb-4 leading-tight">{title}</h1>
+
+      {#if post.published_at}
+        <p class="text-[12px] text-[#9aa0a8] uppercase tracking-wide mb-8">{new Date(post.published_at).toLocaleDateString($locale === 'hr' ? 'hr-HR' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+      {/if}
 
       {#if post.cover_image}
-        <div class="card overflow-hidden mb-8">
+        <div class="rounded-xl overflow-hidden mb-10" style="box-shadow:0 4px 24px rgba(0,0,0,0.10)">
           <img src={post.cover_image} alt={title} class="w-full h-auto" />
         </div>
       {/if}

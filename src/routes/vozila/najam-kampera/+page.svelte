@@ -14,10 +14,18 @@
   let vehicles: Vehicle[] = $state(seed);
   let filterCategory = $state('');
   let filterSeats = $state(0);
+  let filterBeds = $state(0);
+  let filterMaxPrice = $state(300);
+  let filterAvailable = $state('');
+
+  const hasActiveFilter = $derived(!!filterCategory || filterSeats > 0 || filterBeds > 0 || filterMaxPrice < 300 || !!filterAvailable);
 
   const filtered = $derived(vehicles.filter(v => {
     if (filterCategory && v.category !== filterCategory) return false;
     if (filterSeats && (v.seats ?? 0) < filterSeats) return false;
+    if (filterBeds && ((v.specs as any)?.beds ?? 0) < filterBeds) return false;
+    if (filterMaxPrice < 300 && (v.price_per_day ?? 0) > filterMaxPrice) return false;
+    if (filterAvailable === 'yes' && !v.is_available) return false;
     return true;
   }));
 
@@ -41,33 +49,93 @@
 
     <div class="flex flex-col lg:flex-row gap-8">
       <!-- Filters -->
-      <aside class="lg:w-64 flex-shrink-0 space-y-6">
-        <div class="card p-6">
-          <h3 class="text-[12px] font-bold uppercase tracking-wide mb-4" style="color:#b5890a">{$locale === 'hr' ? 'Filteri' : 'Filters'}</h3>
-          <div class="space-y-5">
-            <div>
-              <span class="field-label">{$locale === 'hr' ? 'Kategorija' : 'Category'}</span>
-              <select class="field" bind:value={filterCategory}>
-                <option value="">{$locale === 'hr' ? 'Sve kategorije' : 'All categories'}</option>
-                <option value="COMFORT">COMFORT</option>
-                <option value="ECO">ECO</option>
-                <option value="ELITE">ELITE</option>
-                <option value="DUO 4x4">DUO 4x4</option>
-              </select>
-            </div>
-            <div>
-              <span class="field-label">{$locale === 'hr' ? 'Min. sjedala' : 'Min. seats'}</span>
-              <input type="range" min="0" max="8" step="1" class="w-full accent-[#f5c518]" bind:value={filterSeats} />
-              <p class="text-xs mt-1 text-[#8b9099]">{filterSeats > 0 ? `${filterSeats}+` : ($locale === 'hr' ? 'Sve' : 'All')}</p>
-            </div>
-            {#if filterCategory || filterSeats > 0}
-              <button onclick={() => { filterCategory = ''; filterSeats = 0; }} class="text-xs font-medium underline text-[#8b9099] hover:text-[#2b2b2b]">{$locale === 'hr' ? 'Poništi filtere' : 'Reset filters'}</button>
+      <aside class="lg:w-[380px] flex-shrink-0 space-y-5">
+        <div class="card p-7">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-[13px] font-bold uppercase tracking-widest" style="color:#b5890a">{$locale === 'hr' ? 'Filteri' : 'Filters'}</h3>
+            {#if hasActiveFilter}
+              <button onclick={() => { filterCategory = ''; filterSeats = 0; filterBeds = 0; filterMaxPrice = 300; filterAvailable = ''; }}
+                class="text-[11px] font-semibold px-3 py-1 rounded border border-[#e2e4e8] text-[#8b9099] hover:border-[#f5c518] hover:text-[#2b2b2b] transition-colors">
+                {$locale === 'hr' ? 'Poništi' : 'Reset'}
+              </button>
             {/if}
           </div>
+          <div class="space-y-7">
+            <!-- Category -->
+            <div>
+              <span class="field-label">{$locale === 'hr' ? 'Kategorija vozila' : 'Vehicle category'}</span>
+              <select class="field" bind:value={filterCategory}>
+                <option value="">{$locale === 'hr' ? 'Sve kategorije' : 'All categories'}</option>
+                <option value="COMFORT">COMFORT — obiteljski</option>
+                <option value="ECO">ECO — ekonomičan</option>
+                <option value="ELITE">ELITE — premium</option>
+                <option value="DUO 4x4">DUO 4×4 — terenski</option>
+              </select>
+            </div>
+
+            <!-- Min seats -->
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="field-label mb-0">{$locale === 'hr' ? 'Min. sjedala' : 'Min. seats'}</span>
+                <span class="text-[13px] font-bold" style="color:#2b2b2b">{filterSeats > 0 ? `${filterSeats}+` : ($locale === 'hr' ? 'Sve' : 'All')}</span>
+              </div>
+              <input type="range" min="0" max="8" step="1" class="w-full accent-[#f5c518] h-2" bind:value={filterSeats} />
+              <div class="flex justify-between text-[11px] text-[#c0c4cb] mt-1"><span>0</span><span>2</span><span>4</span><span>6</span><span>8</span></div>
+            </div>
+
+            <!-- Min beds -->
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="field-label mb-0">{$locale === 'hr' ? 'Min. ležajeva' : 'Min. beds'}</span>
+                <span class="text-[13px] font-bold" style="color:#2b2b2b">{filterBeds > 0 ? `${filterBeds}+` : ($locale === 'hr' ? 'Sve' : 'All')}</span>
+              </div>
+              <input type="range" min="0" max="8" step="1" class="w-full accent-[#f5c518] h-2" bind:value={filterBeds} />
+              <div class="flex justify-between text-[11px] text-[#c0c4cb] mt-1"><span>0</span><span>2</span><span>4</span><span>6</span><span>8</span></div>
+            </div>
+
+            <!-- Max price -->
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="field-label mb-0">{$locale === 'hr' ? 'Max. cijena / dan' : 'Max. price / day'}</span>
+                <span class="text-[13px] font-bold" style="color:#2b2b2b">{filterMaxPrice < 300 ? `${filterMaxPrice} €` : ($locale === 'hr' ? 'Sve' : 'All')}</span>
+              </div>
+              <input type="range" min="50" max="300" step="10" class="w-full accent-[#f5c518] h-2" bind:value={filterMaxPrice} />
+              <div class="flex justify-between text-[11px] text-[#c0c4cb] mt-1"><span>50 €</span><span>150 €</span><span>300+ €</span></div>
+            </div>
+
+            <!-- Availability -->
+            <div>
+              <span class="field-label">{$locale === 'hr' ? 'Dostupnost' : 'Availability'}</span>
+              <select class="field" bind:value={filterAvailable}>
+                <option value="">{$locale === 'hr' ? 'Sva vozila' : 'All vehicles'}</option>
+                <option value="yes">{$locale === 'hr' ? 'Samo dostupna' : 'Available only'}</option>
+              </select>
+            </div>
+
+            <!-- Quick tags -->
+            <div>
+              <span class="field-label mb-3 block">{$locale === 'hr' ? 'Brzi odabir' : 'Quick select'}</span>
+              <div class="flex flex-wrap gap-2">
+                {#each [['ECO', $locale === 'hr' ? 'Ekonomičan' : 'Budget'], ['COMFORT', $locale === 'hr' ? 'Obitelj' : 'Family'], ['ELITE', $locale === 'hr' ? 'Premium' : 'Premium']] as [val, label]}
+                  <button onclick={() => filterCategory = filterCategory === val ? '' : val}
+                    class="text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-all"
+                    style="border-color:{filterCategory === val ? '#f5c518' : '#e2e4e8'};background:{filterCategory === val ? '#fffbea' : '#fff'};color:{filterCategory === val ? '#b5890a' : '#6b7178'}">
+                    {label}
+                  </button>
+                {/each}
+              </div>
+            </div>
+          </div>
         </div>
-        <a href="/rezerviraj" class="block card p-6 text-center hover:border-[#f5c518]" style="background:#fffaf0">
-          <p class="font-bold text-[#2b2b2b] text-sm uppercase tracking-wide">{$locale === 'hr' ? 'Rezerviraj' : 'Book now'}</p>
-          <p class="text-xs text-[#8b9099] mt-1">{$locale === 'hr' ? 'Brza rezervacija' : 'Quick booking'}</p>
+
+        <a href="/rezerviraj" class="block card p-6 hover:border-[#f5c518] group" style="background:linear-gradient(135deg,#fffbea,#fff8d6)">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style="background:#f5c518">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <p class="font-bold text-[#2b2b2b] text-sm uppercase tracking-wide">{$locale === 'hr' ? 'Rezerviraj odmah' : 'Book now'}</p>
+          </div>
+          <p class="text-xs text-[#8b9099]">{$locale === 'hr' ? 'Brza i jednostavna rezervacija u nekoliko koraka' : 'Fast and easy booking in a few steps'}</p>
         </a>
       </aside>
 
