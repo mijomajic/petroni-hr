@@ -9,7 +9,7 @@ export type BookingExtra = {
 };
 
 export const bookingExtras: BookingExtra[] = [
-  { id: 'booking-fee', name_hr: 'Trošak rezervacije', name_en: 'Booking fee', price: 75, max_qty: 1, is_required: true, sort_order: 1 },
+  { id: 'booking-fee', name_hr: 'Trošak rezervacije', name_en: 'Booking fee', price: 40, max_qty: 1, is_required: true, sort_order: 1 },
   { id: 'deposit-plus', name_hr: 'Polog Plus', name_en: 'Deposit Plus', price: 2000, max_qty: 1, is_required: false, sort_order: 2 },
   { id: 'b10-deposit', name_hr: 'B10 polog', name_en: 'B10 Deposit', price: 2000, max_qty: 1, is_required: false, sort_order: 3 },
   { id: 'dinnerware-1-4-persons', name_hr: 'Posuđe za 1-4 osobe', name_en: 'Dinnerware 1-4 persons', price: 45, max_qty: 1, is_required: false, sort_order: 4 },

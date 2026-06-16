@@ -198,78 +198,89 @@
             <span class="text-[#6b7178]"><b class="text-[#2b2b2b]">{$booking.pickupDate}</b> → <b class="text-[#2b2b2b]">{$booking.dropoffDate}</b> <span style="color:#b5890a" class="font-semibold">({days} {$locale === 'hr' ? (days === 1 ? 'dan' : 'dana') : 'days'})</span></span>
           </div>
         {/if}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {#each availableVehicles as vehicle}
-            <button onclick={() => selectVehicle(vehicle)} class="card text-left overflow-hidden" style="border-color:{$booking.selectedVehicle?.id === vehicle.id ? '#f5c518' : '#ededf0'}">
-              <div class="aspect-video overflow-hidden bg-[#f3f4f6]"><img src={vehicle.images?.[0]} alt={vehicle.name} class="w-full h-full object-cover" /></div>
-              <div class="p-5">
-                <h3 class="font-semibold text-[#2b2b2b] mb-2">{vehicle.name}</h3>
-                <div class="flex items-center justify-between">
-                  <div><span class="text-xl font-bold text-[#2b2b2b]">{(vehicle.price_per_day ?? 0) * days} €</span> <span class="text-xs text-[#9aa0a8]">({days} × {vehicle.price_per_day} €)</span></div>
-                  <span class="btn btn-primary px-4 py-2 text-[11px]">{$locale === 'hr' ? 'Odaberi' : 'Select'}</span>
-                </div>
-              </div>
-            </button>
-          {/each}
-        </div>
-
-        {#if $booking.selectedVehicle}
-          <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-            <!-- Extras list -->
-            <div class="card p-6 md:p-8">
-              <h2 class="text-lg font-bold uppercase tracking-wide text-[#2b2b2b] mb-6">{$locale === 'hr' ? 'Dodatna oprema' : 'Extras'}</h2>
-              <div class="divide-y divide-[#ededf0]">
-                {#each bookingExtras as extra}
-                  {@const qty = $booking.extras[extra.id] ?? 0}
-                  <div class="flex items-center justify-between gap-4 py-4">
-                    <div class="flex items-center gap-2 flex-1">
-                      <span class="text-sm font-medium text-[#2b2b2b]">{$locale === 'hr' ? extra.name_hr : extra.name_en}</span>
-                      {#if extra.is_required}
-                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style="background:#fff7e0;color:#b5890a">{$locale === 'hr' ? 'Obavezno' : 'Required'}</span>
-                      {/if}
-                    </div>
-                    <span class="text-sm text-[#7a7f86] w-20 text-right">{extra.price} €</span>
-                    {#if extra.max_qty > 1}
-                      <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
-                        <button onclick={() => setExtraQty(extra.id, qty - 1, extra.max_qty)} disabled={extra.is_required} class="px-3 py-1.5 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:opacity-40">−</button>
-                        <span class="px-3 text-sm font-semibold text-[#2b2b2b]">{qty}</span>
-                        <button onclick={() => setExtraQty(extra.id, qty + 1, extra.max_qty)} disabled={extra.is_required} class="px-3 py-1.5 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:opacity-40">+</button>
-                      </div>
-                    {:else}
-                      <button onclick={() => setExtraQty(extra.id, qty > 0 ? 0 : 1, extra.max_qty)} disabled={extra.is_required}
-                        class="px-4 py-1.5 rounded-md text-[11px] font-bold uppercase disabled:opacity-60"
-                        style="{qty > 0 ? 'background:#f5c518;color:#fff' : 'background:#f6f7f9;color:#5b6168'}">
-                        {qty > 0 ? ($locale === 'hr' ? 'Odabrano' : 'Selected') : ($locale === 'hr' ? 'Dodaj' : 'Add')}
-                      </button>
-                    {/if}
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
+          <!-- Vehicles: single column -->
+          <div class="flex flex-col gap-4">
+            {#each availableVehicles as vehicle}
+              <button onclick={() => selectVehicle(vehicle)} class="card text-left overflow-hidden flex flex-row" style="border-color:{$booking.selectedVehicle?.id === vehicle.id ? '#f5c518' : '#ededf0'}">
+                <div class="w-40 sm:w-56 flex-shrink-0 overflow-hidden bg-[#f3f4f6]"><img src={vehicle.images?.[0]} alt={vehicle.name} class="w-full h-full object-cover" /></div>
+                <div class="p-5 flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 class="font-semibold text-[#2b2b2b] mb-1">{vehicle.name}</h3>
+                    <p class="text-xs text-[#9aa0a8]">{vehicle.category} · {vehicle.seats} {$locale === 'hr' ? 'sjedala' : 'seats'}</p>
                   </div>
-                {/each}
-              </div>
-            </div>
-
-            <!-- Summary -->
-            <div class="card p-6 h-fit lg:sticky lg:top-24">
-              <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Sažetak' : 'Summary'}</h2>
-              <div class="space-y-2 mb-4">
-                <div class="flex justify-between text-sm">
-                  <span class="text-[#7a7f86]">{$locale === 'hr' ? 'Vozilo' : 'Vehicle'} ({$booking.selectedVehicle.price_per_day} € × {days})</span>
-                  <span class="text-[#2b2b2b]">{vehicleSubtotal} €</span>
-                </div>
-                {#each selectedExtras as { extra, qty }}
-                  <div class="flex justify-between text-sm">
-                    <span class="text-[#7a7f86]">{$locale === 'hr' ? extra.name_hr : extra.name_en} × {qty}</span>
-                    <span class="text-[#2b2b2b]">{extra.price * qty} €</span>
+                  <div class="flex items-center gap-4">
+                    <div class="text-right"><span class="text-xl font-bold text-[#2b2b2b]">{(vehicle.price_per_day ?? 0) * days} €</span> <span class="text-xs text-[#9aa0a8] block">({days} × {vehicle.price_per_day} €)</span></div>
+                    <span class="btn btn-primary px-4 py-2 text-[11px] flex-shrink-0">{$locale === 'hr' ? 'Odaberi' : 'Select'}</span>
                   </div>
-                {/each}
-              </div>
-              <div class="pt-3 flex justify-between font-bold text-lg border-t border-[#ededf0] mb-5">
-                <span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span>
-                <span style="color:#b5890a">{totalPrice} €</span>
-              </div>
-              <button onclick={() => booking.update(b => ({ ...b, step: 3 }))} class="btn btn-primary w-full">{$locale === 'hr' ? 'Nastavi' : 'Continue'} →</button>
-            </div>
+                </div>
+              </button>
+            {/each}
           </div>
-        {/if}
+
+          <!-- Extras + summary: right column -->
+          <div class="flex flex-col gap-6 lg:sticky lg:top-24 h-fit">
+            <div class="card p-6">
+              <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Dodatna oprema' : 'Extras'}</h2>
+              {#if !$booking.selectedVehicle}
+                <p class="text-sm text-[#9aa0a8]">{$locale === 'hr' ? 'Odaberite vozilo za prikaz dodatne opreme.' : 'Select a vehicle to view extras.'}</p>
+              {:else}
+                <div class="divide-y divide-[#ededf0]">
+                  {#each bookingExtras as extra}
+                    {@const qty = $booking.extras[extra.id] ?? 0}
+                    <div class="flex flex-col gap-2 py-3">
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-[#2b2b2b] flex-1">{$locale === 'hr' ? extra.name_hr : extra.name_en}</span>
+                        {#if extra.is_required}
+                          <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style="background:#fff7e0;color:#b5890a">{$locale === 'hr' ? 'Obavezno' : 'Required'}</span>
+                        {/if}
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm text-[#7a7f86]">{extra.price} €</span>
+                        {#if extra.max_qty > 1}
+                          <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
+                            <button onclick={() => setExtraQty(extra.id, qty - 1, extra.max_qty)} disabled={extra.is_required} class="px-3 py-1.5 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:opacity-40">−</button>
+                            <span class="px-3 text-sm font-semibold text-[#2b2b2b]">{qty}</span>
+                            <button onclick={() => setExtraQty(extra.id, qty + 1, extra.max_qty)} disabled={extra.is_required} class="px-3 py-1.5 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:opacity-40">+</button>
+                          </div>
+                        {:else}
+                          <button onclick={() => setExtraQty(extra.id, qty > 0 ? 0 : 1, extra.max_qty)} disabled={extra.is_required}
+                            class="px-4 py-1.5 rounded-md text-[11px] font-bold uppercase disabled:opacity-60"
+                            style="{qty > 0 ? 'background:#f5c518;color:#fff' : 'background:#f6f7f9;color:#5b6168'}">
+                            {qty > 0 ? ($locale === 'hr' ? 'Odabrano' : 'Selected') : ($locale === 'hr' ? 'Dodaj' : 'Add')}
+                          </button>
+                        {/if}
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+
+            {#if $booking.selectedVehicle}
+              <div class="card p-6">
+                <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Sažetak' : 'Summary'}</h2>
+                <div class="space-y-2 mb-4">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-[#7a7f86]">{$locale === 'hr' ? 'Vozilo' : 'Vehicle'} ({$booking.selectedVehicle.price_per_day} € × {days})</span>
+                    <span class="text-[#2b2b2b]">{vehicleSubtotal} €</span>
+                  </div>
+                  {#each selectedExtras as { extra, qty }}
+                    <div class="flex justify-between text-sm">
+                      <span class="text-[#7a7f86]">{$locale === 'hr' ? extra.name_hr : extra.name_en} × {qty}</span>
+                      <span class="text-[#2b2b2b]">{extra.price * qty} €</span>
+                    </div>
+                  {/each}
+                </div>
+                <div class="pt-3 flex justify-between font-bold text-lg border-t border-[#ededf0] mb-5">
+                  <span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span>
+                  <span style="color:#b5890a">{totalPrice} €</span>
+                </div>
+                <button onclick={() => booking.update(b => ({ ...b, step: 3 }))} class="btn btn-primary w-full">{$locale === 'hr' ? 'Nastavi' : 'Continue'} →</button>
+              </div>
+            {/if}
+          </div>
+        </div>
 
         <button onclick={() => booking.update(b => ({ ...b, step: 1 }))} class="text-sm text-[#7a7f86] hover:text-[#2b2b2b]">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
       </div>
