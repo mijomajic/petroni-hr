@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { supabase } from '$lib/supabase';
   import type { Product, ProductCategory } from '$lib/supabase';
@@ -29,6 +30,8 @@
   let loading = $state(true);
   let sort = $state('newest');
   let search = $state('');
+  let minPrice = $state($page.url.searchParams.get('min') ?? '');
+  let maxPrice = $state($page.url.searchParams.get('max') ?? '');
 
   const slug = $derived($page.params.category);
   const prettyName = $derived(
@@ -37,12 +40,29 @@
 
   const sorted = $derived([...products]
     .filter(p => !search || (p.name_hr + (p.name_en ?? '')).toLowerCase().includes(search.toLowerCase()))
+    .filter(p => minPrice === '' || p.price >= Number(minPrice))
+    .filter(p => maxPrice === '' || p.price <= Number(maxPrice))
     .sort((a, b) => {
       if (sort === 'price_asc') return a.price - b.price;
       if (sort === 'price_desc') return b.price - a.price;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     })
   );
+
+  function updatePriceParams() {
+    const params = new URLSearchParams($page.url.searchParams);
+    if (minPrice) params.set('min', minPrice); else params.delete('min');
+    if (maxPrice) params.set('max', maxPrice); else params.delete('max');
+    goto(`?${params.toString()}`, { keepFocus: true, noScroll: true, replaceState: true });
+  }
+
+  function resetFilters() {
+    minPrice = '';
+    maxPrice = '';
+    search = '';
+    sort = 'newest';
+    goto($page.url.pathname, { keepFocus: true, noScroll: true, replaceState: true });
+  }
 
   onMount(() => {
     const s = $page.params.category;
@@ -106,7 +126,7 @@
             <a href="/shop" class="btn btn-primary px-6 py-3">{$locale === 'hr' ? 'Sve kategorije' : 'All categories'}</a>
           </div>
         {:else}
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {#each sorted as product}<ProductCard {product} />{/each}
           </div>
         {/if}
@@ -140,12 +160,25 @@
             {#each allCategories as cat}
               <a href="/shop/{cat.slug}"
                 class="flex items-center justify-between py-2 px-2 rounded text-[13px] transition-colors hover:bg-[#fafbfc]"
-                style="color:{cat.slug === slug ? '#b5890a' : '#5b6168'}; font-weight:{cat.slug === slug ? '600' : '400'}">
+                style="color:{cat.slug === slug ? '#f5c518' : '#5b6168'}; font-weight:{cat.slug === slug ? '700' : '400'}">
                 <span>{$locale === 'hr' ? cat.name_hr : cat.name_en}</span>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
               </a>
             {/each}
           </div>
+        </div>
+
+        <!-- Price range -->
+        <div class="card p-5">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-[#b5890a] mb-3">{$locale === 'hr' ? 'Cijena' : 'Price'}</p>
+          <div class="flex items-center gap-2 mb-3">
+            <input type="number" min="0" placeholder={$locale === 'hr' ? 'Min' : 'Min'} bind:value={minPrice} onchange={updatePriceParams}
+              class="field text-[13px]" />
+            <span class="text-[#9aa0a8]">–</span>
+            <input type="number" min="0" placeholder={$locale === 'hr' ? 'Max' : 'Max'} bind:value={maxPrice} onchange={updatePriceParams}
+              class="field text-[13px]" />
+          </div>
+          <button onclick={resetFilters} class="text-[12px] underline" style="color:#b5890a">{$locale === 'hr' ? 'Resetiraj filtere' : 'Reset filters'}</button>
         </div>
 
       </aside>

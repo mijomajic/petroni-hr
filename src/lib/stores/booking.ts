@@ -25,7 +25,7 @@ export type BookingState = {
     zip: string;
     country: string;
   };
-  extras: Record<string, boolean>;
+  extras: Record<string, number>;
   totalPrice: number;
 };
 

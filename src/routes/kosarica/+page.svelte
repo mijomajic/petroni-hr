@@ -3,6 +3,14 @@
   import { locale } from '$lib/stores/locale';
 
   const total = $derived($cart.reduce((acc, i) => acc + i.price * i.qty, 0));
+
+  let couponCode = $state('');
+  let couponMessage = $state('');
+
+  function applyCoupon() {
+    if (!couponCode.trim()) return;
+    couponMessage = $locale === 'hr' ? 'Kupon nije valjan.' : 'Coupon is not valid.';
+  }
 </script>
 
 <svelte:head><title>Košarica — Petroni</title></svelte:head>
@@ -44,6 +52,18 @@
         <div>
           <div class="card p-6 sticky top-24">
             <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Sažetak' : 'Summary'}</h2>
+
+            <div class="mb-5">
+              <span class="field-label">{$locale === 'hr' ? 'Kod kupona' : 'Coupon code'}</span>
+              <div class="flex gap-2">
+                <input type="text" class="field" placeholder={$locale === 'hr' ? 'Unesite kod' : 'Enter code'} bind:value={couponCode} />
+                <button onclick={applyCoupon} class="btn btn-ghost px-4 whitespace-nowrap text-[11px]">{$locale === 'hr' ? 'PRIMIJENI KUPON' : 'APPLY COUPON'}</button>
+              </div>
+              {#if couponMessage}
+                <p class="text-xs mt-2" style="color:#e11d48">{couponMessage}</p>
+              {/if}
+            </div>
+
             <div class="space-y-3 mb-5">
               <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Međuzbroj' : 'Subtotal'}</span><span class="text-[#2b2b2b]">{total.toFixed(2)} €</span></div>
               <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Dostava' : 'Shipping'}</span><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Izračun pri naplati' : 'At checkout'}</span></div>

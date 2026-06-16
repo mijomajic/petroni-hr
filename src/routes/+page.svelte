@@ -266,8 +266,8 @@
 </section>
 
 <!-- ═══════════════════════ BRANDS ═══════════════════════ -->
-<div class="py-12" style="background:#fafbfc">
-  <div class="container-x marquee">
+<div class="py-12 overflow-hidden" style="background:#fafbfc">
+  <div class="marquee">
     <div class="marquee-track gap-4">
       {#each [...brands, ...brands] as brand}
         <div class="w-[200px] h-[110px] flex-shrink-0 bg-white rounded-lg border border-[#ededf0] flex items-center justify-center">

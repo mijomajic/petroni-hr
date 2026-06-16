@@ -5,12 +5,14 @@
   import type { Product } from '$lib/supabase';
   import { addToCart } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
+  import ProductCard from '$lib/components/ui/ProductCard.svelte';
 
   let product: Product | null = $state(null);
   let loading = $state(true);
   let qty = $state(1);
   let added = $state(false);
   let activeImg = $state(0);
+  let relatedProducts: Product[] = $state([]);
 
   const name = $derived(product ? ($locale === 'hr' ? product.name_hr : (product.name_en || product.name_hr)) : '');
   const desc = $derived(product ? ($locale === 'hr' ? product.description_hr : (product.description_en || product.description_hr)) : '');
@@ -24,7 +26,16 @@
 
   onMount(() => {
     supabase.from('products').select('*').eq('slug', $page.params.slug).single()
-      .then(({ data }) => { product = data; loading = false; });
+      .then(async ({ data }) => {
+        product = data;
+        loading = false;
+        if (data?.category_id) {
+          const { data: related } = await supabase.from('products').select('*')
+            .eq('category_id', data.category_id).eq('is_active', true)
+            .neq('id', data.id).order('created_at', { ascending: false }).limit(4);
+          relatedProducts = related ?? [];
+        }
+      });
     setTimeout(() => { loading = false; }, 1500);
   });
 </script>
@@ -100,6 +111,15 @@
           </div>
         </div>
       </div>
+
+      {#if relatedProducts.length > 0}
+        <div class="mt-16 pt-10 border-t border-[#ededf0]">
+          <h2 class="text-[20px] font-bold text-[#2b2b2b] uppercase mb-6">{$locale === 'hr' ? 'Povezani proizvodi' : 'Related products'}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {#each relatedProducts as rp}<ProductCard product={rp} />{/each}
+          </div>
+        </div>
+      {/if}
     {:else}
       <div class="text-center py-20 text-[#8b9099]">
         <p>{$locale === 'hr' ? 'Proizvod nije pronađen.' : 'Product not found.'}</p>
