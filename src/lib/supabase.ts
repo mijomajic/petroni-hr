@@ -1,12 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 import { env } from '$env/dynamic/public';
 
 const url = env.PUBLIC_SUPABASE_URL ?? '';
 const key = env.PUBLIC_SUPABASE_ANON_KEY ?? '';
 
-// Public (anon-key) client. Subject to Row Level Security. Falls back to a
-// placeholder so the app still builds before the Supabase project/keys exist.
-export const supabase = createClient(url || 'https://placeholder.supabase.co', key || 'placeholder');
+// Browser client used by interactive auth flows. The SSR package stores auth
+// state in cookies so SvelteKit server loads see the same signed-in user.
+export const supabase = createBrowserClient(
+  url || 'https://placeholder.supabase.co',
+  key || 'placeholder'
+);
 
 // ---------------------------------------------------------------------------
 // Row types — kept in sync with /supabase/migrations/0001_init.sql
@@ -27,15 +30,11 @@ export type Vehicle = {
   specs: Record<string, unknown> | null;
   is_available: boolean;
   created_at: string;
-  // --- New schema columns (all nullable in DB). Optional here so the temporary
-  //     hardcoded mock vehicle arrays still type-check until Phase 2 rewires the UI. ---
-  beds?: number | null;
-  max_adults?: number | null;
-  max_children?: number | null;
-  base_price_per_day?: number | null;
-  sort_order?: number;
-  /** @deprecated DB column is now `base_price_per_day`. Kept until Phase 2 rewires the UI. */
-  price_per_day?: number | null;
+  beds: number | null;
+  max_adults: number | null;
+  max_children: number | null;
+  base_price_per_day: number | null;
+  sort_order: number;
 };
 
 export type Season = {
@@ -206,8 +205,6 @@ export type Post = {
   is_published: boolean;
   published_at: string | null;
   created_at: string;
-  /** @deprecated Not a DB column in the new schema. Kept for the temporary mock posts until Phase 2. */
-  excerpt_en?: string | null;
 };
 
 export type RentalTerms = {
@@ -222,23 +219,3 @@ export type Setting = {
   key: string;
   value: unknown;
 };
-
-export async function checkAvailability(vehicleId: string, pickupDate: string, dropoffDate: string): Promise<boolean> {
-  const [{ data: bookingConflicts }, { data: blockedConflicts }] = await Promise.all([
-    supabase
-      .from('bookings')
-      .select('id')
-      .eq('vehicle_id', vehicleId)
-      .neq('status', 'cancelled')
-      .lte('pickup_date', dropoffDate)
-      .gte('dropoff_date', pickupDate),
-    supabase
-      .from('vehicle_blocked_dates')
-      .select('id')
-      .eq('vehicle_id', vehicleId)
-      .lte('date_from', dropoffDate)
-      .gte('date_to', pickupDate)
-  ]);
-
-  return (bookingConflicts?.length ?? 0) === 0 && (blockedConflicts?.length ?? 0) === 0;
-}

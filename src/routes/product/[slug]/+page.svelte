@@ -1,21 +1,20 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabase';
   import type { Product } from '$lib/supabase';
   import { addToCart } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
   import ProductCard from '$lib/components/ui/ProductCard.svelte';
+  import type { PageProps } from './$types';
 
-  let product: Product | null = $state(null);
-  let loading = $state(true);
+  let { data }: PageProps = $props();
+  const product: Product = $derived(data.product as Product);
+  const loading = false;
   let qty = $state(1);
   let added = $state(false);
   let activeImg = $state(0);
-  let relatedProducts: Product[] = $state([]);
+  const relatedProducts: Product[] = $derived(data.relatedProducts as Product[]);
 
-  const name = $derived(product ? ($locale === 'hr' ? product.name_hr : (product.name_en || product.name_hr)) : '');
-  const desc = $derived(product ? ($locale === 'hr' ? product.description_hr : (product.description_en || product.description_hr)) : '');
+  const name = $derived($locale === 'hr' ? product.name_hr : (product.name_en || product.name_hr));
+  const desc = $derived($locale === 'hr' ? product.description_hr : (product.description_en || product.description_hr));
 
   function handleAdd() {
     if (!product) return;
@@ -24,20 +23,6 @@
     setTimeout(() => added = false, 2000);
   }
 
-  onMount(() => {
-    supabase.from('products').select('*').eq('slug', $page.params.slug).single()
-      .then(async ({ data }) => {
-        product = data;
-        loading = false;
-        if (data?.category_id) {
-          const { data: related } = await supabase.from('products').select('*')
-            .eq('category_id', data.category_id).eq('is_active', true)
-            .neq('id', data.id).order('created_at', { ascending: false }).limit(4);
-          relatedProducts = related ?? [];
-        }
-      });
-    setTimeout(() => { loading = false; }, 1500);
-  });
 </script>
 
 <svelte:head><title>{name || 'Proizvod'} — Shop — Petroni</title></svelte:head>

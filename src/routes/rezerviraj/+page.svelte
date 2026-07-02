@@ -3,24 +3,25 @@
   import { booking, resetBooking } from '$lib/stores/booking';
   import { supabase } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
-  import type { Vehicle } from '$lib/supabase';
-  import { bookingExtras } from '$lib/mock/bookingExtras';
+  import type { BookingExtra, Vehicle } from '$lib/supabase';
+  import type { PageProps } from './$types';
 
-  const seedLocations = [
-    'Zagreb Depot', 'Zagreb City Centre', 'Zagreb Airport', 'Split Airport', 'Dubrovnik Airport',
-    'Pula Airport', 'Zadar Airport', 'Krk (Rijeka) Airport', 'Ljubljana Airport', 'Budapest Airport', 'Vienna Airport',
-  ];
-
-  const seedVehicles: Vehicle[] = [
-    { id: '1', slug: 'weinsberg-caraone-550qdk', name: 'Weinsberg CaraOne 550QDK', type: 'rental', category: 'COMFORT', seats: 4, bags: 4, price_per_day: 120, sale_price: null, description_hr: 'Udoban obiteljski karavan.', description_en: null, images: ['https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg'], specs: { length: '8.5m', beds: 4 }, is_available: true, created_at: '' },
-    { id: '2', slug: 'weinsberg-caraone-550uk', name: 'Weinsberg CaraOne 550UK', type: 'rental', category: 'ECO', seats: 4, bags: 3, price_per_day: 95, sale_price: null, description_hr: 'Kompaktan i ekonomičan.', description_en: null, images: ['https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg'], specs: { length: '7.9m', beds: 2 }, is_available: true, created_at: '' },
-    { id: '3', slug: 'caratour-ford-600mq', name: 'CaraTour Ford 600MQ', type: 'rental', category: 'ELITE', seats: 6, bags: 5, price_per_day: 180, sale_price: null, description_hr: 'Luksuzni motorhome.', description_en: null, images: ['https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp'], specs: { length: '9.2m', beds: 6 }, is_available: true, created_at: '' },
-  ];
-
-  let locations: string[] = $state(seedLocations);
+  let { data }: PageProps = $props();
+  const locations = $derived(data.locations.map((location) => location.name));
+  const bookingExtras: BookingExtra[] = $derived(data.extras as BookingExtra[]);
+  const rentalVehicles: Vehicle[] = $derived(data.vehicles as Vehicle[]);
   let availableVehicles: Vehicle[] = $state([]);
   let loading = $state(false);
   let paymentMethod = $state<'stripe' | 'paypal'>('stripe');
+  let signedIn = $state(false);
+  let authMode = $state<'login' | 'register'>('login');
+  let authEmail = $state('');
+  let authPassword = $state('');
+  let authFirstName = $state('');
+  let authLastName = $state('');
+  let authError = $state('');
+  let authMessage = $state('');
+  let authLoading = $state(false);
 
   const steps = $derived($locale === 'hr'
     ? ['Datum i Vrijeme', 'Pretražite vozila', 'Detalji vozača', 'Pregled rezervacije']
@@ -32,7 +33,7 @@
     return Math.max(1, Math.ceil((b.getTime() - a.getTime()) / 86400000));
   }
   const days = $derived(getDays());
-  const vehicleSubtotal = $derived($booking.selectedVehicle ? ($booking.selectedVehicle.price_per_day ?? 0) * days : 0);
+  const vehicleSubtotal = $derived($booking.selectedVehicle ? ($booking.selectedVehicle.base_price_per_day ?? 0) * days : 0);
   const selectedExtras = $derived(bookingExtras
     .map(extra => ({ extra, qty: $booking.extras[extra.id] ?? 0 }))
     .filter(e => e.qty > 0));
@@ -56,11 +57,9 @@
 
   async function searchVehicles() {
     loading = true;
-    availableVehicles = seedVehicles;
+    availableVehicles = rentalVehicles;
     booking.update(b => ({ ...b, step: 2 }));
     loading = false;
-    supabase.from('vehicles').select('*').eq('type', 'rental').eq('is_available', true)
-      .then(({ data }) => { if (data?.length) availableVehicles = data; });
   }
 
   async function submitBooking() {
@@ -76,9 +75,83 @@
     } catch (e) { console.error(e); } finally { loading = false; }
   }
 
+  function prefillProfile(profile: Record<string, unknown>) {
+    booking.update((current) => ({
+      ...current,
+      driverDetails: {
+        ...current.driverDetails,
+        firstName: String(profile.first_name ?? current.driverDetails.firstName),
+        lastName: String(profile.last_name ?? current.driverDetails.lastName),
+        email: String(profile.email ?? current.driverDetails.email),
+        phone: String(profile.phone ?? current.driverDetails.phone),
+        address: String(profile.address ?? current.driverDetails.address),
+        city: String(profile.city ?? current.driverDetails.city),
+        zip: String(profile.zip ?? current.driverDetails.zip),
+        country: String(profile.country ?? current.driverDetails.country)
+      }
+    }));
+  }
+
+  async function authenticateDuringBooking() {
+    authLoading = true;
+    authError = '';
+    authMessage = '';
+
+    if (authMode === 'login') {
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: authEmail,
+        password: authPassword
+      });
+      if (error || !authData.user) {
+        authError = 'Prijava nije uspjela. Provjerite email adresu i lozinku.';
+      } else {
+        signedIn = true;
+        prefillProfile({ ...authData.user.user_metadata, email: authData.user.email ?? '' });
+        authMessage = 'Prijavljeni ste. Podaci vozača su popunjeni iz Vašeg profila.';
+      }
+    } else {
+      if (!authFirstName || !authLastName || authPassword.length < 8) {
+        authError = 'Unesite ime i prezime te lozinku od najmanje 8 znakova.';
+        authLoading = false;
+        return;
+      }
+      const { data: authData, error } = await supabase.auth.signUp({
+        email: authEmail,
+        password: authPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/rezerviraj`,
+          data: {
+            first_name: authFirstName,
+            last_name: authLastName,
+            full_name: `${authFirstName} ${authLastName}`,
+            phone: '',
+            address: '',
+            city: '',
+            zip: '',
+            country: 'Hrvatska'
+          }
+        }
+      });
+      if (error) {
+        authError = 'Registracija nije uspjela. Možda račun s ovom adresom već postoji.';
+      } else if (authData.session && authData.user) {
+        signedIn = true;
+        prefillProfile({ ...authData.user.user_metadata, email: authData.user.email ?? '' });
+        authMessage = 'Račun je izrađen i podaci vozača su popunjeni.';
+      } else {
+        authMessage = 'Provjerite email i potvrdite račun. Rezervaciju možete nastaviti kao gost.';
+      }
+    }
+
+    authLoading = false;
+  }
+
   onMount(() => {
-    supabase.from('rental_locations').select('name').order('sort_order')
-      .then(({ data }) => { if (data?.length) locations = data.map(l => l.name); });
+    if (data.profile) {
+      signedIn = true;
+      authEmail = String(data.profile.email ?? '');
+      prefillProfile(data.profile);
+    }
   });
 
   const driverFields = $derived($locale === 'hr' ? [
@@ -210,7 +283,7 @@
                     <p class="text-xs text-[#9aa0a8]">{vehicle.category} · {vehicle.seats} {$locale === 'hr' ? 'sjedala' : 'seats'}</p>
                   </div>
                   <div class="flex items-center gap-4">
-                    <div class="text-right"><span class="text-xl font-bold text-[#2b2b2b]">{(vehicle.price_per_day ?? 0) * days} €</span> <span class="text-xs text-[#9aa0a8] block">({days} × {vehicle.price_per_day} €)</span></div>
+                    <div class="text-right"><span class="text-xl font-bold text-[#2b2b2b]">{(vehicle.base_price_per_day ?? 0) * days} €</span> <span class="text-xs text-[#9aa0a8] block">({days} × {vehicle.base_price_per_day} €)</span></div>
                     <span class="btn btn-primary px-4 py-2 text-[11px] flex-shrink-0">{$locale === 'hr' ? 'Odaberi' : 'Select'}</span>
                   </div>
                 </div>
@@ -262,7 +335,7 @@
                 <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Sažetak' : 'Summary'}</h2>
                 <div class="space-y-2 mb-4">
                   <div class="flex justify-between text-sm">
-                    <span class="text-[#7a7f86]">{$locale === 'hr' ? 'Vozilo' : 'Vehicle'} ({$booking.selectedVehicle.price_per_day} € × {days})</span>
+                    <span class="text-[#7a7f86]">{$locale === 'hr' ? 'Vozilo' : 'Vehicle'} ({$booking.selectedVehicle.base_price_per_day} € × {days})</span>
                     <span class="text-[#2b2b2b]">{vehicleSubtotal} €</span>
                   </div>
                   {#each selectedExtras as { extra, qty }}
@@ -295,6 +368,38 @@
             <div><p class="font-semibold text-[#2b2b2b]">{$booking.selectedVehicle.name}</p><p class="text-sm text-[#7a7f86]">{totalPrice} € {$locale === 'hr' ? 'ukupno' : 'total'} ({days} {$locale === 'hr' ? 'dana' : 'days'})</p></div>
           </div>
         {/if}
+        <div class="rounded-lg p-5 mb-7 border border-[#e2e4e8]" style="background:#fafbfc">
+          {#if signedIn}
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0" style="background:#fff7d6;color:#8a6500">✓</div>
+              <div>
+                <p class="font-semibold text-[#2b2b2b]">Prijavljeni ste</p>
+                <p class="text-sm text-[#7a7f86] mt-1">Podaci iz Vašeg profila automatski su popunjeni. Svejedno ih možete urediti za ovu rezervaciju.</p>
+              </div>
+            </div>
+          {:else}
+            <div class="flex gap-2 mb-5">
+              <button type="button" onclick={() => { authMode = 'login'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'login'} class:btn-ghost={authMode !== 'login'}>Prijava</button>
+              <button type="button" onclick={() => { authMode = 'register'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'register'} class:btn-ghost={authMode !== 'register'}>Izradi račun</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {#if authMode === 'register'}
+                <div><span class="field-label">Ime</span><input class="field" bind:value={authFirstName} autocomplete="given-name" /></div>
+                <div><span class="field-label">Prezime</span><input class="field" bind:value={authLastName} autocomplete="family-name" /></div>
+              {/if}
+              <div class={authMode === 'login' ? '' : 'md:col-span-1'}><span class="field-label">Email</span><input type="email" class="field" bind:value={authEmail} autocomplete="email" /></div>
+              <div><span class="field-label">Lozinka</span><input type="password" class="field" bind:value={authPassword} autocomplete={authMode === 'login' ? 'current-password' : 'new-password'} /></div>
+            </div>
+            {#if authError}<p class="text-sm mt-4" style="color:#b42318">{authError}</p>{/if}
+            {#if authMessage}<p class="text-sm mt-4" style="color:#067647">{authMessage}</p>{/if}
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-5">
+              <button type="button" onclick={authenticateDuringBooking} disabled={authLoading || !authEmail || !authPassword} class="btn btn-primary disabled:opacity-50">
+                {authLoading ? 'Molimo pričekajte…' : (authMode === 'login' ? 'Prijavi se' : 'Izradi račun')}
+              </button>
+              <p class="text-xs text-[#8b9099]">Račun nije obavezan — rezervaciju možete nastaviti kao gost.</p>
+            </div>
+          {/if}
+        </div>
         <h2 class="text-lg font-bold uppercase tracking-wide text-[#2b2b2b] mb-6">{$locale === 'hr' ? 'Podaci vozača' : 'Driver details'}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           {#each driverFields as field}
@@ -327,7 +432,7 @@
             <div><p class="field-label">{$locale === 'hr' ? 'Povrat' : 'Return'}</p><p class="text-sm text-[#2b2b2b]">{$booking.dropoffDate} · {$booking.dropoffTime}</p><p class="text-sm font-medium" style="color:#b5890a">{$booking.dropoffLocation || $booking.pickupLocation}</p></div>
           </div>
           <div class="space-y-2 mb-6 pb-6 border-b border-[#ededf0]">
-            <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Vozilo' : 'Vehicle'}: {$booking.selectedVehicle?.price_per_day} € × {days} {$locale === 'hr' ? 'dana' : 'days'}</span><span class="text-[#2b2b2b]">{vehicleSubtotal} €</span></div>
+            <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Vozilo' : 'Vehicle'}: {$booking.selectedVehicle?.base_price_per_day} € × {days} {$locale === 'hr' ? 'dana' : 'days'}</span><span class="text-[#2b2b2b]">{vehicleSubtotal} €</span></div>
             {#each selectedExtras as { extra, qty }}
               <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? extra.name_hr : extra.name_en} × {qty}</span><span class="text-[#2b2b2b]">{extra.price * qty} €</span></div>
             {/each}

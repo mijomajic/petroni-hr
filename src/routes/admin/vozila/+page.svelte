@@ -61,7 +61,7 @@
                 <td class="px-4 py-3 text-xs uppercase tracking-widest" style="color: #7a7f86">{v.type}</td>
                 <td class="px-4 py-3 text-xs uppercase" style="color: #7a7f86">{v.category || '—'}</td>
                 <td class="px-4 py-3 font-bold" style="color: #F5C518">
-                  {v.type === 'rental' ? `€${v.price_per_day}/dan` : `€${v.sale_price}`}
+                  {v.type === 'rental' ? `€${v.base_price_per_day}/dan` : `€${v.sale_price}`}
                 </td>
                 <td class="px-4 py-3">
                   <button onclick={() => toggleAvailability(v.id, v.is_available)} class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all"

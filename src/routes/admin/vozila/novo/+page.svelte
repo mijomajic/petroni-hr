@@ -4,7 +4,7 @@
 
   let form = $state({
     name: '', slug: '', type: 'rental', category: 'COMFORT',
-    seats: 4, bags: 4, price_per_day: 100, sale_price: 0,
+    seats: 4, bags: 4, base_price_per_day: 100, sale_price: 0,
     description_hr: '', description_en: '',
     images: '', is_available: true,
   });
@@ -74,7 +74,7 @@
         {#if form.type === 'rental'}
           <div class="space-y-2 col-span-2">
             <label class="text-xs uppercase tracking-widest font-bold" style="color: #7a7f86">Cijena / dan (€)</label>
-            <input type="number" class="w-full px-4 py-3 rounded-xl text-[#2b2b2b] text-sm focus:outline-none" style="background: #f6f7f9; border: 1px solid #e7e8eb" bind:value={form.price_per_day} />
+            <input type="number" class="w-full px-4 py-3 rounded-xl text-[#2b2b2b] text-sm focus:outline-none" style="background: #f6f7f9; border: 1px solid #e7e8eb" bind:value={form.base_price_per_day} />
           </div>
         {:else}
           <div class="space-y-2 col-span-2">

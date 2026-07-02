@@ -1,40 +1,21 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabase';
   import type { Post } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
+  import type { PageProps } from './$types';
 
-  let post: Post | null = $state(null);
-  let loading = $state(true);
+  let { data }: PageProps = $props();
+  const post: Post = $derived(data.post as Post);
+  const related = $derived(data.relatedPosts.map((item) => ({
+    slug: item.slug,
+    title: item.title_hr,
+    img: item.cover_image,
+    date: item.published_at
+      ? new Intl.DateTimeFormat('hr-HR').format(new Date(item.published_at))
+      : ''
+  })));
 
-  function fallback(slug: string): Post {
-    const title = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    return {
-      id: slug, slug, title_hr: title, title_en: title,
-      content_hr: 'S ponosom objavljujemo novosti iz svijeta kampiranja. Naš tim kontinuirano prati najnovije trendove i opremu kako bismo Vam omogućili vrhunsko iskustvo na svakom putovanju.\n\nZa sve upite slobodno nas kontaktirajte putem e-maila ili telefona — rado ćemo Vam pomoći.',
-      content_en: 'We are proud to share the latest news from the world of camping. Our team continuously follows the newest trends and equipment to give you a top experience on every trip.\n\nFor any questions, feel free to contact us by email or phone.',
-      excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg',
-      published_at: '2025-03-10', is_published: true, created_at: ''
-    };
-  }
-
-  const related = [
-    { slug: 'klima-uredaj-plein-aircon-12v', title: 'Klima uređaj PLEIN-Aircon 12V', img: 'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg', date: '10.03.2025.' },
-    { slug: 'eurowagon-prikolice', title: 'EUROWAGON prikolice', img: 'https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg', date: '15.11.2019.' },
-    { slug: 'megamobil-slovenska-bistrica', title: 'MEGAMOBIL Slovenska Bistrica', img: 'https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp', date: '16.09.2020.' },
-  ];
-
-  const title = $derived(post ? ($locale === 'hr' ? post.title_hr : (post.title_en || post.title_hr)) : '');
-  const content = $derived(post ? ($locale === 'hr' ? post.content_hr : (post.content_en || post.content_hr)) : '');
-
-  onMount(() => {
-    const slug = $page.params.slug;
-    post = fallback(slug);
-    loading = false;
-    supabase.from('posts').select('*').eq('slug', slug).eq('is_published', true).single()
-      .then(({ data }) => { if (data) post = data; });
-  });
+  const title = $derived($locale === 'hr' ? post.title_hr : (post.title_en || post.title_hr));
+  const content = $derived($locale === 'hr' ? post.content_hr : (post.content_en || post.content_hr));
 </script>
 
 <svelte:head><title>{title || 'Novost'} — Petroni</title></svelte:head>

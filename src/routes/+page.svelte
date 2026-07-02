@@ -2,21 +2,15 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { locale } from '$lib/stores/locale';
-  import { supabase } from '$lib/supabase';
   import type { Vehicle, Product } from '$lib/supabase';
   import VehicleCard from '$lib/components/ui/VehicleCard.svelte';
   import ProductCard from '$lib/components/ui/ProductCard.svelte';
+  import type { PageProps } from './$types';
 
-  const seedRental: Vehicle[] = [
-    { id: '1', slug: 'weinsberg-caraone-550qdk', name: 'Weinsberg CaraOne 550QDK', type: 'rental', category: 'COMFORT', seats: 4, bags: 4, price_per_day: 120, sale_price: null, description_hr: 'Weinsberg CaraOne 550QDK — udoban obiteljski karavan s prostranim rasporedom, opremom i udobnošću za nezaboravna ljetna putovanja.', description_en: 'Comfortable family caravan with a spacious layout and full equipment.', images: ['https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg'], specs: { length: '8.5m', beds: 4 }, is_available: true, created_at: '' },
-    { id: '2', slug: 'weinsberg-caraone-550uk', name: 'Weinsberg CaraOne 550UK', type: 'rental', category: 'ECO', seats: 4, bags: 3, price_per_day: 95, sale_price: null, description_hr: 'Weinsberg CaraOne 550UK — kompaktan i ekonomičan karavan za par ili manju obitelj, opremljen za udobnost.', description_en: 'Compact and economical caravan for a couple or small family.', images: ['https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg'], specs: { length: '7.9m', beds: 2 }, is_available: true, created_at: '' },
-    { id: '3', slug: 'caratour-ford-600mq', name: 'CaraTour Ford 600MQ', type: 'rental', category: 'ELITE', seats: 6, bags: 5, price_per_day: 180, sale_price: null, description_hr: 'Weinsberg CaraTour Ford 600 MQ — kompaktan kamper za udobna putovanja, vrhunska oprema i prostran interijer.', description_en: 'Compact motorhome for comfortable travel with premium equipment.', images: ['https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp'], specs: { length: '9.2m', beds: 6 }, is_available: true, created_at: '' },
-  ];
-
-  // Seed data renders instantly; Supabase overrides only if it returns rows.
-  let rentalVehicles: Vehicle[] = $state(seedRental);
-  let saleVehicles: Vehicle[] = $state(seedRental.map((v, i) => ({ ...v, id: `s${i}`, type: 'sale' as const })));
-  let products: Product[] = $state([]);
+  let { data }: PageProps = $props();
+  const rentalVehicles: Vehicle[] = $derived(data.rentalVehicles as Vehicle[]);
+  const saleVehicles: Vehicle[] = $derived(data.saleVehicles as Vehicle[]);
+  const products: Product[] = $derived(data.products as Product[]);
   let statsStarted = $state(false);
 
   const galleryImages = [
@@ -69,13 +63,6 @@
   }
 
   onMount(async () => {
-    supabase.from('vehicles').select('*').eq('type', 'rental').eq('is_available', true).limit(6)
-      .then(({ data }) => { if (data?.length) rentalVehicles = data; });
-    supabase.from('vehicles').select('*').eq('type', 'sale').limit(3)
-      .then(({ data }) => { if (data?.length) saleVehicles = data; });
-    supabase.from('products').select('*').eq('is_active', true).limit(4)
-      .then(({ data }) => { if (data?.length) products = data; });
-
     const statsEl = document.getElementById('stats');
     if (statsEl) {
       const obs = new IntersectionObserver((entries) => {

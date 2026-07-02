@@ -1,17 +1,11 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabase';
   import type { Vehicle } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
   import VehicleCard from '$lib/components/ui/VehicleCard.svelte';
+  import type { PageProps } from './$types';
 
-  const seed: Vehicle[] = [
-    { id: '1', slug: 'weinsberg-caraone-550qdk', name: 'Weinsberg CaraOne 550QDK', type: 'rental', category: 'COMFORT', seats: 4, bags: 4, price_per_day: 120, sale_price: null, description_hr: 'Udoban obiteljski karavan s prostranim rasporedom i potpunom opremom za ljetna putovanja.', description_en: 'Comfortable family caravan with a spacious layout.', images: ['https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg'], specs: { length: '8.5m', beds: 4 }, is_available: true, created_at: '' },
-    { id: '2', slug: 'weinsberg-caraone-550uk', name: 'Weinsberg CaraOne 550UK', type: 'rental', category: 'ECO', seats: 4, bags: 3, price_per_day: 95, sale_price: null, description_hr: 'Kompaktan i ekonomičan karavan za par ili manju obitelj.', description_en: 'Compact and economical caravan.', images: ['https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg'], specs: { length: '7.9m', beds: 2 }, is_available: true, created_at: '' },
-    { id: '3', slug: 'caratour-ford-600mq', name: 'CaraTour Ford 600MQ', type: 'rental', category: 'ELITE', seats: 6, bags: 5, price_per_day: 180, sale_price: null, description_hr: 'Kompaktan kamper za udobna putovanja, vrhunska oprema i prostran interijer.', description_en: 'Compact motorhome for comfortable travel.', images: ['https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp'], specs: { length: '9.2m', beds: 6 }, is_available: true, created_at: '' },
-  ];
-
-  let vehicles: Vehicle[] = $state(seed);
+  let { data }: PageProps = $props();
+  const vehicles: Vehicle[] = $derived(data.vehicles as Vehicle[]);
   let filterCategory = $state('');
   let filterSeats = $state(0);
   let filterBeds = $state(0);
@@ -23,16 +17,12 @@
   const filtered = $derived(vehicles.filter(v => {
     if (filterCategory && v.category !== filterCategory) return false;
     if (filterSeats && (v.seats ?? 0) < filterSeats) return false;
-    if (filterBeds && ((v.specs as any)?.beds ?? 0) < filterBeds) return false;
-    if (filterMaxPrice < 300 && (v.price_per_day ?? 0) > filterMaxPrice) return false;
+    if (filterBeds && (v.beds ?? 0) < filterBeds) return false;
+    if (filterMaxPrice < 300 && (v.base_price_per_day ?? 0) > filterMaxPrice) return false;
     if (filterAvailable === 'yes' && !v.is_available) return false;
     return true;
   }));
 
-  onMount(() => {
-    supabase.from('vehicles').select('*').eq('type', 'rental').order('created_at', { ascending: false })
-      .then(({ data }) => { if (data?.length) vehicles = data; });
-  });
 </script>
 
 <svelte:head><title>Najam kampera — Petroni</title></svelte:head>

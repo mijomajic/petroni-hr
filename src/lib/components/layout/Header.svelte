@@ -10,6 +10,7 @@
   let vozilaOpen = $state(false);
 
   const cartCount = $derived($cart.reduce((acc, i) => acc + i.qty, 0));
+  const accountHref = $derived($page.data.user ? '/moj-racun' : '/prijava');
 
   const navLinks = [
     { href: '/', label: () => $_('nav.home') },
@@ -117,7 +118,7 @@
       </button>
 
       <!-- Account -->
-      <a href="/admin/login" class="hidden sm:flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 hover:bg-[#f3f4f6]" aria-label="Račun">
+      <a href={accountHref} class="hidden sm:flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 hover:bg-[#f3f4f6]" aria-label={$page.data.user ? 'Moj račun' : 'Prijava'}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b2b2b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
         </svg>
@@ -172,6 +173,9 @@
       </div>
       <a href="/rezerviraj" onclick={() => mobileOpen = false} class="btn btn-primary flex-1">{$_('nav.book')}</a>
     </div>
+    <a href={accountHref} onclick={() => mobileOpen = false} class="btn btn-ghost mt-3">
+      {$page.data.user ? 'Moj račun' : 'Prijava / Registracija'}
+    </a>
   </div>
 {/if}
 

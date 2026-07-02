@@ -1,24 +1,10 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabase';
   import type { Post } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
+  import type { PageProps } from './$types';
 
-  const seed: Post[] = [
-    { id: '1', slug: 'camping-center-petroni-alde-servis', title_hr: 'Camping Center Petroni postao ovlašteni servis za Alde grijanje u Hrvatskoj', title_en: 'Camping Center Petroni — authorised Alde service in Croatia', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg', published_at: '2025-03-10', is_published: true, created_at: '' },
-    { id: '2', slug: 'klima-uredaj-plein-aircon-12v', title_hr: 'Klima uređaj PLEIN-Aircon 12V', title_en: 'PLEIN-Aircon 12V air conditioner', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg', published_at: '2025-02-22', is_published: true, created_at: '' },
-    { id: '3', slug: 'katalog-remo-2024', title_hr: 'Katalog REMO 2024', title_en: 'REMO 2024 catalogue', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp', published_at: '2024-12-01', is_published: true, created_at: '' },
-    { id: '4', slug: 'camper-trolley', title_hr: 'Camper Trolley za jednostavno manevriranje sa prikolicama', title_en: 'Camper Trolley for easy trailer manoeuvring', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg', published_at: '2024-10-15', is_published: true, created_at: '' },
-    { id: '5', slug: 'priprema-kamp-prikolice-za-zimu', title_hr: 'Priprema kamp prikolice za "zimski san"', title_en: 'Preparing your caravan for winter', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg', published_at: '2024-10-01', is_published: true, created_at: '' },
-    { id: '6', slug: 'priprema-kampera-za-zimu', title_hr: 'Priprema kampera za zimu', title_en: 'Preparing your camper for winter', content_hr: '', content_en: '', excerpt_hr: '', excerpt_en: '', cover_image: 'https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp', published_at: '2024-09-20', is_published: true, created_at: '' },
-  ];
-
-  let posts: Post[] = $state(seed);
-
-  onMount(() => {
-    supabase.from('posts').select('*').eq('is_published', true).order('published_at', { ascending: false })
-      .then(({ data }) => { if (data?.length) posts = data; });
-  });
+  let { data }: PageProps = $props();
+  const posts: Post[] = $derived(data.posts as Post[]);
 </script>
 
 <svelte:head><title>Novosti — Petroni</title></svelte:head>

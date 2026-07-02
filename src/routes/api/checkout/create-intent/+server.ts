@@ -1,19 +1,18 @@
 import { json } from '@sveltejs/kit';
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
 import { env as priv } from '$env/dynamic/private';
-import { env as pub } from '$env/dynamic/public';
+import { supabaseAdmin } from '$lib/supabase.server';
 import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
   const body = await request.json();
   const stripeKey = priv.STRIPE_SECRET_KEY ?? '';
-  const supabaseUrl = pub.PUBLIC_SUPABASE_URL ?? '';
-  const serviceKey = priv.SUPABASE_SERVICE_KEY ?? '';
+  const { user } = await locals.safeGetSession();
 
   if (!stripeKey || stripeKey === 'sk_test_placeholder') {
-    const supabase = createClient(supabaseUrl, serviceKey);
-    await supabase.from('orders').insert({
+    const { error } = await supabaseAdmin.from('orders').insert({
+      confirmation_number: `NAR-${Date.now().toString(36).toUpperCase()}`,
+      user_id: user?.id ?? null,
       customer_name: body.customer.name,
       customer_email: body.customer.email,
       customer_phone: body.customer.phone,
@@ -24,6 +23,7 @@ export const POST: RequestHandler = async ({ request }) => {
       status: 'pending',
       payment_status: 'unpaid',
     });
+    if (error) return json({ success: false, error: error.message }, { status: 400 });
     return json({ success: true, mode: 'dev' });
   }
 

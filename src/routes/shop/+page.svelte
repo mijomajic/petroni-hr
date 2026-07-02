@@ -1,32 +1,15 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabase';
-  import type { Product } from '$lib/supabase';
+  import type { Product, ProductCategory } from '$lib/supabase';
   import ProductCard from '$lib/components/ui/ProductCard.svelte';
   import { locale } from '$lib/stores/locale';
+  import type { PageProps } from './$types';
 
-  const allCategories = [
-    { slug: 'elektrika', name_hr: 'Elektrika', name_en: 'Electrical' },
-    { slug: 'gume-i-oprema', name_hr: 'Gume i oprema', name_en: 'Tires & Equipment' },
-    { slug: 'hladenje-grijanje', name_hr: 'Hlađenje / Grijanje', name_en: 'Cooling / Heating' },
-    { slug: 'kamping-namjestaj', name_hr: 'Kamping namještaj', name_en: 'Camping Furniture' },
-    { slug: 'karavan-tehnologija', name_hr: 'Karavan tehnologija', name_en: 'Caravan Tech' },
-    { slug: 'kemikalije', name_hr: 'Kemikalije i sredstva', name_en: 'Chemicals' },
-    { slug: 'kucanstvo-kuhinja', name_hr: 'Kućanstvo / kuhinja', name_en: 'Household / Kitchen' },
-    { slug: 'motorhome-tehnologija', name_hr: 'Motorhome tehnologija', name_en: 'Motorhome Tech' },
-    { slug: 'multimedija', name_hr: 'Multimedija', name_en: 'Multimedia' },
-    { slug: 'oprema-za-van', name_hr: 'Oprema za van', name_en: 'Outdoor Equipment' },
-    { slug: 'plinska-tehnologija', name_hr: 'Plinska tehnologija', name_en: 'Gas Technology' },
-    { slug: 'prozori', name_hr: 'Prozori', name_en: 'Windows' },
-    { slug: 'sigurnost', name_hr: 'Sigurnost', name_en: 'Security' },
-    { slug: 'tende-i-dodaci', name_hr: 'Tende i dodaci', name_en: 'Awnings' },
-    { slug: 'voda-sanitarije', name_hr: 'Voda / Sanitarije', name_en: 'Water / Sanitary' },
-  ];
-
-  let products: Product[] = $state([]);
-  let loading = $state(true);
+  let { data }: PageProps = $props();
+  const allCategories: ProductCategory[] = $derived(data.categories as ProductCategory[]);
+  const products: Product[] = $derived(data.products as Product[]);
+  const loading = false;
   let sort = $state('newest');
   let search = $state('');
   let minPrice = $state($page.url.searchParams.get('min') ?? '');
@@ -58,11 +41,6 @@
     goto($page.url.pathname, { keepFocus: true, noScroll: true, replaceState: true });
   }
 
-  onMount(() => {
-    supabase.from('products').select('*').eq('is_active', true)
-      .then(({ data }) => { products = data ?? []; loading = false; });
-    setTimeout(() => { loading = false; }, 1500);
-  });
 </script>
 
 <svelte:head><title>Shop — Petroni</title></svelte:head>

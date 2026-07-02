@@ -1,43 +1,22 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabase';
   import type { Product, ProductCategory } from '$lib/supabase';
   import ProductCard from '$lib/components/ui/ProductCard.svelte';
   import { locale } from '$lib/stores/locale';
+  import type { PageProps } from './$types';
 
-  const allCategories = [
-    { slug: 'elektrika', name_hr: 'Elektrika', name_en: 'Electrical' },
-    { slug: 'gume-i-oprema', name_hr: 'Gume i oprema', name_en: 'Tires & Equipment' },
-    { slug: 'hladenje-grijanje', name_hr: 'Hlađenje / Grijanje', name_en: 'Cooling / Heating' },
-    { slug: 'kamping-namjestaj', name_hr: 'Kamping namještaj', name_en: 'Camping Furniture' },
-    { slug: 'karavan-tehnologija', name_hr: 'Karavan tehnologija', name_en: 'Caravan Tech' },
-    { slug: 'kemikalije', name_hr: 'Kemikalije i sredstva', name_en: 'Chemicals' },
-    { slug: 'kucanstvo-kuhinja', name_hr: 'Kućanstvo / kuhinja', name_en: 'Household / Kitchen' },
-    { slug: 'motorhome-tehnologija', name_hr: 'Motorhome tehnologija', name_en: 'Motorhome Tech' },
-    { slug: 'multimedija', name_hr: 'Multimedija', name_en: 'Multimedia' },
-    { slug: 'oprema-za-van', name_hr: 'Oprema za van', name_en: 'Outdoor Equipment' },
-    { slug: 'plinska-tehnologija', name_hr: 'Plinska tehnologija', name_en: 'Gas Technology' },
-    { slug: 'prozori', name_hr: 'Prozori', name_en: 'Windows' },
-    { slug: 'sigurnost', name_hr: 'Sigurnost', name_en: 'Security' },
-    { slug: 'tende-i-dodaci', name_hr: 'Tende i dodaci', name_en: 'Awnings' },
-    { slug: 'voda-sanitarije', name_hr: 'Voda / Sanitarije', name_en: 'Water / Sanitary' },
-  ];
-
-  let category: ProductCategory | null = $state(null);
-  let products: Product[] = $state([]);
-  let loading = $state(true);
+  let { data }: PageProps = $props();
+  const allCategories: ProductCategory[] = $derived(data.categories as ProductCategory[]);
+  const category: ProductCategory = $derived(data.category as ProductCategory);
+  const products: Product[] = $derived(data.products as Product[]);
+  const loading = false;
   let sort = $state('newest');
   let search = $state('');
   let minPrice = $state($page.url.searchParams.get('min') ?? '');
   let maxPrice = $state($page.url.searchParams.get('max') ?? '');
 
   const slug = $derived($page.params.category);
-  const prettyName = $derived(
-    (slug ?? '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-  );
-
   const sorted = $derived([...products]
     .filter(p => !search || (p.name_hr + (p.name_en ?? '')).toLowerCase().includes(search.toLowerCase()))
     .filter(p => minPrice === '' || p.price >= Number(minPrice))
@@ -64,21 +43,7 @@
     goto($page.url.pathname, { keepFocus: true, noScroll: true, replaceState: true });
   }
 
-  onMount(() => {
-    const s = $page.params.category;
-    supabase.from('product_categories').select('*').eq('slug', s).single()
-      .then(async ({ data: cat }) => {
-        category = cat;
-        if (cat) {
-          const { data: prods } = await supabase.from('products').select('*').eq('category_id', cat.id).eq('is_active', true);
-          products = prods ?? [];
-        }
-        loading = false;
-      });
-    setTimeout(() => { loading = false; }, 1500);
-  });
-
-  const title = $derived(category ? ($locale === 'hr' ? category.name_hr : (category.name_en || category.name_hr)) : prettyName);
+  const title = $derived($locale === 'hr' ? category.name_hr : (category.name_en || category.name_hr));
   const currentCat = $derived(allCategories.find(c => c.slug === slug));
 </script>
 

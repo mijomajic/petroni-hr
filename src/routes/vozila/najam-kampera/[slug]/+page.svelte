@@ -1,35 +1,14 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabase';
   import type { Vehicle } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
+  import type { PageProps } from './$types';
 
-  let vehicle: Vehicle | null = $state(null);
-  let loading = $state(true);
+  let { data }: PageProps = $props();
+  const vehicle: Vehicle = $derived(data.vehicle as Vehicle);
   let activeImage = $state(0);
 
-  const seed: Record<string, Vehicle> = {
-    'weinsberg-caraone-550qdk': { id: '1', slug: 'weinsberg-caraone-550qdk', name: 'Weinsberg CaraOne 550QDK', type: 'rental', category: 'COMFORT', seats: 4, bags: 4, price_per_day: 120, sale_price: null, description_hr: 'Udoban obiteljski karavan idealan za ljetna putovanja. Prostrani interijer s modernom opremom, klima uređaj, potpuno opremljena kuhinja i udobne ležaljke.', description_en: 'A comfortable family caravan ideal for summer travel.', images: ['https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg'], specs: { Godina: '2024', Vozilo: 'Ford', Model: 'Transit', Motor: '2.0tdci 155ks', 'Broj ležajeva': '6-8', 'Broj sjedala': '6', Tenda: '✓' }, is_available: true, created_at: '' },
-    'weinsberg-caraone-550uk': { id: '2', slug: 'weinsberg-caraone-550uk', name: 'Weinsberg CaraOne 550UK', type: 'rental', category: 'ECO', seats: 4, bags: 3, price_per_day: 95, sale_price: null, description_hr: 'Kompaktan i ekonomičan karavan za par ili manju obitelj. Idealan za brze vikend izlete i dulja putovanja.', description_en: 'Compact and economical caravan.', images: ['https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg'], specs: { Godina: '2023', Vozilo: 'Caravan', Model: 'CaraOne', 'Broj ležajeva': '2-4', 'Broj sjedala': '4' }, is_available: true, created_at: '' },
-    'caratour-ford-600mq': { id: '3', slug: 'caratour-ford-600mq', name: 'CaraTour Ford 600MQ', type: 'rental', category: 'ELITE', seats: 6, bags: 5, price_per_day: 180, sale_price: null, description_hr: 'Vaš san o istraživanju svijeta sada postaje stvarnost. Dizajniran za one koji se uvijek osjećaju spremni za avanturu, omogućavajući vam da uživate u slobodnom vremenu bez odricanja od bilo čega bitnog.', description_en: 'Your dream of exploring the world becomes reality.', images: ['https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp'], specs: { Godina: '2024', Vozilo: 'Ford', Model: 'Transit', Motor: '2.0tdci 155ks', 'Broj ležajeva': '6-8', 'Dimenzije ležajeva': '150x200', 'Broj sjedala': '6', Tenda: '✓', 'Radio/CD/MP3': '✓', Tempomat: '✓', 'Klima kabina': '✓' }, is_available: true, created_at: '' },
-  };
-
-  function fallbackFromSlug(slug: string): Vehicle {
-    const name = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    return { id: slug, slug, name, type: 'sale', category: null, seats: null, bags: null, price_per_day: null, sale_price: null, description_hr: 'Za više informacija o ovom vozilu, specifikacijama i dostupnosti slobodno nas kontaktirajte.', description_en: 'Contact us for more information about this vehicle.', images: ['https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp'], specs: { Godina: '2024' }, is_available: true, created_at: '' };
-  }
-
-  onMount(() => {
-    const slug = $page.params.slug;
-    vehicle = seed[slug] ?? fallbackFromSlug(slug);
-    loading = false;
-    supabase.from('vehicles').select('*').eq('slug', slug).single()
-      .then(({ data }) => { if (data) vehicle = data; });
-  });
-
-  const specEntries = $derived(vehicle?.specs ? Object.entries(vehicle.specs) : []);
-  const desc = $derived(vehicle ? ($locale === 'hr' ? vehicle.description_hr : (vehicle.description_en || vehicle.description_hr)) : '');
+  const specEntries = $derived(vehicle.specs ? Object.entries(vehicle.specs) : []);
+  const desc = $derived($locale === 'hr' ? vehicle.description_hr : (vehicle.description_en || vehicle.description_hr));
 </script>
 
 <svelte:head><title>{vehicle?.name ?? 'Vozilo'} — Petroni</title></svelte:head>
@@ -45,7 +24,7 @@
 
       <h1 class="text-[26px] md:text-[34px] font-bold text-[#2b2b2b] mb-8 leading-tight">{vehicle.name}</h1>
 
-      {#if vehicle.type === 'film' && specEntries.length === 0 && !vehicle.price_per_day}
+      {#if vehicle.type === 'film' && specEntries.length === 0 && !vehicle.base_price_per_day}
         <!-- Film vehicle: full-width layout -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-10">
           <div class="lg:col-span-3">
@@ -139,10 +118,10 @@
                   <span class="text-[13px] text-[#6b7178]">{val as string}</span>
                 </div>
               {/each}
-              {#if vehicle.price_per_day}
+              {#if vehicle.base_price_per_day}
                 <div class="flex items-center justify-between py-2.5 border-b border-[#f0f1f3]">
                   <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{$locale === 'hr' ? 'Cijena od' : 'Price from'}:</span>
-                  <span class="text-[14px] font-bold" style="color:#b5890a">{vehicle.price_per_day} €/{$locale === 'hr' ? 'dan' : 'day'}</span>
+                  <span class="text-[14px] font-bold" style="color:#b5890a">{vehicle.base_price_per_day} €/{$locale === 'hr' ? 'dan' : 'day'}</span>
                 </div>
               {/if}
               {#if vehicle.sale_price}
