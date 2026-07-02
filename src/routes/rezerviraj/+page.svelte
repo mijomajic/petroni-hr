@@ -3,16 +3,46 @@
   import { booking, resetBooking } from '$lib/stores/booking';
   import { supabase } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
-  import type { BookingExtra, Vehicle } from '$lib/supabase';
+  import { calculatePricing, type PricingConfig, type PricingResult } from '$lib/pricing';
+  import type {
+    BookingExtra,
+    Fee,
+    RentalLocation,
+    Season,
+    SeasonPrice,
+    Vehicle
+  } from '$lib/supabase';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
-  const locations = $derived(data.locations.map((location) => location.name));
+  const rentalLocations: RentalLocation[] = $derived(data.locations as RentalLocation[]);
+  const locations = $derived(rentalLocations.map((location) => location.name));
   const bookingExtras: BookingExtra[] = $derived(data.extras as BookingExtra[]);
   const rentalVehicles: Vehicle[] = $derived(data.vehicles as Vehicle[]);
+  const pricingConfig: PricingConfig = $derived({
+    seasons: data.seasons as Season[],
+    seasonPrices: data.seasonPrices as SeasonPrice[],
+    fees: data.fees as Fee[],
+    locations: rentalLocations,
+    extras: bookingExtras,
+    kmPerDayIncluded: data.kmPerDayIncluded
+  });
+  const minDriverAge = $derived(Number(data.minDriverAge));
+  const selectedPickupLocation = $derived(
+    rentalLocations.find((location) => location.name === $booking.pickupLocation)
+  );
+  const selectedDropoffLocation = $derived(
+    rentalLocations.find(
+      (location) => location.name === ($booking.dropoffLocation || $booking.pickupLocation)
+    )
+  );
   let availableVehicles: Vehicle[] = $state([]);
   let loading = $state(false);
   let paymentMethod = $state<'stripe' | 'paypal'>('stripe');
+  let searchError = $state('');
+  let driverError = $state('');
+  let submitError = $state('');
+  let openExtraInfo = $state<string | null>(null);
   let signedIn = $state(false);
   let authMode = $state<'login' | 'register'>('login');
   let authEmail = $state('');
@@ -27,18 +57,70 @@
     ? ['Datum i Vrijeme', 'Pretražite vozila', 'Detalji vozača', 'Pregled rezervacije']
     : ['Date & Time', 'Search vehicles', 'Driver details', 'Review booking']);
 
-  function getDays(): number {
-    if (!$booking.pickupDate || !$booking.dropoffDate) return 0;
-    const a = new Date($booking.pickupDate), b = new Date($booking.dropoffDate);
-    return Math.max(1, Math.ceil((b.getTime() - a.getTime()) / 86400000));
+  function pricingFor(vehicle: Vehicle | null): PricingResult {
+    return calculatePricing({
+      vehicle,
+      pickupDate: $booking.pickupDate,
+      dropoffDate: $booking.dropoffDate,
+      pickupTime: $booking.pickupTime,
+      dropoffTime: $booking.dropoffTime,
+      pickupLocation: $booking.pickupLocation,
+      dropoffLocation: $booking.dropoffLocation,
+      plannedKm: $booking.plannedKm,
+      selectedExtras: $booking.extras
+    }, pricingConfig);
   }
-  const days = $derived(getDays());
-  const vehicleSubtotal = $derived($booking.selectedVehicle ? ($booking.selectedVehicle.base_price_per_day ?? 0) * days : 0);
-  const selectedExtras = $derived(bookingExtras
-    .map(extra => ({ extra, qty: $booking.extras[extra.id] ?? 0 }))
-    .filter(e => e.qty > 0));
-  const extrasTotal = $derived(selectedExtras.reduce((sum, e) => sum + e.extra.price * e.qty, 0));
-  const totalPrice = $derived(vehicleSubtotal + extrasTotal);
+
+  const selectedPricing = $derived(pricingFor($booking.selectedVehicle));
+  const days = $derived(selectedPricing.nights);
+  const totalPrice = $derived(selectedPricing.payable_total);
+  const vehiclePricing = $derived(
+    new Map(availableVehicles.map((vehicle) => [vehicle.id, pricingFor(vehicle)]))
+  );
+  const extraGroups = $derived(
+    [
+      { key: 'depozit', hr: 'Povratni depoziti', en: 'Refundable deposits' },
+      { key: 'oprema', hr: 'Dodatna oprema', en: 'Equipment' },
+      { key: 'ciscenje', hr: 'Čišćenje', en: 'Cleaning' },
+      { key: 'ostalo', hr: 'Ostalo', en: 'Other' }
+    ]
+      .map((group) => ({
+        ...group,
+        extras: bookingExtras.filter((extra) => (extra.category ?? 'ostalo') === group.key)
+      }))
+      .filter((group) => group.extras.length > 0)
+  );
+
+  const canSearch = $derived(
+    Boolean(
+      $booking.pickupLocation &&
+      $booking.pickupDate &&
+      $booking.dropoffDate &&
+      $booking.dropoffDate > $booking.pickupDate &&
+      $booking.numAdults >= 1 &&
+      $booking.plannedKm > 0 &&
+      $booking.destination.trim()
+    )
+  );
+
+  const maxDriverDob = $derived.by(() => {
+    const reference = $booking.pickupDate
+      ? new Date(`${$booking.pickupDate}T00:00:00Z`)
+      : new Date();
+    reference.setUTCFullYear(reference.getUTCFullYear() - minDriverAge);
+    return reference.toISOString().slice(0, 10);
+  });
+
+  function isDriverOldEnough(dateOfBirth: string): boolean {
+    return Boolean(dateOfBirth && dateOfBirth <= maxDriverDob);
+  }
+
+  function formatMoney(value: number): string {
+    return new Intl.NumberFormat($locale === 'hr' ? 'hr-HR' : 'en-IE', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(value);
+  }
 
   function setExtraQty(id: string, qty: number, maxQty: number) {
     const bounded = Math.max(0, Math.min(maxQty, qty));
@@ -57,22 +139,99 @@
 
   async function searchVehicles() {
     loading = true;
-    availableVehicles = rentalVehicles;
+    searchError = '';
+    const capacityMatches = rentalVehicles.filter((vehicle) => {
+      const adultsFit = (vehicle.max_adults ?? vehicle.seats ?? 0) >= $booking.numAdults;
+      const childrenFit = (vehicle.max_children ?? 0) >= $booking.numChildren;
+      return adultsFit && childrenFit;
+    });
+
+    if (capacityMatches.length === 0) {
+      availableVehicles = [];
+      booking.update((current) => ({ ...current, selectedVehicle: null, step: 2 }));
+      searchError = $locale === 'hr'
+        ? 'Nema vozila za odabrani broj putnika.'
+        : 'No vehicles match the selected number of passengers.';
+      loading = false;
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams({
+        vehicleIds: capacityMatches.map((vehicle) => vehicle.id).join(','),
+        pickupDate: $booking.pickupDate,
+        dropoffDate: $booking.dropoffDate
+      });
+      const response = await fetch(`/api/booking/availability?${params}`);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      const unavailable = new Set<string>(result.unavailableVehicleIds ?? []);
+      availableVehicles = capacityMatches.filter((vehicle) => !unavailable.has(vehicle.id));
+      if (availableVehicles.length === 0) {
+        searchError = $locale === 'hr'
+          ? 'Nema slobodnih vozila za odabrane datume.'
+          : 'No vehicles are available for the selected dates.';
+      }
+      if (
+        $booking.selectedVehicle &&
+        !availableVehicles.some((vehicle) => vehicle.id === $booking.selectedVehicle?.id)
+      ) {
+        booking.update((current) => ({ ...current, selectedVehicle: null, extras: {} }));
+      }
+    } catch {
+      availableVehicles = [];
+      searchError = $locale === 'hr'
+        ? 'Dostupnost trenutačno nije moguće provjeriti. Pokušajte ponovno.'
+        : 'Availability could not be checked. Please try again.';
+    }
     booking.update(b => ({ ...b, step: 2 }));
     loading = false;
+  }
+
+  function continueToReview() {
+    const details = $booking.driverDetails;
+    if (!details.firstName || !details.lastName || !details.email || !details.phone) {
+      driverError = $locale === 'hr'
+        ? 'Ispunite ime, prezime, email i telefon.'
+        : 'Enter your name, email, and phone number.';
+      return;
+    }
+    if (!isDriverOldEnough(details.dateOfBirth)) {
+      driverError = $locale === 'hr'
+        ? `Vozač na dan preuzimanja mora imati najmanje ${minDriverAge} godina.`
+        : `The driver must be at least ${minDriverAge} years old on pickup.`;
+      return;
+    }
+    driverError = '';
+    booking.update((current) => ({ ...current, step: 4, totalPrice }));
   }
 
   async function submitBooking() {
     if (!$booking.selectedVehicle) return;
     loading = true;
+    submitError = '';
     try {
       const res = await fetch('/api/booking/create', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...$booking, total_price: totalPrice, payment_method: paymentMethod }),
+        body: JSON.stringify({
+          ...$booking,
+          pricing: selectedPricing,
+          total_price: totalPrice,
+          payment_method: paymentMethod
+        }),
       });
       const data = await res.json();
       if (data.success) { resetBooking(); window.location.href = '/rezerviraj/success'; }
-    } catch (e) { console.error(e); } finally { loading = false; }
+      else {
+        submitError = data.error || ($locale === 'hr'
+          ? 'Rezervaciju nije moguće spremiti. Pokušajte ponovno.'
+          : 'The booking could not be saved. Please try again.');
+      }
+    } catch {
+      submitError = $locale === 'hr'
+        ? 'Rezervaciju nije moguće spremiti. Provjerite vezu i pokušajte ponovno.'
+        : 'The booking could not be saved. Check your connection and try again.';
+    } finally { loading = false; }
   }
 
   function prefillProfile(profile: Record<string, unknown>) {
@@ -157,13 +316,13 @@
   const driverFields = $derived($locale === 'hr' ? [
     { key: 'firstName', label: 'Ime', type: 'text' }, { key: 'lastName', label: 'Prezime', type: 'text' },
     { key: 'email', label: 'Email', type: 'email' }, { key: 'phone', label: 'Telefon', type: 'tel' },
-    { key: 'dateOfBirth', label: 'Datum rođenja', type: 'date' }, { key: 'licenseNumber', label: 'Broj vozačke dozvole', type: 'text' },
+    { key: 'dateOfBirth', label: `Datum rođenja (minimalno ${minDriverAge} godina)`, type: 'date' }, { key: 'licenseNumber', label: 'Broj vozačke dozvole', type: 'text' },
     { key: 'licenseCountry', label: 'Zemlja vozačke', type: 'text' }, { key: 'address', label: 'Adresa', type: 'text' },
     { key: 'city', label: 'Grad', type: 'text' }, { key: 'zip', label: 'Poštanski broj', type: 'text' }, { key: 'country', label: 'Država', type: 'text' },
   ] : [
     { key: 'firstName', label: 'First name', type: 'text' }, { key: 'lastName', label: 'Last name', type: 'text' },
     { key: 'email', label: 'Email', type: 'email' }, { key: 'phone', label: 'Phone', type: 'tel' },
-    { key: 'dateOfBirth', label: 'Date of birth', type: 'date' }, { key: 'licenseNumber', label: 'License number', type: 'text' },
+    { key: 'dateOfBirth', label: `Date of birth (minimum age ${minDriverAge})`, type: 'date' }, { key: 'licenseNumber', label: 'License number', type: 'text' },
     { key: 'licenseCountry', label: 'License country', type: 'text' }, { key: 'address', label: 'Address', type: 'text' },
     { key: 'city', label: 'City', type: 'text' }, { key: 'zip', label: 'ZIP', type: 'text' }, { key: 'country', label: 'Country', type: 'text' },
   ]);
@@ -199,13 +358,17 @@
         <!-- Sidebar -->
         <aside class="card p-6 h-fit text-[13px] text-[#6b7178] leading-relaxed">
           <p class="font-bold text-[#2b2b2b] mb-1">{$locale === 'hr' ? 'Vrijeme preuzimanja vozila' : 'Vehicle pickup hours'}</p>
-          <p>{$locale === 'hr' ? 'Ponedjeljak – Subota' : 'Monday – Saturday'}</p>
-          <p>Zagreb depot: 13:00–15:00</p>
-          <p class="mb-4">{$locale === 'hr' ? 'Ostale lokacije' : 'Other locations'}: 11:00–13:00</p>
+          <p class="mb-4">
+            {selectedPickupLocation
+              ? `${selectedPickupLocation.name}: ${selectedPickupLocation.pickup_window ?? '—'}`
+              : ($locale === 'hr' ? 'Odaberite lokaciju za prikaz vremena.' : 'Select a location to see its hours.')}
+          </p>
           <p class="font-bold text-[#2b2b2b] mb-1">{$locale === 'hr' ? 'Vrijeme povrata vozila' : 'Vehicle return hours'}</p>
-          <p>{$locale === 'hr' ? 'Ponedjeljak – Subota' : 'Monday – Saturday'}</p>
-          <p>Zagreb depot: 08:00–10:00</p>
-          <p class="mb-4">{$locale === 'hr' ? 'Ostale lokacije' : 'Other locations'}: 13:00–15:00</p>
+          <p class="mb-4">
+            {selectedDropoffLocation
+              ? `${selectedDropoffLocation.name}: ${selectedDropoffLocation.return_window ?? '—'}`
+              : ($locale === 'hr' ? 'Odaberite lokaciju za prikaz vremena.' : 'Select a location to see its hours.')}
+          </p>
           <p class="text-[12px] text-[#9aa0a8]">{$locale === 'hr' ? 'Preuzimanje i povrat vozila izvan definiranog vremenskog okvira naplaćuje se prema važećem cjeniku.' : 'Pickup and return outside the defined time window are charged per the current price list.'}</p>
         </aside>
 
@@ -243,17 +406,31 @@
             </div>
           </div>
 
-          <!-- Age -->
+          <!-- Travellers and trip plan -->
           <div class="mb-8">
-            <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#f5c518">{$locale === 'hr' ? 'Starost vozača' : 'Driver age'}</span>
-            <div class="border-t-2 pt-5" style="border-color:#f5c518">
-              <span class="field-label">{$locale === 'hr' ? 'Starost vozača' : 'Driver age'}</span>
-              <input type="number" min="21" max="99" class="field" bind:value={$booking.driverAge} />
+            <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#f5c518">{$locale === 'hr' ? 'Putnici i plan puta' : 'Travellers and trip plan'}</span>
+            <div class="border-t-2 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-color:#f5c518">
+              <div>
+                <span class="field-label">{$locale === 'hr' ? 'Broj odraslih' : 'Adults'}</span>
+                <input type="number" min="1" max="10" class="field" bind:value={$booking.numAdults} />
+              </div>
+              <div>
+                <span class="field-label">{$locale === 'hr' ? 'Broj djece' : 'Children'}</span>
+                <input type="number" min="0" max="10" class="field" bind:value={$booking.numChildren} />
+              </div>
+              <div>
+                <span class="field-label">{$locale === 'hr' ? 'Planirani kilometri' : 'Planned kilometres'}</span>
+                <input type="number" min="1" step="50" class="field" placeholder="npr. 1200" bind:value={$booking.plannedKm} />
+              </div>
+              <div>
+                <span class="field-label">{$locale === 'hr' ? 'Odredište / plan puta' : 'Destination / route'}</span>
+                <input type="text" class="field" placeholder={$locale === 'hr' ? 'npr. Istra i Kvarner' : 'e.g. Istria and Kvarner'} bind:value={$booking.destination} />
+              </div>
             </div>
           </div>
 
           <div class="flex justify-end">
-            <button onclick={searchVehicles} disabled={!$booking.pickupLocation || !$booking.pickupDate || !$booking.dropoffDate || loading} class="btn btn-primary px-8 py-3.5 disabled:opacity-50">
+            <button onclick={searchVehicles} disabled={!canSearch || loading} class="btn btn-primary px-8 py-3.5 disabled:opacity-50">
               {loading ? ($locale === 'hr' ? 'Učitavanje…' : 'Loading…') : ($locale === 'hr' ? 'Pretražite vozila' : 'Search vehicles')}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
@@ -275,6 +452,7 @@
           <!-- Vehicles: single column -->
           <div class="flex flex-col gap-4">
             {#each availableVehicles as vehicle}
+              {@const price = vehiclePricing.get(vehicle.id)}
               <button onclick={() => selectVehicle(vehicle)} class="card text-left overflow-hidden flex flex-row" style="border-color:{$booking.selectedVehicle?.id === vehicle.id ? '#f5c518' : '#ededf0'}">
                 <div class="w-40 sm:w-56 flex-shrink-0 overflow-hidden bg-[#f3f4f6]"><img src={vehicle.images?.[0]} alt={vehicle.name} class="w-full h-full object-cover" /></div>
                 <div class="p-5 flex-1 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_120px] items-center gap-4">
@@ -284,13 +462,21 @@
                   </div>
                   <div class="flex flex-col items-stretch gap-2 sm:text-right">
                     <div>
-                      <span class="block whitespace-nowrap text-xl font-bold tabular-nums text-[#2b2b2b]">{(vehicle.base_price_per_day ?? 0) * days} €</span>
-                      <span class="text-xs whitespace-nowrap text-[#9aa0a8]">({days} × {vehicle.base_price_per_day} €)</span>
+                      <span class="block whitespace-nowrap text-xl font-bold tabular-nums text-[#2b2b2b]">{formatMoney(price?.payable_total ?? 0)}</span>
+                      <span class="block text-xs text-[#9aa0a8]">{price?.season_name ?? ($locale === 'hr' ? 'Osnovna cijena' : 'Base price')}</span>
+                      {#if price?.min_nights_applied}
+                        <span class="block text-[10px] mt-1" style="color:#b5890a">{price.billable_nights} {$locale === 'hr' ? 'obračunatih noćenja' : 'billable nights'}</span>
+                      {/if}
                     </div>
                     <span class="btn btn-primary w-full px-4 py-2.5 text-[11px]">{$locale === 'hr' ? 'Odaberi' : 'Select'}</span>
                   </div>
                 </div>
               </button>
+            {:else}
+              <div class="card card-static p-8 text-center">
+                <p class="font-semibold text-[#2b2b2b]">{searchError || ($locale === 'hr' ? 'Nema dostupnih vozila.' : 'No vehicles available.')}</p>
+                <button onclick={() => booking.update((current) => ({ ...current, step: 1 }))} class="btn btn-ghost mt-5">{$locale === 'hr' ? 'Promijeni pretragu' : 'Change search'}</button>
+              </div>
             {/each}
           </div>
 
@@ -301,33 +487,55 @@
               {#if !$booking.selectedVehicle}
                 <p class="text-sm text-[#9aa0a8]">{$locale === 'hr' ? 'Odaberite vozilo za prikaz dodatne opreme.' : 'Select a vehicle to view extras.'}</p>
               {:else}
-                <div class="divide-y divide-[#ededf0]">
-                  {#each bookingExtras as extra}
-                    {@const qty = $booking.extras[extra.id] ?? 0}
-                    <div class="flex flex-col gap-2 py-3">
-                      <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium text-[#2b2b2b] flex-1">{$locale === 'hr' ? extra.name_hr : extra.name_en}</span>
-                        {#if extra.is_required}
-                          <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style="background:#fff7e0;color:#b5890a">{$locale === 'hr' ? 'Obavezno' : 'Required'}</span>
-                        {/if}
-                      </div>
-                      <div class="flex items-center justify-between">
-                        <span class="text-sm text-[#7a7f86]">{extra.price} €</span>
-                        {#if extra.max_qty > 1}
-                          <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
-                            <button onclick={() => setExtraQty(extra.id, qty - 1, extra.max_qty)} disabled={extra.is_required} class="px-3 py-1.5 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:opacity-40">−</button>
-                            <span class="px-3 text-sm font-semibold text-[#2b2b2b]">{qty}</span>
-                            <button onclick={() => setExtraQty(extra.id, qty + 1, extra.max_qty)} disabled={extra.is_required} class="px-3 py-1.5 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:opacity-40">+</button>
+                <div class="space-y-6">
+                  {#each extraGroups as group}
+                    <section>
+                      <h3 class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9099] mb-2">{$locale === 'hr' ? group.hr : group.en}</h3>
+                      <div class="divide-y divide-[#ededf0]">
+                        {#each group.extras as extra}
+                          {@const qty = extra.is_required ? Math.max(1, $booking.extras[extra.id] ?? 0) : ($booking.extras[extra.id] ?? 0)}
+                          <div class="flex flex-col gap-2 py-3">
+                            <div class="flex items-start gap-2">
+                              <span class="text-sm font-medium text-[#2b2b2b] flex-1">{$locale === 'hr' ? extra.name_hr : (extra.name_en || extra.name_hr)}</span>
+                              <button
+                                type="button"
+                                class="w-5 h-5 flex-shrink-0 rounded-full text-[12px] font-bold cursor-help"
+                                style="background:#f3f4f6;color:#6b7178"
+                                title={extra.description_hr ?? ''}
+                                aria-label={$locale === 'hr' ? `Informacije: ${extra.name_hr}` : `Information: ${extra.name_en || extra.name_hr}`}
+                                aria-expanded={openExtraInfo === extra.id}
+                                onclick={() => openExtraInfo = openExtraInfo === extra.id ? null : extra.id}
+                              >ⓘ</button>
+                              {#if extra.is_required}
+                                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style="background:#fff7e0;color:#b5890a">{$locale === 'hr' ? 'Obavezno' : 'Required'}</span>
+                              {/if}
+                            </div>
+                            {#if openExtraInfo === extra.id}
+                              <p class="text-xs leading-relaxed text-[#7a7f86] p-3 rounded-md" style="background:#f6f7f9">{extra.description_hr}</p>
+                            {/if}
+                            <div class="flex items-center justify-between">
+                              <span class="text-sm text-[#7a7f86]">
+                                {formatMoney(extra.price)}
+                                {#if extra.price_type === 'per_day'}<span class="text-xs">/{$locale === 'hr' ? 'dan' : 'day'}</span>{/if}
+                              </span>
+                              {#if extra.max_qty > 1}
+                                <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
+                                  <button onclick={() => setExtraQty(extra.id, qty - 1, extra.max_qty)} disabled={extra.is_required} class="px-3 py-1.5 font-bold cursor-pointer text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-40">−</button>
+                                  <span class="px-3 text-sm font-semibold text-[#2b2b2b]">{qty}</span>
+                                  <button onclick={() => setExtraQty(extra.id, qty + 1, extra.max_qty)} disabled={extra.is_required} class="px-3 py-1.5 font-bold cursor-pointer text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-40">+</button>
+                                </div>
+                              {:else}
+                                <button onclick={() => setExtraQty(extra.id, qty > 0 ? 0 : 1, extra.max_qty)} disabled={extra.is_required}
+                                  class="px-4 py-1.5 rounded-md text-[11px] font-bold uppercase cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                                  style="{qty > 0 ? 'background:#f5c518;color:#fff' : 'background:#f6f7f9;color:#5b6168'}">
+                                  {qty > 0 ? ($locale === 'hr' ? 'Odabrano' : 'Selected') : ($locale === 'hr' ? 'Dodaj' : 'Add')}
+                                </button>
+                              {/if}
+                            </div>
                           </div>
-                        {:else}
-                          <button onclick={() => setExtraQty(extra.id, qty > 0 ? 0 : 1, extra.max_qty)} disabled={extra.is_required}
-                            class="px-4 py-1.5 rounded-md text-[11px] font-bold uppercase cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-                            style="{qty > 0 ? 'background:#f5c518;color:#fff' : 'background:#f6f7f9;color:#5b6168'}">
-                            {qty > 0 ? ($locale === 'hr' ? 'Odabrano' : 'Selected') : ($locale === 'hr' ? 'Dodaj' : 'Add')}
-                          </button>
-                        {/if}
+                        {/each}
                       </div>
-                    </div>
+                    </section>
                   {/each}
                 </div>
               {/if}
@@ -336,21 +544,35 @@
             {#if $booking.selectedVehicle}
               <div class="card p-6">
                 <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Sažetak' : 'Summary'}</h2>
+                {#if selectedPricing.season_name}
+                  <p class="text-xs mb-4 text-[#8b9099]">
+                    {$locale === 'hr' ? 'Sezona' : 'Season'}:
+                    <strong class="text-[#5b6168]">{selectedPricing.season_name}</strong>
+                  </p>
+                {/if}
+                {#if selectedPricing.min_nights_note}
+                  <p class="text-xs leading-relaxed p-3 rounded-md mb-4" style="background:#fff7e0;color:#8a6500">{selectedPricing.min_nights_note}</p>
+                {/if}
                 <div class="space-y-2 mb-4">
-                  <div class="flex justify-between text-sm">
-                    <span class="text-[#7a7f86]">{$locale === 'hr' ? 'Vozilo' : 'Vehicle'} ({$booking.selectedVehicle.base_price_per_day} € × {days})</span>
-                    <span class="text-[#2b2b2b]">{vehicleSubtotal} €</span>
-                  </div>
-                  {#each selectedExtras as { extra, qty }}
-                    <div class="flex justify-between text-sm">
-                      <span class="text-[#7a7f86]">{$locale === 'hr' ? extra.name_hr : extra.name_en} × {qty}</span>
-                      <span class="text-[#2b2b2b]">{extra.price * qty} €</span>
+                  {#each selectedPricing.line_items as item}
+                    <div class="flex justify-between gap-4 text-sm">
+                      <span class="text-[#7a7f86] leading-snug">{item.label}</span>
+                      <span class="text-[#2b2b2b] whitespace-nowrap">{formatMoney(item.amount)}</span>
                     </div>
                   {/each}
                 </div>
+                {#if selectedPricing.refundable_deposit > 0}
+                  <div class="flex justify-between gap-4 text-sm py-3 border-t border-[#ededf0]">
+                    <span class="text-[#7a7f86]">{$locale === 'hr' ? 'Povratni polog (ne plaća se sada)' : 'Refundable deposit (not charged now)'}</span>
+                    <span class="font-semibold whitespace-nowrap text-[#2b2b2b]">{formatMoney(selectedPricing.refundable_deposit)}</span>
+                  </div>
+                {/if}
+                {#if selectedPricing.extra_km_note}
+                  <p class="text-xs leading-relaxed p-3 rounded-md mb-4" style="background:#f6f7f9;color:#6b7178">{selectedPricing.extra_km_note}</p>
+                {/if}
                 <div class="pt-3 flex justify-between font-bold text-lg border-t border-[#ededf0] mb-5">
-                  <span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span>
-                  <span style="color:#b5890a">{totalPrice} €</span>
+                  <span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Za plaćanje' : 'Payable total'}</span>
+                  <span style="color:#b5890a">{formatMoney(totalPrice)}</span>
                 </div>
                 <button onclick={() => booking.update(b => ({ ...b, step: 3 }))} class="btn btn-primary w-full">{$locale === 'hr' ? 'Nastavi' : 'Continue'} →</button>
               </div>
@@ -368,7 +590,7 @@
         {#if $booking.selectedVehicle}
           <div class="flex items-center gap-4 mb-7 p-4 rounded-md bg-[#f6f7f9]">
             <img src={$booking.selectedVehicle.images?.[0]} alt="" class="w-20 h-14 object-cover rounded-md" />
-            <div><p class="font-semibold text-[#2b2b2b]">{$booking.selectedVehicle.name}</p><p class="text-sm text-[#7a7f86]">{totalPrice} € {$locale === 'hr' ? 'ukupno' : 'total'} ({days} {$locale === 'hr' ? 'dana' : 'days'})</p></div>
+            <div><p class="font-semibold text-[#2b2b2b]">{$booking.selectedVehicle.name}</p><p class="text-sm text-[#7a7f86]">{formatMoney(totalPrice)} {$locale === 'hr' ? 'ukupno' : 'total'} ({days} {$locale === 'hr' ? 'dana' : 'days'})</p></div>
           </div>
         {/if}
         <div class="rounded-lg p-5 mb-7 border border-[#e2e4e8]" style="background:#fafbfc">
@@ -408,13 +630,21 @@
           {#each driverFields as field}
             <div class="{field.key === 'address' || field.key === 'email' ? 'md:col-span-2' : ''}">
               <span class="field-label">{field.label}</span>
-              <input type={field.type} class="field" bind:value={$booking.driverDetails[field.key as keyof typeof $booking.driverDetails]} />
+              <input
+                type={field.type}
+                class="field"
+                max={field.key === 'dateOfBirth' ? maxDriverDob : undefined}
+                bind:value={$booking.driverDetails[field.key as keyof typeof $booking.driverDetails]}
+              />
             </div>
           {/each}
         </div>
+        {#if driverError}
+          <p class="text-sm mt-5 p-3 rounded-md" style="background:#fdecec;color:#b42318">{driverError}</p>
+        {/if}
         <div class="flex gap-4 mt-8">
           <button onclick={() => booking.update(b => ({ ...b, step: 2 }))} class="btn btn-ghost px-6 py-3">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
-          <button onclick={() => booking.update(b => ({ ...b, step: 4 }))} class="btn btn-primary flex-1">{$locale === 'hr' ? 'Nastavi' : 'Continue'} →</button>
+          <button onclick={continueToReview} class="btn btn-primary flex-1">{$locale === 'hr' ? 'Nastavi' : 'Continue'} →</button>
         </div>
       </div>
     {/if}
@@ -433,13 +663,23 @@
           <div class="grid grid-cols-2 gap-4 mb-6">
             <div><p class="field-label">{$locale === 'hr' ? 'Preuzimanje' : 'Pickup'}</p><p class="text-sm text-[#2b2b2b]">{$booking.pickupDate} · {$booking.pickupTime}</p><p class="text-sm font-medium" style="color:#b5890a">{$booking.pickupLocation}</p></div>
             <div><p class="field-label">{$locale === 'hr' ? 'Povrat' : 'Return'}</p><p class="text-sm text-[#2b2b2b]">{$booking.dropoffDate} · {$booking.dropoffTime}</p><p class="text-sm font-medium" style="color:#b5890a">{$booking.dropoffLocation || $booking.pickupLocation}</p></div>
+            <div><p class="field-label">{$locale === 'hr' ? 'Putnici' : 'Travellers'}</p><p class="text-sm text-[#2b2b2b]">{$booking.numAdults} {$locale === 'hr' ? 'odraslih' : 'adults'} · {$booking.numChildren} {$locale === 'hr' ? 'djece' : 'children'}</p></div>
+            <div><p class="field-label">{$locale === 'hr' ? 'Plan puta' : 'Trip plan'}</p><p class="text-sm text-[#2b2b2b]">{$booking.destination} · {$booking.plannedKm} km</p></div>
           </div>
           <div class="space-y-2 mb-6 pb-6 border-b border-[#ededf0]">
-            <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Vozilo' : 'Vehicle'}: {$booking.selectedVehicle?.base_price_per_day} € × {days} {$locale === 'hr' ? 'dana' : 'days'}</span><span class="text-[#2b2b2b]">{vehicleSubtotal} €</span></div>
-            {#each selectedExtras as { extra, qty }}
-              <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? extra.name_hr : extra.name_en} × {qty}</span><span class="text-[#2b2b2b]">{extra.price * qty} €</span></div>
+            {#each selectedPricing.line_items as item}
+              <div class="flex justify-between gap-4 text-sm">
+                <span class="text-[#7a7f86]">{item.label}</span>
+                <span class="text-[#2b2b2b] whitespace-nowrap">{formatMoney(item.amount)}</span>
+              </div>
             {/each}
-            <div class="flex justify-between font-bold text-lg pt-2"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span><span style="color:#b5890a">{totalPrice} €</span></div>
+            {#if selectedPricing.refundable_deposit > 0}
+              <div class="flex justify-between gap-4 text-sm pt-2">
+                <span class="text-[#7a7f86]">{$locale === 'hr' ? 'Povratni polog (odvojeno)' : 'Refundable deposit (separate)'}</span>
+                <span class="text-[#2b2b2b] whitespace-nowrap">{formatMoney(selectedPricing.refundable_deposit)}</span>
+              </div>
+            {/if}
+            <div class="flex justify-between font-bold text-lg pt-2"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Za plaćanje' : 'Payable total'}</span><span style="color:#b5890a">{formatMoney(totalPrice)}</span></div>
           </div>
           <p class="text-sm text-[#6b7178]"><b class="text-[#2b2b2b]">{$booking.driverDetails.firstName} {$booking.driverDetails.lastName}</b> · {$booking.driverDetails.email} · {$booking.driverDetails.phone}</p>
         </div>
@@ -451,9 +691,12 @@
             <button onclick={() => paymentMethod = 'paypal'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'paypal' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">PayPal</p><p class="text-xs text-[#9aa0a8] mt-1">PayPal {$locale === 'hr' ? 'račun' : 'account'}</p></button>
           </div>
           <div class="rounded-md p-4 mb-6 bg-[#f6f7f9] border border-[#ededf0]"><p class="text-sm text-center text-[#7a7f86]">{$locale === 'hr' ? 'Plaćanje se aktivira nakon postavljanja API ključeva.' : 'Payment activates once API keys are configured.'}</p></div>
+          {#if submitError}
+            <p class="text-sm mb-5 p-3 rounded-md" style="background:#fdecec;color:#b42318">{submitError}</p>
+          {/if}
           <div class="flex gap-4">
             <button onclick={() => booking.update(b => ({ ...b, step: 3 }))} class="btn btn-ghost px-6 py-3">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
-            <button onclick={submitBooking} disabled={loading} class="btn btn-primary flex-1 disabled:opacity-50">{loading ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…') : `${$locale === 'hr' ? 'Potvrdi rezervaciju' : 'Confirm booking'} — ${totalPrice} €`}</button>
+            <button onclick={submitBooking} disabled={loading} class="btn btn-primary flex-1 disabled:opacity-50">{loading ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…') : `${$locale === 'hr' ? 'Potvrdi rezervaciju' : 'Confirm booking'} — ${formatMoney(totalPrice)}`}</button>
           </div>
         </div>
       </div>

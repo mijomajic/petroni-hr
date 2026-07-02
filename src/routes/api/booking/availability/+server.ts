@@ -1,37 +1,36 @@
 import { json } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
-import { env as pub } from '$env/dynamic/public';
-import { env as priv } from '$env/dynamic/private';
+import { getUnavailableVehicleIds } from '$lib/pricing.server';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url }) => {
   const vehicleId = url.searchParams.get('vehicleId');
+  const vehicleIds = (url.searchParams.get('vehicleIds') ?? vehicleId ?? '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean);
   const pickupDate = url.searchParams.get('pickupDate');
   const dropoffDate = url.searchParams.get('dropoffDate');
 
-  if (!vehicleId || !pickupDate || !dropoffDate) {
-    return json({ available: false, error: 'Missing parameters' }, { status: 400 });
+  if (
+    vehicleIds.length === 0 ||
+    !pickupDate ||
+    !dropoffDate ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(pickupDate) ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(dropoffDate) ||
+    dropoffDate <= pickupDate
+  ) {
+    return json({ available: false, error: 'Neispravni parametri dostupnosti.' }, { status: 400 });
   }
 
-  const supabase = createClient(pub.PUBLIC_SUPABASE_URL ?? '', priv.SUPABASE_SERVICE_KEY ?? '');
+  let unavailableVehicleIds: string[];
+  try {
+    unavailableVehicleIds = await getUnavailableVehicleIds(vehicleIds, pickupDate, dropoffDate);
+  } catch {
+    return json({ available: false, error: 'Provjera dostupnosti nije uspjela.' }, { status: 500 });
+  }
 
-  const [{ data: bookingConflicts }, { data: blockedConflicts }] = await Promise.all([
-    supabase
-      .from('bookings')
-      .select('id')
-      .eq('vehicle_id', vehicleId)
-      .neq('status', 'cancelled')
-      .lte('pickup_date', dropoffDate)
-      .gte('dropoff_date', pickupDate),
-    supabase
-      .from('vehicle_blocked_dates')
-      .select('id')
-      .eq('vehicle_id', vehicleId)
-      .lte('date_from', dropoffDate)
-      .gte('date_to', pickupDate),
-  ]);
-
-  const available = (bookingConflicts?.length ?? 0) === 0 && (blockedConflicts?.length ?? 0) === 0;
-
-  return json({ available });
+  return json({
+    available: vehicleId ? !unavailableVehicleIds.includes(vehicleId) : undefined,
+    unavailableVehicleIds
+  });
 };

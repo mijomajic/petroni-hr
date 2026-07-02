@@ -1,44 +1,153 @@
 import { json } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/supabase.server';
+import { calculatePricing } from '$lib/pricing';
+import { getUnavailableVehicleIds, loadPricingConfig } from '$lib/pricing.server';
 import type { RequestHandler } from './$types';
+
+function ageOnDate(dateOfBirth: string, referenceDate: string): number {
+  const birth = new Date(`${dateOfBirth}T00:00:00Z`);
+  const reference = new Date(`${referenceDate}T00:00:00Z`);
+  let age = reference.getUTCFullYear() - birth.getUTCFullYear();
+  const beforeBirthday =
+    reference.getUTCMonth() < birth.getUTCMonth() ||
+    (reference.getUTCMonth() === birth.getUTCMonth() &&
+      reference.getUTCDate() < birth.getUTCDate());
+  if (beforeBirthday) age -= 1;
+  return age;
+}
+
+function isValidIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+function isValidTime(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{2}:\d{2}$/.test(value)) return false;
+  const [hours, minutes] = value.split(':').map(Number);
+  return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
+}
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   const body = await request.json();
   const { user } = await locals.safeGetSession();
   const driver = body.driverDetails ?? {};
-  const totalPrice = Number(body.total_price);
+  const vehicleId = String(body.selectedVehicle?.id ?? '');
+  const pickupDate = String(body.pickupDate ?? '');
+  const dropoffDate = String(body.dropoffDate ?? '');
+  const dateOfBirth = String(driver.dateOfBirth ?? '');
+  const rawNumAdults = Number(body.numAdults);
+  const rawNumChildren = Number(body.numChildren);
+  const rawPlannedKm = Number(body.plannedKm);
+  const numAdults = Math.floor(rawNumAdults);
+  const numChildren = Math.floor(rawNumChildren);
+  const plannedKm = Math.floor(rawPlannedKm);
+  const destination = String(body.destination ?? '').trim();
 
   if (
-    !body.selectedVehicle?.id ||
+    !vehicleId ||
     !body.pickupLocation ||
-    !body.pickupDate ||
-    !body.dropoffDate ||
-    !body.pickupTime ||
-    !body.dropoffTime ||
+    !isValidIsoDate(pickupDate) ||
+    !isValidIsoDate(dropoffDate) ||
+    dropoffDate <= pickupDate ||
+    !isValidTime(body.pickupTime) ||
+    !isValidTime(body.dropoffTime) ||
+    !destination ||
+    !Number.isFinite(rawNumAdults) ||
+    !Number.isFinite(rawNumChildren) ||
+    !Number.isFinite(rawPlannedKm) ||
+    numAdults < 1 ||
+    numChildren < 0 ||
+    plannedKm <= 0 ||
     !driver.firstName ||
+    !driver.lastName ||
     !driver.email ||
     !driver.phone ||
-    !Number.isFinite(totalPrice) ||
-    totalPrice < 0
+    !isValidIsoDate(dateOfBirth)
   ) {
     return json({ success: false, error: 'Nedostaju obavezni podaci rezervacije.' }, { status: 400 });
+  }
+
+  const [{ data: vehicle, error: vehicleError }, pricingData] = await Promise.all([
+    supabaseAdmin.from('vehicles').select('*').eq('id', vehicleId).eq('type', 'rental').single(),
+    loadPricingConfig()
+  ]);
+
+  if (vehicleError || !vehicle || !vehicle.is_available) {
+    return json({ success: false, error: 'Odabrano vozilo više nije dostupno.' }, { status: 409 });
+  }
+  const pickupLocation = pricingData.config.locations.find(
+    (location) => location.name === body.pickupLocation
+  );
+  const dropoffLocationName = String(body.dropoffLocation || body.pickupLocation);
+  const dropoffLocation = pricingData.config.locations.find(
+    (location) => location.name === dropoffLocationName
+  );
+  if (!pickupLocation || !dropoffLocation) {
+    return json({ success: false, error: 'Odabrana lokacija nije valjana.' }, { status: 400 });
+  }
+  if (
+    (vehicle.max_adults ?? vehicle.seats ?? 0) < numAdults ||
+    (vehicle.max_children ?? 0) < numChildren
+  ) {
+    return json({ success: false, error: 'Odabrano vozilo nema dovoljan kapacitet.' }, { status: 400 });
+  }
+  if (ageOnDate(dateOfBirth, pickupDate) < pricingData.minDriverAge) {
+    return json(
+      {
+        success: false,
+        error: `Vozač na dan preuzimanja mora imati najmanje ${pricingData.minDriverAge} godina.`
+      },
+      { status: 400 }
+    );
+  }
+
+  const unavailableIds = await getUnavailableVehicleIds([vehicleId], pickupDate, dropoffDate);
+  if (unavailableIds.includes(vehicleId)) {
+    return json(
+      { success: false, error: 'Vozilo je u međuvremenu rezervirano za odabrane datume.' },
+      { status: 409 }
+    );
+  }
+
+  const pricing = calculatePricing(
+    {
+      vehicle,
+      pickupDate,
+      dropoffDate,
+      pickupTime: body.pickupTime,
+      dropoffTime: body.dropoffTime,
+      pickupLocation: pickupLocation.name,
+      dropoffLocation: dropoffLocation.name,
+      plannedKm,
+      selectedExtras: body.extras ?? {}
+    },
+    pricingData.config
+  );
+
+  if (pricing.nights <= 0 || pricing.payable_total < 0) {
+    return json({ success: false, error: 'Cijenu rezervacije nije moguće izračunati.' }, { status: 400 });
   }
 
   const { data, error } = await supabaseAdmin.from('bookings').insert({
     confirmation_number: `PET-${Date.now().toString(36).toUpperCase()}`,
     user_id: user?.id ?? null,
-    vehicle_id: body.selectedVehicle?.id,
-    pickup_location: body.pickupLocation,
-    dropoff_location: body.dropoffLocation || body.pickupLocation,
-    pickup_date: body.pickupDate,
-    dropoff_date: body.dropoffDate,
+    vehicle_id: vehicleId,
+    pickup_location: pickupLocation.name,
+    dropoff_location: dropoffLocation.name,
+    pickup_date: pickupDate,
+    dropoff_date: dropoffDate,
     pickup_time: body.pickupTime,
     dropoff_time: body.dropoffTime,
+    num_adults: numAdults,
+    num_children: numChildren,
+    planned_km: plannedKm,
+    destination,
     driver_name: driver.firstName,
     driver_last_name: driver.lastName,
     driver_email: driver.email,
     driver_phone: driver.phone,
-    driver_dob: driver.dateOfBirth || null,
+    driver_dob: dateOfBirth,
     driver_license: driver.licenseNumber || null,
     driver_license_country: driver.licenseCountry || null,
     billing: {
@@ -47,14 +156,36 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       zip: driver.zip || '',
       country: driver.country || ''
     },
-    price_breakdown: { extras: body.extras ?? {} },
-    total_price: totalPrice,
+    notes: pricing.extra_km_note,
+    price_breakdown: pricing,
+    extras_total: pricing.extras_total,
+    fees_total: pricing.fees_total,
+    total_price: pricing.payable_total,
     status: 'pending',
-    payment_method: body.payment_method ?? null,
+    payment_method: body.payment_method ?? null
   }).select().single();
 
   if (error) {
     return json({ success: false, error: error.message }, { status: 400 });
+  }
+
+  if (pricing.extra_selections.length > 0) {
+    const { error: selectionsError } = await supabaseAdmin
+      .from('booking_extra_selections')
+      .insert(
+        pricing.extra_selections.map((selection) => ({
+          booking_id: data.id,
+          extra_id: selection.extra_id,
+          qty: selection.qty,
+          unit_price: selection.unit_price,
+          total_price: selection.total_price
+        }))
+      );
+
+    if (selectionsError) {
+      await supabaseAdmin.from('bookings').delete().eq('id', data.id);
+      return json({ success: false, error: selectionsError.message }, { status: 400 });
+    }
   }
 
   return json({ success: true, booking: data });

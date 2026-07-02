@@ -10,7 +10,10 @@ export type BookingState = {
   dropoffDate: string;
   pickupTime: string;
   dropoffTime: string;
-  driverAge: number;
+  numAdults: number;
+  numChildren: number;
+  plannedKm: number;
+  destination: string;
   selectedVehicle: Vehicle | null;
   driverDetails: {
     firstName: string;
@@ -37,7 +40,10 @@ const defaultState: BookingState = {
   dropoffDate: '',
   pickupTime: '10:00',
   dropoffTime: '10:00',
-  driverAge: 25,
+  numAdults: 2,
+  numChildren: 0,
+  plannedKm: 0,
+  destination: '',
   selectedVehicle: null,
   driverDetails: {
     firstName: '',
@@ -56,9 +62,18 @@ const defaultState: BookingState = {
   totalPrice: 0,
 };
 
-const initial: BookingState = browser
-  ? JSON.parse(sessionStorage.getItem('petroni_booking') || JSON.stringify(defaultState))
-  : defaultState;
+const stored: Partial<BookingState> = browser
+  ? JSON.parse(sessionStorage.getItem('petroni_booking') || '{}')
+  : {};
+
+const initial: BookingState = {
+  ...defaultState,
+  ...stored,
+  driverDetails: {
+    ...defaultState.driverDetails,
+    ...(stored.driverDetails ?? {})
+  }
+};
 
 export const booking = writable<BookingState>(initial);
 
@@ -69,5 +84,9 @@ if (browser) {
 }
 
 export function resetBooking() {
-  booking.set({ ...defaultState });
+  booking.set({
+    ...defaultState,
+    driverDetails: { ...defaultState.driverDetails },
+    extras: {}
+  });
 }
