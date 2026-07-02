@@ -49,6 +49,8 @@
   let authPassword = $state('');
   let authFirstName = $state('');
   let authLastName = $state('');
+  let authPhone = $state('');
+  let authPasswordConfirm = $state('');
   let authError = $state('');
   let authMessage = $state('');
   let authLoading = $state(false);
@@ -269,8 +271,20 @@
         authMessage = 'Prijavljeni ste. Podaci vozača su popunjeni iz Vašeg profila.';
       }
     } else {
-      if (!authFirstName || !authLastName || authPassword.length < 8) {
-        authError = 'Unesite ime i prezime te lozinku od najmanje 8 znakova.';
+      if (
+        !authFirstName.trim() ||
+        !authLastName.trim() ||
+        !authEmail.trim() ||
+        !authPhone.trim() ||
+        authPassword.length < 8 ||
+        !authPasswordConfirm
+      ) {
+        authError = 'Ispunite sva obavezna polja. Lozinka mora imati najmanje 8 znakova.';
+        authLoading = false;
+        return;
+      }
+      if (authPassword !== authPasswordConfirm) {
+        authError = 'Lozinke se ne podudaraju.';
         authLoading = false;
         return;
       }
@@ -280,10 +294,10 @@
         options: {
           emailRedirectTo: `${window.location.origin}/auth/confirm?next=/rezerviraj`,
           data: {
-            first_name: authFirstName,
-            last_name: authLastName,
-            full_name: `${authFirstName} ${authLastName}`,
-            phone: '',
+            first_name: authFirstName.trim(),
+            last_name: authLastName.trim(),
+            full_name: `${authFirstName.trim()} ${authLastName.trim()}`,
+            phone: authPhone.trim(),
             address: '',
             city: '',
             zip: '',
@@ -609,16 +623,31 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               {#if authMode === 'register'}
-                <div><span class="field-label">Ime</span><input class="field" bind:value={authFirstName} autocomplete="given-name" /></div>
-                <div><span class="field-label">Prezime</span><input class="field" bind:value={authLastName} autocomplete="family-name" /></div>
+                <div><label class="field-label" for="booking_auth_first_name">Ime *</label><input id="booking_auth_first_name" class="field" bind:value={authFirstName} autocomplete="given-name" required /></div>
+                <div><label class="field-label" for="booking_auth_last_name">Prezime *</label><input id="booking_auth_last_name" class="field" bind:value={authLastName} autocomplete="family-name" required /></div>
               {/if}
-              <div class={authMode === 'login' ? '' : 'md:col-span-1'}><span class="field-label">Email</span><input type="email" class="field" bind:value={authEmail} autocomplete="email" /></div>
-              <div><span class="field-label">Lozinka</span><input type="password" class="field" bind:value={authPassword} autocomplete={authMode === 'login' ? 'current-password' : 'new-password'} /></div>
+              <div class={authMode === 'login' ? '' : 'md:col-span-1'}><label class="field-label" for="booking_auth_email">Email *</label><input id="booking_auth_email" type="email" class="field" bind:value={authEmail} autocomplete="email" required /></div>
+              {#if authMode === 'register'}
+                <div><label class="field-label" for="booking_auth_phone">Telefon *</label><input id="booking_auth_phone" type="tel" class="field" bind:value={authPhone} autocomplete="tel" required /></div>
+              {/if}
+              <div>
+                <label class="field-label" for="booking_auth_password">Lozinka *</label>
+                <input id="booking_auth_password" type="password" class="field" bind:value={authPassword} autocomplete={authMode === 'login' ? 'current-password' : 'new-password'} minlength={authMode === 'register' ? 8 : undefined} required />
+                {#if authMode === 'register'}<p class="text-xs text-[#8b9099] mt-2">Najmanje 8 znakova.</p>{/if}
+              </div>
+              {#if authMode === 'register'}
+                <div><label class="field-label" for="booking_auth_password_confirm">Ponovite lozinku *</label><input id="booking_auth_password_confirm" type="password" class="field" bind:value={authPasswordConfirm} autocomplete="new-password" minlength="8" required /></div>
+              {/if}
             </div>
             {#if authError}<p class="text-sm mt-4" style="color:#b42318">{authError}</p>{/if}
             {#if authMessage}<p class="text-sm mt-4" style="color:#067647">{authMessage}</p>{/if}
             <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-5">
-              <button type="button" onclick={authenticateDuringBooking} disabled={authLoading || !authEmail || !authPassword} class="btn btn-primary disabled:opacity-50">
+              <button
+                type="button"
+                onclick={authenticateDuringBooking}
+                disabled={authLoading || !authEmail || !authPassword || (authMode === 'register' && (!authFirstName || !authLastName || !authPhone || !authPasswordConfirm))}
+                class="btn btn-primary disabled:opacity-50"
+              >
                 {authLoading ? 'Molimo pričekajte…' : (authMode === 'login' ? 'Prijavi se' : 'Izradi račun')}
               </button>
               <p class="text-xs text-[#8b9099]">Račun nije obavezan — rezervaciju možete nastaviti kao gost.</p>

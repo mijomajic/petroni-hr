@@ -42,12 +42,13 @@
                 <input id="email" name="email" type="email" class="field" autocomplete="email" value={form?.values?.email ?? ''} required />
               </div>
               <div>
-                <label class="field-label" for="phone">Telefon</label>
-                <input id="phone" name="phone" type="tel" class="field" autocomplete="tel" value={form?.values?.phone ?? ''} />
+                <label class="field-label" for="phone">Telefon *</label>
+                <input id="phone" name="phone" type="tel" class="field" autocomplete="tel" value={form?.values?.phone ?? ''} required />
               </div>
               <div>
                 <label class="field-label" for="password">Lozinka *</label>
                 <input id="password" name="password" type="password" class="field" autocomplete="new-password" minlength="8" required />
+                <p class="text-xs text-[#8b9099] mt-2">Najmanje 8 znakova.</p>
               </div>
               <div>
                 <label class="field-label" for="password_confirm">Ponovite lozinku *</label>

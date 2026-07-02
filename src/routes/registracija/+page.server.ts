@@ -24,7 +24,7 @@ export const actions: Actions = {
     const next = safeNext(form.get('next'));
     const values = { firstName, lastName, email, phone };
 
-    if (!firstName || !lastName || !email || !password) {
+    if (!firstName || !lastName || !email || !phone || !password || !passwordConfirm) {
       return fail(400, { error: 'Ispunite sva obavezna polja.', values });
     }
     if (password.length < 8) {
