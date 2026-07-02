@@ -264,27 +264,30 @@
 
     <!-- Step 2 -->
     {#if $booking.step === 2}
-      <div class="max-w-5xl mx-auto space-y-6">
+      <div class="max-w-6xl mx-auto space-y-6">
         {#if days > 0}
           <div class="card p-4 flex items-center gap-3 text-sm" style="background:#fffaf0">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span class="text-[#6b7178]"><b class="text-[#2b2b2b]">{$booking.pickupDate}</b> → <b class="text-[#2b2b2b]">{$booking.dropoffDate}</b> <span style="color:#b5890a" class="font-semibold">({days} {$locale === 'hr' ? (days === 1 ? 'dan' : 'dana') : 'days'})</span></span>
           </div>
         {/if}
-        <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6">
           <!-- Vehicles: single column -->
           <div class="flex flex-col gap-4">
             {#each availableVehicles as vehicle}
               <button onclick={() => selectVehicle(vehicle)} class="card text-left overflow-hidden flex flex-row" style="border-color:{$booking.selectedVehicle?.id === vehicle.id ? '#f5c518' : '#ededf0'}">
                 <div class="w-40 sm:w-56 flex-shrink-0 overflow-hidden bg-[#f3f4f6]"><img src={vehicle.images?.[0]} alt={vehicle.name} class="w-full h-full object-cover" /></div>
-                <div class="p-5 flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="p-5 flex-1 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_120px] items-center gap-4">
                   <div>
                     <h3 class="font-semibold text-[#2b2b2b] mb-1">{vehicle.name}</h3>
                     <p class="text-xs text-[#9aa0a8]">{vehicle.category} · {vehicle.seats} {$locale === 'hr' ? 'sjedala' : 'seats'}</p>
                   </div>
-                  <div class="flex items-center gap-4">
-                    <div class="text-right"><span class="text-xl font-bold text-[#2b2b2b]">{(vehicle.base_price_per_day ?? 0) * days} €</span> <span class="text-xs text-[#9aa0a8] block">({days} × {vehicle.base_price_per_day} €)</span></div>
-                    <span class="btn btn-primary px-4 py-2 text-[11px] flex-shrink-0">{$locale === 'hr' ? 'Odaberi' : 'Select'}</span>
+                  <div class="flex flex-col items-stretch gap-2 sm:text-right">
+                    <div>
+                      <span class="block whitespace-nowrap text-xl font-bold tabular-nums text-[#2b2b2b]">{(vehicle.base_price_per_day ?? 0) * days} €</span>
+                      <span class="text-xs whitespace-nowrap text-[#9aa0a8]">({days} × {vehicle.base_price_per_day} €)</span>
+                    </div>
+                    <span class="btn btn-primary w-full px-4 py-2.5 text-[11px]">{$locale === 'hr' ? 'Odaberi' : 'Select'}</span>
                   </div>
                 </div>
               </button>
@@ -318,7 +321,7 @@
                           </div>
                         {:else}
                           <button onclick={() => setExtraQty(extra.id, qty > 0 ? 0 : 1, extra.max_qty)} disabled={extra.is_required}
-                            class="px-4 py-1.5 rounded-md text-[11px] font-bold uppercase disabled:opacity-60"
+                            class="px-4 py-1.5 rounded-md text-[11px] font-bold uppercase cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                             style="{qty > 0 ? 'background:#f5c518;color:#fff' : 'background:#f6f7f9;color:#5b6168'}">
                             {qty > 0 ? ($locale === 'hr' ? 'Odabrano' : 'Selected') : ($locale === 'hr' ? 'Dodaj' : 'Add')}
                           </button>
@@ -441,7 +444,7 @@
           <p class="text-sm text-[#6b7178]"><b class="text-[#2b2b2b]">{$booking.driverDetails.firstName} {$booking.driverDetails.lastName}</b> · {$booking.driverDetails.email} · {$booking.driverDetails.phone}</p>
         </div>
 
-        <div class="card p-6 md:p-8">
+        <div class="card card-static p-6 md:p-8">
           <h2 class="text-lg font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Način plaćanja' : 'Payment method'}</h2>
           <div class="grid grid-cols-2 gap-4 mb-6">
             <button onclick={() => paymentMethod = 'stripe'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'stripe' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Kartica' : 'Card'}</p><p class="text-xs text-[#9aa0a8] mt-1">Visa, Mastercard</p></button>
