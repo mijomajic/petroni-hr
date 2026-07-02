@@ -192,10 +192,22 @@
 
   function continueToReview() {
     const details = $booking.driverDetails;
-    if (!details.firstName || !details.lastName || !details.email || !details.phone) {
+    if (
+      !details.firstName.trim() ||
+      !details.lastName.trim() ||
+      !details.email.trim() ||
+      !details.phone.trim() ||
+      !details.dateOfBirth ||
+      !details.licenseNumber.trim() ||
+      !details.licenseCountry.trim() ||
+      !details.address.trim() ||
+      !details.city.trim() ||
+      !details.zip.trim() ||
+      !details.country.trim()
+    ) {
       driverError = $locale === 'hr'
-        ? 'Ispunite ime, prezime, email i telefon.'
-        : 'Enter your name, email, and phone number.';
+        ? 'Ispunite sva obavezna polja vozača.'
+        : 'Complete all required driver fields.';
       return;
     }
     if (!isDriverOldEnough(details.dateOfBirth)) {
@@ -328,17 +340,17 @@
   });
 
   const driverFields = $derived($locale === 'hr' ? [
-    { key: 'firstName', label: 'Ime', type: 'text' }, { key: 'lastName', label: 'Prezime', type: 'text' },
-    { key: 'email', label: 'Email', type: 'email' }, { key: 'phone', label: 'Telefon', type: 'tel' },
-    { key: 'dateOfBirth', label: `Datum rođenja (minimalno ${minDriverAge} godina)`, type: 'date' }, { key: 'licenseNumber', label: 'Broj vozačke dozvole', type: 'text' },
-    { key: 'licenseCountry', label: 'Zemlja vozačke', type: 'text' }, { key: 'address', label: 'Adresa', type: 'text' },
-    { key: 'city', label: 'Grad', type: 'text' }, { key: 'zip', label: 'Poštanski broj', type: 'text' }, { key: 'country', label: 'Država', type: 'text' },
+    { key: 'firstName', label: 'Ime *', type: 'text' }, { key: 'lastName', label: 'Prezime *', type: 'text' },
+    { key: 'email', label: 'Email *', type: 'email' }, { key: 'phone', label: 'Telefon *', type: 'tel' },
+    { key: 'dateOfBirth', label: `Datum rođenja * (minimalno ${minDriverAge} godina)`, type: 'date' }, { key: 'licenseNumber', label: 'Broj vozačke dozvole *', type: 'text' },
+    { key: 'licenseCountry', label: 'Zemlja vozačke *', type: 'text' }, { key: 'address', label: 'Adresa *', type: 'text' },
+    { key: 'city', label: 'Grad *', type: 'text' }, { key: 'zip', label: 'Poštanski broj *', type: 'text' }, { key: 'country', label: 'Država *', type: 'text' },
   ] : [
-    { key: 'firstName', label: 'First name', type: 'text' }, { key: 'lastName', label: 'Last name', type: 'text' },
-    { key: 'email', label: 'Email', type: 'email' }, { key: 'phone', label: 'Phone', type: 'tel' },
-    { key: 'dateOfBirth', label: `Date of birth (minimum age ${minDriverAge})`, type: 'date' }, { key: 'licenseNumber', label: 'License number', type: 'text' },
-    { key: 'licenseCountry', label: 'License country', type: 'text' }, { key: 'address', label: 'Address', type: 'text' },
-    { key: 'city', label: 'City', type: 'text' }, { key: 'zip', label: 'ZIP', type: 'text' }, { key: 'country', label: 'Country', type: 'text' },
+    { key: 'firstName', label: 'First name *', type: 'text' }, { key: 'lastName', label: 'Last name *', type: 'text' },
+    { key: 'email', label: 'Email *', type: 'email' }, { key: 'phone', label: 'Phone *', type: 'tel' },
+    { key: 'dateOfBirth', label: `Date of birth * (minimum age ${minDriverAge})`, type: 'date' }, { key: 'licenseNumber', label: 'License number *', type: 'text' },
+    { key: 'licenseCountry', label: 'License country *', type: 'text' }, { key: 'address', label: 'Address *', type: 'text' },
+    { key: 'city', label: 'City *', type: 'text' }, { key: 'zip', label: 'ZIP *', type: 'text' }, { key: 'country', label: 'Country *', type: 'text' },
   ]);
 </script>
 
@@ -658,11 +670,14 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           {#each driverFields as field}
             <div class="{field.key === 'address' || field.key === 'email' ? 'md:col-span-2' : ''}">
-              <span class="field-label">{field.label}</span>
+              <label class="field-label" for="booking_driver_{field.key}">{field.label}</label>
               <input
+                id="booking_driver_{field.key}"
                 type={field.type}
                 class="field"
                 max={field.key === 'dateOfBirth' ? maxDriverDob : undefined}
+                autocomplete={field.key === 'firstName' ? 'given-name' : field.key === 'lastName' ? 'family-name' : field.key === 'email' ? 'email' : field.key === 'phone' ? 'tel' : field.key === 'address' ? 'street-address' : field.key === 'city' ? 'address-level2' : field.key === 'zip' ? 'postal-code' : field.key === 'country' ? 'country-name' : 'off'}
+                required
                 bind:value={$booking.driverDetails[field.key as keyof typeof $booking.driverDetails]}
               />
             </div>

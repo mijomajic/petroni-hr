@@ -63,7 +63,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     !driver.lastName ||
     !driver.email ||
     !driver.phone ||
-    !isValidIsoDate(dateOfBirth)
+    !isValidIsoDate(dateOfBirth) ||
+    !driver.licenseNumber ||
+    !driver.licenseCountry ||
+    !driver.address ||
+    !driver.city ||
+    !driver.zip ||
+    !driver.country
   ) {
     return json({ success: false, error: 'Nedostaju obavezni podaci rezervacije.' }, { status: 400 });
   }
