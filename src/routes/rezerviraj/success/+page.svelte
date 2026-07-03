@@ -6,12 +6,13 @@
     const raw = sessionStorage.getItem('petroni_booking_result');
     if (raw) result = JSON.parse(raw);
   });
+  const today = new Date().toISOString().slice(0, 10);
 </script>
 
 <svelte:head><title>Rezervacija potvrđena — Petroni</title></svelte:head>
 
 <div class="min-h-[70vh] flex items-center justify-center py-20 px-4">
-  <div class="text-center max-w-lg">
+  <div class="text-center max-w-6xl w-full">
     <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8" style="background:#fff7e0;border:2px solid #fbe7a1">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
@@ -23,10 +24,16 @@
       <div class="text-left card card-static p-5 mb-8">
         <p class="font-bold mb-2">#{result.booking.confirmation_number}</p>
         {#if result.booking.payment_method === 'cash'}<p class="text-sm text-[#60656b]">{$locale === 'hr' ? 'Plaćanje gotovinom obavlja se pri preuzimanju vozila prema uputama osoblja.' : 'Pay cash at vehicle pickup following staff instructions.'}</p>{/if}
-        {#if result.booking.payment_split}<p class="text-sm text-[#60656b] mt-2">{$locale === 'hr' ? `Drugi dio: ${result.booking.second_payment_amount} EUR, dospijeće ${result.booking.second_payment_due_date}.` : `Second payment: EUR ${result.booking.second_payment_amount}, due ${result.booking.second_payment_due_date}.`}</p>{/if}
+        {#if result.booking.payment_split}
+          <p class="text-sm text-[#60656b] mt-2">
+            {$locale === 'hr'
+              ? `Drugi dio: ${result.booking.second_payment_amount} EUR, ${result.booking.second_payment_due_date <= today ? `dospijeva odmah jer je preuzimanje unutar ${result.booking.second_payment_due_days} dana` : `dospijeće ${result.booking.second_payment_due_date}`}.`
+              : `Second payment: EUR ${result.booking.second_payment_amount}, ${result.booking.second_payment_due_date <= today ? `due immediately because pickup is within ${result.booking.second_payment_due_days} days` : `due ${result.booking.second_payment_due_date}`}.`}
+          </p>
+        {/if}
       </div>
       {#if result.bankTransfers?.length}
-        <div class="space-y-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {#each result.bankTransfers as transfer}
             <div class="card card-static p-5 text-left">
               <p class="font-bold">{transfer.bank}</p><p class="text-sm mt-1">{transfer.iban}</p>

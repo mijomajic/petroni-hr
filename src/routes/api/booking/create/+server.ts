@@ -155,6 +155,9 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
   const dueDays = Math.max(1, Number(settings.split_payment_due_days ?? 7));
   const dueDate = new Date(`${pickupDate}T00:00:00Z`);
   dueDate.setUTCDate(dueDate.getUTCDate() - dueDays);
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  if (dueDate < today) dueDate.setTime(today.getTime());
   const firstAmount = paymentAmount(pricing.payable_total, paymentSplit, 1);
   const secondAmount = paymentSplit ? paymentAmount(pricing.payable_total, true, 2) : 0;
   const confirmationNumber = `PET-${Date.now().toString(36).toUpperCase()}`;
@@ -242,7 +245,8 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
       payment_split: data.payment_split,
       first_payment_amount: firstAmount,
       second_payment_amount: secondAmount,
-      second_payment_due_date: data.second_payment_due_date
+      second_payment_due_date: data.second_payment_due_date,
+      second_payment_due_days: dueDays
     }
   };
   if (paymentMethod === 'bank_transfer') {

@@ -120,6 +120,12 @@
     return Boolean(dateOfBirth && dateOfBirth <= maxDriverDob);
   }
 
+  function formatDate(value: string): string {
+    return new Intl.DateTimeFormat($locale === 'hr' ? 'hr-HR' : 'en-GB').format(
+      new Date(`${value}T00:00:00Z`)
+    );
+  }
+
   function formatMoney(value: number): string {
     return new Intl.NumberFormat($locale === 'hr' ? 'hr-HR' : 'en-IE', {
       style: 'currency',
@@ -655,9 +661,13 @@
               </div>
             </div>
           {:else}
+            <div class="mb-5">
+              <p class="font-semibold text-[#2b2b2b]">{$locale === 'hr' ? 'Prijavite se, izradite račun ili nastavite kao gost' : 'Sign in, create an account, or continue as a guest'}</p>
+              <p class="text-sm text-[#7a7f86] mt-1">{$locale === 'hr' ? 'Preporučujemo izradu računa kako biste kasnije lakše pratili rezervaciju. Račun nije obavezan — za nastavak kao gost samo ispunite podatke vozača ispod.' : 'We recommend creating an account so you can track the booking more easily. An account is optional — to continue as a guest, simply complete the driver details below.'}</p>
+            </div>
             <div class="flex gap-2 mb-5">
-              <button type="button" onclick={() => { authMode = 'login'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'login'} class:btn-ghost={authMode !== 'login'}>Prijava</button>
-              <button type="button" onclick={() => { authMode = 'register'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'register'} class:btn-ghost={authMode !== 'register'}>Izradi račun</button>
+              <button type="button" onclick={() => { authMode = 'login'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'login'} class:btn-ghost={authMode !== 'login'}>{$locale === 'hr' ? 'Prijavi se' : 'Sign in'}</button>
+              <button type="button" onclick={() => { authMode = 'register'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'register'} class:btn-ghost={authMode !== 'register'}>{$locale === 'hr' ? 'Izradi račun — preporučeno' : 'Create account — recommended'}</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               {#if authMode === 'register'}
@@ -688,7 +698,7 @@
               >
                 {authLoading ? 'Molimo pričekajte…' : (authMode === 'login' ? 'Prijavi se' : 'Izradi račun')}
               </button>
-              <p class="text-xs text-[#8b9099]">Račun nije obavezan — rezervaciju možete nastaviti kao gost.</p>
+              <p class="text-xs text-[#8b9099]">{$locale === 'hr' ? 'Ne želite račun? Preskočite ovaj okvir i nastavite s podacima vozača.' : 'Do not want an account? Skip this box and continue with the driver details.'}</p>
             </div>
           {/if}
         </div>
@@ -706,6 +716,9 @@
                 required
                 bind:value={$booking.driverDetails[field.key as keyof typeof $booking.driverDetails]}
               />
+              {#if field.key === 'dateOfBirth'}
+                <p class="text-xs text-[#8b9099] mt-2">{$locale === 'hr' ? `Vozač mora imati najmanje ${minDriverAge} godina na dan preuzimanja. Najkasniji dopušteni datum rođenja je ${formatDate(maxDriverDob)}.` : `The driver must be at least ${minDriverAge} on pickup. The latest eligible date of birth is ${formatDate(maxDriverDob)}.`}</p>
+              {/if}
             </div>
           {/each}
         </div>
