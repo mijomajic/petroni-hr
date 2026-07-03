@@ -8,7 +8,7 @@ async function emailConfig() {
   const settings = Object.fromEntries((data ?? []).map((row) => [row.key, row.value]));
   return {
     admin: String(settings.admin_email ?? 'info@petroni.hr'),
-    from: String(settings.email_from ?? 'Petroni <onboarding@resend.dev>'),
+    from: env.RESEND_FROM_EMAIL || String(settings.email_from ?? 'Petroni <onboarding@resend.dev>'),
     company: (settings.company ?? {}) as { name?: string; oib?: string; address?: string }
   };
 }
