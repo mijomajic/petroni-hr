@@ -6,8 +6,8 @@
   let loading = $state(true);
 
   async function updateStatus(id: string, status: string) {
-    await supabase.from('orders').update({ status }).eq('id', id);
-    orders = orders.map(o => o.id === id ? { ...o, status } : o);
+    const response = await fetch(`/api/admin/orders/${id}/status`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status }) });
+    if (response.ok) orders = orders.map(o => o.id === id ? { ...o, status } : o);
   }
 
   onMount(async () => {

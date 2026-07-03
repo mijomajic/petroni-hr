@@ -3,6 +3,14 @@ import { supabaseAdmin } from '$lib/supabase.server';
 import { calculatePricing } from '$lib/pricing';
 import { getUnavailableVehicleIds, loadPricingConfig } from '$lib/pricing.server';
 import type { RequestHandler } from './$types';
+import {
+  createCorvuspayRedirect,
+  hub3BarcodeDataUrl,
+  hub3Payload,
+  paymentAmount,
+  type IbanSetting
+} from '$lib/payments.server';
+import { sendBookingReceived } from '$lib/email.server';
 
 function ageOnDate(dateOfBirth: string, referenceDate: string): number {
   const birth = new Date(`${dateOfBirth}T00:00:00Z`);
@@ -28,7 +36,7 @@ function isValidTime(value: unknown): value is string {
   return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
 }
 
-export const POST: RequestHandler = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request, locals, getClientAddress, url }) => {
   const body = await request.json();
   const { user } = await locals.safeGetSession();
   const driver = body.driverDetails ?? {};
@@ -43,6 +51,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const numChildren = Math.floor(rawNumChildren);
   const plannedKm = Math.floor(rawPlannedKm);
   const destination = String(body.destination ?? '').trim();
+  const paymentMethod = String(body.payment_method ?? '');
+  const paymentSplit = body.payment_split === true;
 
   if (
     !vehicleId ||
@@ -69,18 +79,25 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     !driver.address ||
     !driver.city ||
     !driver.zip ||
-    !driver.country
+    !driver.country ||
+    !body.terms_accepted ||
+    !['bank_transfer', 'corvuspay', 'cash'].includes(paymentMethod)
   ) {
     return json({ success: false, error: 'Nedostaju obavezni podaci rezervacije.' }, { status: 400 });
   }
 
-  const [{ data: vehicle, error: vehicleError }, pricingData] = await Promise.all([
+  const [{ data: vehicle, error: vehicleError }, pricingData, { data: terms }, { data: paymentSettings }] = await Promise.all([
     supabaseAdmin.from('vehicles').select('*').eq('id', vehicleId).eq('type', 'rental').single(),
-    loadPricingConfig()
+    loadPricingConfig(),
+    supabaseAdmin.from('rental_terms').select('version,content_hr').eq('is_active', true).single(),
+    supabaseAdmin.from('settings').select('key,value').in('key', ['ibans', 'company', 'split_payment_due_days'])
   ]);
 
   if (vehicleError || !vehicle || !vehicle.is_available) {
     return json({ success: false, error: 'Odabrano vozilo više nije dostupno.' }, { status: 409 });
+  }
+  if (!terms) {
+    return json({ success: false, error: 'Aktivni uvjeti najma nisu dostupni.' }, { status: 503 });
   }
   const pickupLocation = pricingData.config.locations.find(
     (location) => location.name === body.pickupLocation
@@ -134,9 +151,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   if (pricing.nights <= 0 || pricing.payable_total < 0) {
     return json({ success: false, error: 'Cijenu rezervacije nije moguće izračunati.' }, { status: 400 });
   }
+  const settings = Object.fromEntries((paymentSettings ?? []).map((row) => [row.key, row.value]));
+  const dueDays = Math.max(1, Number(settings.split_payment_due_days ?? 7));
+  const dueDate = new Date(`${pickupDate}T00:00:00Z`);
+  dueDate.setUTCDate(dueDate.getUTCDate() - dueDays);
+  const firstAmount = paymentAmount(pricing.payable_total, paymentSplit, 1);
+  const secondAmount = paymentSplit ? paymentAmount(pricing.payable_total, true, 2) : 0;
+  const confirmationNumber = `PET-${Date.now().toString(36).toUpperCase()}`;
 
   const { data, error } = await supabaseAdmin.from('bookings').insert({
-    confirmation_number: `PET-${Date.now().toString(36).toUpperCase()}`,
+    confirmation_number: confirmationNumber,
     user_id: user?.id ?? null,
     vehicle_id: vehicleId,
     pickup_location: pickupLocation.name,
@@ -167,8 +191,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     extras_total: pricing.extras_total,
     fees_total: pricing.fees_total,
     total_price: pricing.payable_total,
+    deposit_amount: pricing.refundable_deposit,
+    payment_split: paymentSplit,
+    first_payment_amount: firstAmount,
+    second_payment_amount: secondAmount,
+    first_payment_status: paymentMethod === 'cash' ? 'unpaid' : 'unpaid',
+    second_payment_status: paymentSplit ? 'unpaid' : 'not_applicable',
+    second_payment_due_date: paymentSplit ? dueDate.toISOString().slice(0, 10) : null,
+    payment_status: 'unpaid',
     status: 'pending',
-    payment_method: body.payment_method ?? null
+    payment_method: paymentMethod,
+    terms_accepted_at: new Date().toISOString(),
+    terms_accepted_ip: getClientAddress(),
+    terms_version: terms.version
   }).select().single();
 
   if (error) {
@@ -194,5 +229,49 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     }
   }
 
-  return json({ success: true, booking: data });
+  sendBookingReceived(data).then(async (sent) => {
+    if (sent) await supabaseAdmin.from('bookings').update({ confirmation_email_sent: true }).eq('id', data.id);
+  }).catch((mailError) => console.error('Booking email failed', mailError));
+
+  const response: Record<string, unknown> = {
+    success: true,
+    booking: {
+      id: data.id,
+      confirmation_number: data.confirmation_number,
+      payment_method: data.payment_method,
+      payment_split: data.payment_split,
+      first_payment_amount: firstAmount,
+      second_payment_amount: secondAmount,
+      second_payment_due_date: data.second_payment_due_date
+    }
+  };
+  if (paymentMethod === 'bank_transfer') {
+    const company = (settings.company ?? {}) as { name?: string; address?: string };
+    response.bankTransfers = await Promise.all(((settings.ibans ?? []) as IbanSetting[]).map(async (account) => {
+      const payload = hub3Payload({
+        amount: firstAmount,
+        recipient: company.name ?? 'Petroni d.o.o.',
+        address: company.address ?? '',
+        iban: account.iban,
+        reference: confirmationNumber,
+        description: `Rezervacija ${confirmationNumber}`
+      });
+      return { ...account, amount: firstAmount, reference: confirmationNumber, barcode: await hub3BarcodeDataUrl(payload) };
+    }));
+  }
+  if (paymentMethod === 'corvuspay') {
+    const redirect = createCorvuspayRedirect({
+      orderNumber: `${data.id}:1`,
+      amount: firstAmount,
+      description: `Rezervacija ${confirmationNumber}`,
+      email: data.driver_email,
+      baseUrl: url.origin
+    });
+    if (!redirect) {
+      await supabaseAdmin.from('bookings').delete().eq('id', data.id);
+      return json({ success: false, error: 'CorvusPay je uskoro dostupan. Odaberite bankovnu uplatu ili gotovinu.' }, { status: 503 });
+    }
+    response.corvuspay = redirect;
+  }
+  return json(response);
 };

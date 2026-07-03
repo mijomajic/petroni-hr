@@ -38,7 +38,10 @@
   );
   let availableVehicles: Vehicle[] = $state([]);
   let loading = $state(false);
-  let paymentMethod = $state<'stripe' | 'paypal'>('stripe');
+  let paymentMethod = $state<'bank_transfer' | 'corvuspay' | 'cash'>('bank_transfer');
+  let paymentSplit = $state(false);
+  let termsAccepted = $state(false);
+  let termsOpen = $state(false);
   let searchError = $state('');
   let driverError = $state('');
   let submitError = $state('');
@@ -222,6 +225,10 @@
 
   async function submitBooking() {
     if (!$booking.selectedVehicle) return;
+    if (!termsAccepted) {
+      submitError = $locale === 'hr' ? 'Prihvatite uvjete najma prije slanja.' : 'Accept the rental terms before submitting.';
+      return;
+    }
     loading = true;
     submitError = '';
     try {
@@ -231,11 +238,30 @@
           ...$booking,
           pricing: selectedPricing,
           total_price: totalPrice,
-          payment_method: paymentMethod
+          payment_method: paymentMethod,
+          payment_split: paymentSplit,
+          terms_accepted: termsAccepted
         }),
       });
       const data = await res.json();
-      if (data.success) { resetBooking(); window.location.href = '/rezerviraj/success'; }
+      if (data.success) {
+        sessionStorage.setItem('petroni_booking_result', JSON.stringify(data));
+        resetBooking();
+        if (data.corvuspay) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = data.corvuspay.url;
+          for (const [name, value] of Object.entries(data.corvuspay.fields)) {
+            const input = document.createElement('input');
+            input.type = 'hidden'; input.name = name; input.value = String(value);
+            form.appendChild(input);
+          }
+          document.body.appendChild(form);
+          form.submit();
+        } else {
+          window.location.href = '/rezerviraj/success';
+        }
+      }
       else {
         submitError = data.error || ($locale === 'hr'
           ? 'Rezervaciju nije moguće spremiti. Pokušajte ponovno.'
@@ -730,11 +756,25 @@
 
         <div class="card card-static p-6 md:p-8">
           <h2 class="text-lg font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Način plaćanja' : 'Payment method'}</h2>
-          <div class="grid grid-cols-2 gap-4 mb-6">
-            <button onclick={() => paymentMethod = 'stripe'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'stripe' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Kartica' : 'Card'}</p><p class="text-xs text-[#9aa0a8] mt-1">Visa, Mastercard</p></button>
-            <button onclick={() => paymentMethod = 'paypal'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'paypal' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">PayPal</p><p class="text-xs text-[#9aa0a8] mt-1">PayPal {$locale === 'hr' ? 'račun' : 'account'}</p></button>
+          <div class="grid md:grid-cols-3 gap-4 mb-6">
+            <button onclick={() => paymentMethod = 'bank_transfer'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'bank_transfer' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Bankovna uplata' : 'Bank transfer'}</p><p class="text-xs text-[#9aa0a8] mt-1">HUB-3 / PDF417</p></button>
+            <button onclick={() => data.corvuspayAvailable && (paymentMethod = 'corvuspay')} disabled={!data.corvuspayAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'corvuspay' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Kartica' : 'Card'}</p><p class="text-xs text-[#9aa0a8] mt-1">{data.corvuspayAvailable ? 'CorvusPay' : ($locale === 'hr' ? 'Uskoro dostupno' : 'Coming soon')}</p></button>
+            <button onclick={() => paymentMethod = 'cash'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'cash' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Gotovina' : 'Cash'}</p><p class="text-xs text-[#9aa0a8] mt-1">{$locale === 'hr' ? 'Pri preuzimanju' : 'At pickup'}</p></button>
           </div>
-          <div class="rounded-md p-4 mb-6 bg-[#f6f7f9] border border-[#ededf0]"><p class="text-sm text-center text-[#7a7f86]">{$locale === 'hr' ? 'Plaćanje se aktivira nakon postavljanja API ključeva.' : 'Payment activates once API keys are configured.'}</p></div>
+          <div class="rounded-md p-4 mb-5 bg-[#f6f7f9] border border-[#ededf0]">
+            <label class="flex gap-3 items-start cursor-pointer">
+              <input type="checkbox" bind:checked={paymentSplit} class="mt-1" />
+              <span class="text-sm text-[#4c5157]"><b>{$locale === 'hr' ? 'Plaćanje 50/50' : '50/50 payment'}</b><br />{$locale === 'hr' ? `${formatMoney(totalPrice / 2)} sada, ostatak do ${data.splitPaymentDueDays} dana prije preuzimanja.` : `${formatMoney(totalPrice / 2)} now, the rest ${data.splitPaymentDueDays} days before pickup.`}</span>
+            </label>
+          </div>
+          <label class="flex gap-3 items-start mb-5">
+            <input type="checkbox" bind:checked={termsAccepted} class="mt-1" required />
+            <span class="text-sm text-[#4c5157]">
+              {$locale === 'hr' ? 'Prihvaćam ' : 'I accept the '}
+              <button type="button" class="underline font-semibold" onclick={() => termsOpen = true}>{$locale === 'hr' ? 'uvjete najma' : 'rental terms'}</button>.
+              <span class="block text-xs text-[#8b9099] mt-1">{$locale === 'hr' ? 'Prihvat se bilježi kao revizijski trag; pravnu valjanost treba potvrditi pravni savjetnik.' : 'Acceptance is recorded as an audit trail; legal enforceability should be confirmed by legal counsel.'}</span>
+            </span>
+          </label>
           {#if submitError}
             <p class="text-sm mb-5 p-3 rounded-md" style="background:#fdecec;color:#b42318">{submitError}</p>
           {/if}
@@ -747,3 +787,13 @@
     {/if}
   </div>
 </div>
+
+{#if termsOpen}
+  <div class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" role="presentation" onclick={(event) => event.currentTarget === event.target && (termsOpen = false)}>
+    <div class="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+      <div class="p-5 border-b flex justify-between gap-4"><h2 id="terms-title" class="font-bold text-lg">{$locale === 'hr' ? 'Uvjeti najma' : 'Rental terms'} · {data.terms?.version}</h2><button onclick={() => termsOpen = false} aria-label="Zatvori">✕</button></div>
+      <div class="p-6 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-[#4c5157]">{data.terms?.content_hr}</div>
+      <div class="p-5 border-t"><button class="btn btn-primary w-full" onclick={() => { termsAccepted = true; termsOpen = false; }}>{$locale === 'hr' ? 'Prihvaćam uvjete' : 'Accept terms'}</button></div>
+    </div>
+  </div>
+{/if}

@@ -1,0 +1,34 @@
+import { redirect } from '@sveltejs/kit';
+import { supabaseAdmin } from '$lib/supabase.server';
+import { verifyCorvuspayCallback } from '$lib/payments.server';
+import type { RequestHandler } from './$types';
+
+export const POST: RequestHandler = async ({ request, url }) => {
+  const form = await request.formData();
+  const fields = Object.fromEntries([...form.entries()].map(([key, value]) => [key, String(value)]));
+  if (!verifyCorvuspayCallback(fields)) return new Response('Invalid signature', { status: 400 });
+  const [bookingId, partText] = String(fields.order_number ?? '').split(':');
+  const successful = ['success', 'approved', 'completed'].includes(String(fields.status ?? fields.result ?? '').toLowerCase());
+  if (bookingId && successful) {
+    const part = partText === '2' ? 2 : 1;
+    const { data: booking } = await supabaseAdmin.from('bookings')
+      .select('payment_split,first_payment_status,second_payment_status')
+      .eq('id', bookingId).single();
+    const update = part === 2
+      ? {
+          second_payment_status: 'paid',
+          payment_status: booking?.first_payment_status === 'paid' ? 'paid' : 'partial'
+        }
+      : {
+          first_payment_status: 'paid',
+          payment_status: booking?.payment_split && booking?.second_payment_status !== 'paid' ? 'partial' : 'paid'
+        };
+    await supabaseAdmin.from('bookings').update(update).eq('id', bookingId);
+  }
+  return new Response('OK');
+};
+
+export const GET: RequestHandler = async ({ url }) => {
+  const result = url.searchParams.get('result');
+  throw redirect(303, result === 'success' ? '/rezerviraj/success?payment=success' : '/rezerviraj/success?payment=cancel');
+};

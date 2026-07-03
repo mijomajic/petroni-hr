@@ -1,9 +1,10 @@
 import type { PageServerLoad } from './$types';
 import { supabaseAdmin } from '$lib/supabase.server';
+import { corvuspayAvailable } from '$lib/payments.server';
 
 export const load: PageServerLoad = async ({ locals }) => {
   const { user } = await locals.safeGetSession();
-  const [vehicles, locations, extras, seasons, seasonPrices, fees, settings] = await Promise.all([
+  const [vehicles, locations, extras, seasons, seasonPrices, fees, settings, terms] = await Promise.all([
     locals.supabase
       .from('vehicles')
       .select('*')
@@ -18,7 +19,8 @@ export const load: PageServerLoad = async ({ locals }) => {
     supabaseAdmin
       .from('settings')
       .select('key,value')
-      .in('key', ['min_driver_age', 'km_per_day_included'])
+      .in('key', ['min_driver_age', 'km_per_day_included', 'ibans', 'split_payment_due_days']),
+    supabaseAdmin.from('rental_terms').select('version,content_hr').eq('is_active', true).single()
   ]);
 
   const settingsMap = Object.fromEntries(
@@ -34,6 +36,10 @@ export const load: PageServerLoad = async ({ locals }) => {
     fees: fees.data ?? [],
     minDriverAge: Number(settingsMap.min_driver_age ?? 28),
     kmPerDayIncluded: Number(settingsMap.km_per_day_included ?? 300),
+    ibans: settingsMap.ibans ?? [],
+    splitPaymentDueDays: Number(settingsMap.split_payment_due_days ?? 7),
+    terms: terms.data ?? null,
+    corvuspayAvailable: corvuspayAvailable(),
     profile: user
       ? {
           ...user.user_metadata,

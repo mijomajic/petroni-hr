@@ -116,8 +116,11 @@ export type Booking = {
   deposit_amount: number | null;
   payment_split: boolean;
   first_payment_status: 'unpaid' | 'paid';
+  first_payment_amount: number | null;
   second_payment_status: 'unpaid' | 'paid' | 'not_applicable';
+  second_payment_amount: number | null;
   second_payment_due_date: string | null;
+  payment_status: 'unpaid' | 'partial' | 'paid';
   payment_method: 'bank_transfer' | 'corvuspay' | 'cash' | null;
   corvuspay_order_id: string | null;
   terms_accepted_at: string | null;
@@ -125,6 +128,7 @@ export type Booking = {
   terms_version: string | null;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   invoice_sent: boolean;
+  confirmation_email_sent: boolean;
   created_at: string;
 };
 

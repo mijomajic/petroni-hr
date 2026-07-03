@@ -9,8 +9,8 @@
   const filtered = $derived(filterStatus ? bookings.filter(b => b.status === filterStatus) : bookings);
 
   async function updateStatus(id: string, status: string) {
-    await supabase.from('bookings').update({ status }).eq('id', id);
-    bookings = bookings.map(b => b.id === id ? { ...b, status } : b);
+    const response = await fetch(`/api/admin/bookings/${id}/status`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status }) });
+    if (response.ok) bookings = bookings.map(b => b.id === id ? { ...b, status } : b);
   }
 
   onMount(async () => {

@@ -17,6 +17,7 @@
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@tailwindcss/vite": "^4.2.2",
+		"@types/bwip-js": "^3.2.3",
 		"@types/node": "^26.1.0",
 		"svelte": "^5.55.2",
 		"svelte-check": "^4.4.6",
@@ -30,6 +31,9 @@
 		"@stripe/stripe-js": "^9.7.0",
 		"@supabase/ssr": "^0.12.0",
 		"@supabase/supabase-js": "^2.108.0",
+		"bwip-js": "^4.11.2",
+		"pdf-lib": "^1.17.1",
+		"resend": "^6.16.0",
 		"stripe": "^22.2.0",
 		"svelte-i18n": "^4.0.1"
 	}
