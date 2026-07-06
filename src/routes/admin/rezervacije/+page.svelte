@@ -7,7 +7,10 @@
 
 <div>
   <div class="flex items-center justify-between mb-8">
-    <h1 class="text-3xl font-black uppercase tracking-tight text-[#2b2b2b]">Rezervacije</h1>
+    <div>
+      <h1 class="text-3xl font-black uppercase tracking-tight text-[#2b2b2b]">Rezervacije</h1>
+      <p class="text-sm text-[#7a7f86] mt-2">Otvorite rezervaciju za podatke vozača, obračun, plaćanja, e-suglasnost i povijest promjena.</p>
+    </div>
     <form method="GET" class="flex items-end gap-2">
       <label class="text-xs text-[#7a7f86]">Od
         <input type="date" name="date_from" value={data.filters.dateFrom} class="block px-3 py-2 rounded-xl text-sm text-[#2b2b2b]" style="background:#f6f7f9;border:1px solid #e7e8eb" />
@@ -31,7 +34,7 @@
         <table class="w-full text-sm">
           <thead style="border-bottom: 1px solid #e7e8eb">
             <tr>
-              {#each ['Vozač', 'Vozilo', 'Preuzimanje', 'Povrat', 'Ukupno', 'Status', 'Akcija'] as h}
+              {#each ['Broj', 'Vozač', 'Vozilo', 'Preuzimanje', 'Povrat', 'Ukupno', 'Status', 'Detalji'] as h}
                 <th class="text-left px-4 py-3 text-xs uppercase tracking-widest font-bold" style="color: #7a7f86">{h}</th>
               {/each}
             </tr>
@@ -39,6 +42,7 @@
           <tbody>
             {#each data.bookings as b}
               <tr style="border-bottom: 1px solid #f0f1f3">
+                <td class="px-4 py-3 font-mono text-xs font-bold text-[#2b2b2b]">{b.confirmation_number ?? '—'}</td>
                 <td class="px-4 py-3">
                   <p class="text-[#2b2b2b] font-medium">{b.driver_name}</p>
                   <p class="text-xs" style="color: #7a7f86">{b.driver_email}</p>
@@ -54,7 +58,7 @@
                   </span>
                 </td>
                 <td class="px-4 py-3">
-                  <a href="/admin/rezervacije/{b.id}" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#f6f7f9] border border-[#e7e8eb]">Otvori</a>
+                  <a href="/admin/rezervacije/{b.id}" class="inline-flex px-4 py-2 rounded-lg text-xs font-bold bg-[#F5C518] text-black">Pregledaj sve detalje</a>
                 </td>
               </tr>
             {/each}

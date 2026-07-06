@@ -5,8 +5,10 @@
   import Footer from '$lib/components/layout/Footer.svelte';
   import { onMount, tick } from 'svelte';
   import { afterNavigate } from '$app/navigation';
+  import { page } from '$app/stores';
 
   let { children } = $props();
+  const isAdmin = $derived($page.url.pathname.startsWith('/admin'));
 
   // Initialise i18n synchronously — messages are bundled, so no need to gate
   // rendering behind a loading screen (that was the main cause of slow loads).
@@ -63,8 +65,10 @@
   <meta name="theme-color" content="#ffffff" />
 </svelte:head>
 
-<Header />
-<main>
-  {@render children()}
-</main>
-<Footer />
+<div class="min-h-screen flex flex-col">
+  {#if !isAdmin}<Header />{/if}
+  <main class="flex-1">
+    {@render children()}
+  </main>
+  {#if !isAdmin}<Footer />{/if}
+</div>

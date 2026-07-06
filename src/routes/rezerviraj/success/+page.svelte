@@ -18,7 +18,7 @@
     </div>
     <h1 class="text-3xl md:text-4xl font-bold text-[#2b2b2b] mb-4">{$locale === 'hr' ? 'Zahtjev je zaprimljen!' : 'Request received!'}</h1>
     <p class="text-[15px] leading-relaxed text-[#6b7178] mb-10">
-      {$locale === 'hr' ? 'Rezervacija čeka pregled i potvrdu. Ako je slanje e-pošte konfigurirano, detalji stižu na Vašu adresu.' : 'Your booking awaits review and confirmation. If email delivery is configured, details will arrive by email.'}
+      {$locale === 'hr' ? 'Rezervacija čeka pregled i potvrdu. Potvrdu i daljnje upute primit ćete e-poštom.' : 'Your booking awaits review and confirmation. You will receive confirmation and further instructions by email.'}
     </p>
     {#if result?.booking}
       <div class="text-left card card-static p-5 mb-8">

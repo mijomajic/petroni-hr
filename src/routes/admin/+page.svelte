@@ -36,7 +36,7 @@
         <table class="w-full text-sm">
           <thead>
             <tr style="border-bottom: 1px solid #e7e8eb">
-              {#each ['ID', 'Vozač', 'Preuzimanje', 'Povrat', 'Status', 'Plaćanje'] as h}
+              {#each ['Broj', 'Vozač', 'Preuzimanje', 'Povrat', 'Status', 'Plaćanje', 'Detalji'] as h}
                 <th class="text-left py-2 pr-4 text-xs uppercase tracking-widest font-bold" style="color: #7a7f86">{h}</th>
               {/each}
             </tr>
@@ -44,7 +44,7 @@
           <tbody>
             {#each recentBookings as b}
               <tr class="transition-colors hover:bg-[#f6f7f9]" style="border-bottom: 1px solid #f0f1f3">
-                <td class="py-3 pr-4 font-mono text-xs text-[#2b2b2b]">{b.id.slice(0, 8)}…</td>
+                <td class="py-3 pr-4 font-mono text-xs text-[#2b2b2b]">{b.confirmation_number ?? b.id.slice(0, 8)}</td>
                 <td class="py-3 pr-4 text-[#2b2b2b]">{b.driver_name}</td>
                 <td class="py-3 pr-4" style="color: #7a7f86">{b.pickup_date}</td>
                 <td class="py-3 pr-4" style="color: #7a7f86">{b.dropoff_date}</td>
@@ -59,6 +59,9 @@
                     style="{b.payment_status === 'paid' ? 'background: rgba(22,163,74,0.15); color: #16a34a' : 'background: rgba(245,197,24,0.15); color: #F5C518'}">
                     {b.payment_status}
                   </span>
+                </td>
+                <td class="py-3">
+                  <a href="/admin/rezervacije/{b.id}" class="inline-flex px-3 py-1.5 rounded-lg text-xs font-bold bg-[#F5C518] text-black">Otvori</a>
                 </td>
               </tr>
             {/each}

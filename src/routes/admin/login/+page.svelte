@@ -1,6 +1,5 @@
 <script lang="ts">
   import { supabase } from '$lib/supabase';
-  import { goto } from '$app/navigation';
 
   let email = $state('');
   let password = $state('');
@@ -12,7 +11,7 @@
     error = '';
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
     if (err) error = err.message;
-    else goto('/admin');
+    else window.location.assign('/admin');
     loading = false;
   }
 </script>
