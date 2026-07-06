@@ -14,12 +14,13 @@
   }
 
   const navItems = [
-    { href: '/admin', label: 'Dashboard', icon: '📊' },
-    { href: '/admin/rezervacije', label: 'Rezervacije', icon: '📅' },
-    { href: '/admin/vozila', label: 'Vozila', icon: '🚐' },
-    { href: '/admin/proizvodi', label: 'Proizvodi', icon: '📦' },
-    { href: '/admin/narudzbe', label: 'Narudžbe', icon: '🛒' },
-    { href: '/admin/objave', label: 'Objave', icon: '📝' },
+    { href: '/admin', label: 'Dashboard', icon: 'M4 13h6V4H4v9Zm10 7h6V11h-6v9ZM4 20h6v-3H4v3Zm10-13h6V4h-6v3Z' },
+    { href: '/admin/rezervacije', label: 'Rezervacije', icon: 'M6 3v3m12-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z' },
+    { href: '/admin/vozila', label: 'Vozila', icon: 'M3 16V9l2-4h12l4 6v5M5 16v2m14-2v2M3 13h18M7 15h.01M17 15h.01' },
+    { href: '/admin/proizvodi', label: 'Proizvodi', icon: 'm4 7 8-4 8 4-8 4-8-4Zm0 0v10l8 4 8-4V7M12 11v10' },
+    { href: '/admin/narudzbe', label: 'Narudžbe', icon: 'M3 4h2l2 11h10l3-8H6m2 12h.01M17 19h.01' },
+    { href: '/admin/objave', label: 'Objave', icon: 'M5 4h14v16H5V4Zm3 4h8m-8 4h8m-8 4h5' },
+    { href: '/admin/uvjeti-najma', label: 'Uvjeti najma', icon: 'M6 3h9l3 3v15H6V3Zm9 0v4h4M9 11h6m-6 4h6m-6 4h4' },
   ];
 </script>
 
@@ -41,7 +42,9 @@
             class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-200 hover:bg-[#f6f7f9]"
             style="{$page.url.pathname === item.href || ($page.url.pathname.startsWith(item.href + '/') && item.href !== '/admin') ? 'background:#fff7e0;color:#b5890a' : 'color:#5b6168'}"
           >
-            <span>{item.icon}</span>
+            <svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d={item.icon} />
+            </svg>
             {item.label}
           </a>
         {/each}

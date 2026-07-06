@@ -201,9 +201,14 @@ export const actions: Actions = {
     if (
       !booking?.payment_split ||
       booking.status !== 'confirmed' ||
+      booking.first_payment_status !== 'paid' ||
       booking.second_payment_status === 'paid'
     ) {
-      return fail(400, { message: 'Za ovu rezervaciju nije potrebna doplata.' });
+      return fail(400, {
+        message: booking?.first_payment_status !== 'paid'
+          ? 'Poveznicu možete izraditi nakon što je prva rata evidentirana kao plaćena.'
+          : 'Za ovu rezervaciju nije potrebna doplata.'
+      });
     }
 
     const pickupExpiry = new Date(`${booking.pickup_date}T23:59:59Z`);

@@ -13,11 +13,12 @@ export const POST: RequestHandler = async ({ request, url }) => {
     throw error(404, 'Poveznica za plaćanje nije valjana.');
   }
   const { data: booking } = await supabaseAdmin.from('bookings')
-    .select('id,confirmation_number,driver_email,first_payment_amount,second_payment_amount,payment_split,second_payment_status,status')
+    .select('id,confirmation_number,driver_email,first_payment_amount,second_payment_amount,payment_split,first_payment_status,second_payment_status,status')
     .eq('id', bookingId).single();
   if (
     !booking?.payment_split ||
     booking.status !== 'confirmed' ||
+    booking.first_payment_status !== 'paid' ||
     booking.second_payment_status === 'paid'
   ) {
     throw error(404);

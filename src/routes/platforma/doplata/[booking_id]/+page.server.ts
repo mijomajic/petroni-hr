@@ -12,13 +12,14 @@ export const load: PageServerLoad = async ({ params, url, setHeaders }) => {
   }
   const [{ data: booking }, { data: rows }] = await Promise.all([
     supabaseAdmin.from('bookings')
-      .select('id,confirmation_number,driver_name,second_payment_amount,second_payment_due_date,second_payment_status,payment_split,status')
+      .select('id,confirmation_number,driver_name,second_payment_amount,second_payment_due_date,second_payment_status,first_payment_status,payment_split,status')
       .eq('id', params.booking_id).single(),
     supabaseAdmin.from('settings').select('key,value').in('key', ['ibans', 'company'])
   ]);
   if (
     !booking?.payment_split ||
     booking.status !== 'confirmed' ||
+    booking.first_payment_status !== 'paid' ||
     booking.second_payment_status === 'paid'
   ) {
     throw error(404, 'Doplata nije pronađena.');

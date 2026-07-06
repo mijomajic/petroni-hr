@@ -14,8 +14,8 @@
 <div class="space-y-6">
   <div class="flex items-start justify-between gap-4">
     <div>
-      <a href="/admin/rezervacije" class="text-sm text-[#7a7f86]">← Rezervacije</a>
-      <h1 class="text-3xl font-black uppercase mt-2">{data.booking.confirmation_number}</h1>
+      <a href="/admin/rezervacije" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#d9dce1] bg-white text-sm font-bold text-[#454a50] hover:bg-[#f6f7f9] active:scale-[0.98]">← Natrag na rezervacije</a>
+      <h1 class="text-3xl font-black uppercase mt-4">{data.booking.confirmation_number}</h1>
       <p class="text-sm text-[#7a7f86]">{data.booking.vehicles?.name} · {data.booking.pickup_date} – {data.booking.dropoff_date}</p>
     </div>
     <span class="px-3 py-2 rounded-xl text-xs font-bold uppercase bg-[#fff7e0] text-[#9a7600]">{data.booking.status}</span>
@@ -112,13 +112,18 @@
             <button class="text-sm font-bold">Spremi</button>
           </form>
           <div class="pt-3 border-t border-[#ededf0]">
+            <p class="text-xs leading-relaxed text-[#7a7f86] mb-3">Poveznica se ne šalje automatski. Nakon evidentirane prve rate izradite je ovdje, kopirajte i pošaljite klijentu. Izrada nove poveznice poništava prethodnu.</p>
             {#if form?.paymentLink}
-              <label class="text-xs text-[#7a7f86]">Nova poveznica — kopirajte je sada
+              <label class="text-xs font-bold text-[#5b6168]">Sigurna poveznica — kopirajte je sada
                 <input readonly value={form.paymentLink} class="field mt-1" onclick={(event) => event.currentTarget.select()} />
               </label>
             {/if}
             <div class="flex gap-3 mt-3">
-              <form method="POST" action="?/generatePaymentLink"><button class="btn btn-primary">Izradi poveznicu</button></form>
+              {#if data.booking.first_payment_status === 'paid'}
+                <form method="POST" action="?/generatePaymentLink"><button class="btn btn-primary">{data.activeToken ? 'Izradi novu poveznicu' : 'Izradi sigurnu poveznicu'}</button></form>
+              {:else}
+                <span class="inline-flex px-4 py-2 rounded-lg bg-[#f3f4f6] text-sm font-bold text-[#8b9099]">Dostupno nakon uplate prve rate</span>
+              {/if}
               {#if data.activeToken}<form method="POST" action="?/revokePaymentLink"><button class="btn border">Opozovi</button></form>{/if}
             </div>
             {#if data.activeToken}<p class="text-xs text-[#7a7f86] mt-2">Aktivna do {dateTime(data.activeToken.expires_at)}</p>{/if}
