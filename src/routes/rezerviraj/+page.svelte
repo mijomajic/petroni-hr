@@ -801,11 +801,25 @@
 </div>
 
 {#if termsOpen}
-  <div class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" role="presentation" onclick={(event) => event.currentTarget === event.target && (termsOpen = false)}>
-    <div class="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="terms-title">
-      <div class="p-5 border-b flex justify-between gap-4"><h2 id="terms-title" class="font-bold text-lg">{$locale === 'hr' ? 'Uvjeti najma' : 'Rental terms'} · {data.terms?.version}</h2><button onclick={() => termsOpen = false} aria-label="Zatvori">✕</button></div>
-      <div class="p-6 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-[#4c5157]">{data.terms?.content_hr}</div>
-      <div class="p-5 border-t"><button class="btn btn-primary w-full" onclick={() => { termsAccepted = true; termsOpen = false; }}>{$locale === 'hr' ? 'Prihvaćam uvjete' : 'Accept terms'}</button></div>
+  <div class="fixed inset-0 z-50 bg-[#17181a]/75 backdrop-blur-sm flex items-center justify-center p-4 md:p-8" role="presentation" onclick={(event) => event.currentTarget === event.target && (termsOpen = false)}>
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[88dvh] flex flex-col overflow-hidden shadow-[0_24px_70px_rgba(0,0,0,0.22)]" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+      <div class="px-6 md:px-8 py-5 border-b border-[#e8e9eb] flex items-start justify-between gap-5">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#9a7600] mb-2">Petroni</p>
+          <h2 id="terms-title" class="font-black text-xl md:text-2xl text-[#2b2b2b]">{$locale === 'hr' ? 'Uvjeti najma' : 'Rental terms'}</h2>
+          <p class="text-xs text-[#8b9099] mt-1">{$locale === 'hr' ? 'Aktivna verzija' : 'Active version'}: {data.terms?.version}</p>
+        </div>
+        <button class="w-10 h-10 rounded-full border border-[#dfe1e4] flex items-center justify-center text-[#5b6168] hover:bg-[#f3f4f6] hover:text-[#25282c] transition-colors active:scale-[0.96]" onclick={() => termsOpen = false} aria-label="Zatvori">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+        </button>
+      </div>
+      <div class="px-6 md:px-8 py-6 overflow-y-auto">
+        <div class="whitespace-pre-wrap break-words text-sm leading-7 text-[#4c5157]">{data.terms?.content_hr}</div>
+      </div>
+      <div class="px-6 md:px-8 py-5 border-t border-[#e8e9eb] bg-[#fafbfc] flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
+        <button class="btn btn-ghost sm:min-w-32 active:scale-[0.98]" onclick={() => termsOpen = false}>{$locale === 'hr' ? 'Zatvori' : 'Close'}</button>
+        <button class="btn btn-primary sm:min-w-52 active:scale-[0.98]" onclick={() => { termsAccepted = true; termsOpen = false; }}>{$locale === 'hr' ? 'Prihvaćam uvjete' : 'Accept terms'}</button>
+      </div>
     </div>
   </div>
 {/if}

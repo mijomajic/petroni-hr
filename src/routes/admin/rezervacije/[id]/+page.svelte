@@ -86,7 +86,7 @@
           <option value="pending">Na čekanju</option><option value="confirmed">Potvrđena</option>
           <option value="cancelled">Otkazana</option><option value="completed">Završena</option>
         </select>
-        <button class="btn btn-primary">Spremi</button>
+        <button class="btn btn-primary hover:brightness-95 active:scale-[0.98] transition">Spremi</button>
       </form>
       <div class="mt-4 flex items-center justify-between gap-3 text-sm">
         <span>Email potvrde: <b>{data.booking.confirmation_email_sent ? 'poslan' : 'nije poslan'}</b></span>
@@ -102,14 +102,14 @@
           <input type="hidden" name="part" value="1" />
           <span class="text-sm flex-1">Prva rata ({money(data.booking.first_payment_amount)})</span>
           <select name="status" value={data.booking.first_payment_status} class="px-3 py-2 border rounded-lg text-sm"><option value="unpaid">Nije plaćena</option><option value="paid">Plaćena</option></select>
-          <button class="text-sm font-bold">Spremi</button>
+          <button class="px-3 py-2 rounded-lg text-sm font-bold bg-[#F5C518] text-black hover:bg-[#dfb314] active:scale-[0.97] transition">Spremi</button>
         </form>
         {#if data.booking.payment_split}
           <form method="POST" action="?/payment" class="flex items-center gap-3">
             <input type="hidden" name="part" value="2" />
             <span class="text-sm flex-1">Druga rata ({money(data.booking.second_payment_amount)}), do {data.booking.second_payment_due_date}</span>
             <select name="status" value={data.booking.second_payment_status} class="px-3 py-2 border rounded-lg text-sm"><option value="unpaid">Nije plaćena</option><option value="paid">Plaćena</option></select>
-            <button class="text-sm font-bold">Spremi</button>
+            <button class="px-3 py-2 rounded-lg text-sm font-bold bg-[#F5C518] text-black hover:bg-[#dfb314] active:scale-[0.97] transition">Spremi</button>
           </form>
           <div class="pt-3 border-t border-[#ededf0]">
             <p class="text-xs leading-relaxed text-[#7a7f86] mb-3">Poveznica se ne šalje automatski. Nakon evidentirane prve rate izradite je ovdje, kopirajte i pošaljite klijentu. Izrada nove poveznice poništava prethodnu.</p>

@@ -29,7 +29,7 @@
 
 <div class="max-w-2xl">
   <div class="flex items-center gap-4 mb-8">
-    <a href="/admin/vozila" class="text-sm transition-colors hover:text-[#2b2b2b]" style="color: #7a7f86">← Vozila</a>
+    <a href="/admin/vozila" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#d9dce1] bg-white text-sm font-bold text-[#454a50] hover:bg-[#f6f7f9] active:scale-[0.98] transition">← Natrag na vozila</a>
     <h1 class="text-2xl font-black uppercase tracking-tight text-[#2b2b2b]">Novo vozilo</h1>
   </div>
 
