@@ -121,7 +121,7 @@ export type Booking = {
   second_payment_amount: number | null;
   second_payment_due_date: string | null;
   payment_status: 'unpaid' | 'partial' | 'paid';
-  payment_method: 'bank_transfer' | 'corvuspay' | 'cash' | null;
+  payment_method: 'bank_transfer' | 'corvuspay' | null;
   corvuspay_order_id: string | null;
   terms_accepted_at: string | null;
   terms_accepted_ip: string | null;

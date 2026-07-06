@@ -3,7 +3,10 @@
   let { data }: PageProps = $props();
 </script>
 
-<svelte:head><title>Doplata rezervacije — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Doplata rezervacije — Petroni</title>
+  <meta name="referrer" content="no-referrer" />
+</svelte:head>
 <div class="max-w-3xl mx-auto px-4 py-16">
   <h1 class="text-3xl font-bold mb-2">Doplata rezervacije</h1>
   <p class="text-[#6b7178] mb-8">#{data.booking.confirmation_number} · dospijeće {data.booking.second_payment_due_date}</p>
@@ -17,6 +20,7 @@
         <form method="POST" action="/api/corvuspay/start" class="mt-5">
           <input type="hidden" name="booking_id" value={data.booking.id} />
           <input type="hidden" name="part" value="2" />
+          <input type="hidden" name="token" value={data.token} />
           <button class="btn btn-primary">Plati karticom</button>
         </form>
       {:else}

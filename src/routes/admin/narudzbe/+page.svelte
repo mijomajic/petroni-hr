@@ -1,20 +1,14 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabase';
+  import type { PageProps } from './$types';
+  import { invalidateAll } from '$app/navigation';
 
-  let orders: any[] = $state([]);
-  let loading = $state(true);
+  let { data }: PageProps = $props();
+  const orders = $derived(data.orders);
 
   async function updateStatus(id: string, status: string) {
     const response = await fetch(`/api/admin/orders/${id}/status`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status }) });
-    if (response.ok) orders = orders.map(o => o.id === id ? { ...o, status } : o);
+    if (response.ok) await invalidateAll();
   }
-
-  onMount(async () => {
-    const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-    orders = data ?? [];
-    loading = false;
-  });
 </script>
 
 <svelte:head><title>Narudžbe — Admin — Petroni</title></svelte:head>
@@ -23,9 +17,6 @@
   <h1 class="text-3xl font-black uppercase tracking-tight text-[#2b2b2b] mb-8">Narudžbe</h1>
 
   <div class="rounded-2xl overflow-hidden" style="background: #ffffff; border: 1px solid #ededf0">
-    {#if loading}
-      <div class="p-8 space-y-3">{#each [1,2,3] as _}<div class="h-12 rounded-xl animate-pulse" style="background: #f6f7f9"></div>{/each}</div>
-    {:else}
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead style="border-bottom: 1px solid #e7e8eb">
@@ -53,6 +44,5 @@
         </table>
         {#if orders.length === 0}<p class="p-8 text-center text-sm" style="color: #7a7f86">Nema narudžbi.</p>{/if}
       </div>
-    {/if}
   </div>
 </div>

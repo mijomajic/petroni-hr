@@ -23,7 +23,6 @@
     {#if result?.booking}
       <div class="text-left card card-static p-5 mb-8">
         <p class="font-bold mb-2">#{result.booking.confirmation_number}</p>
-        {#if result.booking.payment_method === 'cash'}<p class="text-sm text-[#60656b]">{$locale === 'hr' ? 'Plaćanje gotovinom obavlja se pri preuzimanju vozila prema uputama osoblja.' : 'Pay cash at vehicle pickup following staff instructions.'}</p>{/if}
         {#if result.booking.payment_split}
           <p class="text-sm text-[#60656b] mt-2">
             {$locale === 'hr'

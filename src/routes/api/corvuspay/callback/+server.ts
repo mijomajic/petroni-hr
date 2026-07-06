@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/supabase.server';
 import { verifyCorvuspayCallback } from '$lib/payments.server';
+import { revokeSecondPaymentTokens } from '$lib/payment-tokens.server';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, url }) => {
@@ -9,6 +10,19 @@ export const POST: RequestHandler = async ({ request, url }) => {
   if (!verifyCorvuspayCallback(fields)) return new Response('Invalid signature', { status: 400 });
   const [bookingId, partText] = String(fields.order_number ?? '').split(':');
   const successful = ['success', 'approved', 'completed'].includes(String(fields.status ?? fields.result ?? '').toLowerCase());
+  if (bookingId) {
+    await supabaseAdmin.from('payment_attempts').insert({
+      booking_id: bookingId,
+      payment_part: partText === '2' ? 2 : 1,
+      provider: 'corvuspay',
+      action: 'callback_received',
+      status: successful ? 'succeeded' : 'failed',
+      provider_reference: String(fields.order_number ?? ''),
+      metadata: {
+        result: String(fields.status ?? fields.result ?? 'unknown')
+      }
+    });
+  }
   if (bookingId && successful) {
     const part = partText === '2' ? 2 : 1;
     const { data: booking } = await supabaseAdmin.from('bookings')
@@ -24,6 +38,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
           payment_status: booking?.payment_split && booking?.second_payment_status !== 'paid' ? 'partial' : 'paid'
         };
     await supabaseAdmin.from('bookings').update(update).eq('id', bookingId);
+    if (part === 2) await revokeSecondPaymentTokens(bookingId);
   }
   return new Response('OK');
 };

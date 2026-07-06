@@ -5,6 +5,7 @@ import { getUnavailableVehicleIds, loadPricingConfig } from '$lib/pricing.server
 import type { RequestHandler } from './$types';
 import {
   createCorvuspayRedirect,
+  corvuspayAvailable,
   hub3BarcodeDataUrl,
   hub3Payload,
   paymentAmount,
@@ -81,9 +82,15 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
     !driver.zip ||
     !driver.country ||
     !body.terms_accepted ||
-    !['bank_transfer', 'corvuspay', 'cash'].includes(paymentMethod)
+    !['bank_transfer', 'corvuspay'].includes(paymentMethod)
   ) {
     return json({ success: false, error: 'Nedostaju obavezni podaci rezervacije.' }, { status: 400 });
+  }
+  if (paymentMethod === 'corvuspay' && !corvuspayAvailable()) {
+    return json(
+      { success: false, error: 'CorvusPay je uskoro dostupan. Odaberite bankovnu uplatu.' },
+      { status: 503 }
+    );
   }
 
   const [{ data: vehicle, error: vehicleError }, pricingData, { data: terms }, { data: paymentSettings }] = await Promise.all([
@@ -152,7 +159,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
     return json({ success: false, error: 'Cijenu rezervacije nije moguće izračunati.' }, { status: 400 });
   }
   const settings = Object.fromEntries((paymentSettings ?? []).map((row) => [row.key, row.value]));
-  const dueDays = Math.max(1, Number(settings.split_payment_due_days ?? 7));
+  const dueDays = Math.max(1, Number(settings.split_payment_due_days ?? 3));
   const dueDate = new Date(`${pickupDate}T00:00:00Z`);
   dueDate.setUTCDate(dueDate.getUTCDate() - dueDays);
   const today = new Date();
@@ -198,7 +205,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
     payment_split: paymentSplit,
     first_payment_amount: firstAmount,
     second_payment_amount: secondAmount,
-    first_payment_status: paymentMethod === 'cash' ? 'unpaid' : 'unpaid',
+    first_payment_status: 'unpaid',
     second_payment_status: paymentSplit ? 'unpaid' : 'not_applicable',
     second_payment_due_date: paymentSplit ? dueDate.toISOString().slice(0, 10) : null,
     payment_status: 'unpaid',
@@ -262,6 +269,14 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
       });
       return { ...account, amount: firstAmount, reference: confirmationNumber, barcode: await hub3BarcodeDataUrl(payload) };
     }));
+    await supabaseAdmin.from('payment_attempts').insert({
+      booking_id: data.id,
+      payment_part: 1,
+      provider: 'bank_transfer',
+      action: 'payment_instructions_created',
+      status: 'pending',
+      provider_reference: confirmationNumber
+    });
   }
   if (paymentMethod === 'corvuspay') {
     const redirect = createCorvuspayRedirect({
@@ -273,8 +288,16 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
     });
     if (!redirect) {
       await supabaseAdmin.from('bookings').delete().eq('id', data.id);
-      return json({ success: false, error: 'CorvusPay je uskoro dostupan. Odaberite bankovnu uplatu ili gotovinu.' }, { status: 503 });
+      return json({ success: false, error: 'CorvusPay je uskoro dostupan. Odaberite bankovnu uplatu.' }, { status: 503 });
     }
+    await supabaseAdmin.from('payment_attempts').insert({
+      booking_id: data.id,
+      payment_part: 1,
+      provider: 'corvuspay',
+      action: 'redirect_created',
+      status: 'started',
+      provider_reference: `${data.id}:1`
+    });
     response.corvuspay = redirect;
   }
   return json(response);

@@ -1,25 +1,12 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { supabase } from '$lib/supabase';
+  import type { LayoutProps } from './$types';
 
-  let { children } = $props();
-  let user = $state<any>(null);
-  let checking = $state(true);
+  let { children, data }: LayoutProps = $props();
 
   const isLoginPage = $derived($page.url.pathname === '/admin/login');
-
-  onMount(async () => {
-    if (isLoginPage) { checking = false; return; }
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      goto('/admin/login');
-    } else {
-      user = session.user;
-    }
-    checking = false;
-  });
 
   async function logout() {
     await supabase.auth.signOut();
@@ -38,11 +25,7 @@
 
 {#if isLoginPage}
   {@render children()}
-{:else if checking}
-  <div class="min-h-screen flex items-center justify-center" style="background:#fafbfc">
-    <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color:#f5c518;border-top-color:transparent"></div>
-  </div>
-{:else if user}
+{:else if data.administrator}
   <div class="min-h-screen flex" style="background:#fafbfc">
     <!-- Sidebar -->
     <aside class="w-64 flex-shrink-0 fixed left-0 top-0 bottom-0 flex flex-col bg-white border-r border-[#eceef1]">
@@ -65,7 +48,7 @@
       </nav>
 
       <div class="p-4 border-t border-[#eceef1]">
-        <p class="text-xs truncate mb-3 text-[#8b9099]">{user.email}</p>
+        <p class="text-xs truncate mb-3 text-[#8b9099]">{data.administrator.email}</p>
         <button onclick={logout} class="w-full py-2 rounded-md text-xs font-bold uppercase tracking-wide text-[#5b6168] border border-[#e2e4e8] hover:bg-[#f6f7f9]">Odjava</button>
         <a href="/" class="block mt-2 text-center text-xs text-[#8b9099] hover:text-[#2b2b2b]">← Na stranicu</a>
       </div>

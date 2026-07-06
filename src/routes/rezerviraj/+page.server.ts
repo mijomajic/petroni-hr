@@ -37,7 +37,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     minDriverAge: Number(settingsMap.min_driver_age ?? 28),
     kmPerDayIncluded: Number(settingsMap.km_per_day_included ?? 300),
     ibans: settingsMap.ibans ?? [],
-    splitPaymentDueDays: Number(settingsMap.split_payment_due_days ?? 7),
+    splitPaymentDueDays: Number(settingsMap.split_payment_due_days ?? 3),
     terms: terms.data ?? null,
     corvuspayAvailable: corvuspayAvailable(),
     profile: user

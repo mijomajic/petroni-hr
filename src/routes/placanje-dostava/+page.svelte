@@ -4,11 +4,9 @@
   const paymentMethods = $derived($locale === 'hr' ? [
     { name: 'Bankovna doznaka', desc: 'Plaćanje uplatom na bankovni račun tvrtke Petroni d.o.o. Detalji za uplatu dostavljaju se uz potvrdu narudžbe.' },
     { name: 'Kartično plaćanje (CorvusPay)', desc: 'Sigurno plaćanje karticama (Visa, Mastercard, Maestro) putem CorvusPay sustava.' },
-    { name: 'Gotovina', desc: 'Plaćanje gotovinom moguće je isključivo prilikom osobnog preuzimanja vozila ili robe.' },
   ] : [
     { name: 'Bank transfer', desc: 'Payment via transfer to the Petroni d.o.o. bank account. Payment details are sent with the order confirmation.' },
     { name: 'Card payment (CorvusPay)', desc: 'Secure card payment (Visa, Mastercard, Maestro) via the CorvusPay system.' },
-    { name: 'Cash', desc: 'Cash payment is only possible upon personal pickup of the vehicle or goods.' },
   ]);
 
   const shippingOptions = $derived($locale === 'hr' ? [

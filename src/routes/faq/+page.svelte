@@ -6,20 +6,20 @@
   const faqs = $derived($locale === 'hr' ? [
     { q: 'Kako mogu rezervirati kamper?', a: 'Rezervaciju možete obaviti online putem naše stranice za rezervacije u nekoliko jednostavnih koraka, ili nas kontaktirajte telefonom ili e-mailom.' },
     { q: 'Što je uključeno u cijenu najma?', a: 'U cijenu najma uključena je osnovna oprema vozila te tehnička podrška tijekom putovanja. Dodatna opremu možete odabrati prilikom rezervacije.' },
-    { q: 'Koja je minimalna starost vozača?', a: 'Vozač mora imati najmanje 21 godinu i posjedovati važeću vozačku dozvolu B kategorije izdanu prije najmanje 2 godine.' },
+    { q: 'Koja je minimalna starost vozača?', a: 'Vozač mora imati najmanje 28 godina na dan preuzimanja i posjedovati važeću vozačku dozvolu.' },
     { q: 'Mogu li otkazati rezervaciju?', a: 'Besplatno otkazivanje moguće je do 30 dana prije preuzimanja vozila. Pogledajte uvjete najma za detalje.' },
     { q: 'Koliko traje dostava narudžbe iz shopa?', a: 'Dostava unutar Hrvatske traje 2–4 radna dana, ovisno o odabranoj dostavnoj službi.' },
     { q: 'Mogu li vratiti kupljeni proizvod?', a: 'Da, imate pravo na povrat proizvoda u roku od 14 dana od preuzimanja, sukladno našoj politici povrata.' },
-    { q: 'Koje načine plaćanja prihvaćate?', a: 'Prihvaćamo plaćanje bankovnom doznakom, karticom putem CorvusPaya, te gotovinom prilikom osobnog preuzimanja.' },
+    { q: 'Koje načine plaćanja prihvaćate?', a: 'Prihvaćamo plaćanje bankovnom doznakom i karticom putem CorvusPaya.' },
     { q: 'Je li dostupna pomoć na putu?', a: 'Da, svi naši kamperi dolaze s kontaktom za tehničku podršku i pomoć na putu 0-24.' },
   ] : [
     { q: 'How can I book a camper?', a: 'You can book online through our reservation page in a few simple steps, or contact us by phone or email.' },
     { q: 'What is included in the rental price?', a: 'The rental price includes the basic vehicle equipment and technical support during your trip. Additional extras can be selected during booking.' },
-    { q: 'What is the minimum driver age?', a: 'The driver must be at least 21 years old and hold a valid category B driving licence issued at least 2 years ago.' },
+    { q: 'What is the minimum driver age?', a: 'The driver must be at least 28 years old on the pickup date and hold a valid driving licence.' },
     { q: 'Can I cancel my booking?', a: 'Free cancellation is possible up to 30 days before pickup. See the rental terms for details.' },
     { q: 'How long does shop delivery take?', a: 'Delivery within Croatia takes 2–4 business days, depending on the chosen shipping option.' },
     { q: 'Can I return a purchased product?', a: 'Yes, you have the right to return a product within 14 days of receiving it, in accordance with our return policy.' },
-    { q: 'What payment methods do you accept?', a: 'We accept bank transfer, card payment via CorvusPay, and cash on personal pickup.' },
+    { q: 'What payment methods do you accept?', a: 'We accept bank transfer and card payment via CorvusPay.' },
     { q: 'Is roadside assistance available?', a: 'Yes, all our campers come with a 24/7 technical support and roadside assistance contact.' },
   ]);
 </script>

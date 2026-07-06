@@ -38,7 +38,7 @@
   );
   let availableVehicles: Vehicle[] = $state([]);
   let loading = $state(false);
-  let paymentMethod = $state<'bank_transfer' | 'corvuspay' | 'cash'>('bank_transfer');
+  let paymentMethod = $state<'bank_transfer' | 'corvuspay'>('bank_transfer');
   let paymentSplit = $state(false);
   let termsAccepted = $state(false);
   let termsOpen = $state(false);
@@ -769,10 +769,9 @@
 
         <div class="card card-static p-6 md:p-8">
           <h2 class="text-lg font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Način plaćanja' : 'Payment method'}</h2>
-          <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <div class="grid md:grid-cols-2 gap-4 mb-6">
             <button onclick={() => paymentMethod = 'bank_transfer'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'bank_transfer' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Bankovna uplata' : 'Bank transfer'}</p><p class="text-xs text-[#9aa0a8] mt-1">HUB-3 / PDF417</p></button>
             <button onclick={() => data.corvuspayAvailable && (paymentMethod = 'corvuspay')} disabled={!data.corvuspayAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'corvuspay' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Kartica' : 'Card'}</p><p class="text-xs text-[#9aa0a8] mt-1">{data.corvuspayAvailable ? 'CorvusPay' : ($locale === 'hr' ? 'Uskoro dostupno' : 'Coming soon')}</p></button>
-            <button onclick={() => paymentMethod = 'cash'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'cash' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Gotovina' : 'Cash'}</p><p class="text-xs text-[#9aa0a8] mt-1">{$locale === 'hr' ? 'Pri preuzimanju' : 'At pickup'}</p></button>
           </div>
           <div class="rounded-md p-4 mb-5 bg-[#f6f7f9] border border-[#ededf0]">
             <label class="flex gap-3 items-start cursor-pointer">

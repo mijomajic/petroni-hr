@@ -1,23 +1,6 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabase';
-
-  let bookings: any[] = $state([]);
-  let loading = $state(true);
-  let filterStatus = $state('');
-
-  const filtered = $derived(filterStatus ? bookings.filter(b => b.status === filterStatus) : bookings);
-
-  async function updateStatus(id: string, status: string) {
-    const response = await fetch(`/api/admin/bookings/${id}/status`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status }) });
-    if (response.ok) bookings = bookings.map(b => b.id === id ? { ...b, status } : b);
-  }
-
-  onMount(async () => {
-    const { data } = await supabase.from('bookings').select('*, vehicles(name)').order('created_at', { ascending: false });
-    bookings = data ?? [];
-    loading = false;
-  });
+  import type { PageProps } from './$types';
+  let { data }: PageProps = $props();
 </script>
 
 <svelte:head><title>Rezervacije — Admin — Petroni</title></svelte:head>
@@ -25,21 +8,25 @@
 <div>
   <div class="flex items-center justify-between mb-8">
     <h1 class="text-3xl font-black uppercase tracking-tight text-[#2b2b2b]">Rezervacije</h1>
-    <select class="px-4 py-2 rounded-xl text-sm text-[#2b2b2b] focus:outline-none" style="background: #f6f7f9; border: 1px solid #e7e8eb" bind:value={filterStatus}>
-      <option value="">Sve</option>
-      <option value="pending">Na čekanju</option>
-      <option value="confirmed">Potvrđene</option>
-      <option value="cancelled">Otkazane</option>
-      <option value="completed">Završene</option>
-    </select>
+    <form method="GET" class="flex items-end gap-2">
+      <label class="text-xs text-[#7a7f86]">Od
+        <input type="date" name="date_from" value={data.filters.dateFrom} class="block px-3 py-2 rounded-xl text-sm text-[#2b2b2b]" style="background:#f6f7f9;border:1px solid #e7e8eb" />
+      </label>
+      <label class="text-xs text-[#7a7f86]">Do
+        <input type="date" name="date_to" value={data.filters.dateTo} class="block px-3 py-2 rounded-xl text-sm text-[#2b2b2b]" style="background:#f6f7f9;border:1px solid #e7e8eb" />
+      </label>
+      <select name="status" class="px-4 py-2 rounded-xl text-sm text-[#2b2b2b]" style="background:#f6f7f9;border:1px solid #e7e8eb" value={data.filters.status}>
+        <option value="">Svi statusi</option>
+        <option value="pending">Na čekanju</option>
+        <option value="confirmed">Potvrđene</option>
+        <option value="cancelled">Otkazane</option>
+        <option value="completed">Završene</option>
+      </select>
+      <button class="px-4 py-2 rounded-xl text-sm font-bold bg-[#F5C518] text-black">Filtriraj</button>
+    </form>
   </div>
 
   <div class="rounded-2xl overflow-hidden" style="background: #ffffff; border: 1px solid #ededf0">
-    {#if loading}
-      <div class="p-8 space-y-3">
-        {#each [1,2,3,4,5] as _}<div class="h-12 rounded-xl animate-pulse" style="background: #f6f7f9"></div>{/each}
-      </div>
-    {:else}
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead style="border-bottom: 1px solid #e7e8eb">
@@ -50,13 +37,13 @@
             </tr>
           </thead>
           <tbody>
-            {#each filtered as b}
+            {#each data.bookings as b}
               <tr style="border-bottom: 1px solid #f0f1f3">
                 <td class="px-4 py-3">
                   <p class="text-[#2b2b2b] font-medium">{b.driver_name}</p>
                   <p class="text-xs" style="color: #7a7f86">{b.driver_email}</p>
                 </td>
-                <td class="px-4 py-3 text-[#2b2b2b]">{b.vehicles?.name ?? '—'}</td>
+                <td class="px-4 py-3 text-[#2b2b2b]">{b.vehicles?.[0]?.name ?? '—'}</td>
                 <td class="px-4 py-3" style="color: #7a7f86">{b.pickup_date}</td>
                 <td class="px-4 py-3" style="color: #7a7f86">{b.dropoff_date}</td>
                 <td class="px-4 py-3 font-bold" style="color: #F5C518">€{b.total_price}</td>
@@ -67,26 +54,15 @@
                   </span>
                 </td>
                 <td class="px-4 py-3">
-                  <select
-                    class="px-3 py-1.5 rounded-xl text-xs text-[#2b2b2b] focus:outline-none"
-                    style="background: #f6f7f9; border: 1px solid #e7e8eb"
-                    value={b.status}
-                    onchange={e => updateStatus(b.id, (e.target as HTMLSelectElement).value)}
-                  >
-                    <option value="pending">Na čekanju</option>
-                    <option value="confirmed">Potvrdi</option>
-                    <option value="cancelled">Otkaži</option>
-                    <option value="completed">Završi</option>
-                  </select>
+                  <a href="/admin/rezervacije/{b.id}" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#f6f7f9] border border-[#e7e8eb]">Otvori</a>
                 </td>
               </tr>
             {/each}
           </tbody>
         </table>
-        {#if filtered.length === 0}
+        {#if data.bookings.length === 0}
           <p class="p-8 text-sm text-center" style="color: #7a7f86">Nema rezervacija.</p>
         {/if}
       </div>
-    {/if}
   </div>
 </div>

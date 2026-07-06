@@ -1,28 +1,8 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabase';
-
-  let stats = $state({ pendingBookings: 0, vehicles: 0, orders: 0, revenue: 0 });
-  let recentBookings: any[] = $state([]);
-  let loading = $state(true);
-
-  onMount(async () => {
-    const [bookingsRes, vehiclesRes, ordersRes, recentRes] = await Promise.all([
-      supabase.from('bookings').select('id', { count: 'exact' }).eq('status', 'pending'),
-      supabase.from('vehicles').select('id', { count: 'exact' }),
-      supabase.from('orders').select('id', { count: 'exact' }).eq('status', 'pending'),
-      supabase.from('bookings').select('*').order('created_at', { ascending: false }).limit(5),
-    ]);
-
-    stats = {
-      pendingBookings: bookingsRes.count ?? 0,
-      vehicles: vehiclesRes.count ?? 0,
-      orders: ordersRes.count ?? 0,
-      revenue: 0,
-    };
-    recentBookings = recentRes.data ?? [];
-    loading = false;
-  });
+  import type { PageProps } from './$types';
+  let { data }: PageProps = $props();
+  const stats = $derived(data.stats);
+  const recentBookings = $derived(data.recentBookings);
 </script>
 
 <svelte:head><title>Dashboard — Admin — Petroni</title></svelte:head>
@@ -49,13 +29,7 @@
   <!-- Recent bookings -->
   <div class="p-6 rounded-2xl" style="background: #ffffff; border: 1px solid #ededf0">
     <h2 class="font-bold text-[#2b2b2b] mb-4 text-sm uppercase tracking-widest">Nedavne rezervacije</h2>
-    {#if loading}
-      <div class="space-y-2">
-        {#each [1,2,3] as _}
-          <div class="h-12 rounded-xl animate-pulse" style="background: #f6f7f9"></div>
-        {/each}
-      </div>
-    {:else if recentBookings.length === 0}
+    {#if recentBookings.length === 0}
       <p class="text-sm" style="color: #7a7f86">Nema rezervacija.</p>
     {:else}
       <div class="overflow-x-auto">
