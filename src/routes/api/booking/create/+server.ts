@@ -117,6 +117,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
     return json({ success: false, error: 'Odabrana lokacija nije valjana.' }, { status: 400 });
   }
   if (
+    (vehicle.seats ?? vehicle.max_adults ?? 0) < numAdults + numChildren ||
     (vehicle.max_adults ?? vehicle.seats ?? 0) < numAdults ||
     (vehicle.max_children ?? 0) < numChildren
   ) {
@@ -239,7 +240,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
     }
   }
 
-  sendBookingReceived(data).then(async (sent) => {
+  sendBookingReceived(data, terms).then(async (sent) => {
     if (sent) await supabaseAdmin.from('bookings').update({ confirmation_email_sent: true }).eq('id', data.id);
   }).catch((mailError) => console.error('Booking email failed', mailError));
 

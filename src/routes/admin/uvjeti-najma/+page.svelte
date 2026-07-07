@@ -25,7 +25,11 @@
     <div class="grid gap-2">
       <label for="terms-content" class="text-xs font-bold uppercase tracking-wider text-[#5b6168]">Tekst uvjeta na hrvatskom</label>
       <textarea id="terms-content" name="content_hr" rows="22" class="field min-h-[32rem] resize-y leading-relaxed" required>{data.activeTerms?.content_hr ?? ''}</textarea>
-      <p class="text-xs text-[#8b9099]">Spremanje odmah postavlja ovu verziju kao aktivnu za nove rezervacije.</p>
+    </div>
+    <div class="grid gap-2 mt-6">
+      <label for="terms-content-en" class="text-xs font-bold uppercase tracking-wider text-[#5b6168]">Tekst uvjeta na engleskom</label>
+      <textarea id="terms-content-en" name="content_en" rows="22" class="field min-h-[32rem] resize-y leading-relaxed">{data.activeTerms?.content_en ?? ''}</textarea>
+      <p class="text-xs text-[#8b9099]">Spremanje odmah postavlja ovu verziju kao aktivnu za nove rezervacije. Engleski tekst je opcionalan, ali se prikazuje gostima koji koriste englesko sučelje.</p>
     </div>
     <div class="mt-6 p-4 rounded-xl border border-[#f0d87a] bg-[#fffaf0] text-sm text-[#6f5600]">
       E-suglasnost je revizijski trag prihvaćanja. Pravnu valjanost i konačni tekst treba potvrditi pravni savjetnik.

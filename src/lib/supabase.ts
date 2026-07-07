@@ -215,6 +215,7 @@ export type RentalTerms = {
   id: string;
   version: string;
   content_hr: string;
+  content_en: string | null;
   is_active: boolean;
   created_at: string;
 };

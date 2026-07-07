@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { booking, resetBooking } from '$lib/stores/booking';
   import { supabase } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
@@ -42,6 +42,7 @@
   let paymentSplit = $state(false);
   let termsAccepted = $state(false);
   let termsOpen = $state(false);
+  let termsScrolled = $state(false);
   let searchError = $state('');
   let driverError = $state('');
   let submitError = $state('');
@@ -81,6 +82,9 @@
   const totalPrice = $derived(selectedPricing.payable_total);
   const vehiclePricing = $derived(
     new Map(availableVehicles.map((vehicle) => [vehicle.id, pricingFor(vehicle)]))
+  );
+  const activeTermsText = $derived(
+    $locale === 'hr' ? data.terms?.content_hr : (data.terms?.content_en || data.terms?.content_hr)
   );
   const extraGroups = $derived(
     [
@@ -148,14 +152,31 @@
     });
   }
 
+  function vehicleCapacityMatches(vehicle: Vehicle): boolean {
+    const seats = vehicle.seats ?? vehicle.max_adults ?? 0;
+    const adultsFit = (vehicle.max_adults ?? seats) >= $booking.numAdults;
+    const childrenFit = (vehicle.max_children ?? seats) >= $booking.numChildren;
+    return seats >= $booking.numAdults + $booking.numChildren && adultsFit && childrenFit;
+  }
+
+  function handleTermsScroll(event: Event) {
+    const element = event.currentTarget as HTMLElement;
+    termsScrolled = element.scrollTop + element.clientHeight >= element.scrollHeight - 8;
+  }
+
+  function openTerms() {
+    termsOpen = true;
+    termsScrolled = false;
+    void tick().then(() => {
+      const element = document.getElementById('rental-terms-scroll');
+      if (element && element.scrollHeight <= element.clientHeight + 8) termsScrolled = true;
+    });
+  }
+
   async function searchVehicles() {
     loading = true;
     searchError = '';
-    const capacityMatches = rentalVehicles.filter((vehicle) => {
-      const adultsFit = (vehicle.max_adults ?? vehicle.seats ?? 0) >= $booking.numAdults;
-      const childrenFit = (vehicle.max_children ?? 0) >= $booking.numChildren;
-      return adultsFit && childrenFit;
-    });
+    const capacityMatches = rentalVehicles.filter(vehicleCapacityMatches);
 
     if (capacityMatches.length === 0) {
       availableVehicles = [];
@@ -297,6 +318,33 @@
     }));
   }
 
+  function sanitizeStoredBooking() {
+    const validVehicleIds = new Set(rentalVehicles.map((vehicle) => vehicle.id));
+    const extrasById = new Map(bookingExtras.map((extra) => [extra.id, extra]));
+
+    booking.update((current) => {
+      const selectedVehicle = current.selectedVehicle?.id
+        ? rentalVehicles.find((vehicle) => vehicle.id === current.selectedVehicle?.id) ?? null
+        : null;
+      const extras = Object.fromEntries(
+        Object.entries(current.extras)
+          .filter(([id]) => extrasById.has(id))
+          .map(([id, qty]) => {
+            const extra = extrasById.get(id);
+            return [id, Math.max(0, Math.min(extra?.max_qty ?? 0, Math.floor(Number(qty) || 0)))];
+          })
+      );
+      const selectedVehicleIsStale = current.selectedVehicle && !validVehicleIds.has(current.selectedVehicle.id);
+
+      return {
+        ...current,
+        selectedVehicle,
+        extras,
+        step: selectedVehicleIsStale && current.step > 1 ? 1 : current.step
+      };
+    });
+  }
+
   async function authenticateDuringBooking() {
     authLoading = true;
     authError = '';
@@ -364,6 +412,7 @@
   }
 
   onMount(() => {
+    sanitizeStoredBooking();
     if (data.profile) {
       signedIn = true;
       authEmail = String(data.profile.email ?? '');
@@ -780,11 +829,17 @@
             </label>
           </div>
           <label class="flex gap-3 items-start mb-5">
-            <input type="checkbox" bind:checked={termsAccepted} class="mt-1" required />
+            <input type="checkbox" bind:checked={termsAccepted} disabled={!termsScrolled && !termsAccepted} class="mt-1 disabled:opacity-40" required />
             <span class="text-sm text-[#4c5157]">
               {$locale === 'hr' ? 'Prihvaćam ' : 'I accept the '}
-              <button type="button" class="underline font-semibold" onclick={() => termsOpen = true}>{$locale === 'hr' ? 'uvjete najma' : 'rental terms'}</button>.
-              <span class="block text-xs text-[#8b9099] mt-1">{$locale === 'hr' ? 'Prihvat se bilježi kao revizijski trag; pravnu valjanost treba potvrditi pravni savjetnik.' : 'Acceptance is recorded as an audit trail; legal enforceability should be confirmed by legal counsel.'}</span>
+              <button type="button" class="underline font-semibold" onclick={openTerms}>{$locale === 'hr' ? 'uvjete najma' : 'rental terms'}</button>.
+              <span class="block text-xs text-[#8b9099] mt-1">
+                {#if !termsScrolled && !termsAccepted}
+                  {$locale === 'hr' ? 'Otvorite uvjete i dođite do kraja teksta prije označavanja.' : 'Open the terms and reach the end of the text before checking this box.'}
+                {:else}
+                  {$locale === 'hr' ? 'Prihvat se bilježi kao revizijski trag; pravnu valjanost treba potvrditi pravni savjetnik.' : 'Acceptance is recorded as an audit trail; legal enforceability should be confirmed by legal counsel.'}
+                {/if}
+              </span>
             </span>
           </label>
           {#if submitError}
@@ -813,12 +868,12 @@
           <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
         </button>
       </div>
-      <div class="px-6 md:px-8 py-6 overflow-y-auto">
-        <div class="whitespace-pre-wrap break-words text-sm leading-7 text-[#4c5157]">{data.terms?.content_hr}</div>
+      <div id="rental-terms-scroll" class="px-6 md:px-8 py-6 overflow-y-auto" onscroll={handleTermsScroll}>
+        <div class="whitespace-pre-wrap break-words text-sm leading-7 text-[#4c5157]">{activeTermsText}</div>
       </div>
       <div class="px-6 md:px-8 py-5 border-t border-[#e8e9eb] bg-[#fafbfc] flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
         <button class="btn btn-ghost sm:min-w-32 active:scale-[0.98]" onclick={() => termsOpen = false}>{$locale === 'hr' ? 'Zatvori' : 'Close'}</button>
-        <button class="btn btn-primary sm:min-w-52 active:scale-[0.98]" onclick={() => { termsAccepted = true; termsOpen = false; }}>{$locale === 'hr' ? 'Prihvaćam uvjete' : 'Accept terms'}</button>
+        <button class="btn btn-primary sm:min-w-52 active:scale-[0.98] disabled:opacity-50" disabled={!termsScrolled} onclick={() => { termsAccepted = true; termsOpen = false; }}>{$locale === 'hr' ? 'Prihvaćam uvjete' : 'Accept terms'}</button>
       </div>
     </div>
   </div>

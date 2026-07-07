@@ -85,12 +85,18 @@ async function send(
   }
 }
 
-export async function sendBookingReceived(booking: Record<string, any>) {
+export async function sendBookingReceived(
+  booking: Record<string, any>,
+  terms?: { version?: string | null; content_hr?: string | null }
+) {
   const config = await emailConfig();
   const details = `<p>Broj rezervacije: <strong>${escapeHtml(booking.confirmation_number)}</strong></p><p>${escapeHtml(booking.pickup_date)} - ${escapeHtml(booking.dropoff_date)}</p><p>Ukupno: ${Number(booking.total_price).toFixed(2)} EUR</p>`;
+  const termsBlock = terms?.content_hr
+    ? `<hr><p><strong>Uvjeti najma - verzija ${escapeHtml(terms.version)}</strong></p><pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:13px;line-height:1.55">${escapeHtml(terms.content_hr)}</pre>`
+    : '';
   const results = await Promise.all([
     send(
-      { from: config.from, to: booking.driver_email, subject: 'Zahtjev za rezervaciju zaprimljen', html: `<h1>Zahtjev je zaprimljen</h1>${details}<p>Rezervacija čeka pregled i potvrdu.</p>` },
+      { from: config.from, to: booking.driver_email, subject: 'Zahtjev za rezervaciju zaprimljen', html: `<h1>Zahtjev je zaprimljen</h1>${details}<p>Rezervacija čeka pregled i potvrdu.</p>${termsBlock}` },
       { bookingId: booking.id, messageType: 'booking_received_customer', recipient: booking.driver_email }
     ),
     send(

@@ -2,7 +2,6 @@
   const year = new Date().getFullYear();
 
   const links = [
-    { href: '/uvjeti-najma', label: 'Uvjeti najma' },
     { href: '/privatnost', label: 'Privatnost & Uvjeti poslovanja' },
     { href: '/placanje-dostava', label: 'Plaćanje & Dostava' },
     { href: '/reklamacije-povrat', label: 'Reklamacije & Povrat' },

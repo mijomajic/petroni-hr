@@ -20,7 +20,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       .from('settings')
       .select('key,value')
       .in('key', ['min_driver_age', 'km_per_day_included', 'ibans', 'split_payment_due_days']),
-    supabaseAdmin.from('rental_terms').select('version,content_hr').eq('is_active', true).single()
+    supabaseAdmin.from('rental_terms').select('*').eq('is_active', true).single()
   ]);
 
   const settingsMap = Object.fromEntries(

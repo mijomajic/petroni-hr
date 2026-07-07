@@ -117,6 +117,12 @@ function priceForSeason(
   return Number(vehicle.base_price_per_day ?? 0);
 }
 
+function refundableDepositForVehicle(vehicle: Vehicle): number {
+  const deposit = vehicle.specs?.deposit_eur;
+  const numericDeposit = typeof deposit === 'number' ? deposit : Number(deposit ?? 0);
+  return Number.isFinite(numericDeposit) ? Math.max(0, numericDeposit) : 0;
+}
+
 function isOutsideWindow(time: string, window: string | null): boolean {
   if (!time || !window) return false;
   const [from, to] = window.split('-').map((value) => value.trim());
@@ -256,7 +262,7 @@ export function calculatePricing(input: PricingInput, config: PricingConfig): Pr
   }
 
   let extrasTotal = 0;
-  let refundableDeposit = 0;
+  let refundableDeposit = refundableDepositForVehicle(input.vehicle);
   const extraSelections: PricingExtraSelection[] = [];
   for (const extra of config.extras) {
     const requestedQty = Math.max(0, Math.floor(Number(input.selectedExtras[extra.id] ?? 0)));
