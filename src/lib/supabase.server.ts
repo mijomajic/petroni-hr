@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import { env as pub } from '$env/dynamic/public';
 import { env as priv } from '$env/dynamic/private';
 
-const url = pub.PUBLIC_SUPABASE_URL ?? '';
-const serviceKey = priv.SUPABASE_SERVICE_KEY ?? '';
+const url = pub.PUBLIC_SUPABASE_URL ?? process.env.PUBLIC_SUPABASE_URL ?? '';
+const serviceKey = priv.SUPABASE_SERVICE_KEY ?? process.env.SUPABASE_SERVICE_KEY ?? '';
 
 // Server-only admin client. Uses the SERVICE-ROLE key, which BYPASSES Row Level
 // Security — so this must NEVER be imported into client/browser code. Two guards

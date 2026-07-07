@@ -1,18 +1,73 @@
+import { supabaseAdmin } from '$lib/supabase.server';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
-  const [products, categories] = await Promise.all([
-    locals.supabase
+const PAGE_SIZE = 24;
+
+function getNumberParam(url: URL, key: string) {
+  const rawValue = url.searchParams.get(key);
+  if (!rawValue) return undefined;
+  const value = Number(rawValue);
+  return Number.isFinite(value) && value >= 0 ? value : undefined;
+}
+
+export const load: PageServerLoad = async ({ url }) => {
+  const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
+  const sort = url.searchParams.get('sort') ?? 'newest';
+  const query = (url.searchParams.get('q') ?? '').trim();
+  const minPrice = getNumberParam(url, 'min');
+  const maxPrice = getNumberParam(url, 'max');
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
+  let productsQuery = supabaseAdmin
+    .from('products')
+    .select('*', { count: 'exact' })
+    .eq('is_active', true);
+
+  if (query) {
+    const safeQuery = query.replace(/[%_,]/g, ' ');
+    productsQuery = productsQuery.or(`name_hr.ilike.%${safeQuery}%,sku.ilike.%${safeQuery}%`);
+  }
+  if (minPrice !== undefined) productsQuery = productsQuery.gte('price', minPrice);
+  if (maxPrice !== undefined) productsQuery = productsQuery.lte('price', maxPrice);
+
+  if (sort === 'price_asc') {
+    productsQuery = productsQuery.order('price', { ascending: true });
+  } else if (sort === 'price_desc') {
+    productsQuery = productsQuery.order('price', { ascending: false });
+  } else {
+    productsQuery = productsQuery.order('created_at', { ascending: false });
+  }
+
+  const [products, categories, productCategories] = await Promise.all([
+    productsQuery.range(from, to),
+    supabaseAdmin.from('product_categories').select('*').order('sort_order'),
+    supabaseAdmin
       .from('products')
-      .select('*')
+      .select('category_id')
       .eq('is_active', true)
-      .order('created_at', { ascending: false }),
-    locals.supabase.from('product_categories').select('*').order('sort_order')
+      .not('category_id', 'is', null)
+      .range(0, 5000)
   ]);
+
+  const allCategories = categories.data ?? [];
+  const usedCategoryIds = new Set((productCategories.data ?? []).map((product) => product.category_id));
+  const visibleCategoryIds = new Set(usedCategoryIds);
+  for (const category of allCategories) {
+    if (usedCategoryIds.has(category.id) && category.parent_id) visibleCategoryIds.add(category.parent_id);
+  }
+  const visibleCategories = allCategories.filter((category) => visibleCategoryIds.has(category.id));
 
   return {
     products: products.data ?? [],
-    categories: categories.data ?? [],
+    categories: visibleCategories,
+    total: products.count ?? 0,
+    page,
+    pageSize: PAGE_SIZE,
+    sort,
+    query,
+    minPrice: url.searchParams.get('min') ?? '',
+    maxPrice: url.searchParams.get('max') ?? '',
     loadError: products.error?.message ?? categories.error?.message ?? null
   };
 };

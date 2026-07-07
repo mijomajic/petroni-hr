@@ -11,27 +11,31 @@
   const category: ProductCategory = $derived(data.category as ProductCategory);
   const products: Product[] = $derived(data.products as Product[]);
   const loading = false;
+  const total = $derived(data.total as number);
+  const pageNumber = $derived(data.page as number);
+  const pageSize = $derived(data.pageSize as number);
+  const totalPages = $derived(Math.max(1, Math.ceil(total / pageSize)));
   let sort = $state('newest');
   let search = $state('');
-  let minPrice = $state($page.url.searchParams.get('min') ?? '');
-  let maxPrice = $state($page.url.searchParams.get('max') ?? '');
-
+  let minPrice = $state('');
+  let maxPrice = $state('');
   const slug = $derived($page.params.category);
-  const sorted = $derived([...products]
-    .filter(p => !search || (p.name_hr + (p.name_en ?? '')).toLowerCase().includes(search.toLowerCase()))
-    .filter(p => minPrice === '' || p.price >= Number(minPrice))
-    .filter(p => maxPrice === '' || p.price <= Number(maxPrice))
-    .sort((a, b) => {
-      if (sort === 'price_asc') return a.price - b.price;
-      if (sort === 'price_desc') return b.price - a.price;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    })
-  );
 
-  function updatePriceParams() {
+  $effect(() => {
+    $page.url.href;
+    sort = data.sort as string;
+    search = data.query as string;
+    minPrice = data.minPrice as string;
+    maxPrice = data.maxPrice as string;
+  });
+
+  function applyFilters(nextPage = 1) {
     const params = new URLSearchParams($page.url.searchParams);
+    if (search.trim()) params.set('q', search.trim()); else params.delete('q');
+    if (sort && sort !== 'newest') params.set('sort', sort); else params.delete('sort');
     if (minPrice) params.set('min', minPrice); else params.delete('min');
     if (maxPrice) params.set('max', maxPrice); else params.delete('max');
+    if (nextPage > 1) params.set('page', String(nextPage)); else params.delete('page');
     goto(`?${params.toString()}`, { keepFocus: true, noScroll: true, replaceState: true });
   }
 
@@ -61,7 +65,7 @@
     <!-- Title + sort row -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
       <h1 class="text-[26px] md:text-[32px] font-bold text-[#2b2b2b] uppercase">{title}</h1>
-      <select class="field max-w-[220px]" bind:value={sort}>
+      <select class="field max-w-[220px]" bind:value={sort} onchange={() => applyFilters(1)}>
         <option value="newest">{$locale === 'hr' ? 'Zadano sortiranje' : 'Default sorting'}</option>
         <option value="price_asc">{$locale === 'hr' ? 'Cijena: niža → viša' : 'Price: low → high'}</option>
         <option value="price_desc">{$locale === 'hr' ? 'Cijena: viša → niža' : 'Price: high → low'}</option>
@@ -70,7 +74,9 @@
 
     {#if !loading}
       <p class="text-[12px] text-[#9aa0a8] mb-8 uppercase tracking-wide">
-        {$locale === 'hr' ? `Prikazujemo ${sorted.length} ${sorted.length === 1 ? 'rezultat' : 'rezultata'}` : `Showing ${sorted.length} ${sorted.length === 1 ? 'result' : 'results'}`}
+        {$locale === 'hr'
+          ? `Prikazujemo ${products.length} od ${total} ${total === 1 ? 'rezultata' : 'rezultata'}`
+          : `Showing ${products.length} of ${total} ${total === 1 ? 'result' : 'results'}`}
       </p>
     {/if}
 
@@ -83,7 +89,7 @@
           <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
             {#each Array(9) as _}<div class="rounded-lg aspect-square animate-pulse bg-[#f1f2f4]"></div>{/each}
           </div>
-        {:else if sorted.length === 0}
+        {:else if products.length === 0}
           <div class="py-20 text-center card">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" class="mx-auto mb-5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
             <p class="font-semibold text-[#5b6168] mb-2">{$locale === 'hr' ? 'Nema proizvoda u ovoj kategoriji' : 'No products in this category'}</p>
@@ -92,8 +98,22 @@
           </div>
         {:else}
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {#each sorted as product}<ProductCard {product} />{/each}
+            {#each products as product}<ProductCard {product} />{/each}
           </div>
+
+          {#if totalPages > 1}
+            <div class="flex flex-wrap items-center justify-center gap-2 mt-10">
+              <button class="btn btn-ghost px-4 py-2 disabled:opacity-40" disabled={pageNumber <= 1} onclick={() => applyFilters(pageNumber - 1)}>
+                {$locale === 'hr' ? 'Prethodna' : 'Previous'}
+              </button>
+              <span class="text-[13px] font-semibold text-[#5b6168] px-3">
+                {pageNumber} / {totalPages}
+              </span>
+              <button class="btn btn-ghost px-4 py-2 disabled:opacity-40" disabled={pageNumber >= totalPages} onclick={() => applyFilters(pageNumber + 1)}>
+                {$locale === 'hr' ? 'Sljedeća' : 'Next'}
+              </button>
+            </div>
+          {/if}
         {/if}
       </div>
 
@@ -113,9 +133,12 @@
           <p class="text-[11px] font-bold uppercase tracking-widest text-[#b5890a] mb-3">{$locale === 'hr' ? 'Pretraži' : 'Search'}</p>
           <div class="relative">
             <input type="text" placeholder={$locale === 'hr' ? 'Pretraži proizvode…' : 'Search products…'} bind:value={search}
-              class="field pr-10 text-[13px]" />
+              class="field pr-10 text-[13px]" onkeydown={(event) => { if (event.key === 'Enter') applyFilters(1); }} />
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9aa0a8" stroke-width="2" class="absolute right-3 top-1/2 -translate-y-1/2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           </div>
+          <button onclick={() => applyFilters(1)} class="btn btn-primary w-full mt-3 py-2.5 text-[11px]">
+            {$locale === 'hr' ? 'Pretraži' : 'Search'}
+          </button>
         </div>
 
         <!-- Categories -->
@@ -137,10 +160,10 @@
         <div class="card p-5">
           <p class="text-[11px] font-bold uppercase tracking-widest text-[#b5890a] mb-3">{$locale === 'hr' ? 'Cijena' : 'Price'}</p>
           <div class="flex items-center gap-2 mb-3">
-            <input type="number" min="0" placeholder={$locale === 'hr' ? 'Min' : 'Min'} bind:value={minPrice} onchange={updatePriceParams}
+            <input type="number" min="0" placeholder={$locale === 'hr' ? 'Min' : 'Min'} bind:value={minPrice} onchange={() => applyFilters(1)}
               class="field text-[13px]" />
             <span class="text-[#9aa0a8]">–</span>
-            <input type="number" min="0" placeholder={$locale === 'hr' ? 'Max' : 'Max'} bind:value={maxPrice} onchange={updatePriceParams}
+            <input type="number" min="0" placeholder={$locale === 'hr' ? 'Max' : 'Max'} bind:value={maxPrice} onchange={() => applyFilters(1)}
               class="field text-[13px]" />
           </div>
           <button onclick={resetFilters} class="text-[12px] underline" style="color:#b5890a">{$locale === 'hr' ? 'Resetiraj filtere' : 'Reset filters'}</button>
