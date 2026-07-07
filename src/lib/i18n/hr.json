@@ -68,8 +68,8 @@
     "back": "Natrag",
     "continue": "Nastavi",
     "confirmBook": "Potvrdi rezervaciju",
-    "payStripe": "Plati karticom",
-    "payPayPal": "Plati PayPalom",
+    "payCard": "Plati karticom",
+    "payBank": "Bankovna uplata",
     "successTitle": "Rezervacija potvrđena!",
     "successText": "Vaša rezervacija je uspješno primljena. Detalji su poslani na vašu email adresu."
   },

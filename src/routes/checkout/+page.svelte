@@ -1,7 +1,9 @@
 <script lang="ts">
   import { cart, clearCart } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
+  import type { PageProps } from './$types';
 
+  let { data }: PageProps = $props();
   let name = $state('');
   let email = $state('');
   let phone = $state('');
@@ -10,20 +12,53 @@
   let zip = $state('');
   let country = $state('Hrvatska');
   let loading = $state(false);
+  let submitError = $state('');
+  let paymentMethod = $state<'bank_transfer' | 'corvuspay'>('bank_transfer');
 
   const total = $derived($cart.reduce((acc, i) => acc + i.price * i.qty, 0));
 
   async function handleCheckout() {
     loading = true;
+    submitError = '';
     try {
       const res = await fetch('/api/checkout/create-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: $cart, customer: { name, email, phone, address, city, zip, country }, total }),
+        body: JSON.stringify({
+          items: $cart,
+          customer: { name, email, phone, address, city, zip, country },
+          payment_method: paymentMethod
+        }),
       });
       const data = await res.json();
-      if (data.success) { clearCart(); window.location.href = '/checkout/success'; }
-    } catch (e) { console.error(e); } finally { loading = false; }
+      if (data.success) {
+        sessionStorage.setItem('petroni_order_result', JSON.stringify(data));
+        clearCart();
+        if (data.corvuspay) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = data.corvuspay.url;
+          for (const [name, value] of Object.entries(data.corvuspay.fields)) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = String(value);
+            form.appendChild(input);
+          }
+          document.body.appendChild(form);
+          form.submit();
+        } else {
+          window.location.href = '/checkout/success';
+        }
+      } else {
+        submitError = data.error || ($locale === 'hr' ? 'Narudžbu nije moguće spremiti.' : 'The order could not be saved.');
+      }
+    } catch (e) {
+      console.error(e);
+      submitError = $locale === 'hr'
+        ? 'Narudžbu nije moguće spremiti. Provjerite vezu i pokušajte ponovno.'
+        : 'The order could not be saved. Check your connection and try again.';
+    } finally { loading = false; }
   }
 
   const fields = $derived([
@@ -65,8 +100,15 @@
 
         <div class="card p-7">
           <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-4">{$locale === 'hr' ? 'Plaćanje' : 'Payment'}</h2>
-          <div class="rounded-md p-4 bg-[#f6f7f9] border border-[#ededf0]">
-            <p class="text-sm text-center text-[#7a7f86]">{$locale === 'hr' ? 'Stripe plaćanje aktivira se nakon unosa API ključeva.' : 'Stripe payment activates once API keys are configured.'}</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button type="button" onclick={() => paymentMethod = 'bank_transfer'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'bank_transfer' ? '#f5c518' : '#e2e4e8'}">
+              <p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Bankovna uplata' : 'Bank transfer'}</p>
+              <p class="text-xs text-[#9aa0a8] mt-1">HUB-3 / PDF417</p>
+            </button>
+            <button type="button" onclick={() => data.corvuspayAvailable && (paymentMethod = 'corvuspay')} disabled={!data.corvuspayAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'corvuspay' ? '#f5c518' : '#e2e4e8'}">
+              <p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Kartica' : 'Card'}</p>
+              <p class="text-xs text-[#9aa0a8] mt-1">{data.corvuspayAvailable ? 'CorvusPay' : ($locale === 'hr' ? 'Uskoro dostupno' : 'Coming soon')}</p>
+            </button>
           </div>
         </div>
       </div>
@@ -87,8 +129,11 @@
             <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Međuzbroj' : 'Subtotal'}</span><span class="text-[#2b2b2b]">{total.toFixed(2)} €</span></div>
             <div class="flex justify-between font-bold text-lg"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span><span style="color:#b5890a">{total.toFixed(2)} €</span></div>
           </div>
+          {#if submitError}
+            <p class="text-sm text-[#b42318] mb-4">{submitError}</p>
+          {/if}
           <button onclick={handleCheckout} disabled={loading || $cart.length === 0 || !name || !email} class="btn btn-primary w-full disabled:opacity-50">
-            {loading ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…') : `${$locale === 'hr' ? 'Plati' : 'Pay'} ${total.toFixed(2)} €`}
+            {loading ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…') : `${$locale === 'hr' ? 'Naruči' : 'Place order'} ${total.toFixed(2)} €`}
           </button>
         </div>
       </div>

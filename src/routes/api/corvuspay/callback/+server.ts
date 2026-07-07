@@ -8,8 +8,16 @@ export const POST: RequestHandler = async ({ request, url }) => {
   const form = await request.formData();
   const fields = Object.fromEntries([...form.entries()].map(([key, value]) => [key, String(value)]));
   if (!verifyCorvuspayCallback(fields)) return new Response('Invalid signature', { status: 400 });
-  const [bookingId, partText] = String(fields.order_number ?? '').split(':');
+  const orderNumber = String(fields.order_number ?? '');
   const successful = ['success', 'approved', 'completed'].includes(String(fields.status ?? fields.result ?? '').toLowerCase());
+  if (orderNumber.startsWith('order:')) {
+    const orderId = orderNumber.slice('order:'.length);
+    if (orderId && successful) {
+      await supabaseAdmin.from('orders').update({ payment_status: 'paid', status: 'confirmed' }).eq('id', orderId);
+    }
+    return new Response('OK');
+  }
+  const [bookingId, partText] = orderNumber.split(':');
   if (bookingId) {
     await supabaseAdmin.from('payment_attempts').insert({
       booking_id: bookingId,

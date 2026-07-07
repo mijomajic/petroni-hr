@@ -68,8 +68,8 @@
     "back": "Back",
     "continue": "Continue",
     "confirmBook": "Confirm Booking",
-    "payStripe": "Pay by Card",
-    "payPayPal": "Pay with PayPal",
+    "payCard": "Pay by Card",
+    "payBank": "Bank transfer",
     "successTitle": "Booking Confirmed!",
     "successText": "Your booking has been successfully received. Details have been sent to your email address."
   },

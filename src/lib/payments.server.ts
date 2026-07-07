@@ -53,6 +53,9 @@ export function createCorvuspayRedirect(input: {
   description: string;
   email: string;
   baseUrl: string;
+  successPath?: string;
+  cancelPath?: string;
+  callbackPath?: string;
 }): { url: string; fields: Record<string, string> } | null {
   if (!corvuspayAvailable()) return null;
   const environment = env.CORVUSPAY_ENV?.toLowerCase();
@@ -67,9 +70,9 @@ export function createCorvuspayRedirect(input: {
     language: 'hr',
     cart: input.description.slice(0, 255),
     cardholder_email: input.email,
-    success_url: `${input.baseUrl}/api/corvuspay/callback?result=success`,
-    cancel_url: `${input.baseUrl}/api/corvuspay/callback?result=cancel`,
-    callback_url: `${input.baseUrl}/api/corvuspay/callback`
+    success_url: `${input.baseUrl}${input.successPath ?? '/api/corvuspay/callback?result=success'}`,
+    cancel_url: `${input.baseUrl}${input.cancelPath ?? '/api/corvuspay/callback?result=cancel'}`,
+    callback_url: `${input.baseUrl}${input.callbackPath ?? '/api/corvuspay/callback'}`
   };
   return { url, fields: { ...fields, signature: corvusSignature(fields) } };
 }

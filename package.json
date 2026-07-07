@@ -28,13 +28,11 @@
 	},
 	"dependencies": {
 		"@paypal/paypal-js": "^10.0.0",
-		"@stripe/stripe-js": "^9.7.0",
 		"@supabase/ssr": "^0.12.0",
 		"@supabase/supabase-js": "^2.108.0",
 		"bwip-js": "^4.11.2",
 		"pdf-lib": "^1.17.1",
 		"resend": "^6.16.0",
-		"stripe": "^22.2.0",
 		"svelte-i18n": "^4.0.1"
 	}
 }
