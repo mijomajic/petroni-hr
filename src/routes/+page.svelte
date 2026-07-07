@@ -2,15 +2,13 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { locale } from '$lib/stores/locale';
-  import type { Vehicle, Product } from '$lib/supabase';
+  import type { Vehicle } from '$lib/supabase';
   import VehicleCard from '$lib/components/ui/VehicleCard.svelte';
-  import ProductCard from '$lib/components/ui/ProductCard.svelte';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
   const rentalVehicles: Vehicle[] = $derived(data.rentalVehicles as Vehicle[]);
   const saleVehicles: Vehicle[] = $derived(data.saleVehicles as Vehicle[]);
-  const products: Product[] = $derived(data.products as Product[]);
   let statsStarted = $state(false);
 
   const galleryImages = [
@@ -18,8 +16,8 @@
     'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg',
     'https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp',
     'https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg',
-    'https://www.petroni.hr/wp-content/uploads/2024/03/DSC_0001-768x512.jpg',
-    'https://www.petroni.hr/wp-content/uploads/2024/03/DSC_0003-768x512.jpg',
+    'https://www.petroni.hr/wp-content/uploads/2025/02/DSC_1792.jpg',
+    'https://www.petroni.hr/wp-content/uploads/2025/02/DSC_1684.jpg',
   ];
 
   const partners = [
@@ -244,42 +242,6 @@
                onerror={(e) => { (e.currentTarget as HTMLImageElement).style.opacity='0'; }} />
         </div>
       {/each}
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════ DODATNE USLUGE I OPREMA ═══════════════════════ -->
-<section class="section">
-  <div class="container-x">
-    <div class="text-center mb-12 reveal">
-      <span class="eyebrow mb-3">{$locale === 'hr' ? 'Sve za bezbrižan odmor' : 'Everything for a carefree holiday'}</span>
-      <h2 class="section-title">{$locale === 'hr' ? 'Dodatne usluge i oprema' : 'Additional services & equipment'}</h2>
-    </div>
-
-    {#if products.length > 0}
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-5 reveal">
-        {#each products as product}
-          <ProductCard {product} />
-        {/each}
-      </div>
-    {:else}
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 reveal">
-        {#each [
-          { hr: 'Elektrika', en: 'Electrical' },
-          { hr: 'Hlađenje / Grijanje', en: 'Cooling / Heating' },
-          { hr: 'Plinska oprema', en: 'Gas equipment' },
-          { hr: 'Tende i dodaci', en: 'Awnings' },
-          { hr: 'Voda / Sanitarije', en: 'Water / Sanitary' },
-        ] as cat}
-          <a href="/shop" class="card flex items-center justify-center text-center h-28 px-4 hover:border-[#f5c518]">
-            <span class="text-[14px] font-semibold text-[#3a3f45]">{$locale === 'hr' ? cat.hr : cat.en}</span>
-          </a>
-        {/each}
-      </div>
-    {/if}
-
-    <div class="text-center mt-10 reveal">
-      <a href="/shop" class="btn btn-primary px-8 py-3.5">{$locale === 'hr' ? 'Pogledaj ponudu' : 'View the shop'}</a>
     </div>
   </div>
 </section>
