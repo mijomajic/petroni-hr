@@ -2,6 +2,7 @@ import { env } from '$env/dynamic/private';
 import { Resend } from 'resend';
 import { supabaseAdmin } from '$lib/supabase.server';
 import { createInvoicePdf } from '$lib/invoice.server';
+import { renderTermsMarkup } from '$lib/terms-markup';
 
 async function emailConfig() {
   const { data } = await supabaseAdmin.from('settings').select('key,value').in('key', ['admin_email', 'email_from', 'company']);
@@ -92,7 +93,7 @@ export async function sendBookingReceived(
   const config = await emailConfig();
   const details = `<p>Broj rezervacije: <strong>${escapeHtml(booking.confirmation_number)}</strong></p><p>${escapeHtml(booking.pickup_date)} - ${escapeHtml(booking.dropoff_date)}</p><p>Ukupno: ${Number(booking.total_price).toFixed(2)} EUR</p>`;
   const termsBlock = terms?.content_hr
-    ? `<hr><p><strong>Uvjeti najma - verzija ${escapeHtml(terms.version)}</strong></p><pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:13px;line-height:1.55">${escapeHtml(terms.content_hr)}</pre>`
+    ? `<hr><p><strong>Uvjeti najma - verzija ${escapeHtml(terms.version)}</strong></p><div style="font-family:Arial,sans-serif;font-size:13px;line-height:1.55;color:#333">${renderTermsMarkup(terms.content_hr)}</div>`
     : '';
   const results = await Promise.all([
     send(

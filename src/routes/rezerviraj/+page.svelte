@@ -4,6 +4,7 @@
   import { supabase } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
   import { calculatePricing, type PricingConfig, type PricingResult } from '$lib/pricing';
+  import { renderTermsMarkup } from '$lib/terms-markup';
   import type {
     BookingExtra,
     Fee,
@@ -44,6 +45,7 @@
   let termsOpen = $state(false);
   let termsScrolled = $state(false);
   let searchError = $state('');
+  let availabilityLoadedFor = $state('');
   let driverError = $state('');
   let submitError = $state('');
   let openExtraInfo = $state<string | null>(null);
@@ -159,6 +161,22 @@
     return seats >= $booking.numAdults + $booking.numChildren && adultsFit && childrenFit;
   }
 
+  function searchSignature() {
+    return [
+      $booking.pickupLocation,
+      $booking.dropoffLocation || $booking.pickupLocation,
+      $booking.pickupDate,
+      $booking.dropoffDate,
+      $booking.numAdults,
+      $booking.numChildren
+    ].join('|');
+  }
+
+  function goToStep(step: number) {
+    booking.update((current) => ({ ...current, step }));
+    if (step === 2 && canSearch) void refreshAvailability({ keepStep: true });
+  }
+
   function handleTermsScroll(event: Event) {
     const element = event.currentTarget as HTMLElement;
     termsScrolled = element.scrollTop + element.clientHeight >= element.scrollHeight - 8;
@@ -173,14 +191,21 @@
     });
   }
 
-  async function searchVehicles() {
+  async function refreshAvailability(options: { keepStep?: boolean } = {}) {
     loading = true;
     searchError = '';
     const capacityMatches = rentalVehicles.filter(vehicleCapacityMatches);
+    const signature = searchSignature();
 
     if (capacityMatches.length === 0) {
       availableVehicles = [];
-      booking.update((current) => ({ ...current, selectedVehicle: null, step: 2 }));
+      availabilityLoadedFor = signature;
+      booking.update((current) => ({
+        ...current,
+        selectedVehicle: null,
+        extras: {},
+        step: current.step > 1 ? 2 : current.step
+      }));
       searchError = $locale === 'hr'
         ? 'Nema vozila za odabrani broj putnika.'
         : 'No vehicles match the selected number of passengers.';
@@ -199,6 +224,7 @@
       if (!response.ok) throw new Error(result.error);
       const unavailable = new Set<string>(result.unavailableVehicleIds ?? []);
       availableVehicles = capacityMatches.filter((vehicle) => !unavailable.has(vehicle.id));
+      availabilityLoadedFor = signature;
       if (availableVehicles.length === 0) {
         searchError = $locale === 'hr'
           ? 'Nema slobodnih vozila za odabrane datume.'
@@ -208,19 +234,56 @@
         $booking.selectedVehicle &&
         !availableVehicles.some((vehicle) => vehicle.id === $booking.selectedVehicle?.id)
       ) {
-        booking.update((current) => ({ ...current, selectedVehicle: null, extras: {} }));
+        booking.update((current) => ({
+          ...current,
+          selectedVehicle: null,
+          extras: {},
+          step: current.step > 2 ? 2 : current.step
+        }));
       }
     } catch {
       availableVehicles = [];
+      availabilityLoadedFor = '';
       searchError = $locale === 'hr'
         ? 'Dostupnost trenutačno nije moguće provjeriti. Pokušajte ponovno.'
         : 'Availability could not be checked. Please try again.';
+      if (options.keepStep) booking.update((current) => ({ ...current, step: current.step > 2 ? 2 : current.step }));
     }
-    booking.update(b => ({ ...b, step: 2 }));
+    if (!options.keepStep) booking.update(b => ({ ...b, step: 2 }));
     loading = false;
   }
 
+  async function searchVehicles() {
+    await refreshAvailability();
+  }
+
+  function selectionStillAvailable() {
+    return Boolean(
+      $booking.selectedVehicle &&
+        availabilityLoadedFor === searchSignature() &&
+        availableVehicles.some((vehicle) => vehicle.id === $booking.selectedVehicle?.id)
+    );
+  }
+
+  function continueToDriver() {
+    if (!selectionStillAvailable()) {
+      searchError = $locale === 'hr'
+        ? 'Ponovno provjerite dostupnost i odaberite vozilo.'
+        : 'Check availability again and select a vehicle.';
+      void refreshAvailability({ keepStep: true });
+      return;
+    }
+    goToStep(3);
+  }
+
   function continueToReview() {
+    if (!selectionStillAvailable()) {
+      driverError = $locale === 'hr'
+        ? 'Odabrano vozilo treba ponovno provjeriti. Vratite se na odabir vozila.'
+        : 'The selected vehicle needs to be checked again. Go back to vehicle selection.';
+      goToStep(2);
+      return;
+    }
     const details = $booking.driverDetails;
     if (
       !details.firstName.trim() ||
@@ -252,6 +315,13 @@
 
   async function submitBooking() {
     if (!$booking.selectedVehicle) return;
+    if (!selectionStillAvailable()) {
+      submitError = $locale === 'hr'
+        ? 'Odabrano vozilo više nije potvrđeno kao dostupno. Vratite se na odabir vozila.'
+        : 'The selected vehicle is no longer confirmed as available. Return to vehicle selection.';
+      goToStep(2);
+      return;
+    }
     if (!termsAccepted) {
       submitError = $locale === 'hr' ? 'Prihvatite uvjete najma prije slanja.' : 'Accept the rental terms before submitting.';
       return;
@@ -413,6 +483,7 @@
 
   onMount(() => {
     sanitizeStoredBooking();
+    if ($booking.step >= 2 && canSearch) void refreshAvailability({ keepStep: true });
     if (data.profile) {
       signedIn = true;
       authEmail = String(data.profile.email ?? '');
@@ -582,28 +653,28 @@
             {:else}
               <div class="card card-static p-8 text-center">
                 <p class="font-semibold text-[#2b2b2b]">{searchError || ($locale === 'hr' ? 'Nema dostupnih vozila.' : 'No vehicles available.')}</p>
-                <button onclick={() => booking.update((current) => ({ ...current, step: 1 }))} class="btn btn-ghost mt-5">{$locale === 'hr' ? 'Promijeni pretragu' : 'Change search'}</button>
+                <button onclick={() => goToStep(1)} class="btn btn-ghost mt-5">{$locale === 'hr' ? 'Promijeni pretragu' : 'Change search'}</button>
               </div>
             {/each}
           </div>
 
           <!-- Extras + summary: right column -->
-          <div class="flex flex-col gap-6 lg:sticky lg:top-24 h-fit">
-            <div class="card p-6">
+          <div class="grid gap-6 lg:sticky lg:top-24 h-fit">
+            <div class="card p-6 max-h-[38rem] overflow-hidden flex flex-col">
               <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Dodatna oprema' : 'Extras'}</h2>
               {#if !$booking.selectedVehicle}
                 <p class="text-sm text-[#9aa0a8]">{$locale === 'hr' ? 'Odaberite vozilo za prikaz dodatne opreme.' : 'Select a vehicle to view extras.'}</p>
               {:else}
-                <div class="space-y-6">
+                <div class="space-y-4 overflow-y-auto pr-2 -mr-2">
                   {#each extraGroups as group}
                     <section>
                       <h3 class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9099] mb-2">{$locale === 'hr' ? group.hr : group.en}</h3>
                       <div class="divide-y divide-[#ededf0]">
                         {#each group.extras as extra}
                           {@const qty = extra.is_required ? Math.max(1, $booking.extras[extra.id] ?? 0) : ($booking.extras[extra.id] ?? 0)}
-                          <div class="flex flex-col gap-2 py-3">
+                          <div class="grid gap-2 py-2.5">
                             <div class="flex items-start gap-2">
-                              <span class="text-sm font-medium text-[#2b2b2b] flex-1">{$locale === 'hr' ? extra.name_hr : (extra.name_en || extra.name_hr)}</span>
+                              <span class="text-[13px] leading-snug font-medium text-[#2b2b2b] flex-1">{$locale === 'hr' ? extra.name_hr : (extra.name_en || extra.name_hr)}</span>
                               <button
                                 type="button"
                                 class="w-5 h-5 flex-shrink-0 rounded-full text-[12px] font-bold cursor-help"
@@ -621,7 +692,7 @@
                               <p class="text-xs leading-relaxed text-[#7a7f86] p-3 rounded-md" style="background:#f6f7f9">{extra.description_hr}</p>
                             {/if}
                             <div class="flex items-center justify-between">
-                              <span class="text-sm text-[#7a7f86]">
+                              <span class="text-[13px] text-[#7a7f86]">
                                 {formatMoney(extra.price)}
                                 {#if extra.price_type === 'per_day'}<span class="text-xs">/{$locale === 'hr' ? 'dan' : 'day'}</span>{/if}
                               </span>
@@ -681,13 +752,13 @@
                   <span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Za plaćanje' : 'Payable total'}</span>
                   <span style="color:#b5890a">{formatMoney(totalPrice)}</span>
                 </div>
-                <button onclick={() => booking.update(b => ({ ...b, step: 3 }))} class="btn btn-primary w-full">{$locale === 'hr' ? 'Nastavi' : 'Continue'} →</button>
+                <button onclick={continueToDriver} class="btn btn-primary w-full">{$locale === 'hr' ? 'Nastavi' : 'Continue'} →</button>
               </div>
             {/if}
           </div>
         </div>
 
-        <button onclick={() => booking.update(b => ({ ...b, step: 1 }))} class="text-sm text-[#7a7f86] hover:text-[#2b2b2b]">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
+        <button onclick={() => goToStep(1)} class="text-sm text-[#7a7f86] hover:text-[#2b2b2b]">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
       </div>
     {/if}
 
@@ -775,7 +846,7 @@
           <p class="text-sm mt-5 p-3 rounded-md" style="background:#fdecec;color:#b42318">{driverError}</p>
         {/if}
         <div class="flex gap-4 mt-8">
-          <button onclick={() => booking.update(b => ({ ...b, step: 2 }))} class="btn btn-ghost px-6 py-3">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
+          <button onclick={() => goToStep(2)} class="btn btn-ghost px-6 py-3">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
           <button onclick={continueToReview} class="btn btn-primary flex-1">{$locale === 'hr' ? 'Nastavi' : 'Continue'} →</button>
         </div>
       </div>
@@ -846,7 +917,7 @@
             <p class="text-sm mb-5 p-3 rounded-md" style="background:#fdecec;color:#b42318">{submitError}</p>
           {/if}
           <div class="flex gap-4">
-            <button onclick={() => booking.update(b => ({ ...b, step: 3 }))} class="btn btn-ghost px-6 py-3">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
+            <button onclick={() => goToStep(3)} class="btn btn-ghost px-6 py-3">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
             <button onclick={submitBooking} disabled={loading} class="btn btn-primary flex-1 disabled:opacity-50">{loading ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…') : `${$locale === 'hr' ? 'Potvrdi rezervaciju' : 'Confirm booking'} — ${formatMoney(totalPrice)}`}</button>
           </div>
         </div>
@@ -869,7 +940,7 @@
         </button>
       </div>
       <div id="rental-terms-scroll" class="px-6 md:px-8 py-6 overflow-y-auto" onscroll={handleTermsScroll}>
-        <div class="whitespace-pre-wrap break-words text-sm leading-7 text-[#4c5157]">{activeTermsText}</div>
+        <div class="terms-document break-words text-sm leading-7 text-[#4c5157]">{@html renderTermsMarkup(activeTermsText)}</div>
       </div>
       <div class="px-6 md:px-8 py-5 border-t border-[#e8e9eb] bg-[#fafbfc] flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3">
         <button class="btn btn-ghost sm:min-w-32 active:scale-[0.98]" onclick={() => termsOpen = false}>{$locale === 'hr' ? 'Zatvori' : 'Close'}</button>
@@ -878,3 +949,37 @@
     </div>
   </div>
 {/if}
+
+<style>
+  :global(.terms-document h2) {
+    margin: 1.4rem 0 0.65rem;
+    color: #2b2b2b;
+    font-size: 1.05rem;
+    font-weight: 900;
+    line-height: 1.25;
+    text-transform: uppercase;
+  }
+
+  :global(.terms-document h3) {
+    margin: 1.15rem 0 0.45rem;
+    color: #2b2b2b;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  :global(.terms-document p) {
+    margin: 0 0 0.65rem;
+  }
+
+  :global(.terms-document ul),
+  :global(.terms-document ol) {
+    margin: 0.2rem 0 0.9rem 1.25rem;
+    padding: 0;
+  }
+
+  :global(.terms-document li) {
+    margin: 0.28rem 0;
+    padding-left: 0.2rem;
+  }
+</style>

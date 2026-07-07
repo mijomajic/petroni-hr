@@ -84,16 +84,17 @@
 <section class="relative min-h-[68vh] md:min-h-[78vh] max-h-[760px] flex items-center overflow-hidden">
   <div class="absolute inset-0">
     <img src="https://www.petroni.hr/wp-content/uploads/2025/02/hero-image-petroni-camping-and-caravaning-rental10-1.jpg" alt="" class="w-full h-full object-cover" fetchpriority="high" />
-    <div class="absolute inset-0" style="background:linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.65) 42%, rgba(0,0,0,0.18) 100%)"></div>
+    <div class="absolute inset-0" style="background:linear-gradient(to left, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.38) 36%, rgba(0,0,0,0.08) 76%, rgba(0,0,0,0.02) 100%)"></div>
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.08)"></div>
   </div>
 
-  <div class="container-x relative z-10 w-full">
-    <div class="max-w-xl">
+  <div class="container-x relative z-10 w-full flex justify-center md:justify-end">
+    <div class="max-w-xl text-center md:text-right">
       <h1 class="text-[28px] sm:text-[36px] md:text-5xl font-extrabold uppercase leading-[1.1] tracking-tight mb-5"
-          style="color:#ffffff; text-shadow:0 2px 16px rgba(0,0,0,0.95), 0 0 40px rgba(0,0,0,0.6)">
+          style="color:#ffffff; text-shadow:0 2px 14px rgba(0,0,0,0.78), 0 0 30px rgba(0,0,0,0.42)">
         Putujte bez granica,<br /><span style="color:#f5c518">živite bez ograničenja.</span>
       </h1>
-      <p class="text-[14px] md:text-base mb-8" style="color:rgba(255,255,255,0.92)">
+      <p class="text-[14px] md:text-base mb-8 md:ml-auto max-w-lg" style="color:rgba(255,255,255,0.94); text-shadow:0 1px 10px rgba(0,0,0,0.55)">
         {$_('hero.subtext')}
       </p>
       <a href="/rezerviraj" class="btn btn-primary px-8 py-4">{$_('nav.book')}</a>
