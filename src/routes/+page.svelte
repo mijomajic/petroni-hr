@@ -22,8 +22,44 @@
     'https://www.petroni.hr/wp-content/uploads/2024/03/DSC_0003-768x512.jpg',
   ];
 
-  const partners = ['Udruga Kampista', 'Polidor', 'Camping Adriatic', 'Camping Plitvice', 'Kamping Udruženje'];
-  const brands = ['RIMOR', 'CARAVANS INT.', 'MEGA MOBIL', 'THETFORD', 'KNAUS', 'ROLLER TEAM', 'TRUMA', 'WEINSBERG'];
+  const partners = [
+    {
+      name: 'Udruga Kampista Hrvatske',
+      src: '/partners/logos/udruga-kampista.png',
+      href: 'https://udrugakampista.hr/'
+    },
+    {
+      name: 'Polidor Camping Resort',
+      src: '/partners/logos/polidor.png',
+      href: 'https://www.campingpolidor.com/'
+    },
+    {
+      name: 'Camping Adriatic / Valamar',
+      src: '/partners/logos/valamar-camping.svg',
+      href: 'https://www.valamarcamping.com/camping-adriatic',
+      filter: 'invert(1)'
+    },
+    {
+      name: 'Plitvice Holiday Resort',
+      src: '/partners/logos/plitvice.svg',
+      href: 'https://www.plitvice.com/'
+    },
+    {
+      name: 'Kamping udruženje Hrvatske',
+      src: '/partners/logos/kamping-udruzenje.jpg',
+      href: 'https://www.camping.hr/hr'
+    }
+  ];
+  const brands = [
+    { name: 'RIMOR', src: '/partners/logos/rimor.svg', href: 'https://www.rimor.it/it/en' },
+    { name: 'CARAVANS INT.', src: '/partners/logos/caravans-international.svg', href: 'https://www.caravansinternational.it/fr/' },
+    { name: 'MEGA MOBIL', src: '/partners/logos/mega-mobil.png', href: 'https://megamobil.si/en/' },
+    { name: 'THETFORD', src: '/partners/logos/thetford.png', href: 'https://www.thetford.com/' },
+    { name: 'KNAUS', src: '/partners/logos/knaus.png', href: 'https://www.knaus.com/en-int/' },
+    { name: 'ROLLER TEAM', src: '/partners/logos/roller-team.svg', href: 'https://www.rollerteam.it/' },
+    { name: 'TRUMA', src: '/partners/logos/truma.svg', href: 'https://www.truma.com/', filter: 'invert(1)' },
+    { name: 'WEINSBERG', src: '/partners/logos/weinsberg.png', href: 'https://weinsberg.com/en-int/' }
+  ];
 
   const advantages = $derived([
     {
@@ -127,10 +163,23 @@
 <div class="py-10" style="background:#f6f7f9">
   <div class="container-x">
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-      {#each partners as p}
-        <div class="bg-white rounded-lg border border-[#ededf0] h-24 flex items-center justify-center px-4 text-center">
-          <span class="text-[13px] font-semibold uppercase tracking-wide text-[#9aa0a8]">{p}</span>
-        </div>
+      {#each partners as partner}
+        <a
+          href={partner.href}
+          target="_blank"
+          rel="noreferrer"
+          class="bg-white rounded-lg border border-[#ededf0] h-28 flex flex-col items-center justify-center gap-2 px-4 text-center transition-all hover:border-[#f5c518] hover:-translate-y-0.5"
+          aria-label={partner.name}
+        >
+          <img
+            src={partner.src}
+            alt={partner.name}
+            loading="lazy"
+            class="max-h-12 max-w-[150px] object-contain"
+            style={partner.filter ? `filter:${partner.filter}` : undefined}
+          />
+          <span class="text-[10px] font-bold uppercase text-[#9aa0a8]">{partner.name}</span>
+        </a>
       {/each}
     </div>
   </div>
@@ -258,9 +307,22 @@
   <div class="marquee">
     <div class="marquee-track gap-4">
       {#each [...brands, ...brands] as brand}
-        <div class="w-[200px] h-[110px] flex-shrink-0 bg-white rounded-lg border border-[#ededf0] flex items-center justify-center">
-          <span class="text-[15px] font-extrabold tracking-wide text-[#54585e]">{brand}</span>
-        </div>
+        <a
+          href={brand.href}
+          target="_blank"
+          rel="noreferrer"
+          class="w-[200px] h-[110px] flex-shrink-0 bg-white rounded-lg border border-[#ededf0] flex flex-col items-center justify-center gap-2 px-6 text-center transition-all hover:border-[#f5c518]"
+          aria-label={brand.name}
+        >
+          <img
+            src={brand.src}
+            alt={brand.name}
+            loading="lazy"
+            class="max-h-10 max-w-full object-contain"
+            style={brand.filter ? `filter:${brand.filter}` : undefined}
+          />
+          <span class="text-[10px] font-bold uppercase text-[#9aa0a8]">{brand.name}</span>
+        </a>
       {/each}
     </div>
   </div>
