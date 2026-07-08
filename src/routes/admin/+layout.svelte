@@ -17,10 +17,14 @@
     { href: '/admin', label: 'Dashboard', icon: 'M4 13h6V4H4v9Zm10 7h6V11h-6v9ZM4 20h6v-3H4v3Zm10-13h6V4h-6v3Z' },
     { href: '/admin/rezervacije', label: 'Rezervacije', icon: 'M6 3v3m12-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z' },
     { href: '/admin/vozila', label: 'Vozila', icon: 'M3 16V9l2-4h12l4 6v5M5 16v2m14-2v2M3 13h18M7 15h.01M17 15h.01' },
+    { href: '/admin/sezone', label: 'Sezone i cijene', icon: 'M4 5h16M4 12h16M4 19h16M8 3v4m8-4v4M8 10v4m8-4v4M8 17v4m8-4v4' },
+    { href: '/admin/naknade', label: 'Naknade', icon: 'M12 3v18M17 7H9.5a3.5 3.5 0 0 0 0 7H15a3 3 0 0 1 0 6H6' },
+    { href: '/admin/dodatne-opcije', label: 'Dodatne opcije', icon: 'M12 5v14M5 12h14M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z' },
     { href: '/admin/proizvodi', label: 'Proizvodi', icon: 'm4 7 8-4 8 4-8 4-8-4Zm0 0v10l8 4 8-4V7M12 11v10' },
     { href: '/admin/narudzbe', label: 'Narudžbe', icon: 'M3 4h2l2 11h10l3-8H6m2 12h.01M17 19h.01' },
     { href: '/admin/objave', label: 'Objave', icon: 'M5 4h14v16H5V4Zm3 4h8m-8 4h8m-8 4h5' },
     { href: '/admin/uvjeti-najma', label: 'Uvjeti najma', icon: 'M6 3h9l3 3v15H6V3Zm9 0v4h4M9 11h6m-6 4h6m-6 4h4' },
+    { href: '/admin/postavke', label: 'Postavke', icon: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .34 1.88l.04.05a2 2 0 1 1-2.83 2.83l-.05-.04A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.05A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.05.04a2 2 0 1 1-2.83-2.83l.04-.05A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.05A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.04-.05a2 2 0 1 1 2.83-2.83l.05.04A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.05A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.05-.04a2 2 0 1 1 2.83 2.83l-.04.05A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.05A1.7 1.7 0 0 0 19.4 15Z' },
   ];
 </script>
 
