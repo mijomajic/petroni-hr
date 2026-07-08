@@ -60,6 +60,7 @@
                 <option value="ECO">ECO — ekonomičan</option>
                 <option value="ELITE">ELITE — premium</option>
                 <option value="DUO 4x4">DUO 4×4 — terenski</option>
+                <option value="KAMP PRIKOLICE">KAMP PRIKOLICE</option>
               </select>
             </div>
 
@@ -106,7 +107,7 @@
             <div>
               <span class="field-label mb-3 block">{$locale === 'hr' ? 'Brzi odabir' : 'Quick select'}</span>
               <div class="flex flex-wrap gap-2">
-                {#each [['ECO', $locale === 'hr' ? 'Ekonomičan' : 'Budget'], ['COMFORT', $locale === 'hr' ? 'Obitelj' : 'Family'], ['ELITE', $locale === 'hr' ? 'Premium' : 'Premium']] as [val, label]}
+                {#each [['ECO', $locale === 'hr' ? 'Eco' : 'Eco'], ['COMFORT', 'Comfort'], ['ELITE', 'Elite'], ['DUO 4x4', 'Duo 4×4'], ['KAMP PRIKOLICE', $locale === 'hr' ? 'Kamp prikolice' : 'Caravans']] as [val, label]}
                   <button onclick={() => filterCategory = filterCategory === val ? '' : val}
                     class="text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-all"
                     style="border-color:{filterCategory === val ? '#f5c518' : '#e2e4e8'};background:{filterCategory === val ? '#fffbea' : '#fff'};color:{filterCategory === val ? '#b5890a' : '#6b7178'}">
