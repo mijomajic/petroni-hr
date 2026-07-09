@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Vehicle } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
+  import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd, truncateText } from '$lib/seo';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -9,9 +10,47 @@
 
   const specEntries = $derived(vehicle.specs ? Object.entries(vehicle.specs) : []);
   const desc = $derived($locale === 'hr' ? vehicle.description_hr : (vehicle.description_en || vehicle.description_hr));
+  const metaDescription = $derived(truncateText(desc || `${vehicle.name} u Petroni ponudi vozila za najam i prodaju.`, 155));
+  const vehicleUrl = $derived(absoluteUrl(`/vozila/najam-kampera/${vehicle.slug}`));
+  const vehicleImage = $derived(vehicle.images?.[0] || undefined);
+  const vehicleSchema = $derived(graphSchema([
+    breadcrumbSchema([
+      { name: 'Petroni', path: '/' },
+      { name: 'Vozila', path: '/vozila' },
+      { name: vehicle.name, path: `/vozila/najam-kampera/${vehicle.slug}` }
+    ]),
+    {
+      '@type': 'Vehicle',
+      '@id': `${vehicleUrl}#vehicle`,
+      name: vehicle.name,
+      description: metaDescription,
+      image: vehicle.images ?? [],
+      url: vehicleUrl,
+      brand: { '@type': 'Brand', name: vehicle.name.split(' ')[0] },
+      vehicleSeatingCapacity: vehicle.seats ?? undefined,
+      numberOfDoors: undefined,
+      offers: vehicle.base_price_per_day || vehicle.sale_price
+        ? {
+            '@type': 'Offer',
+            url: vehicleUrl,
+            priceCurrency: 'EUR',
+            price: (vehicle.sale_price ?? vehicle.base_price_per_day)?.toString(),
+            availability: vehicle.is_available ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            businessFunction: vehicle.type === 'sale' ? 'https://schema.org/Sell' : 'https://schema.org/LeaseOut'
+          }
+        : undefined
+    }
+  ]));
 </script>
 
-<svelte:head><title>{vehicle?.name ?? 'Vozilo'} — Petroni</title></svelte:head>
+<svelte:head>
+  <title>{vehicle?.name ?? 'Vozilo'} — Petroni</title>
+  <meta name="description" content={metaDescription} />
+  <meta property="og:title" content={`${vehicle?.name ?? 'Vozilo'} — Petroni`} />
+  <meta property="og:description" content={metaDescription} />
+  {#if vehicleImage}<meta property="og:image" content={vehicleImage} />{/if}
+  <script type="application/ld+json">{@html jsonLd(vehicleSchema)}</script>
+</svelte:head>
 
 <div class="section">
   <div class="container-x">

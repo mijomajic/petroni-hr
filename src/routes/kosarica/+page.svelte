@@ -13,7 +13,10 @@
   }
 </script>
 
-<svelte:head><title>Košarica — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Košarica — Petroni</title>
+  <meta name="robots" content="noindex, nofollow" />
+</svelte:head>
 
 <div class="section">
   <div class="container-x max-w-5xl mx-auto">

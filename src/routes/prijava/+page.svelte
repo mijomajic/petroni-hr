@@ -6,6 +6,7 @@
 <svelte:head>
   <title>Prijava — Petroni</title>
   <meta name="description" content="Prijavite se u svoj Petroni korisnički račun." />
+  <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <section class="min-h-[72vh] flex items-center py-16" style="background:#202124">

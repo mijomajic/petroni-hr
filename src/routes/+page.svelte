@@ -3,6 +3,7 @@
   import { _ } from 'svelte-i18n';
   import { locale } from '$lib/stores/locale';
   import type { Vehicle } from '$lib/supabase';
+  import { DEFAULT_IMAGE, graphSchema, jsonLd, organizationSchema, websiteSchema } from '$lib/seo';
   import VehicleCard from '$lib/components/ui/VehicleCard.svelte';
   import type { PageProps } from './$types';
 
@@ -80,6 +81,8 @@
   // Animated counters
   let counts = $state({ users: 0, years: 0, vehicles: 0 });
   const targets = { users: 546, years: 19, vehicles: 20 };
+  const description = 'Petroni – najam i prodaja vrhunskih kampera i karavana. 19 godina iskustva, 20+ vozila, lokacije diljem Hrvatske i Europe.';
+  const homeSchema = graphSchema([organizationSchema(), websiteSchema()]);
 
   function animateCounters() {
     const duration = 1800, steps = 60, interval = duration / steps;
@@ -111,7 +114,12 @@
 
 <svelte:head>
   <title>Petroni — Najam i prodaja kampera i karavana</title>
-  <meta name="description" content="Petroni – najam i prodaja vrhunskih kampera i karavana. 19 godina iskustva, 20+ vozila, lokacije diljem Hrvatske i Europe." />
+  <meta name="description" content={description} />
+  <meta property="og:title" content="Petroni — Najam i prodaja kampera i karavana" />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content={DEFAULT_IMAGE} />
+  <script type="application/ld+json">{@html jsonLd(homeSchema)}</script>
 </svelte:head>
 
 <!-- ═══════════════════════ HERO ═══════════════════════ -->

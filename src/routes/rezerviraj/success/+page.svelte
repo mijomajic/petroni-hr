@@ -9,7 +9,10 @@
   const today = new Date().toISOString().slice(0, 10);
 </script>
 
-<svelte:head><title>Rezervacija potvrđena — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Rezervacija potvrđena — Petroni</title>
+  <meta name="robots" content="noindex, nofollow" />
+</svelte:head>
 
 <div class="min-h-[70vh] flex items-center justify-center py-20 px-4">
   <div class="text-center max-w-6xl w-full">

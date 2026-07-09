@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Vehicle } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
+  import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd } from '$lib/seo';
   import VehicleCard from '$lib/components/ui/VehicleCard.svelte';
   import type { PageProps } from './$types';
 
@@ -22,10 +23,39 @@
     if (filterAvailable === 'yes' && !v.is_available) return false;
     return true;
   }));
+  const description = 'Najam kampera i kamp prikolica u Hrvatskoj uz Petroni: pregled vozila, kategorija, kapaciteta i cijena po danu.';
+  const pageSchema = $derived(graphSchema([
+    breadcrumbSchema([
+      { name: 'Petroni', path: '/' },
+      { name: 'Vozila', path: '/vozila' },
+      { name: 'Najam kampera', path: '/vozila/najam-kampera' }
+    ]),
+    {
+      '@type': 'CollectionPage',
+      '@id': `${absoluteUrl('/vozila/najam-kampera')}#collection`,
+      name: 'Najam kampera',
+      description,
+      mainEntity: {
+        '@type': 'ItemList',
+        itemListElement: vehicles.slice(0, 20).map((vehicle, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          url: absoluteUrl(`/vozila/najam-kampera/${vehicle.slug}`),
+          name: vehicle.name
+        }))
+      }
+    }
+  ]));
 
 </script>
 
-<svelte:head><title>Najam kampera — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Najam kampera — Petroni</title>
+  <meta name="description" content={description} />
+  <meta property="og:title" content="Najam kampera — Petroni" />
+  <meta property="og:description" content={description} />
+  <script type="application/ld+json">{@html jsonLd(pageSchema)}</script>
+</svelte:head>
 
 <div class="section">
   <div class="container-x">

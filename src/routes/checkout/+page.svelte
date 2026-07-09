@@ -72,7 +72,10 @@
   ]);
 </script>
 
-<svelte:head><title>Narudžba — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Narudžba — Petroni</title>
+  <meta name="robots" content="noindex, nofollow" />
+</svelte:head>
 
 <div class="section">
   <div class="container-x max-w-6xl mx-auto">

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Post } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
+  import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd, organizationSchema, truncateText } from '$lib/seo';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -16,9 +17,39 @@
 
   const title = $derived($locale === 'hr' ? post.title_hr : (post.title_en || post.title_hr));
   const content = $derived($locale === 'hr' ? post.content_hr : (post.content_en || post.content_hr));
+  const metaDescription = $derived(truncateText(post.excerpt_hr || content, 155));
+  const postUrl = $derived(absoluteUrl(`/novosti/${post.slug}`));
+  const articleSchema = $derived(graphSchema([
+    organizationSchema(),
+    breadcrumbSchema([
+      { name: 'Petroni', path: '/' },
+      { name: 'Novosti', path: '/novosti' },
+      { name: title, path: `/novosti/${post.slug}` }
+    ]),
+    {
+      '@type': 'Article',
+      '@id': `${postUrl}#article`,
+      headline: title,
+      description: metaDescription,
+      image: post.cover_image ? [post.cover_image] : undefined,
+      datePublished: post.published_at ?? post.created_at,
+      dateModified: post.published_at ?? post.created_at,
+      author: { '@type': 'Organization', name: 'Petroni' },
+      publisher: { '@id': absoluteUrl('/#organization') },
+      mainEntityOfPage: postUrl
+    }
+  ]));
 </script>
 
-<svelte:head><title>{title || 'Novost'} — Petroni</title></svelte:head>
+<svelte:head>
+  <title>{title || 'Novost'} — Petroni</title>
+  <meta name="description" content={metaDescription} />
+  <meta property="og:title" content={`${title || 'Novost'} — Petroni`} />
+  <meta property="og:description" content={metaDescription} />
+  <meta property="og:type" content="article" />
+  {#if post.cover_image}<meta property="og:image" content={post.cover_image} />{/if}
+  <script type="application/ld+json">{@html jsonLd(articleSchema)}</script>
+</svelte:head>
 
 <div class="section">
   <div class="container-x max-w-3xl mx-auto">

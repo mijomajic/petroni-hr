@@ -2,6 +2,7 @@
   import type { Product } from '$lib/supabase';
   import { addToCart } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
+  import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd, truncateText } from '$lib/seo';
   import ProductCard from '$lib/components/ui/ProductCard.svelte';
   import type { PageProps } from './$types';
 
@@ -15,6 +16,33 @@
 
   const name = $derived($locale === 'hr' ? product.name_hr : (product.name_en || product.name_hr));
   const desc = $derived($locale === 'hr' ? product.description_hr : (product.description_en || product.description_hr));
+  const metaDescription = $derived(truncateText(desc || `${name} u Petroni shopu za kamping opremu i dijelove.`, 155));
+  const productUrl = $derived(absoluteUrl(`/product/${product.slug}`));
+  const productImage = $derived(product.images?.[0] || undefined);
+  const productSchema = $derived(graphSchema([
+    breadcrumbSchema([
+      { name: 'Petroni', path: '/' },
+      { name: 'Shop', path: '/shop' },
+      { name, path: `/product/${product.slug}` }
+    ]),
+    {
+      '@type': 'Product',
+      '@id': `${productUrl}#product`,
+      name,
+      description: metaDescription,
+      image: product.images ?? [],
+      sku: product.sku ?? undefined,
+      brand: { '@type': 'Brand', name: 'Petroni' },
+      offers: {
+        '@type': 'Offer',
+        url: productUrl,
+        priceCurrency: 'EUR',
+        price: product.price.toFixed(2),
+        availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        itemCondition: 'https://schema.org/NewCondition'
+      }
+    }
+  ]));
 
   function handleAdd() {
     if (!product) return;
@@ -25,7 +53,15 @@
 
 </script>
 
-<svelte:head><title>{name || 'Proizvod'} — Shop — Petroni</title></svelte:head>
+<svelte:head>
+  <title>{name || 'Proizvod'} — Shop — Petroni</title>
+  <meta name="description" content={metaDescription} />
+  <meta property="og:title" content={`${name || 'Proizvod'} — Shop — Petroni`} />
+  <meta property="og:description" content={metaDescription} />
+  <meta property="og:type" content="product" />
+  {#if productImage}<meta property="og:image" content={productImage} />{/if}
+  <script type="application/ld+json">{@html jsonLd(productSchema)}</script>
+</svelte:head>
 
 <div class="section">
   <div class="container-x">

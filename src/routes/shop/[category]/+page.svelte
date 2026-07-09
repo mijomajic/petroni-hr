@@ -4,6 +4,7 @@
   import type { Product, ProductCategory } from '$lib/supabase';
   import ProductCard from '$lib/components/ui/ProductCard.svelte';
   import { locale } from '$lib/stores/locale';
+  import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd } from '$lib/seo';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -49,9 +50,38 @@
 
   const title = $derived($locale === 'hr' ? category.name_hr : (category.name_en || category.name_hr));
   const currentCat = $derived(allCategories.find(c => c.slug === slug));
+  const description = $derived(`${title} u Petroni shopu: kamping oprema, dijelovi i proizvodi za kampere i karavane.`);
+  const categorySchema = $derived(graphSchema([
+    breadcrumbSchema([
+      { name: 'Petroni', path: '/' },
+      { name: 'Shop', path: '/shop' },
+      { name: title, path: `/shop/${category.slug}` }
+    ]),
+    {
+      '@type': 'CollectionPage',
+      '@id': `${absoluteUrl(`/shop/${category.slug}`)}#collection`,
+      name: title,
+      description,
+      mainEntity: {
+        '@type': 'ItemList',
+        itemListElement: products.slice(0, 24).map((product, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          url: absoluteUrl(`/product/${product.slug}`),
+          name: product.name_hr
+        }))
+      }
+    }
+  ]));
 </script>
 
-<svelte:head><title>{title} — Shop — Petroni</title></svelte:head>
+<svelte:head>
+  <title>{title} — Shop — Petroni</title>
+  <meta name="description" content={description} />
+  <meta property="og:title" content={`${title} — Shop — Petroni`} />
+  <meta property="og:description" content={description} />
+  <script type="application/ld+json">{@html jsonLd(categorySchema)}</script>
+</svelte:head>
 
 <div class="section">
   <div class="container-x">
