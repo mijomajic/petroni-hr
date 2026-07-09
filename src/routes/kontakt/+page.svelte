@@ -89,9 +89,20 @@
             {$locale === 'hr' ? 'Molimo Vas da nas za sve upite kontaktirate isključivo putem e-maila ili telefonskim pozivom. WhatsApp poruke nisu podržane kao službeni kanal komunikacije.' : 'Please contact us only by email or phone call. WhatsApp messages are not supported as an official channel.'}
           </p>
         </div>
-        <div class="card overflow-hidden h-[320px]">
-          <iframe title="Petroni lokacija" class="w-full h-full border-0" loading="lazy"
-            src="https://maps.google.com/maps?q=Slavka%20Tomerlina%209%2C%20Sesvete%2C%20Zagreb&t=&z=14&ie=UTF8&iwloc=&output=embed"></iframe>
+        <div class="card card-static p-6">
+          <p class="text-[12px] font-bold uppercase tracking-widest mb-3" style="color:#b5890a">
+            {$locale === 'hr' ? 'Lokacija' : 'Location'}
+          </p>
+          <p class="text-[15px] font-semibold text-[#2b2b2b] mb-2">Petroni d.o.o.</p>
+          <p class="text-[14px] leading-relaxed text-[#6b7178] mb-5">Slavka Tomerlina 9, 10380 Sesvete, Zagreb</p>
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=Slavka%20Tomerlina%209%2C%2010380%20Sesvete%2C%20Zagreb"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-outline px-5 py-3"
+          >
+            {$locale === 'hr' ? 'Otvori u Google Maps' : 'Open in Google Maps'}
+          </a>
         </div>
       </div>
     </div>
