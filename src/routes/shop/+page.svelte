@@ -113,7 +113,7 @@
   <div class="container-x">
     <!-- Title + sort row -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-      <h1 class="text-[26px] md:text-[32px] font-bold text-[#2b2b2b] uppercase">Shop</h1>
+      <h2 class="text-[26px] md:text-[32px] font-bold text-[#2b2b2b] uppercase">Shop</h2>
       <select class="field max-w-[220px]" bind:value={sort} onchange={() => applyFilters(1)}>
         <option value="newest">{$locale === 'hr' ? 'Zadano sortiranje' : 'Default sorting'}</option>
         <option value="price_asc">{$locale === 'hr' ? 'Cijena: niža → viša' : 'Price: low → high'}</option>

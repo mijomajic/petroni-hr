@@ -20,7 +20,12 @@
   ]);
 </script>
 
-<svelte:head><title>Plaćanje & Dostava — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Plaćanje & Dostava — Petroni</title>
+  <meta name="description" content="Informacije o Petroni načinima plaćanja, dostavi shop narudžbi, osobnom preuzimanju i uvjetima dostave unutar Hrvatske." />
+  <meta property="og:title" content="Plaćanje & Dostava — Petroni" />
+  <meta property="og:description" content="Informacije o Petroni načinima plaćanja, dostavi shop narudžbi, osobnom preuzimanju i uvjetima dostave unutar Hrvatske." />
+</svelte:head>
 
 <div class="section">
   <div class="container-x max-w-3xl mx-auto">

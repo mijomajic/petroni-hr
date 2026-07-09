@@ -29,7 +29,12 @@
   ]);
 </script>
 
-<svelte:head><title>Kontakt — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Kontakt — Petroni</title>
+  <meta name="description" content="Kontaktirajte Petroni za najam kampera, prodaju vozila, shop narudžbe i podršku. Adresa, telefon i email na jednom mjestu." />
+  <meta property="og:title" content="Kontakt — Petroni" />
+  <meta property="og:description" content="Kontaktirajte Petroni za najam kampera, prodaju vozila, shop narudžbe i podršku. Adresa, telefon i email na jednom mjestu." />
+</svelte:head>
 
 <div class="section">
   <div class="container-x">

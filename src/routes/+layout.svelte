@@ -11,6 +11,8 @@
   let { children } = $props();
   const isAdmin = $derived($page.url.pathname.startsWith('/admin'));
   const canonicalUrl = $derived(absoluteUrl(canonicalPath($page.url.pathname)));
+  const hasSearchParams = $derived($page.url.searchParams.toString().length > 0);
+  const defaultDescription = 'Petroni nudi najam i prodaju kampera i karavana, kamping opremu, podršku za putovanja i lokacije diljem Hrvatske i Europe.';
 
   // Initialise i18n synchronously — messages are bundled, so no need to gate
   // rendering behind a loading screen (that was the main cause of slow loads).
@@ -64,13 +66,22 @@
 
 <svelte:head>
   <link rel="icon" href="https://www.petroni.hr/wp-content/uploads/2024/03/cropped-Group-3-270x270.jpg" />
+  <link rel="apple-touch-icon" href="https://www.petroni.hr/wp-content/uploads/2024/03/cropped-Group-3-270x270.jpg" />
+  <link rel="manifest" href="/site.webmanifest" />
   <link rel="canonical" href={canonicalUrl} />
   <meta name="theme-color" content="#ffffff" />
   <meta property="og:site_name" content={SITE_NAME} />
   <meta property="og:url" content={canonicalUrl} />
   <meta property="og:image" content={DEFAULT_IMAGE} />
   <meta name="twitter:card" content="summary_large_image" />
-  {#if isAdmin}<meta name="robots" content="noindex, nofollow" />{/if}
+  <meta name="twitter:title" content="Petroni — Najam i prodaja kampera i karavana" />
+  <meta name="twitter:description" content={defaultDescription} />
+  <meta name="twitter:image" content={DEFAULT_IMAGE} />
+  {#if isAdmin}
+    <meta name="robots" content="noindex, nofollow" />
+  {:else if hasSearchParams}
+    <meta name="robots" content="noindex, follow" />
+  {/if}
 </svelte:head>
 
 <div class="min-h-screen flex flex-col">

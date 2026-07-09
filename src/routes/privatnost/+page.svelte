@@ -18,7 +18,12 @@
   ]);
 </script>
 
-<svelte:head><title>Privatnost & Uvjeti poslovanja — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Privatnost & Uvjeti poslovanja — Petroni</title>
+  <meta name="description" content="Petroni informacije o privatnosti, obradi osobnih podataka, kolačićima, pravima korisnika i uvjetima poslovanja." />
+  <meta property="og:title" content="Privatnost & Uvjeti poslovanja — Petroni" />
+  <meta property="og:description" content="Petroni informacije o privatnosti, obradi osobnih podataka, kolačićima, pravima korisnika i uvjetima poslovanja." />
+</svelte:head>
 
 <div class="section">
   <div class="container-x max-w-3xl mx-auto">

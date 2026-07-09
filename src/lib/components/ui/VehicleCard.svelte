@@ -22,6 +22,8 @@
       <img
         src={img}
         alt={vehicle.name}
+        width="768"
+        height="576"
         loading="lazy"
         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
         onerror={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}

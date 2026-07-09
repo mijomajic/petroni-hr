@@ -1,0 +1,17 @@
+{
+  "name": "Petroni",
+  "short_name": "Petroni",
+  "description": "Najam i prodaja kampera i karavana te shop za kamping opremu.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://www.petroni.hr/wp-content/uploads/2024/03/cropped-Group-3-270x270.jpg",
+      "sizes": "270x270",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

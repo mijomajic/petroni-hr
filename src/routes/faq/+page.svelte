@@ -1,5 +1,6 @@
 <script lang="ts">
   import { locale } from '$lib/stores/locale';
+  import { breadcrumbSchema, graphSchema, jsonLd } from '$lib/seo';
 
   let openIndex = $state<number | null>(0);
 
@@ -22,9 +23,33 @@
     { q: 'What payment methods do you accept?', a: 'We accept bank transfer and card payment via CorvusPay.' },
     { q: 'Is roadside assistance available?', a: 'Yes, all our campers come with a 24/7 technical support and roadside assistance contact.' },
   ]);
+  const description = 'Odgovori na najčešća pitanja o Petroni najmu kampera, uvjetima, plaćanju, dostavi, povratu proizvoda i podršci.';
+  const faqSchema = $derived(graphSchema([
+    breadcrumbSchema([
+      { name: 'Petroni', path: '/' },
+      { name: 'FAQ', path: '/faq' }
+    ]),
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.a
+        }
+      }))
+    }
+  ]));
 </script>
 
-<svelte:head><title>FAQ — Petroni</title></svelte:head>
+<svelte:head>
+  <title>FAQ — Petroni</title>
+  <meta name="description" content={description} />
+  <meta property="og:title" content="FAQ — Petroni" />
+  <meta property="og:description" content={description} />
+  <script type="application/ld+json">{@html jsonLd(faqSchema)}</script>
+</svelte:head>
 
 <div class="section">
   <div class="container-x max-w-3xl mx-auto">

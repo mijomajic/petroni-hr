@@ -30,7 +30,7 @@
   <a href="/product/{product.slug}" class="block group">
     <div class="aspect-square p-4 flex items-center justify-center bg-white overflow-hidden">
       {#if img}
-        <img src={img} alt={name} loading="lazy" class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105" />
+        <img src={img} alt={name} width="600" height="600" loading="lazy" class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105" />
       {:else}
         <div class="w-full h-full flex items-center justify-center text-[#dfe1e5]">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">

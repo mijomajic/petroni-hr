@@ -6,6 +6,7 @@
 <svelte:head>
   <title>Doplata rezervacije — Petroni</title>
   <meta name="referrer" content="no-referrer" />
+  <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 <div class="min-h-[70vh] flex items-center justify-center py-20 px-4">
   <div class="text-center max-w-6xl w-full">

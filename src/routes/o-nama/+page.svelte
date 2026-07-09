@@ -12,7 +12,12 @@
   ]);
 </script>
 
-<svelte:head><title>O nama — Petroni</title></svelte:head>
+<svelte:head>
+  <title>O nama — Petroni</title>
+  <meta name="description" content="Upoznajte Petroni, obiteljski tim s dugogodišnjim iskustvom u najmu i prodaji kampera, karavana i kamping opreme." />
+  <meta property="og:title" content="O nama — Petroni" />
+  <meta property="og:description" content="Upoznajte Petroni, obiteljski tim s dugogodišnjim iskustvom u najmu i prodaji kampera, karavana i kamping opreme." />
+</svelte:head>
 
 <!-- Hero banner -->
 <section class="relative h-[320px] md:h-[400px] flex items-center justify-center overflow-hidden">

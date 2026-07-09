@@ -23,7 +23,12 @@
   ]);
 </script>
 
-<svelte:head><title>Vozila — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Vozila — Petroni</title>
+  <meta name="description" content="Pregled Petroni ponude vozila: najam kampera, vozila za prodaju i specijalizirana vozila za filmske produkcije." />
+  <meta property="og:title" content="Vozila — Petroni" />
+  <meta property="og:description" content="Pregled Petroni ponude vozila: najam kampera, vozila za prodaju i specijalizirana vozila za filmske produkcije." />
+</svelte:head>
 
 <div class="section">
   <div class="container-x">

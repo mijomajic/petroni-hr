@@ -2,7 +2,12 @@
   import { locale } from '$lib/stores/locale';
 </script>
 
-<svelte:head><title>Uvjeti najma - Petroni</title></svelte:head>
+<svelte:head>
+  <title>Uvjeti najma — Petroni</title>
+  <meta name="description" content="Informacije o Petroni uvjetima najma kampera i prikazu punih uvjeta tijekom procesa online rezervacije." />
+  <meta property="og:title" content="Uvjeti najma — Petroni" />
+  <meta property="og:description" content="Informacije o Petroni uvjetima najma kampera i prikazu punih uvjeta tijekom procesa online rezervacije." />
+</svelte:head>
 
 <div class="section">
   <div class="container-x max-w-2xl mx-auto text-center">

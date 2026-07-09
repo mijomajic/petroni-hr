@@ -506,7 +506,12 @@
   ]);
 </script>
 
-<svelte:head><title>Rezervacija — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Rezervacija kampera — Petroni</title>
+  <meta name="description" content="Online rezervacija Petroni kampera: odaberite lokaciju, datume, vozilo, dodatnu opremu i način plaćanja u nekoliko koraka." />
+  <meta property="og:title" content="Rezervacija kampera — Petroni" />
+  <meta property="og:description" content="Online rezervacija Petroni kampera: odaberite lokaciju, datume, vozilo, dodatnu opremu i način plaćanja u nekoliko koraka." />
+</svelte:head>
 
 <div class="section" style="background:#fafbfc">
   <div class="container-x">

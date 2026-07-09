@@ -7,7 +7,12 @@
   const posts: Post[] = $derived(data.posts as Post[]);
 </script>
 
-<svelte:head><title>Novosti — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Novosti — Petroni</title>
+  <meta name="description" content="Petroni novosti, savjeti i informacije iz svijeta kampiranja, kampera, karavana, putovanja i kamping opreme." />
+  <meta property="og:title" content="Novosti — Petroni" />
+  <meta property="og:description" content="Petroni novosti, savjeti i informacije iz svijeta kampiranja, kampera, karavana, putovanja i kamping opreme." />
+</svelte:head>
 
 <div class="section">
   <div class="container-x">

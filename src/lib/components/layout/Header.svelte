@@ -41,6 +41,8 @@
       <img
         src="https://www.petroni.hr/wp-content/uploads/2024/03/Logo-Petroni-Yellow-New.png"
         alt="Petroni"
+        width="220"
+        height="58"
         class="h-9 w-auto"
         onerror={(e) => { const el = e.currentTarget as HTMLImageElement; el.replaceWith(Object.assign(document.createElement('span'), { textContent: 'PETRONI', className: 'text-2xl font-extrabold tracking-tight', style: 'color:#f5c518' })); }}
       />
@@ -92,12 +94,12 @@
         <button onclick={() => locale.set('hr')} aria-label="Hrvatski"
           class="w-6 h-[18px] rounded-sm overflow-hidden transition-all duration-200"
           style="opacity:{$locale === 'hr' ? '1' : '0.4'}; outline:{$locale === 'hr' ? '2px solid #f5c518' : 'none'}; outline-offset:1px">
-          <img src="https://flagcdn.com/h40/hr.png" alt="HR" class="w-full h-full object-cover" />
+          <img src="https://flagcdn.com/h40/hr.png" alt="" width="30" height="20" class="w-full h-full object-cover" />
         </button>
         <button onclick={() => locale.set('en')} aria-label="English"
           class="w-6 h-[18px] rounded-sm overflow-hidden transition-all duration-200"
           style="opacity:{$locale === 'en' ? '1' : '0.4'}; outline:{$locale === 'en' ? '2px solid #f5c518' : 'none'}; outline-offset:1px">
-          <img src="https://flagcdn.com/h40/gb.png" alt="EN" class="w-full h-full object-cover" />
+          <img src="https://flagcdn.com/h40/gb.png" alt="" width="30" height="20" class="w-full h-full object-cover" />
         </button>
       </div>
 
@@ -164,11 +166,11 @@
 
     <div class="mt-8 flex items-center gap-3">
       <div class="flex items-center gap-2">
-        <button onclick={() => locale.set('hr')} class="w-7 h-5 rounded-sm overflow-hidden" style="opacity:{$locale === 'hr' ? '1' : '0.4'}">
-          <img src="https://flagcdn.com/h40/hr.png" alt="HR" class="w-full h-full object-cover" />
+        <button onclick={() => locale.set('hr')} aria-label="Hrvatski" class="w-7 h-5 rounded-sm overflow-hidden" style="opacity:{$locale === 'hr' ? '1' : '0.4'}">
+          <img src="https://flagcdn.com/h40/hr.png" alt="" width="30" height="20" class="w-full h-full object-cover" />
         </button>
-        <button onclick={() => locale.set('en')} class="w-7 h-5 rounded-sm overflow-hidden" style="opacity:{$locale === 'en' ? '1' : '0.4'}">
-          <img src="https://flagcdn.com/h40/gb.png" alt="EN" class="w-full h-full object-cover" />
+        <button onclick={() => locale.set('en')} aria-label="English" class="w-7 h-5 rounded-sm overflow-hidden" style="opacity:{$locale === 'en' ? '1' : '0.4'}">
+          <img src="https://flagcdn.com/h40/gb.png" alt="" width="30" height="20" class="w-full h-full object-cover" />
         </button>
       </div>
       <a href="/rezerviraj" onclick={() => mobileOpen = false} class="btn btn-primary flex-1">{$_('nav.book')}</a>

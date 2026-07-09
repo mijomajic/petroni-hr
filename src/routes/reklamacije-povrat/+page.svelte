@@ -16,7 +16,12 @@
   ]);
 </script>
 
-<svelte:head><title>Reklamacije & Povrat — Petroni</title></svelte:head>
+<svelte:head>
+  <title>Reklamacije & Povrat — Petroni</title>
+  <meta name="description" content="Informacije o Petroni reklamacijama, povratu proizvoda, roku od 14 dana, povratu novca i pisanom prigovoru." />
+  <meta property="og:title" content="Reklamacije & Povrat — Petroni" />
+  <meta property="og:description" content="Informacije o Petroni reklamacijama, povratu proizvoda, roku od 14 dana, povratu novca i pisanom prigovoru." />
+</svelte:head>
 
 <div class="section">
   <div class="container-x max-w-3xl mx-auto">
