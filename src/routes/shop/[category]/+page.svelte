@@ -80,7 +80,7 @@
   <meta name="description" content={description} />
   <meta property="og:title" content={`${title} — Shop — Petroni`} />
   <meta property="og:description" content={description} />
-  <script type="application/ld+json">{@html jsonLd(categorySchema)}</script>
+  {@html `<script type="application/ld+json">${jsonLd(categorySchema)}</script>`}
 </svelte:head>
 
 <div class="section">

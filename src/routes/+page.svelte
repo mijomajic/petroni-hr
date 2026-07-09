@@ -119,7 +119,7 @@
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
   <meta property="og:image" content={DEFAULT_IMAGE} />
-  <script type="application/ld+json">{@html jsonLd(homeSchema)}</script>
+  {@html `<script type="application/ld+json">${jsonLd(homeSchema)}</script>`}
 </svelte:head>
 
 <!-- ═══════════════════════ HERO ═══════════════════════ -->

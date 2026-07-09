@@ -49,7 +49,7 @@
   <meta property="og:title" content={`${vehicle?.name ?? 'Vozilo'} — Petroni`} />
   <meta property="og:description" content={metaDescription} />
   {#if vehicleImage}<meta property="og:image" content={vehicleImage} />{/if}
-  <script type="application/ld+json">{@html jsonLd(vehicleSchema)}</script>
+  {@html `<script type="application/ld+json">${jsonLd(vehicleSchema)}</script>`}
 </svelte:head>
 
 <div class="section">

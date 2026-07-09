@@ -54,7 +54,7 @@
   <meta name="description" content={description} />
   <meta property="og:title" content="Najam kampera — Petroni" />
   <meta property="og:description" content={description} />
-  <script type="application/ld+json">{@html jsonLd(pageSchema)}</script>
+  {@html `<script type="application/ld+json">${jsonLd(pageSchema)}</script>`}
 </svelte:head>
 
 <div class="section">

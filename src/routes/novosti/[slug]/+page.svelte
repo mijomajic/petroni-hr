@@ -48,7 +48,7 @@
   <meta property="og:description" content={metaDescription} />
   <meta property="og:type" content="article" />
   {#if post.cover_image}<meta property="og:image" content={post.cover_image} />{/if}
-  <script type="application/ld+json">{@html jsonLd(articleSchema)}</script>
+  {@html `<script type="application/ld+json">${jsonLd(articleSchema)}</script>`}
 </svelte:head>
 
 <div class="section">

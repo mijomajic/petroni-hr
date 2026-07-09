@@ -60,7 +60,7 @@
   <meta property="og:description" content={metaDescription} />
   <meta property="og:type" content="product" />
   {#if productImage}<meta property="og:image" content={productImage} />{/if}
-  <script type="application/ld+json">{@html jsonLd(productSchema)}</script>
+  {@html `<script type="application/ld+json">${jsonLd(productSchema)}</script>`}
 </svelte:head>
 
 <div class="section">

@@ -48,7 +48,7 @@
   <meta name="description" content={description} />
   <meta property="og:title" content="FAQ — Petroni" />
   <meta property="og:description" content={description} />
-  <script type="application/ld+json">{@html jsonLd(faqSchema)}</script>
+  {@html `<script type="application/ld+json">${jsonLd(faqSchema)}</script>`}
 </svelte:head>
 
 <div class="section">

@@ -35,7 +35,7 @@
 </script>
 
 <header class="sticky top-0 left-0 right-0 z-50 bg-white border-b border-[#eceef1] shadow-[0_1px_12px_rgba(16,24,40,0.05)]">
-  <div class="container-x flex items-center justify-between gap-4 h-[72px]">
+  <div class="container-x flex items-center justify-between gap-3 h-[72px]">
     <!-- Logo -->
     <a href="/" class="flex-shrink-0" aria-label="Petroni">
       <img
@@ -104,9 +104,11 @@
       </div>
 
       <!-- Book CTA -->
-      <a href="/rezerviraj" class="hidden md:inline-flex btn btn-primary px-5 py-2.5 text-[12px]">
-        {$_('nav.book')}
-      </a>
+      <div class="hidden lg:block">
+        <a href="/rezerviraj" class="btn btn-primary px-5 py-2.5 text-[12px]">
+          {$_('nav.book')}
+        </a>
+      </div>
 
       <!-- Cart -->
       <button onclick={() => cartOpen = true} class="relative flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 hover:bg-[#f3f4f6]" aria-label="Košarica">
@@ -134,7 +136,7 @@
       </a>
 
       <!-- Mobile hamburger -->
-      <button onclick={() => mobileOpen = !mobileOpen} class="lg:hidden flex flex-col gap-[5px] w-10 h-10 items-center justify-center" aria-label="Izbornik">
+      <button type="button" onclick={() => mobileOpen = !mobileOpen} class="lg:hidden flex flex-col gap-[5px] w-10 h-10 items-center justify-center flex-shrink-0" aria-label="Izbornik">
         <span class="block w-5 h-0.5 bg-[#2b2b2b] transition-all duration-300" class:rotate-45={mobileOpen} class:translate-y-[7px]={mobileOpen}></span>
         <span class="block w-5 h-0.5 bg-[#2b2b2b] transition-all duration-300" class:opacity-0={mobileOpen}></span>
         <span class="block w-5 h-0.5 bg-[#2b2b2b] transition-all duration-300" class:-rotate-45={mobileOpen} class:-translate-y-[7px]={mobileOpen}></span>
@@ -164,7 +166,17 @@
       {/each}
     </nav>
 
-    <div class="mt-8 flex items-center gap-3">
+    <div class="mt-8 grid grid-cols-1 gap-3">
+      <a href="/rezerviraj" onclick={() => mobileOpen = false} class="btn btn-primary w-full py-4">{$_('nav.book')}</a>
+      <a href={accountHref} onclick={() => mobileOpen = false} class="btn btn-ghost w-full">
+        {$page.data.user ? 'Moj račun' : 'Prijava / Registracija'}
+      </a>
+      <a href="/shop" onclick={() => mobileOpen = false} class="btn btn-ghost w-full">
+        {$locale === 'hr' ? 'Pretraži shop' : 'Search shop'}
+      </a>
+    </div>
+
+    <div class="mt-6 flex items-center justify-center gap-3">
       <div class="flex items-center gap-2">
         <button onclick={() => locale.set('hr')} aria-label="Hrvatski" class="w-7 h-5 rounded-sm overflow-hidden" style="opacity:{$locale === 'hr' ? '1' : '0.4'}">
           <img src="https://flagcdn.com/h40/hr.png" alt="" width="30" height="20" class="w-full h-full object-cover" />
@@ -173,11 +185,7 @@
           <img src="https://flagcdn.com/h40/gb.png" alt="" width="30" height="20" class="w-full h-full object-cover" />
         </button>
       </div>
-      <a href="/rezerviraj" onclick={() => mobileOpen = false} class="btn btn-primary flex-1">{$_('nav.book')}</a>
     </div>
-    <a href={accountHref} onclick={() => mobileOpen = false} class="btn btn-ghost mt-3">
-      {$page.data.user ? 'Moj račun' : 'Prijava / Registracija'}
-    </a>
   </div>
 {/if}
 
