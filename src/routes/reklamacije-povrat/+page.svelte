@@ -17,9 +17,9 @@
 </script>
 
 <svelte:head>
-  <title>Reklamacije & Povrat — Petroni</title>
+  <title>Reklamacije i povrat kamping opreme | Petroni Shop</title>
   <meta name="description" content="Informacije o Petroni reklamacijama, povratu proizvoda, roku od 14 dana, povratu novca i pisanom prigovoru." />
-  <meta property="og:title" content="Reklamacije & Povrat — Petroni" />
+  <meta property="og:title" content="Reklamacije i povrat kamping opreme | Petroni Shop" />
   <meta property="og:description" content="Informacije o Petroni reklamacijama, povratu proizvoda, roku od 14 dana, povratu novca i pisanom prigovoru." />
 </svelte:head>
 

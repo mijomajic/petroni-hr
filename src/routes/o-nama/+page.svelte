@@ -13,9 +13,9 @@
 </script>
 
 <svelte:head>
-  <title>O nama — Petroni</title>
+  <title>O Petroniju – iskustvo za vaš put kamperom | Petroni</title>
   <meta name="description" content="Upoznajte Petroni, obiteljski tim s dugogodišnjim iskustvom u najmu i prodaji kampera, karavana i kamping opreme." />
-  <meta property="og:title" content="O nama — Petroni" />
+  <meta property="og:title" content="O Petroniju – iskustvo za vaš put kamperom | Petroni" />
   <meta property="og:description" content="Upoznajte Petroni, obiteljski tim s dugogodišnjim iskustvom u najmu i prodaji kampera, karavana i kamping opreme." />
 </svelte:head>
 

@@ -9,9 +9,9 @@
 </script>
 
 <svelte:head>
-  <title>Vozila za prodaju — Petroni</title>
+  <title>Kamperi i karavani za prodaju u Hrvatskoj | Petroni</title>
   <meta name="description" content="Petroni vozila za prodaju s fotografijama, specifikacijama i ključnim informacijama za odabir kampera ili karavana." />
-  <meta property="og:title" content="Vozila za prodaju — Petroni" />
+  <meta property="og:title" content="Kamperi i karavani za prodaju u Hrvatskoj | Petroni" />
   <meta property="og:description" content="Petroni vozila za prodaju s fotografijama, specifikacijama i ključnim informacijama za odabir kampera ili karavana." />
 </svelte:head>
 

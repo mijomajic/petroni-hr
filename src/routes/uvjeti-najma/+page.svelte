@@ -3,9 +3,9 @@
 </script>
 
 <svelte:head>
-  <title>Uvjeti najma — Petroni</title>
+  <title>Uvjeti najma kampera i prikolica | Petroni</title>
   <meta name="description" content="Informacije o Petroni uvjetima najma kampera i prikazu punih uvjeta tijekom procesa online rezervacije." />
-  <meta property="og:title" content="Uvjeti najma — Petroni" />
+  <meta property="og:title" content="Uvjeti najma kampera i prikolica | Petroni" />
   <meta property="og:description" content="Informacije o Petroni uvjetima najma kampera i prikazu punih uvjeta tijekom procesa online rezervacije." />
 </svelte:head>
 

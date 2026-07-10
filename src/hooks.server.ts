@@ -1,8 +1,16 @@
 import { createServerClient } from '@supabase/ssr';
 import { env } from '$env/dynamic/public';
 import type { Handle } from '@sveltejs/kit';
+import { legacyRedirectTarget } from '$lib/legacy-redirects';
 
 export const handle: Handle = async ({ event, resolve }) => {
+  const legacyTarget = legacyRedirectTarget(event.url.pathname);
+  if (legacyTarget && legacyTarget !== event.url.pathname) {
+    const targetUrl = new URL(legacyTarget, event.url.origin);
+    targetUrl.search = event.url.search;
+    return Response.redirect(targetUrl, 308);
+  }
+
   event.locals.supabase = createServerClient(
     env.PUBLIC_SUPABASE_URL,
     env.PUBLIC_SUPABASE_ANON_KEY,

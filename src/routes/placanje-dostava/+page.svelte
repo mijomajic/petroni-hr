@@ -21,9 +21,9 @@
 </script>
 
 <svelte:head>
-  <title>Plaćanje & Dostava — Petroni</title>
+  <title>Plaćanje i dostava kamping opreme | Petroni Shop</title>
   <meta name="description" content="Informacije o Petroni načinima plaćanja, dostavi shop narudžbi, osobnom preuzimanju i uvjetima dostave unutar Hrvatske." />
-  <meta property="og:title" content="Plaćanje & Dostava — Petroni" />
+  <meta property="og:title" content="Plaćanje i dostava kamping opreme | Petroni Shop" />
   <meta property="og:description" content="Informacije o Petroni načinima plaćanja, dostavi shop narudžbi, osobnom preuzimanju i uvjetima dostave unutar Hrvatske." />
 </svelte:head>
 

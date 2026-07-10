@@ -1,0 +1,12 @@
+# Petroni
+
+> Petroni offers camper and caravan rental and sales, camping equipment, and support for travel throughout Croatia and Europe.
+
+## Main pages
+
+- [Camper rental](/vozila/najam-kampera): Rental fleet, vehicle information and online booking.
+- [Book a camper](/rezerviraj): Start an online camper-rental reservation.
+- [Camping shop](/shop): Camping equipment, caravan parts and travel accessories.
+- [Vehicles for sale](/vozila/vozila-za-prodaju): Current vehicles available for sale.
+- [Contact](/kontakt): Contact details and customer support.
+- [Frequently asked questions](/faq): Answers about rental, payment, delivery and returns.

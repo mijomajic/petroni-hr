@@ -9,9 +9,9 @@
 </script>
 
 <svelte:head>
-  <title>Vozila za filmske produkcije — Petroni</title>
+  <title>Kamperi za filmske i TV produkcije | Petroni</title>
   <meta name="description" content="Specijalizirana Petroni vozila za filmske i TV produkcije, reklame i snimanja uz fleksibilne uvjete najma." />
-  <meta property="og:title" content="Vozila za filmske produkcije — Petroni" />
+  <meta property="og:title" content="Kamperi za filmske i TV produkcije | Petroni" />
   <meta property="og:description" content="Specijalizirana Petroni vozila za filmske i TV produkcije, reklame i snimanja uz fleksibilne uvjete najma." />
 </svelte:head>
 

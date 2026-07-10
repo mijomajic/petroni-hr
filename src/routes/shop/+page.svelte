@@ -71,9 +71,9 @@
 </script>
 
 <svelte:head>
-  <title>Shop — Petroni</title>
+  <title>Kamping oprema i dijelovi za kamper | Petroni Shop</title>
   <meta name="description" content={description} />
-  <meta property="og:title" content="Shop — Petroni" />
+  <meta property="og:title" content="Kamping oprema i dijelovi za kamper | Petroni Shop" />
   <meta property="og:description" content={description} />
   {@html `<script type="application/ld+json">${jsonLd(shopSchema)}</script>`}
 </svelte:head>

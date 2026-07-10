@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://petroni-hr.vercel.app/sitemap.xml

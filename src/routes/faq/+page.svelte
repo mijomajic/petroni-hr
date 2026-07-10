@@ -44,9 +44,9 @@
 </script>
 
 <svelte:head>
-  <title>FAQ — Petroni</title>
+  <title>Česta pitanja o najmu kampera i shopu | Petroni</title>
   <meta name="description" content={description} />
-  <meta property="og:title" content="FAQ — Petroni" />
+  <meta property="og:title" content="Česta pitanja o najmu kampera i shopu | Petroni" />
   <meta property="og:description" content={description} />
   {@html `<script type="application/ld+json">${jsonLd(faqSchema)}</script>`}
 </svelte:head>

@@ -24,9 +24,9 @@
 </script>
 
 <svelte:head>
-  <title>Vozila — Petroni</title>
+  <title>Kamperi za najam, prodaju i snimanja | Petroni</title>
   <meta name="description" content="Pregled Petroni ponude vozila: najam kampera, vozila za prodaju i specijalizirana vozila za filmske produkcije." />
-  <meta property="og:title" content="Vozila — Petroni" />
+  <meta property="og:title" content="Kamperi za najam, prodaju i snimanja | Petroni" />
   <meta property="og:description" content="Pregled Petroni ponude vozila: najam kampera, vozila za prodaju i specijalizirana vozila za filmske produkcije." />
 </svelte:head>
 

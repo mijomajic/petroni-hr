@@ -50,9 +50,9 @@
 </script>
 
 <svelte:head>
-  <title>Najam kampera — Petroni</title>
+  <title>Najam kampera u Hrvatskoj – rezervirajte online | Petroni</title>
   <meta name="description" content={description} />
-  <meta property="og:title" content="Najam kampera — Petroni" />
+  <meta property="og:title" content="Najam kampera u Hrvatskoj – rezervirajte online | Petroni" />
   <meta property="og:description" content={description} />
   {@html `<script type="application/ld+json">${jsonLd(pageSchema)}</script>`}
 </svelte:head>
