@@ -77,6 +77,15 @@ export const actions: Actions = {
       .single();
     if (updateError) return fail(400, { message: updateError.message });
 
+    let invoiceSent: boolean | null = null;
+    if (paymentStatus === 'paid' && after.status === 'completed' && !after.invoice_sent) {
+      invoiceSent = await sendOrderInvoice(after, administrator.user.id);
+      if (invoiceSent) {
+        await supabaseAdmin.from('orders').update({ invoice_sent: true }).eq('id', params.id);
+        after.invoice_sent = true;
+      }
+    }
+
     await Promise.all([
       supabaseAdmin.from('payment_attempts').insert({
         order_id: params.id,
@@ -91,10 +100,11 @@ export const actions: Actions = {
         entityId: params.id,
         action: 'order_payment_status_changed',
         beforeState: { payment_status: before.payment_status },
-        afterState: { payment_status: after.payment_status }
+        afterState: { payment_status: after.payment_status, invoice_sent: after.invoice_sent },
+        metadata: invoiceSent === null ? {} : { invoice_sent: invoiceSent }
       })
     ]);
-    return { message: 'Status plaćanja je spremljen.' };
+    return { message: invoiceSent === false ? 'Status plaćanja je spremljen, ali račun nije poslan.' : 'Status plaćanja je spremljen.' };
   },
 
   retryInvoice: async ({ params, locals }) => {

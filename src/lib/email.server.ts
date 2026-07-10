@@ -5,12 +5,16 @@ import { createInvoicePdf } from '$lib/invoice.server';
 import { renderTermsMarkup } from '$lib/terms-markup';
 
 async function emailConfig() {
-  const { data } = await supabaseAdmin.from('settings').select('key,value').in('key', ['admin_email', 'email_from', 'company']);
+  const { data } = await supabaseAdmin
+    .from('settings')
+    .select('key,value')
+    .in('key', ['admin_email', 'email_from', 'company', 'ibans']);
   const settings = Object.fromEntries((data ?? []).map((row) => [row.key, row.value]));
   return {
     admin: String(settings.admin_email ?? 'info@petroni.hr'),
     from: env.RESEND_FROM_EMAIL || String(settings.email_from ?? 'Petroni <onboarding@resend.dev>'),
-    company: (settings.company ?? {}) as { name?: string; oib?: string; address?: string }
+    company: (settings.company ?? {}) as { name?: string; oib?: string; address?: string },
+    ibans: Array.isArray(settings.ibans) ? settings.ibans as Array<{ label?: string; iban?: string }> : []
   };
 }
 
@@ -30,6 +34,48 @@ type EmailContext = {
   recipient: string;
   attemptedBy?: string;
 };
+
+const euro = (value: unknown) => `${Number(value ?? 0).toFixed(2)} EUR`;
+const date = (value: unknown) => String(value ?? '').split('-').reverse().join('.');
+
+function emailLayout(title: string, content: string) {
+  return `<div style="margin:0;padding:32px 16px;background:#f5f5f3;font-family:Arial,sans-serif;color:#252525"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:0 auto;background:#ffffff"><tr><td style="padding:28px 32px;background:#252525;color:#ffffff"><div style="font-size:12px;letter-spacing:2px;font-weight:700">PETRONI</div><div style="margin-top:6px;font-size:14px;color:#d7d7d7">Najam kampera i oprema za putovanja</div></td></tr><tr><td style="padding:32px"><h1 style="margin:0 0 18px;font-size:26px;line-height:1.2;color:#252525">${title}</h1>${content}</td></tr><tr><td style="padding:20px 32px;background:#f5f5f3;font-size:12px;line-height:1.5;color:#666">Za pitanja nam odgovorite na ovaj email ili nam se javite na info@petroni.hr.</td></tr></table></div>`;
+}
+
+function detailRows(rows: Array<[string, unknown]>) {
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border:1px solid #e6e6e6;border-collapse:collapse">${rows.map(([label, value]) => `<tr><td style="padding:10px 12px;border-bottom:1px solid #e6e6e6;color:#666;font-size:14px">${escapeHtml(label)}</td><td style="padding:10px 12px;border-bottom:1px solid #e6e6e6;text-align:right;font-size:14px;font-weight:700">${escapeHtml(value)}</td></tr>`).join('')}</table>`;
+}
+
+function bookingSummary(booking: Record<string, any>) {
+  const vehicle = booking.vehicles?.name ?? booking.vehicle_name ?? 'Odabrano vozilo';
+  return detailRows([
+    ['Broj rezervacije', booking.confirmation_number],
+    ['Vozilo', vehicle],
+    ['Preuzimanje', `${booking.pickup_location}, ${date(booking.pickup_date)} u ${booking.pickup_time}`],
+    ['Povrat', `${booking.dropoff_location}, ${date(booking.dropoff_date)} u ${booking.dropoff_time}`],
+    ['Ukupno za najam', euro(booking.total_price)],
+    ['Povratni depozit', euro(booking.deposit_amount)]
+  ]);
+}
+
+function paymentSummary(booking: Record<string, any>, ibans: Array<{ label?: string; iban?: string }>) {
+  const rows: Array<[string, unknown]> = [['Način plaćanja', booking.payment_method === 'bank_transfer' ? 'Bankovna uplata' : 'Kartično plaćanje']];
+  if (booking.payment_split) {
+    rows.push(['Prva rata', euro(booking.first_payment_amount)], ['Druga rata', `${euro(booking.second_payment_amount)} do ${date(booking.second_payment_due_date)}`]);
+  } else {
+    rows.push(['Iznos za uplatu', euro(booking.first_payment_amount ?? booking.total_price)]);
+  }
+  const ibansHtml = booking.payment_method === 'bank_transfer' && ibans.length
+    ? `<p style="font-size:14px;line-height:1.6">Prilikom uplate obavezno navedite poziv na broj <strong>${escapeHtml(booking.confirmation_number)}</strong>.<br>${ibans.map((account) => `${escapeHtml(account.label ?? 'IBAN')}: <strong>${escapeHtml(account.iban ?? '')}</strong>`).join('<br>')}</p>`
+    : '';
+  return `${detailRows(rows)}${ibansHtml}`;
+}
+
+function orderSummary(order: Record<string, any>) {
+  const items = Array.isArray(order.items) ? order.items : [];
+  const itemRows = items.map((item: Record<string, any>) => `<tr><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;font-size:14px">${escapeHtml(item.name_hr ?? item.name ?? item.slug ?? 'Proizvod')} × ${escapeHtml(item.qty ?? item.quantity ?? 1)}</td><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;text-align:right;font-size:14px;font-weight:700">${euro(Number(item.price ?? item.total ?? 0) * Number(item.qty ?? item.quantity ?? 1))}</td></tr>`).join('');
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-collapse:collapse">${itemRows}<tr><td style="padding:14px 0;font-size:16px;font-weight:700">Ukupno</td><td style="padding:14px 0;text-align:right;font-size:16px;font-weight:700">${euro(order.total)}</td></tr></table>`;
+}
 
 async function recordEmailAttempt(
   context: EmailContext,
@@ -91,17 +137,17 @@ export async function sendBookingReceived(
   terms?: { version?: string | null; content_hr?: string | null }
 ) {
   const config = await emailConfig();
-  const details = `<p>Broj rezervacije: <strong>${escapeHtml(booking.confirmation_number)}</strong></p><p>${escapeHtml(booking.pickup_date)} - ${escapeHtml(booking.dropoff_date)}</p><p>Ukupno: ${Number(booking.total_price).toFixed(2)} EUR</p>`;
+  const details = bookingSummary(booking);
   const termsBlock = terms?.content_hr
-    ? `<hr><p><strong>Uvjeti najma - verzija ${escapeHtml(terms.version)}</strong></p><div style="font-family:Arial,sans-serif;font-size:13px;line-height:1.55;color:#333">${renderTermsMarkup(terms.content_hr)}</div>`
+    ? `<hr style="border:0;border-top:1px solid #e6e6e6;margin:28px 0"><p style="font-size:14px"><strong>Uvjeti najma — verzija ${escapeHtml(terms.version)}</strong></p><div style="font-size:13px;line-height:1.55;color:#333">${renderTermsMarkup(terms.content_hr)}</div>`
     : '';
   const results = await Promise.all([
     send(
-      { from: config.from, to: booking.driver_email, subject: 'Zahtjev za rezervaciju zaprimljen', html: `<h1>Zahtjev je zaprimljen</h1>${details}<p>Rezervacija čeka pregled i potvrdu.</p>${termsBlock}` },
+      { from: config.from, replyTo: config.admin, to: booking.driver_email, subject: `Zaprimili smo zahtjev za rezervaciju ${booking.confirmation_number}`, html: emailLayout('Zahtjev za rezervaciju je zaprimljen', `<p style="font-size:16px;line-height:1.6">Hvala, ${escapeHtml(booking.driver_name)}. Provjerit ćemo dostupnost i javiti vam se s potvrdom i daljnjim uputama.</p>${details}${paymentSummary(booking, config.ibans)}${termsBlock}`) },
       { bookingId: booking.id, messageType: 'booking_received_customer', recipient: booking.driver_email }
     ),
     send(
-      { from: config.from, to: config.admin, subject: `Nova rezervacija ${booking.confirmation_number}`, html: `<h1>Nova rezervacija</h1><p>${escapeHtml(booking.driver_name)} ${escapeHtml(booking.driver_last_name)}</p>${details}` },
+      { from: config.from, replyTo: booking.driver_email, to: config.admin, subject: `Nova rezervacija ${booking.confirmation_number}`, html: emailLayout('Nova rezervacija čeka pregled', `<p style="font-size:15px;line-height:1.6"><strong>${escapeHtml(booking.driver_name)} ${escapeHtml(booking.driver_last_name)}</strong><br>${escapeHtml(booking.driver_email)} · ${escapeHtml(booking.driver_phone)}</p>${details}${paymentSummary(booking, config.ibans)}<p style="font-size:14px">Otvorite administraciju za potpuni pregled podataka vozača, obračuna i e-suglasnosti.</p>`) },
       { bookingId: booking.id, messageType: 'booking_received_admin', recipient: config.admin }
     )
   ]);
@@ -114,7 +160,7 @@ export async function sendBookingConfirmed(
 ) {
   const config = await emailConfig();
   return send(
-    { from: config.from, to: booking.driver_email, subject: `Rezervacija ${booking.confirmation_number} potvrđena`, html: `<h1>Rezervacija je potvrđena</h1><p>Termin: ${escapeHtml(booking.pickup_date)} - ${escapeHtml(booking.dropoff_date)}</p>` },
+    { from: config.from, replyTo: config.admin, to: booking.driver_email, subject: `Potvrđena rezervacija ${booking.confirmation_number}`, html: emailLayout('Vaša rezervacija je potvrđena', `<p style="font-size:16px;line-height:1.6">Veselimo se vašem putovanju. Sačuvajte ovaj email; ovdje su najvažniji podaci za preuzimanje vozila.</p>${bookingSummary(booking)}${paymentSummary(booking, config.ibans)}<p style="font-size:14px;line-height:1.6">Ako trebate promijeniti podatke ili imate pitanje prije preuzimanja, odgovorite na ovaj email.</p>`) },
     {
       bookingId: booking.id,
       messageType: 'booking_confirmed_customer',
@@ -122,6 +168,30 @@ export async function sendBookingConfirmed(
       attemptedBy
     }
   );
+}
+
+export async function sendSecondPaymentLink(booking: Record<string, any>, paymentLink: string, attemptedBy?: string) {
+  const config = await emailConfig();
+  return send(
+    { from: config.from, replyTo: config.admin, to: booking.driver_email, subject: `Doplata za rezervaciju ${booking.confirmation_number}`, html: emailLayout('Dostupna je poveznica za doplatu', `<p style="font-size:16px;line-height:1.6">Preostali iznos za vašu rezervaciju je <strong>${euro(booking.second_payment_amount)}</strong>. Rok za uplatu je ${date(booking.second_payment_due_date)}.</p><p style="margin:24px 0"><a href="${escapeHtml(paymentLink)}" style="display:inline-block;padding:13px 18px;background:#252525;color:#ffffff;text-decoration:none;font-weight:700">Otvori doplatu</a></p><p style="font-size:13px;line-height:1.6;color:#666">Poveznica vrijedi do dana preuzimanja. Ako imate pitanje, odgovorite na ovaj email.</p>`) },
+    { bookingId: booking.id, messageType: 'booking_second_payment_link_customer', recipient: booking.driver_email, attemptedBy }
+  );
+}
+
+export async function sendOrderReceived(order: Record<string, any>) {
+  const config = await emailConfig();
+  const summary = orderSummary(order);
+  const payment = order.payment_method === 'bank_transfer' ? 'Odabrali ste bankovnu uplatu. Podaci za uplatu prikazani su nakon narudžbe.' : 'Odabrali ste kartično plaćanje.';
+  return Promise.all([
+    send(
+      { from: config.from, replyTo: config.admin, to: order.customer_email, subject: `Zaprimili smo narudžbu ${order.confirmation_number}`, html: emailLayout('Hvala na narudžbi', `<p style="font-size:16px;line-height:1.6">Narudžba <strong>${escapeHtml(order.confirmation_number)}</strong> je zaprimljena. ${payment}</p>${summary}<p style="font-size:14px;line-height:1.6">Obavijestit ćemo vas kada narudžba bude plaćena i poslana. Račun ćete dobiti emailom nakon slanja.</p>`) },
+      { orderId: order.id, messageType: 'order_received_customer', recipient: order.customer_email }
+    ),
+    send(
+      { from: config.from, replyTo: order.customer_email, to: config.admin, subject: `Nova shop narudžba ${order.confirmation_number}`, html: emailLayout('Nova shop narudžba', `<p style="font-size:15px;line-height:1.6"><strong>${escapeHtml(order.customer_name)}</strong><br>${escapeHtml(order.customer_email)} · ${escapeHtml(order.customer_phone)}</p>${summary}`) },
+      { orderId: order.id, messageType: 'order_received_admin', recipient: config.admin }
+    )
+  ]);
 }
 
 export async function sendOrderInvoice(
@@ -141,9 +211,10 @@ export async function sendOrderInvoice(
   return send(
     {
       from: config.from,
+      replyTo: config.admin,
       to: order.customer_email,
       subject: `Račun ${order.confirmation_number ?? ''}`.trim(),
-      html: '<h1>Vaša narudžba je plaćena i poslana</h1><p>Račun se nalazi u privitku.</p>',
+      html: emailLayout('Narudžba je plaćena i poslana', `<p style="font-size:16px;line-height:1.6">Vaša narudžba <strong>${escapeHtml(order.confirmation_number)}</strong> je poslana. Račun je u privitku ovog emaila.</p>${orderSummary(order)}<p style="font-size:14px;line-height:1.6">Hvala što kupujete kod Petronija.</p>`),
       attachments: [{ filename: `racun-${order.confirmation_number ?? order.id}.pdf`, content: Buffer.from(pdf) }]
     },
     {

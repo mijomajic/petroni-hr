@@ -1,6 +1,6 @@
 import { fail, error } from '@sveltejs/kit';
 import { requireAdministrator, recordAdminEvent } from '$lib/admin.server';
-import { sendBookingConfirmed } from '$lib/email.server';
+import { sendBookingConfirmed, sendSecondPaymentLink } from '$lib/email.server';
 import {
   createSecondPaymentToken,
   revokeSecondPaymentTokens
@@ -228,7 +228,13 @@ export const actions: Actions = {
       action: 'second_payment_link_generated',
       metadata: { expires_at: expiresAt.toISOString() }
     });
-    return { message: 'Nova poveznica je izrađena. Prethodna više ne vrijedi.', paymentLink };
+    const emailSent = await sendSecondPaymentLink(booking, paymentLink, administrator.user.id);
+    return {
+      message: emailSent
+        ? 'Poveznica za doplatu je izrađena i poslana klijentu. Prethodna više ne vrijedi.'
+        : 'Poveznica je izrađena, ali email nije poslan. Kopirajte je i pošaljite klijentu ručno.',
+      paymentLink
+    };
   },
 
   revokePaymentLink: async ({ params, locals }) => {

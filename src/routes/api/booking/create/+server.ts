@@ -215,7 +215,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
     terms_accepted_at: new Date().toISOString(),
     terms_accepted_ip: getClientAddress(),
     terms_version: terms.version
-  }).select().single();
+  }).select('*,vehicles(name)').single();
 
   if (error) {
     return json({ success: false, error: error.message }, { status: 400 });

@@ -8,6 +8,7 @@ import {
   type IbanSetting
 } from '$lib/payments.server';
 import type { RequestHandler } from './$types';
+import { sendOrderReceived } from '$lib/email.server';
 
 type CartItem = {
   id?: string;
@@ -79,9 +80,11 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
     status: 'pending',
     payment_status: 'unpaid',
     payment_method: paymentMethod
-  }).select('id,confirmation_number,customer_email,total,payment_method').single();
+  }).select().single();
 
   if (error) return json({ success: false, error: error.message }, { status: 400 });
+
+  sendOrderReceived(order).catch((mailError) => console.error('Order email failed', mailError));
 
   const response: Record<string, unknown> = {
     success: true,

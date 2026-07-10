@@ -112,7 +112,7 @@
             <button class="px-3 py-2 rounded-lg text-sm font-bold bg-[#F5C518] text-black hover:bg-[#dfb314] active:scale-[0.97] transition">Spremi</button>
           </form>
           <div class="pt-3 border-t border-[#ededf0]">
-            <p class="text-xs leading-relaxed text-[#7a7f86] mb-3">Poveznica se ne šalje automatski. Nakon evidentirane prve rate izradite je ovdje, kopirajte i pošaljite klijentu. Izrada nove poveznice poništava prethodnu.</p>
+            <p class="text-xs leading-relaxed text-[#7a7f86] mb-3">Nakon evidentirane prve rate izradite sigurnu poveznicu. Ona se automatski šalje klijentu emailom; izrada nove poveznice poništava prethodnu.</p>
             {#if form?.paymentLink}
               <label class="text-xs font-bold text-[#5b6168]">Sigurna poveznica — kopirajte je sada
                 <input readonly value={form.paymentLink} class="field mt-1" onclick={(event) => event.currentTarget.select()} />
