@@ -8,7 +8,60 @@
   const vehicle: Vehicle = $derived(data.vehicle as Vehicle);
   let activeImage = $state(0);
 
-  const specEntries = $derived(vehicle.specs ? Object.entries(vehicle.specs) : []);
+  type DisplaySpec = { label: string; value: string };
+
+  const specEntries = $derived.by<DisplaySpec[]>(() => {
+    if (!vehicle.specs) return [];
+
+    const labels: Record<string, { hr: string; en: string }> = {
+      cab_ac: { hr: 'Klima u kabini', en: 'Cab air conditioning' },
+      chassis: { hr: 'Podvozje', en: 'Chassis' },
+      power_hp: { hr: 'Snaga motora', en: 'Engine power' },
+      living_ac: { hr: 'Klima u kamperu', en: 'Living-area air conditioning' },
+      model_year: { hr: 'Godina modela', en: 'Model year' },
+      seats_beds: { hr: 'Sjedala / ležajevi', en: 'Seats / berths' },
+      deposit_eur: { hr: 'Povratni polog', en: 'Refundable deposit' },
+      dimensions_m: { hr: 'Dimenzije (D × Š × V)', en: 'Dimensions (L × W × H)' },
+      transmission: { hr: 'Mjenjač', en: 'Transmission' },
+      living_ac_note: { hr: 'Napomena o klimi', en: 'Air conditioning note' }
+    };
+
+    const yesNo = (value: unknown) => value
+      ? ($locale === 'hr' ? 'Da' : 'Yes')
+      : ($locale === 'hr' ? 'Ne' : 'No');
+    const formatValue = (key: string, value: unknown) => {
+      if (key === 'cab_ac' || key === 'living_ac') return yesNo(value);
+      if (key === 'power_hp') return `${value} KS`;
+      if (key === 'deposit_eur') return `${Number(value).toLocaleString('hr-HR')} €`;
+      if (key === 'transmission') {
+        const manual = $locale === 'hr' ? 'Ručni' : 'Manual';
+        const automatic = $locale === 'hr' ? 'Automatski' : 'Automatic';
+        return value === 'manual' ? manual : value === 'automatic' ? automatic : String(value);
+      }
+      return String(value);
+    };
+
+    return Object.entries(vehicle.specs).map(([key, value]) => ({
+      label: labels[key]?.[$locale] ?? key.replaceAll('_', ' '),
+      value: formatValue(key, value)
+    }));
+  });
+  const summaryMetrics = $derived.by(() => {
+    const dimensions = String(vehicle.specs?.dimensions_m ?? '')
+      .split(/[x×]/i)
+      .map(value => value.trim())
+      .filter(Boolean);
+    const labels = $locale === 'hr'
+      ? { seats: 'Putnika', beds: 'Ležajeva', length: 'Duljina', width: 'Širina' }
+      : { seats: 'Passengers', beds: 'Berths', length: 'Length', width: 'Width' };
+
+    return [
+      vehicle.seats ? { value: String(vehicle.seats), label: labels.seats } : null,
+      vehicle.beds ? { value: String(vehicle.beds), label: labels.beds } : null,
+      dimensions[0] ? { value: `${dimensions[0]} m`, label: labels.length } : null,
+      dimensions[1] ? { value: `${dimensions[1]} m`, label: labels.width } : null
+    ].filter((metric): metric is { value: string; label: string } => metric !== null);
+  });
   const desc = $derived($locale === 'hr' ? vehicle.description_hr : (vehicle.description_en || vehicle.description_hr));
   const metaDescription = $derived(truncateText(desc || `${vehicle.name} u Petroni ponudi vozila za najam i prodaju.`, 155));
   const vehicleUrl = $derived(absoluteUrl(`/vozila/najam-kampera/${vehicle.slug}`));
@@ -115,6 +168,18 @@
 
       {:else}
         <!-- Standard rental/sale layout -->
+        {#if vehicle.type === 'rental' && summaryMetrics.length}
+          <section class="mb-8 overflow-hidden rounded-xl bg-[#252a35] text-white shadow-[0_18px_35px_-28px_rgba(29,35,48,0.75)]" aria-label={$locale === 'hr' ? 'Sažetak kapaciteta i dimenzija' : 'Capacity and dimensions summary'}>
+            <div class="grid grid-cols-2 divide-x divide-y divide-white/10 sm:grid-cols-4 sm:divide-y-0">
+              {#each summaryMetrics as metric}
+                <div class="px-4 py-5 text-center sm:px-6 sm:py-6">
+                  <p class="text-[27px] font-bold leading-none tracking-tight sm:text-[32px]">{metric.value}</p>
+                  <p class="mt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/65">{metric.label}</p>
+                </div>
+              {/each}
+            </div>
+          </section>
+        {/if}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div class="lg:col-span-2">
             <div class="relative rounded-lg overflow-hidden bg-[#f3f4f6] aspect-[4/3] mb-4 border border-[#ededf0]">
@@ -151,10 +216,10 @@
 
           <aside class="lg:col-span-1">
             <div class="card p-6">
-              {#each specEntries as [key, val]}
+              {#each specEntries as spec}
                 <div class="flex items-center justify-between py-2.5 border-b border-[#f0f1f3] last:border-0">
-                  <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{key}:</span>
-                  <span class="text-[13px] text-[#6b7178]">{val as string}</span>
+                  <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{spec.label}:</span>
+                  <span class="text-right text-[13px] text-[#6b7178]">{spec.value}</span>
                 </div>
               {/each}
               {#if vehicle.base_price_per_day}
