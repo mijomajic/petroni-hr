@@ -1,6 +1,6 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
 import { env } from '$env/dynamic/private';
 import bwipjs from 'bwip-js';
+import { signCorvuspayFields, verifyCorvuspayFields } from '$lib/corvuspay.server';
 
 export type IbanSetting = { bank: string; iban: string; bic?: string };
 
@@ -39,12 +39,11 @@ export async function hub3BarcodeDataUrl(payload: string): Promise<string> {
 }
 
 export function corvuspayAvailable(): boolean {
-  return Boolean(env.CORVUSPAY_STORE_ID && env.CORVUSPAY_SECRET_KEY && env.CORVUSPAY_ENV);
-}
-
-function corvusSignature(fields: Record<string, string>): string {
-  const canonical = Object.keys(fields).sort().map((key) => `${key}=${fields[key]}`).join('&');
-  return createHmac('sha256', env.CORVUSPAY_SECRET_KEY ?? '').update(canonical).digest('hex');
+  return Boolean(
+    env.CORVUSPAY_STORE_ID &&
+    env.CORVUSPAY_SECRET_KEY &&
+    ['test', 'production'].includes(env.CORVUSPAY_ENV?.toLowerCase() ?? '')
+  );
 }
 
 export function createCorvuspayRedirect(input: {
@@ -55,32 +54,29 @@ export function createCorvuspayRedirect(input: {
   baseUrl: string;
   successPath?: string;
   cancelPath?: string;
-  callbackPath?: string;
 }): { url: string; fields: Record<string, string> } | null {
   if (!corvuspayAvailable()) return null;
   const environment = env.CORVUSPAY_ENV?.toLowerCase();
   const url = environment === 'production'
-    ? 'https://cps.corvus.hr/redirect/'
-    : 'https://test-wallet.corvuspay.com/checkout/';
+    ? 'https://wallet.corvuspay.com/checkout/'
+    : 'https://wallet.test.corvuspay.com/checkout/';
   const fields: Record<string, string> = {
+    version: '1.6',
     store_id: env.CORVUSPAY_STORE_ID!,
     order_number: input.orderNumber,
-    amount: input.amount.toFixed(2),
-    currency: 'EUR',
     language: 'hr',
+    currency: 'EUR',
+    amount: input.amount.toFixed(2),
     cart: input.description.slice(0, 255),
+    require_complete: 'false',
+    cardholder_country_code: 'HR',
     cardholder_email: input.email,
-    success_url: `${input.baseUrl}${input.successPath ?? '/api/corvuspay/callback?result=success'}`,
-    cancel_url: `${input.baseUrl}${input.cancelPath ?? '/api/corvuspay/callback?result=cancel'}`,
-    callback_url: `${input.baseUrl}${input.callbackPath ?? '/api/corvuspay/callback'}`
+    success_url: `${input.baseUrl}${input.successPath ?? '/api/corvuspay/callback'}`,
+    cancel_url: `${input.baseUrl}${input.cancelPath ?? '/api/corvuspay/cancel'}`
   };
-  return { url, fields: { ...fields, signature: corvusSignature(fields) } };
+  return { url, fields: { ...fields, signature: signCorvuspayFields(env.CORVUSPAY_SECRET_KEY!, fields) } };
 }
 
 export function verifyCorvuspayCallback(fields: Record<string, string>): boolean {
-  if (!corvuspayAvailable() || !fields.signature) return false;
-  const { signature, ...signedFields } = fields;
-  const expected = Buffer.from(corvusSignature(signedFields));
-  const received = Buffer.from(signature);
-  return expected.length === received.length && timingSafeEqual(expected, received);
+  return corvuspayAvailable() && verifyCorvuspayFields(env.CORVUSPAY_SECRET_KEY!, fields);
 }

@@ -1,57 +1,71 @@
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/supabase.server';
+import { parseCorvuspayOrderNumber } from '$lib/corvuspay.server';
 import { verifyCorvuspayCallback } from '$lib/payments.server';
 import { revokeSecondPaymentTokens } from '$lib/payment-tokens.server';
 import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async ({ request, url }) => {
-  const form = await request.formData();
-  const fields = Object.fromEntries([...form.entries()].map(([key, value]) => [key, String(value)]));
-  if (!verifyCorvuspayCallback(fields)) return new Response('Invalid signature', { status: 400 });
-  const orderNumber = String(fields.order_number ?? '');
-  const successful = ['success', 'approved', 'completed'].includes(String(fields.status ?? fields.result ?? '').toLowerCase());
-  if (orderNumber.startsWith('order:')) {
-    const orderId = orderNumber.slice('order:'.length);
-    if (orderId && successful) {
-      await supabaseAdmin.from('orders').update({ payment_status: 'paid', status: 'confirmed' }).eq('id', orderId);
-    }
-    return new Response('OK');
-  }
-  const [bookingId, partText] = orderNumber.split(':');
-  if (bookingId) {
-    await supabaseAdmin.from('payment_attempts').insert({
-      booking_id: bookingId,
-      payment_part: partText === '2' ? 2 : 1,
-      provider: 'corvuspay',
-      action: 'callback_received',
-      status: successful ? 'succeeded' : 'failed',
-      provider_reference: String(fields.order_number ?? ''),
-      metadata: {
-        result: String(fields.status ?? fields.result ?? 'unknown')
-      }
-    });
-  }
-  if (bookingId && successful) {
-    const part = partText === '2' ? 2 : 1;
-    const { data: booking } = await supabaseAdmin.from('bookings')
-      .select('payment_split,first_payment_status,second_payment_status')
-      .eq('id', bookingId).single();
-    const update = part === 2
-      ? {
-          second_payment_status: 'paid',
-          payment_status: booking?.first_payment_status === 'paid' ? 'paid' : 'partial'
-        }
-      : {
-          first_payment_status: 'paid',
-          payment_status: booking?.payment_split && booking?.second_payment_status !== 'paid' ? 'partial' : 'paid'
-        };
-    await supabaseAdmin.from('bookings').update(update).eq('id', bookingId);
-    if (part === 2) await revokeSecondPaymentTokens(bookingId);
-  }
-  return new Response('OK');
-};
-
 export const GET: RequestHandler = async ({ url }) => {
-  const result = url.searchParams.get('result');
-  throw redirect(303, result === 'success' ? '/rezerviraj/success?payment=success' : '/rezerviraj/success?payment=cancel');
+  const fields = Object.fromEntries(url.searchParams.entries());
+  if (!verifyCorvuspayCallback(fields)) throw error(400, 'Neispravan CorvusPay potpis.');
+
+  const reference = parseCorvuspayOrderNumber(String(fields.order_number ?? ''));
+  if (!reference) throw error(400, 'Nepoznata CorvusPay transakcija.');
+
+  if (reference.kind === 'order') {
+    const { data: order } = await supabaseAdmin
+      .from('orders')
+      .select('id')
+      .eq('id', reference.orderId)
+      .eq('payment_method', 'corvuspay')
+      .eq('corvuspay_order_id', fields.order_number)
+      .single();
+    if (!order) throw error(404, 'Narudžba nije pronađena.');
+    await supabaseAdmin.from('orders').update({ payment_status: 'paid', status: 'confirmed' }).eq('id', order.id);
+    throw redirect(303, '/checkout/success?payment=success');
+  }
+
+  const { data: booking } = await supabaseAdmin
+    .from('bookings')
+    .select('id,payment_split,first_payment_status,second_payment_status')
+    .eq('id', reference.bookingId)
+    .eq('payment_method', 'corvuspay')
+    .single();
+  if (!booking) throw error(404, 'Rezervacija nije pronađena.');
+  const { data: paymentAttempt } = await supabaseAdmin
+    .from('payment_attempts')
+    .select('id')
+    .eq('booking_id', booking.id)
+    .eq('payment_part', reference.paymentPart)
+    .eq('provider', 'corvuspay')
+    .eq('action', 'redirect_created')
+    .eq('provider_reference', fields.order_number)
+    .limit(1)
+    .maybeSingle();
+  if (!paymentAttempt) throw error(404, 'CorvusPay pokušaj plaćanja nije pronađen.');
+  if (
+    reference.paymentPart === 2 &&
+    (!booking.payment_split || booking.first_payment_status !== 'paid' || booking.second_payment_status === 'paid')
+  ) {
+    throw error(409, 'Doplata za ovu rezervaciju nije dostupna.');
+  }
+
+  const paymentStatus = reference.paymentPart === 2
+    ? (booking.first_payment_status === 'paid' ? 'paid' : 'partial')
+    : (booking.payment_split && booking.second_payment_status !== 'paid' ? 'partial' : 'paid');
+  const update = reference.paymentPart === 2
+    ? { second_payment_status: 'paid', payment_status: paymentStatus }
+    : { first_payment_status: 'paid', payment_status: paymentStatus };
+  await supabaseAdmin.from('bookings').update(update).eq('id', booking.id);
+  await supabaseAdmin.from('payment_attempts').insert({
+    booking_id: booking.id,
+    payment_part: reference.paymentPart,
+    provider: 'corvuspay',
+    action: 'success_redirect_verified',
+    status: 'succeeded',
+    provider_reference: fields.order_number,
+    metadata: { approval_code: fields.approval_code ?? null, language: fields.language ?? null }
+  });
+  if (reference.paymentPart === 2) await revokeSecondPaymentTokens(booking.id);
+  throw redirect(303, '/rezerviraj/success?payment=success');
 };

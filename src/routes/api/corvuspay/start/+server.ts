@@ -2,6 +2,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/supabase.server';
 import { createCorvuspayRedirect } from '$lib/payments.server';
 import { validateSecondPaymentToken } from '$lib/payment-tokens.server';
+import { corvuspayBookingOrderNumber } from '$lib/corvuspay.server';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, url }) => {
@@ -24,7 +25,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
     throw error(404);
   }
   const redirectData = createCorvuspayRedirect({
-    orderNumber: `${booking.id}:${part}`,
+    orderNumber: corvuspayBookingOrderNumber(booking.id, part),
     amount: Number(part === 2 ? booking.second_payment_amount : booking.first_payment_amount),
     description: `${part === 2 ? 'Doplata' : 'Rezervacija'} ${booking.confirmation_number}`,
     email: booking.driver_email,
@@ -37,7 +38,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
     provider: 'corvuspay',
     action: 'redirect_created',
     status: 'started',
-    provider_reference: `${booking.id}:${part}`
+    provider_reference: corvuspayBookingOrderNumber(booking.id, part)
   });
   const escapeAttribute = (value: string) => value
     .replaceAll('&', '&amp;')

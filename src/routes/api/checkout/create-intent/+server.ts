@@ -7,6 +7,7 @@ import {
   hub3Payload,
   type IbanSetting
 } from '$lib/payments.server';
+import { corvuspayShopOrderNumber } from '$lib/corvuspay.server';
 import type { RequestHandler } from './$types';
 import { sendOrderReceived } from '$lib/email.server';
 
@@ -114,7 +115,7 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 
   if (paymentMethod === 'corvuspay') {
     const redirect = createCorvuspayRedirect({
-      orderNumber: `order:${order.id}`,
+      orderNumber: corvuspayShopOrderNumber(order.id),
       amount: subtotal,
       description: `Narudžba ${confirmationNumber}`,
       email: order.customer_email,
@@ -126,6 +127,7 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
       await supabaseAdmin.from('orders').delete().eq('id', order.id);
       return json({ success: false, error: 'CorvusPay je uskoro dostupan. Odaberite bankovnu uplatu.' }, { status: 503 });
     }
+    await supabaseAdmin.from('orders').update({ corvuspay_order_id: corvuspayShopOrderNumber(order.id) }).eq('id', order.id);
     response.corvuspay = redirect;
   }
 

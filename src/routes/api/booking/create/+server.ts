@@ -11,6 +11,7 @@ import {
   paymentAmount,
   type IbanSetting
 } from '$lib/payments.server';
+import { corvuspayBookingOrderNumber } from '$lib/corvuspay.server';
 import { sendBookingReceived } from '$lib/email.server';
 
 function ageOnDate(dateOfBirth: string, referenceDate: string): number {
@@ -281,7 +282,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
   }
   if (paymentMethod === 'corvuspay') {
     const redirect = createCorvuspayRedirect({
-      orderNumber: `${data.id}:1`,
+      orderNumber: corvuspayBookingOrderNumber(data.id, 1),
       amount: firstAmount,
       description: `Rezervacija ${confirmationNumber}`,
       email: data.driver_email,
@@ -297,8 +298,9 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
       provider: 'corvuspay',
       action: 'redirect_created',
       status: 'started',
-      provider_reference: `${data.id}:1`
+      provider_reference: corvuspayBookingOrderNumber(data.id, 1)
     });
+    await supabaseAdmin.from('bookings').update({ corvuspay_order_id: corvuspayBookingOrderNumber(data.id, 1) }).eq('id', data.id);
     response.corvuspay = redirect;
   }
   return json(response);
