@@ -152,7 +152,9 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
       pickupLocation: pickupLocation.name,
       dropoffLocation: dropoffLocation.name,
       plannedKm,
-      selectedExtras: body.extras ?? {}
+      selectedExtras: body.extras ?? {},
+      crossesBorder: body.crossesBorder === true,
+      attendsFestival: body.attendsFestival === true
     },
     pricingData.config
   );

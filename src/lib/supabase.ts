@@ -82,6 +82,7 @@ export type BookingExtra = {
   category: 'oprema' | 'ciscenje' | 'depozit' | 'ostalo' | string | null;
   max_qty: number;
   is_required: boolean;
+  auto_apply_rule?: 'border_crossing' | 'festival' | null;
   sort_order: number;
 };
 

@@ -14,6 +14,8 @@ export type BookingState = {
   numChildren: number;
   plannedKm: number;
   destination: string;
+  crossesBorder: boolean;
+  attendsFestival: boolean;
   selectedVehicle: Vehicle | null;
   driverDetails: {
     firstName: string;
@@ -44,6 +46,8 @@ const defaultState: BookingState = {
   numChildren: 0,
   plannedKm: 0,
   destination: '',
+  crossesBorder: false,
+  attendsFestival: false,
   selectedVehicle: null,
   driverDetails: {
     firstName: '',

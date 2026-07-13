@@ -24,6 +24,7 @@ function extraPayload(form: FormData) {
     price: numberField(form, 'price') ?? 0,
     price_type: textField(form, 'price_type') || 'per_rental',
     category: optionalTextField(form, 'category'),
+    auto_apply_rule: optionalTextField(form, 'auto_apply_rule'),
     max_qty: integerField(form, 'max_qty') ?? 1,
     is_required: checkboxField(form, 'is_required'),
     sort_order: integerField(form, 'sort_order') ?? 0

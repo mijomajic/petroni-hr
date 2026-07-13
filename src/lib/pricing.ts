@@ -53,6 +53,8 @@ export type PricingInput = {
   dropoffLocation: string;
   plannedKm: number;
   selectedExtras: Record<string, number>;
+  crossesBorder?: boolean;
+  attendsFestival?: boolean;
   paymentSplit?: boolean;
 };
 
@@ -265,7 +267,13 @@ export function calculatePricing(input: PricingInput, config: PricingConfig): Pr
   let refundableDeposit = refundableDepositForVehicle(input.vehicle);
   const extraSelections: PricingExtraSelection[] = [];
   for (const extra of config.extras) {
-    const requestedQty = Math.max(0, Math.floor(Number(input.selectedExtras[extra.id] ?? 0)));
+    const appliesAutomatically =
+      (extra.auto_apply_rule === 'border_crossing' && input.crossesBorder) ||
+      (extra.auto_apply_rule === 'festival' && input.attendsFestival);
+    const requestedQty = Math.max(
+      appliesAutomatically ? 1 : 0,
+      Math.floor(Number(input.selectedExtras[extra.id] ?? 0))
+    );
     const qty = Math.min(extra.max_qty, extra.is_required ? Math.max(1, requestedQty) : requestedQty);
     if (qty === 0) continue;
 

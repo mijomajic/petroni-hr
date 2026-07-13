@@ -204,3 +204,45 @@ test('event fees, per-day extras, deposits and estimated extra kilometres stay s
   assert.equal(result.estimated_extra_km, 200);
   assert.equal(result.estimated_extra_km_cost, 60);
 });
+
+test('declared border crossing and festival travel add their configured special fees', () => {
+  const borderFee: BookingExtra = {
+    ...bookingFee,
+    id: 'border-fee',
+    name_hr: 'Prelazak granice',
+    price: 120,
+    is_required: false,
+    auto_apply_rule: 'border_crossing'
+  };
+  const festivalFee: BookingExtra = {
+    ...bookingFee,
+    id: 'festival-fee',
+    name_hr: 'Naknada za festival',
+    price: 1_500,
+    is_required: false,
+    auto_apply_rule: 'festival'
+  };
+
+  const result = calculatePricing(
+    {
+      vehicle,
+      pickupDate: '2026-06-10',
+      dropoffDate: '2026-06-12',
+      pickupTime: '14:00',
+      dropoffTime: '09:00',
+      pickupLocation: 'Zagreb Depot',
+      dropoffLocation: 'Zagreb Depot',
+      plannedKm: 0,
+      selectedExtras: {},
+      crossesBorder: true,
+      attendsFestival: true
+    },
+    config({ extras: [bookingFee, borderFee, festivalFee] })
+  );
+
+  assert.equal(result.extras_total, 1_660);
+  assert.deepEqual(
+    result.extra_selections.map((selection) => selection.extra_id),
+    ['booking-fee', 'border-fee', 'festival-fee']
+  );
+});

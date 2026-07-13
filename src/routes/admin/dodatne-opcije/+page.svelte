@@ -20,7 +20,7 @@
   <section class="rounded-2xl border border-[#e7e8eb] bg-white">
     <div class="divide-y divide-[#f0f1f3]">
       {#each data.extras as extra}
-        <div class="grid gap-3 p-5 xl:grid-cols-[1.3fr_1fr_110px_140px_130px_90px_120px]">
+        <div class="grid gap-3 p-5 xl:grid-cols-[1.3fr_1fr_110px_140px_150px_170px_90px_120px]">
           <form id="extra-{extra.id}" method="POST" action="?/saveExtra"></form>
           <input form="extra-{extra.id}" type="hidden" name="id" value={extra.id} />
           <label><span class="field-label">Naziv HR</span><input form="extra-{extra.id}" name="name_hr" class="field" value={extra.name_hr} /></label>
@@ -41,7 +41,16 @@
               <option value="depozit">Depozit</option>
               <option value="oprema">Oprema</option>
               <option value="ciscenje">Čišćenje</option>
+              <option value="posebne_naknade">Posebne naknade</option>
               <option value="ostalo">Ostalo</option>
+            </select>
+          </label>
+          <label>
+            <span class="field-label">Automatska primjena</span>
+            <select form="extra-{extra.id}" name="auto_apply_rule" class="field" value={extra.auto_apply_rule ?? ''}>
+              <option value="">Ručno odabire gost</option>
+              <option value="border_crossing">Prelazak granice</option>
+              <option value="festival">Festival</option>
             </select>
           </label>
           <label><span class="field-label">Max</span><input form="extra-{extra.id}" name="max_qty" type="number" min="1" class="field" value={extra.max_qty} /></label>
@@ -83,7 +92,16 @@
           <option value="oprema">Oprema</option>
           <option value="depozit">Depozit</option>
           <option value="ciscenje">Čišćenje</option>
+          <option value="posebne_naknade">Posebne naknade</option>
           <option value="ostalo">Ostalo</option>
+        </select>
+      </label>
+      <label>
+        <span class="field-label">Automatska primjena</span>
+        <select name="auto_apply_rule" class="field">
+          <option value="">Ručno odabire gost</option>
+          <option value="border_crossing">Prelazak granice</option>
+          <option value="festival">Festival</option>
         </select>
       </label>
       <label><span class="field-label">Max količina</span><input name="max_qty" type="number" min="1" value="1" class="field" /></label>

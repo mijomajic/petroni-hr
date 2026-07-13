@@ -4,6 +4,7 @@
   import { supabase } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
   import { calculatePricing, type PricingConfig, type PricingResult } from '$lib/pricing';
+  import { isCroatianPublicHoliday, isSunday } from '$lib/holidays';
   import { renderTermsMarkup } from '$lib/terms-markup';
   import type {
     BookingExtra,
@@ -17,7 +18,6 @@
 
   let { data }: PageProps = $props();
   const rentalLocations: RentalLocation[] = $derived(data.locations as RentalLocation[]);
-  const locations = $derived(rentalLocations.map((location) => location.name));
   const bookingExtras: BookingExtra[] = $derived(data.extras as BookingExtra[]);
   const rentalVehicles: Vehicle[] = $derived(data.vehicles as Vehicle[]);
   const pricingConfig: PricingConfig = $derived({
@@ -75,7 +75,9 @@
       pickupLocation: $booking.pickupLocation,
       dropoffLocation: $booking.dropoffLocation,
       plannedKm: $booking.plannedKm,
-      selectedExtras: $booking.extras
+      selectedExtras: $booking.extras,
+      crossesBorder: $booking.crossesBorder,
+      attendsFestival: $booking.attendsFestival
     }, pricingConfig);
   }
 
@@ -90,6 +92,7 @@
   );
   const extraGroups = $derived(
     [
+      { key: 'posebne_naknade', hr: 'Posebne naknade', en: 'Special fees' },
       { key: 'depozit', hr: 'Povratni depoziti', en: 'Refundable deposits' },
       { key: 'oprema', hr: 'Dodatna oprema', en: 'Equipment' },
       { key: 'ciscenje', hr: 'Čišćenje', en: 'Cleaning' },
@@ -138,6 +141,58 @@
       currency: 'EUR'
     }).format(value);
   }
+
+  function locationOptionLabel(location: RentalLocation): string {
+    const suffix = Number(location.location_fee) > 0
+      ? `+${formatMoney(Number(location.location_fee))}`
+      : 'Free';
+    return `${location.name} — ${suffix}`;
+  }
+
+  function scheduleStatus(
+    location: RentalLocation | undefined,
+    date: string,
+    time: string,
+    window: string | null | undefined
+  ): { label: string; detail: string; charged: boolean } | null {
+    if (!location) return null;
+    const afterHoursFee = pricingConfig.fees.find((fee) => fee.key === 'after_hours' && fee.is_active);
+    const sundayHolidayFee = pricingConfig.fees.find((fee) => fee.key === 'sunday_holiday' && fee.is_active);
+    const outsideWindow = Boolean(window && time && (time < window.split('-')[0].trim() || time > window.split('-')[1].trim()));
+    const sundayOrHoliday = Boolean(date && (isSunday(date) || isCroatianPublicHoliday(date)));
+    const charges = [
+      outsideWindow && afterHoursFee ? Number(afterHoursFee.amount) : 0,
+      sundayOrHoliday && sundayHolidayFee ? Number(sundayHolidayFee.amount) : 0
+    ].filter(Boolean);
+    const amount = charges.reduce((total, charge) => total + charge, 0);
+    if (!amount) {
+      return {
+        label: 'Free',
+        detail: window
+          ? ($locale === 'hr' ? `Unutar radnog vremena (${window})` : `Within working hours (${window})`)
+          : ($locale === 'hr' ? 'Bez dodatne naknade za termin' : 'No time surcharge'),
+        charged: false
+      };
+    }
+    const reasons = [
+      outsideWindow ? ($locale === 'hr' ? 'izvan radnog vremena' : 'outside working hours') : '',
+      sundayOrHoliday ? ($locale === 'hr' ? 'nedjelja/blagdan' : 'Sunday/holiday') : ''
+    ].filter(Boolean).join(' · ');
+    return { label: `+${formatMoney(amount)}`, detail: reasons, charged: true };
+  }
+
+  const pickupScheduleStatus = $derived(scheduleStatus(
+    selectedPickupLocation,
+    $booking.pickupDate,
+    $booking.pickupTime,
+    selectedPickupLocation?.pickup_window
+  ));
+  const dropoffScheduleStatus = $derived(scheduleStatus(
+    selectedDropoffLocation,
+    $booking.dropoffDate,
+    $booking.dropoffTime,
+    selectedDropoffLocation?.return_window
+  ));
 
   function setExtraQty(id: string, qty: number, maxQty: number) {
     const bounded = Math.max(0, Math.min(maxQty, qty));
@@ -537,25 +592,7 @@
 
     <!-- Step 1 -->
     {#if $booking.step === 1}
-      <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 max-w-5xl mx-auto">
-        <!-- Sidebar -->
-        <aside class="card p-6 h-fit text-[13px] text-[#6b7178] leading-relaxed">
-          <p class="font-bold text-[#2b2b2b] mb-1">{$locale === 'hr' ? 'Vrijeme preuzimanja vozila' : 'Vehicle pickup hours'}</p>
-          <p class="mb-4">
-            {selectedPickupLocation
-              ? `${selectedPickupLocation.name}: ${selectedPickupLocation.pickup_window ?? '—'}`
-              : ($locale === 'hr' ? 'Odaberite lokaciju za prikaz vremena.' : 'Select a location to see its hours.')}
-          </p>
-          <p class="font-bold text-[#2b2b2b] mb-1">{$locale === 'hr' ? 'Vrijeme povrata vozila' : 'Vehicle return hours'}</p>
-          <p class="mb-4">
-            {selectedDropoffLocation
-              ? `${selectedDropoffLocation.name}: ${selectedDropoffLocation.return_window ?? '—'}`
-              : ($locale === 'hr' ? 'Odaberite lokaciju za prikaz vremena.' : 'Select a location to see its hours.')}
-          </p>
-          <p class="text-[12px] text-[#9aa0a8]">{$locale === 'hr' ? 'Preuzimanje i povrat vozila izvan definiranog vremenskog okvira naplaćuje se prema važećem cjeniku.' : 'Pickup and return outside the defined time window are charged per the current price list.'}</p>
-        </aside>
-
-        <!-- Form -->
+      <div class="max-w-4xl mx-auto">
         <div class="card p-6 md:p-8">
           <!-- Pickup -->
           <div class="mb-8">
@@ -565,11 +602,17 @@
                 <span class="field-label">{$locale === 'hr' ? 'Mjesto preuzimanja vozila' : 'Pickup location'}</span>
                 <select class="field" bind:value={$booking.pickupLocation}>
                   <option value="">{$locale === 'hr' ? 'Odaberite lokaciju' : 'Select location'}</option>
-                  {#each locations as loc}<option value={loc}>{loc}</option>{/each}
+                  {#each rentalLocations as loc}<option value={loc.name}>{locationOptionLabel(loc)}</option>{/each}
                 </select>
               </div>
               <div><span class="field-label">{$locale === 'hr' ? 'Datum preuzimanja' : 'Pickup date'}</span><input type="date" class="field" min={new Date().toISOString().split('T')[0]} bind:value={$booking.pickupDate} /></div>
-              <div><span class="field-label">{$locale === 'hr' ? 'Vrijeme preuzimanja' : 'Pickup time'}</span><input type="time" class="field" bind:value={$booking.pickupTime} /></div>
+              <div>
+                <span class="field-label">{$locale === 'hr' ? 'Vrijeme preuzimanja' : 'Pickup time'}</span>
+                <div class="flex gap-2"><input type="time" class="field" bind:value={$booking.pickupTime} />
+                  {#if pickupScheduleStatus}<span class="shrink-0 self-center rounded-md px-3 py-2 text-xs font-bold" style={pickupScheduleStatus.charged ? 'background:#fff0ef;color:#b42318' : 'background:#e9f9ef;color:#167a3a'}>{pickupScheduleStatus.label}</span>{/if}
+                </div>
+                {#if pickupScheduleStatus}<p class="mt-1 text-xs text-[#7a7f86]">{pickupScheduleStatus.detail}</p>{/if}
+              </div>
             </div>
           </div>
 
@@ -581,11 +624,17 @@
                 <span class="field-label">{$locale === 'hr' ? 'Mjesto povratka vozila' : 'Return location'}</span>
                 <select class="field" bind:value={$booking.dropoffLocation}>
                   <option value="">{$locale === 'hr' ? 'Ista kao preuzimanje' : 'Same as pickup'}</option>
-                  {#each locations as loc}<option value={loc}>{loc}</option>{/each}
+                  {#each rentalLocations as loc}<option value={loc.name}>{locationOptionLabel(loc)}</option>{/each}
                 </select>
               </div>
               <div><span class="field-label">{$locale === 'hr' ? 'Datum povratka' : 'Return date'}</span><input type="date" class="field" min={$booking.pickupDate || new Date().toISOString().split('T')[0]} bind:value={$booking.dropoffDate} /></div>
-              <div><span class="field-label">{$locale === 'hr' ? 'Vrijeme povratka' : 'Return time'}</span><input type="time" class="field" bind:value={$booking.dropoffTime} /></div>
+              <div>
+                <span class="field-label">{$locale === 'hr' ? 'Vrijeme povratka' : 'Return time'}</span>
+                <div class="flex gap-2"><input type="time" class="field" bind:value={$booking.dropoffTime} />
+                  {#if dropoffScheduleStatus}<span class="shrink-0 self-center rounded-md px-3 py-2 text-xs font-bold" style={dropoffScheduleStatus.charged ? 'background:#fff0ef;color:#b42318' : 'background:#e9f9ef;color:#167a3a'}>{dropoffScheduleStatus.label}</span>{/if}
+                </div>
+                {#if dropoffScheduleStatus}<p class="mt-1 text-xs text-[#7a7f86]">{dropoffScheduleStatus.detail}</p>{/if}
+              </div>
             </div>
           </div>
 
@@ -609,6 +658,14 @@
                 <span class="field-label">{$locale === 'hr' ? 'Odredište / plan puta' : 'Destination / route'}</span>
                 <input type="text" class="field" placeholder={$locale === 'hr' ? 'npr. Istra i Kvarner' : 'e.g. Istria and Kvarner'} bind:value={$booking.destination} />
               </div>
+              <label class="flex items-start gap-3 rounded-md border border-[#e2e4e8] p-3 text-sm text-[#4c5157]">
+                <input type="checkbox" class="mt-1 h-4 w-4 accent-[#f5c518]" bind:checked={$booking.crossesBorder} />
+                <span><b class="text-[#2b2b2b]">{$locale === 'hr' ? 'Planiram prelazak granice' : 'I plan to cross a border'}</b><br />{$locale === 'hr' ? 'Naknada za prelazak granice automatski se dodaje u obračun.' : 'The border-crossing fee is automatically added to the quote.'}</span>
+              </label>
+              <label class="flex items-start gap-3 rounded-md border border-[#e2e4e8] p-3 text-sm text-[#4c5157]">
+                <input type="checkbox" class="mt-1 h-4 w-4 accent-[#f5c518]" bind:checked={$booking.attendsFestival} />
+                <span><b class="text-[#2b2b2b]">{$locale === 'hr' ? 'Putujem na festival' : 'I am travelling to a festival'}</b><br />{$locale === 'hr' ? 'Naknada za festival automatski se dodaje u obračun.' : 'The festival fee is automatically added to the quote.'}</span>
+              </label>
             </div>
           </div>
 
@@ -676,7 +733,10 @@
                       <h3 class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9099] mb-2">{$locale === 'hr' ? group.hr : group.en}</h3>
                       <div class="divide-y divide-[#ededf0]">
                         {#each group.extras as extra}
-                          {@const qty = extra.is_required ? Math.max(1, $booking.extras[extra.id] ?? 0) : ($booking.extras[extra.id] ?? 0)}
+                          {@const autoApplied =
+                            (extra.auto_apply_rule === 'border_crossing' && $booking.crossesBorder) ||
+                            (extra.auto_apply_rule === 'festival' && $booking.attendsFestival)}
+                          {@const qty = extra.is_required || autoApplied ? Math.max(1, $booking.extras[extra.id] ?? 0) : ($booking.extras[extra.id] ?? 0)}
                           <div class="grid gap-2 py-2.5">
                             <div class="flex items-start gap-2">
                               <span class="text-[13px] leading-snug font-medium text-[#2b2b2b] flex-1">{$locale === 'hr' ? extra.name_hr : (extra.name_en || extra.name_hr)}</span>
@@ -691,6 +751,8 @@
                               >ⓘ</button>
                               {#if extra.is_required}
                                 <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style="background:#fff7e0;color:#b5890a">{$locale === 'hr' ? 'Obavezno' : 'Required'}</span>
+                              {:else if autoApplied}
+                                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style="background:#e9f9ef;color:#167a3a">{$locale === 'hr' ? 'Automatski dodano' : 'Automatically added'}</span>
                               {/if}
                             </div>
                             {#if openExtraInfo === extra.id}
@@ -701,7 +763,9 @@
                                 {formatMoney(extra.price)}
                                 {#if extra.price_type === 'per_day'}<span class="text-xs">/{$locale === 'hr' ? 'dan' : 'day'}</span>{/if}
                               </span>
-                              {#if extra.max_qty > 1}
+                              {#if autoApplied}
+                                <span class="text-[11px] font-bold uppercase" style="color:#167a3a">{$locale === 'hr' ? 'Uključeno' : 'Included'}</span>
+                              {:else if extra.max_qty > 1}
                                 <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
                                   <button onclick={() => setExtraQty(extra.id, qty - 1, extra.max_qty)} disabled={extra.is_required} class="px-3 py-1.5 font-bold cursor-pointer text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-40">−</button>
                                   <span class="px-3 text-sm font-semibold text-[#2b2b2b]">{qty}</span>
