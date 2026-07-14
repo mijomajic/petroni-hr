@@ -6,13 +6,15 @@ import { corvuspayTransactionStatus, verifyCorvuspayCallback } from '$lib/paymen
 import { revokeSecondPaymentTokens } from '$lib/payment-tokens.server';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async ({ url }) => {
-  const fields = Object.fromEntries(url.searchParams.entries());
+const handleCallback: RequestHandler = async ({ request, url }) => {
+  const fields = request.method === 'POST'
+    ? await readFormFields(request)
+    : Object.fromEntries(url.searchParams.entries());
   const gatewayFields = Object.fromEntries(
     Object.entries(fields).filter(([key]) => key !== 'state')
   );
-  const orderNumber = String(fields.order_number ?? '');
-  const callbackState = String(fields.state ?? '');
+  const orderNumber = String(fields.order_number ?? url.searchParams.get('order_number') ?? '');
+  const callbackState = String(fields.state ?? url.searchParams.get('state') ?? '');
   let approvalCode: string | null = String(fields.approval_code ?? '') || null;
 
   if (!verifyCorvuspayCallback(gatewayFields)) {
@@ -86,6 +88,16 @@ export const GET: RequestHandler = async ({ url }) => {
   if (reference.paymentPart === 2) await revokeSecondPaymentTokens(booking.id);
   throw redirect(303, '/rezerviraj/success?payment=success');
 };
+
+export const GET = handleCallback;
+export const POST = handleCallback;
+
+async function readFormFields(request: Request): Promise<Record<string, string>> {
+  const formData = await request.formData();
+  return Object.fromEntries(
+    [...formData.entries()].filter((entry): entry is [string, string] => typeof entry[1] === 'string')
+  );
+}
 
 function corvuspayAvailableForCallback(): boolean {
   return Boolean(env.CORVUSPAY_SECRET_KEY && env.CORVUSPAY_STORE_ID);
