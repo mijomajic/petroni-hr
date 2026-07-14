@@ -50,7 +50,7 @@
   let submitError = $state('');
   let openExtraInfo = $state<string | null>(null);
   let signedIn = $state(false);
-  let authMode = $state<'login' | 'register'>('login');
+  let authMode = $state<'guest' | 'login' | 'register'>('guest');
   let authEmail = $state('');
   let authPassword = $state('');
   let authFirstName = $state('');
@@ -60,6 +60,12 @@
   let authError = $state('');
   let authMessage = $state('');
   let authLoading = $state(false);
+
+  const timeOptions = Array.from({ length: 96 }, (_, index) => {
+    const hours = Math.floor(index / 4).toString().padStart(2, '0');
+    const minutes = ((index % 4) * 15).toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  });
 
   const steps = $derived($locale === 'hr'
     ? ['Datum i Vrijeme', 'Pretražite vozila', 'Detalji vozača', 'Pregled rezervacije']
@@ -471,6 +477,7 @@
   }
 
   async function authenticateDuringBooking() {
+    if (authMode === 'guest') return;
     authLoading = true;
     authError = '';
     authMessage = '';
@@ -607,8 +614,8 @@
               </div>
               <div><span class="field-label">{$locale === 'hr' ? 'Datum preuzimanja' : 'Pickup date'}</span><input type="date" class="field" min={new Date().toISOString().split('T')[0]} bind:value={$booking.pickupDate} /></div>
               <div>
-                <span class="field-label">{$locale === 'hr' ? 'Vrijeme preuzimanja' : 'Pickup time'}</span>
-                <div class="flex gap-2"><input type="time" class="field" bind:value={$booking.pickupTime} />
+                <label class="field-label" for="pickup_time">{$locale === 'hr' ? 'Vrijeme preuzimanja' : 'Pickup time'}</label>
+                <div class="flex gap-2"><select id="pickup_time" class="field" bind:value={$booking.pickupTime}>{#each timeOptions as time}<option value={time}>{time}</option>{/each}</select>
                   {#if pickupScheduleStatus}<span class="shrink-0 self-center rounded-md px-3 py-2 text-xs font-bold" style={pickupScheduleStatus.charged ? 'background:#fff0ef;color:#b42318' : 'background:#e9f9ef;color:#167a3a'}>{pickupScheduleStatus.label}</span>{/if}
                 </div>
                 {#if pickupScheduleStatus}<p class="mt-1 text-xs text-[#7a7f86]">{pickupScheduleStatus.detail}</p>{/if}
@@ -629,8 +636,8 @@
               </div>
               <div><span class="field-label">{$locale === 'hr' ? 'Datum povratka' : 'Return date'}</span><input type="date" class="field" min={$booking.pickupDate || new Date().toISOString().split('T')[0]} bind:value={$booking.dropoffDate} /></div>
               <div>
-                <span class="field-label">{$locale === 'hr' ? 'Vrijeme povratka' : 'Return time'}</span>
-                <div class="flex gap-2"><input type="time" class="field" bind:value={$booking.dropoffTime} />
+                <label class="field-label" for="dropoff_time">{$locale === 'hr' ? 'Vrijeme povratka' : 'Return time'}</label>
+                <div class="flex gap-2"><select id="dropoff_time" class="field" bind:value={$booking.dropoffTime}>{#each timeOptions as time}<option value={time}>{time}</option>{/each}</select>
                   {#if dropoffScheduleStatus}<span class="shrink-0 self-center rounded-md px-3 py-2 text-xs font-bold" style={dropoffScheduleStatus.charged ? 'background:#fff0ef;color:#b42318' : 'background:#e9f9ef;color:#167a3a'}>{dropoffScheduleStatus.label}</span>{/if}
                 </div>
                 {#if dropoffScheduleStatus}<p class="mt-1 text-xs text-[#7a7f86]">{dropoffScheduleStatus.detail}</p>{/if}
@@ -851,44 +858,48 @@
             </div>
           {:else}
             <div class="mb-5">
-              <p class="font-semibold text-[#2b2b2b]">{$locale === 'hr' ? 'Prijavite se, izradite račun ili nastavite kao gost' : 'Sign in, create an account, or continue as a guest'}</p>
-              <p class="text-sm text-[#7a7f86] mt-1">{$locale === 'hr' ? 'Preporučujemo izradu računa kako biste kasnije lakše pratili rezervaciju. Račun nije obavezan — za nastavak kao gost samo ispunite podatke vozača ispod.' : 'We recommend creating an account so you can track the booking more easily. An account is optional — to continue as a guest, simply complete the driver details below.'}</p>
+              <p class="font-semibold text-[#2b2b2b]">{$locale === 'hr' ? 'Želite li rezervirati s računom?' : 'Would you like to book with an account?'}</p>
+              <p class="text-sm text-[#7a7f86] mt-1">{$locale === 'hr' ? 'Račun nije obavezan. Možete odmah nastaviti kao gost ili se prijaviti za brže popunjavanje podataka.' : 'An account is optional. Continue as a guest now, or sign in to prefill your details.'}</p>
             </div>
-            <div class="flex gap-2 mb-5">
-              <button type="button" onclick={() => { authMode = 'login'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'login'} class:btn-ghost={authMode !== 'login'}>{$locale === 'hr' ? 'Prijavi se' : 'Sign in'}</button>
-              <button type="button" onclick={() => { authMode = 'register'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'register'} class:btn-ghost={authMode !== 'register'}>{$locale === 'hr' ? 'Izradi račun — preporučeno' : 'Create account — recommended'}</button>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-5">
+              <button type="button" onclick={() => { authMode = 'guest'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'guest'} class:btn-ghost={authMode !== 'guest'}>{$locale === 'hr' ? 'Nastavi kao gost' : 'Continue as guest'}</button>
+              <button type="button" onclick={() => { authMode = 'login'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'login'} class:btn-ghost={authMode !== 'login'}>{$locale === 'hr' ? 'Imam račun' : 'I have an account'}</button>
+              <button type="button" onclick={() => { authMode = 'register'; authError = ''; authMessage = ''; }} class="btn text-[11px]" class:btn-primary={authMode === 'register'} class:btn-ghost={authMode !== 'register'}>{$locale === 'hr' ? 'Izradi račun' : 'Create account'}</button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {#if authMode === 'register'}
-                <div><label class="field-label" for="booking_auth_first_name">Ime *</label><input id="booking_auth_first_name" class="field" bind:value={authFirstName} autocomplete="given-name" required /></div>
-                <div><label class="field-label" for="booking_auth_last_name">Prezime *</label><input id="booking_auth_last_name" class="field" bind:value={authLastName} autocomplete="family-name" required /></div>
-              {/if}
-              <div class={authMode === 'login' ? '' : 'md:col-span-1'}><label class="field-label" for="booking_auth_email">Email *</label><input id="booking_auth_email" type="email" class="field" bind:value={authEmail} autocomplete="email" required /></div>
-              {#if authMode === 'register'}
-                <div><label class="field-label" for="booking_auth_phone">Telefon *</label><input id="booking_auth_phone" type="tel" class="field" bind:value={authPhone} autocomplete="tel" required /></div>
-              {/if}
-              <div>
-                <label class="field-label" for="booking_auth_password">Lozinka *</label>
-                <input id="booking_auth_password" type="password" class="field" bind:value={authPassword} autocomplete={authMode === 'login' ? 'current-password' : 'new-password'} minlength={authMode === 'register' ? 8 : undefined} required />
-                {#if authMode === 'register'}<p class="text-xs text-[#8b9099] mt-2">Najmanje 8 znakova.</p>{/if}
+            {#if authMode === 'guest'}
+              <p class="rounded-md border border-[#e2e4e8] bg-white px-4 py-3 text-sm text-[#4c5157]">{$locale === 'hr' ? 'Nastavljate bez računa. Ispunite podatke vozača u nastavku.' : 'You are continuing without an account. Complete the driver details below.'}</p>
+            {:else}
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {#if authMode === 'register'}
+                  <div><label class="field-label" for="booking_auth_first_name">Ime *</label><input id="booking_auth_first_name" class="field" bind:value={authFirstName} autocomplete="given-name" required /></div>
+                  <div><label class="field-label" for="booking_auth_last_name">Prezime *</label><input id="booking_auth_last_name" class="field" bind:value={authLastName} autocomplete="family-name" required /></div>
+                {/if}
+                <div class={authMode === 'login' ? '' : 'md:col-span-1'}><label class="field-label" for="booking_auth_email">Email *</label><input id="booking_auth_email" type="email" class="field" bind:value={authEmail} autocomplete="email" required /></div>
+                {#if authMode === 'register'}
+                  <div><label class="field-label" for="booking_auth_phone">Telefon *</label><input id="booking_auth_phone" type="tel" class="field" bind:value={authPhone} autocomplete="tel" required /></div>
+                {/if}
+                <div>
+                  <label class="field-label" for="booking_auth_password">Lozinka *</label>
+                  <input id="booking_auth_password" type="password" class="field" bind:value={authPassword} autocomplete={authMode === 'login' ? 'current-password' : 'new-password'} minlength={authMode === 'register' ? 8 : undefined} required />
+                  {#if authMode === 'register'}<p class="text-xs text-[#8b9099] mt-2">Najmanje 8 znakova.</p>{/if}
+                </div>
+                {#if authMode === 'register'}
+                  <div><label class="field-label" for="booking_auth_password_confirm">Ponovite lozinku *</label><input id="booking_auth_password_confirm" type="password" class="field" bind:value={authPasswordConfirm} autocomplete="new-password" minlength="8" required /></div>
+                {/if}
               </div>
-              {#if authMode === 'register'}
-                <div><label class="field-label" for="booking_auth_password_confirm">Ponovite lozinku *</label><input id="booking_auth_password_confirm" type="password" class="field" bind:value={authPasswordConfirm} autocomplete="new-password" minlength="8" required /></div>
-              {/if}
-            </div>
-            {#if authError}<p class="text-sm mt-4" style="color:#b42318">{authError}</p>{/if}
-            {#if authMessage}<p class="text-sm mt-4" style="color:#067647">{authMessage}</p>{/if}
-            <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-5">
-              <button
-                type="button"
-                onclick={authenticateDuringBooking}
-                disabled={authLoading || !authEmail || !authPassword || (authMode === 'register' && (!authFirstName || !authLastName || !authPhone || !authPasswordConfirm))}
-                class="btn btn-primary disabled:opacity-50"
-              >
-                {authLoading ? 'Molimo pričekajte…' : (authMode === 'login' ? 'Prijavi se' : 'Izradi račun')}
-              </button>
-              <p class="text-xs text-[#8b9099]">{$locale === 'hr' ? 'Ne želite račun? Preskočite ovaj okvir i nastavite s podacima vozača.' : 'Do not want an account? Skip this box and continue with the driver details.'}</p>
-            </div>
+              {#if authError}<p class="text-sm mt-4" style="color:#b42318">{authError}</p>{/if}
+              {#if authMessage}<p class="text-sm mt-4" style="color:#067647">{authMessage}</p>{/if}
+              <div class="mt-5">
+                <button
+                  type="button"
+                  onclick={authenticateDuringBooking}
+                  disabled={authLoading || !authEmail || !authPassword || (authMode === 'register' && (!authFirstName || !authLastName || !authPhone || !authPasswordConfirm))}
+                  class="btn btn-primary disabled:opacity-50"
+                >
+                  {authLoading ? 'Molimo pričekajte…' : (authMode === 'login' ? 'Prijavi se' : 'Izradi račun')}
+                </button>
+              </div>
+            {/if}
           {/if}
         </div>
         <h2 class="text-lg font-bold uppercase tracking-wide text-[#2b2b2b] mb-6">{$locale === 'hr' ? 'Podaci vozača' : 'Driver details'}</h2>
