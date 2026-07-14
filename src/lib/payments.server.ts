@@ -103,11 +103,26 @@ export async function corvuspayTransactionStatus(orderNumber: string): Promise<C
       body,
       signal: AbortSignal.timeout(10_000)
     });
-    if (!response.ok) return null;
     const xml = await response.text();
+    if (!response.ok) {
+      console.warn('CorvusPay status API rejected lookup', {
+        httpStatus: response.status,
+        responseShape: xml.startsWith('<?xml') ? 'xml' : 'non_xml'
+      });
+      return null;
+    }
     const resolvedOrderNumber = xmlValue(xml, 'order-number');
     const status = xmlValue(xml, 'status')?.toLowerCase();
-    if (!resolvedOrderNumber || !status || resolvedOrderNumber !== orderNumber) return null;
+    if (!resolvedOrderNumber || !status || resolvedOrderNumber !== orderNumber) {
+      console.warn('CorvusPay status API returned an unusable lookup', {
+        responseShape: xml.startsWith('<?xml') ? 'xml' : 'non_xml',
+        hasOrderNumber: Boolean(resolvedOrderNumber),
+        orderMatches: resolvedOrderNumber === orderNumber,
+        transactionStatus: status,
+        responseCode: xmlValue(xml, 'response-code')
+      });
+      return null;
+    }
     return { orderNumber: resolvedOrderNumber, status, approvalCode: xmlValue(xml, 'approval-code') };
   } catch {
     return null;
