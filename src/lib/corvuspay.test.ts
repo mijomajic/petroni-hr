@@ -5,6 +5,7 @@ import {
   corvuspayShopOrderNumber,
   parseCorvuspayOrderNumber,
   signCorvuspayFields,
+  verifyCorvuspayCardSuccessResponse,
   verifyCorvuspayFields
 } from './corvuspay.server';
 
@@ -37,6 +38,24 @@ test('verifies CorvusPay signatures case-insensitively', () => {
   const fields = { order_number: '1234', language: 'hr' };
   const signature = signCorvuspayFields('test-key', fields).toUpperCase();
   assert.equal(verifyCorvuspayFields('test-key', { ...fields, signature }), true);
+});
+
+test('accepts a signed card success response when CorvusPay appends response metadata', () => {
+  const response = { approval_code: '88888', language: 'hr', order_number: '1234' };
+  const signature = signCorvuspayFields('test-key', response);
+
+  assert.equal(
+    verifyCorvuspayCardSuccessResponse('test-key', {
+      ...response,
+      response_code: '0',
+      signature
+    }),
+    true
+  );
+  assert.equal(
+    verifyCorvuspayCardSuccessResponse('wrong-key', { ...response, signature }),
+    false
+  );
 });
 
 test('creates short reversible CorvusPay order references', () => {

@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/private';
 import bwipjs from 'bwip-js';
-import { signCorvuspayFields, verifyCorvuspayFields } from '$lib/corvuspay.server';
+import { signCorvuspayFields, verifyCorvuspayCardSuccessResponse } from '$lib/corvuspay.server';
 
 export type IbanSetting = { bank: string; iban: string; bic?: string };
 
@@ -78,5 +78,5 @@ export function createCorvuspayRedirect(input: {
 }
 
 export function verifyCorvuspayCallback(fields: Record<string, string>): boolean {
-  return corvuspayAvailable() && verifyCorvuspayFields(env.CORVUSPAY_SECRET_KEY!, fields);
+  return corvuspayAvailable() && verifyCorvuspayCardSuccessResponse(env.CORVUSPAY_SECRET_KEY!, fields);
 }
