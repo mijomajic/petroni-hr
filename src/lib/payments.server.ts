@@ -124,7 +124,11 @@ export async function corvuspayTransactionStatus(orderNumber: string): Promise<C
       return null;
     }
     return { orderNumber: resolvedOrderNumber, status, approvalCode: xmlValue(xml, 'approval-code') };
-  } catch {
+  } catch (caught) {
+    console.warn('CorvusPay status API lookup failed before receiving a response', {
+      errorName: caught instanceof Error ? caught.name : 'unknown_error',
+      errorMessage: caught instanceof Error ? caught.message : String(caught)
+    });
     return null;
   }
 }
