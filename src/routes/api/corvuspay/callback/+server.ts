@@ -1,22 +1,32 @@
 import { error, redirect } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/supabase.server';
-import { parseCorvuspayOrderNumber } from '$lib/corvuspay.server';
-import { verifyCorvuspayCallback } from '$lib/payments.server';
+import { env } from '$env/dynamic/private';
+import { parseCorvuspayOrderNumber, verifyCorvuspayCallbackState } from '$lib/corvuspay.server';
+import { corvuspayTransactionStatus, verifyCorvuspayCallback } from '$lib/payments.server';
 import { revokeSecondPaymentTokens } from '$lib/payment-tokens.server';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url }) => {
   const fields = Object.fromEntries(url.searchParams.entries());
-  if (!verifyCorvuspayCallback(fields)) {
-    console.warn('Rejected CorvusPay callback signature', {
-      fieldNames: Object.keys(fields).sort(),
-      hasSignature: typeof fields.signature === 'string',
-      signatureLength: typeof fields.signature === 'string' ? fields.signature.length : 0
-    });
-    throw error(400, 'Neispravan CorvusPay potpis.');
+  const gatewayFields = Object.fromEntries(
+    Object.entries(fields).filter(([key]) => key !== 'state')
+  );
+  const orderNumber = String(fields.order_number ?? '');
+  const callbackState = String(fields.state ?? '');
+  let approvalCode: string | null = String(fields.approval_code ?? '') || null;
+
+  if (!verifyCorvuspayCallback(gatewayFields)) {
+    if (!corvuspayAvailableForCallback() || !verifyCorvuspayCallbackState(env.CORVUSPAY_SECRET_KEY!, orderNumber, callbackState)) {
+      throw error(400, 'Neispravan CorvusPay povratni zahtjev.');
+    }
+    const transaction = await corvuspayTransactionStatus(orderNumber);
+    if (!transaction || !['authorized', 'completed'].includes(transaction.status)) {
+      throw error(400, 'CorvusPay transakciju nije moguće potvrditi.');
+    }
+    approvalCode = transaction.approvalCode;
   }
 
-  const reference = parseCorvuspayOrderNumber(String(fields.order_number ?? ''));
+  const reference = parseCorvuspayOrderNumber(orderNumber);
   if (!reference) throw error(400, 'Nepoznata CorvusPay transakcija.');
 
   if (reference.kind === 'order') {
@@ -25,7 +35,7 @@ export const GET: RequestHandler = async ({ url }) => {
       .select('id')
       .eq('id', reference.orderId)
       .eq('payment_method', 'corvuspay')
-      .eq('corvuspay_order_id', fields.order_number)
+      .eq('corvuspay_order_id', orderNumber)
       .single();
     if (!order) throw error(404, 'Narudžba nije pronađena.');
     await supabaseAdmin.from('orders').update({ payment_status: 'paid', status: 'confirmed' }).eq('id', order.id);
@@ -46,7 +56,7 @@ export const GET: RequestHandler = async ({ url }) => {
     .eq('payment_part', reference.paymentPart)
     .eq('provider', 'corvuspay')
     .eq('action', 'redirect_created')
-    .eq('provider_reference', fields.order_number)
+    .eq('provider_reference', orderNumber)
     .limit(1)
     .maybeSingle();
   if (!paymentAttempt) throw error(404, 'CorvusPay pokušaj plaćanja nije pronađen.');
@@ -70,9 +80,13 @@ export const GET: RequestHandler = async ({ url }) => {
     provider: 'corvuspay',
     action: 'success_redirect_verified',
     status: 'succeeded',
-    provider_reference: fields.order_number,
-    metadata: { approval_code: fields.approval_code ?? null, language: fields.language ?? null }
+    provider_reference: orderNumber,
+    metadata: { approval_code: approvalCode, language: fields.language ?? null }
   });
   if (reference.paymentPart === 2) await revokeSecondPaymentTokens(booking.id);
   throw redirect(303, '/rezerviraj/success?payment=success');
 };
+
+function corvuspayAvailableForCallback(): boolean {
+  return Boolean(env.CORVUSPAY_SECRET_KEY && env.CORVUSPAY_STORE_ID);
+}

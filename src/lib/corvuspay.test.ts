@@ -2,10 +2,13 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   corvuspayBookingOrderNumber,
+  corvuspayCallbackState,
   corvuspayShopOrderNumber,
+  corvuspayStatusHash,
   parseCorvuspayOrderNumber,
   signCorvuspayFields,
   verifyCorvuspayCardSuccessResponse,
+  verifyCorvuspayCallbackState,
   verifyCorvuspayFields
 } from './corvuspay.server';
 
@@ -55,6 +58,22 @@ test('accepts a signed card success response when CorvusPay appends response met
   assert.equal(
     verifyCorvuspayCardSuccessResponse('wrong-key', { ...response, signature }),
     false
+  );
+});
+
+test('signs callback state and status lookups without exposing the secret key', () => {
+  const orderNumber = 'B70aa6c81fd314d0485530f603d66e9781';
+  const state = corvuspayCallbackState('test-key', orderNumber);
+  assert.equal(verifyCorvuspayCallbackState('test-key', orderNumber, state), true);
+  assert.equal(verifyCorvuspayCallbackState('test-key', `${orderNumber}x`, state), false);
+  assert.equal(
+    corvuspayStatusHash({
+      secretKey: '86dVcb59moSoDbkESnGiHsDK9',
+      orderNumber: 'Corvuš WooCommerce - 007',
+      storeId: '413',
+      timestamp: '20190701145139'
+    }),
+    'be4b21290602e27abe778c4736d0666259192985'
   );
 });
 

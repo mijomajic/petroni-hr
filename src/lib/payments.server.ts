@@ -1,6 +1,11 @@
 import { env } from '$env/dynamic/private';
 import bwipjs from 'bwip-js';
-import { signCorvuspayFields, verifyCorvuspayCardSuccessResponse } from '$lib/corvuspay.server';
+import {
+  corvuspayCallbackState,
+  corvuspayStatusHash,
+  signCorvuspayFields,
+  verifyCorvuspayCardSuccessResponse
+} from '$lib/corvuspay.server';
 
 export type IbanSetting = { bank: string; iban: string; bic?: string };
 
@@ -46,20 +51,88 @@ export function corvuspayAvailable(): boolean {
   );
 }
 
+function corvuspayTimestamp(date = new Date()): string {
+  return [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, '0'),
+    String(date.getUTCDate()).padStart(2, '0'),
+    String(date.getUTCHours()).padStart(2, '0'),
+    String(date.getUTCMinutes()).padStart(2, '0'),
+    String(date.getUTCSeconds()).padStart(2, '0')
+  ].join('');
+}
+
+function xmlValue(xml: string, tag: string): string | null {
+  const match = new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`, 'i').exec(xml);
+  return match?.[1]?.trim() || null;
+}
+
+export type CorvuspayTransactionStatus = {
+  orderNumber: string;
+  status: string;
+  approvalCode: string | null;
+};
+
+/** Checks CorvusPay server-to-server when a hosted-page redirect contains no signed result fields. */
+export async function corvuspayTransactionStatus(orderNumber: string): Promise<CorvuspayTransactionStatus | null> {
+  if (!corvuspayAvailable()) return null;
+  const environment = env.CORVUSPAY_ENV!.toLowerCase();
+  const timestamp = corvuspayTimestamp();
+  const storeId = env.CORVUSPAY_STORE_ID!;
+  const body = new URLSearchParams({
+    store_id: storeId,
+    order_number: orderNumber,
+    currency_code: '978',
+    timestamp,
+    version: '1.6',
+    hash: corvuspayStatusHash({
+      secretKey: env.CORVUSPAY_SECRET_KEY!,
+      orderNumber,
+      storeId,
+      timestamp
+    })
+  });
+  const endpoint = environment === 'production'
+    ? 'https://cps.corvus.hr/status'
+    : 'https://testcps.corvus.hr/status';
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body,
+      signal: AbortSignal.timeout(10_000)
+    });
+    if (!response.ok) return null;
+    const xml = await response.text();
+    const resolvedOrderNumber = xmlValue(xml, 'order-number');
+    const status = xmlValue(xml, 'status')?.toLowerCase();
+    if (!resolvedOrderNumber || !status || resolvedOrderNumber !== orderNumber) return null;
+    return { orderNumber: resolvedOrderNumber, status, approvalCode: xmlValue(xml, 'approval-code') };
+  } catch {
+    return null;
+  }
+}
+
 export function createCorvuspayRedirect(input: {
   orderNumber: string;
   amount: number;
   description: string;
   email: string;
   baseUrl: string;
-  successPath?: string;
-  cancelPath?: string;
 }): { url: string; fields: Record<string, string> } | null {
   if (!corvuspayAvailable()) return null;
   const environment = env.CORVUSPAY_ENV?.toLowerCase();
   const url = environment === 'production'
     ? 'https://wallet.corvuspay.com/checkout/'
     : 'https://wallet.test.corvuspay.com/checkout/';
+  const callbackState = corvuspayCallbackState(env.CORVUSPAY_SECRET_KEY!, input.orderNumber);
+  const successUrl = new URL('/api/corvuspay/callback', input.baseUrl);
+  successUrl.searchParams.set('order_number', input.orderNumber);
+  successUrl.searchParams.set('state', callbackState);
+  const cancelUrl = new URL('/api/corvuspay/cancel', input.baseUrl);
+  cancelUrl.searchParams.set('order_number', input.orderNumber);
+  cancelUrl.searchParams.set('state', callbackState);
   const fields: Record<string, string> = {
     version: '1.6',
     store_id: env.CORVUSPAY_STORE_ID!,
@@ -71,8 +144,8 @@ export function createCorvuspayRedirect(input: {
     require_complete: 'false',
     cardholder_country_code: 'HR',
     cardholder_email: input.email,
-    success_url: `${input.baseUrl}${input.successPath ?? '/api/corvuspay/callback'}`,
-    cancel_url: `${input.baseUrl}${input.cancelPath ?? '/api/corvuspay/cancel'}`
+    success_url: successUrl.toString(),
+    cancel_url: cancelUrl.toString()
   };
   return { url, fields: { ...fields, signature: signCorvuspayFields(env.CORVUSPAY_SECRET_KEY!, fields) } };
 }
