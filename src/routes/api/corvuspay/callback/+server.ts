@@ -7,7 +7,14 @@ import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url }) => {
   const fields = Object.fromEntries(url.searchParams.entries());
-  if (!verifyCorvuspayCallback(fields)) throw error(400, 'Neispravan CorvusPay potpis.');
+  if (!verifyCorvuspayCallback(fields)) {
+    console.warn('Rejected CorvusPay callback signature', {
+      fieldNames: Object.keys(fields).sort(),
+      hasSignature: typeof fields.signature === 'string',
+      signatureLength: typeof fields.signature === 'string' ? fields.signature.length : 0
+    });
+    throw error(400, 'Neispravan CorvusPay potpis.');
+  }
 
   const reference = parseCorvuspayOrderNumber(String(fields.order_number ?? ''));
   if (!reference) throw error(400, 'Nepoznata CorvusPay transakcija.');
