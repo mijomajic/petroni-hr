@@ -55,3 +55,17 @@ export function verifyCorvuspayFields(secretKey: string, fields: Record<string, 
   const received = Buffer.from(signature, 'hex');
   return expected.length === received.length && timingSafeEqual(expected, received);
 }
+
+/**
+ * A card success redirect always identifies the authorization with these three
+ * fields. CorvusPay can append provider-specific response fields, while the
+ * signature may cover either the complete response or this documented core.
+ */
+export function verifyCorvuspayCardSuccessResponse(secretKey: string, fields: Record<string, string>): boolean {
+  const keys = ['approval_code', 'language', 'order_number'] as const;
+  if (!keys.every((key) => typeof fields[key] === 'string' && fields[key].length > 0)) return false;
+
+  if (verifyCorvuspayFields(secretKey, fields)) return true;
+  const coreFields = Object.fromEntries(keys.map((key) => [key, fields[key]]));
+  return verifyCorvuspayFields(secretKey, { ...coreFields, signature: fields.signature });
+}
