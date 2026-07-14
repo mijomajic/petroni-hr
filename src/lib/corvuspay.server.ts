@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
 export type CorvuspayPaymentReference =
   | { kind: 'booking'; bookingId: string; paymentPart: 1 | 2 }
@@ -48,12 +48,37 @@ export function signCorvuspayFields(secretKey: string, fields: Record<string, st
   return createHmac('sha256', secretKey).update(message, 'utf8').digest('hex');
 }
 
+function signaturesMatch(expectedValue: string, receivedValue: string): boolean {
+  const expected = Buffer.from(expectedValue, 'hex');
+  const received = Buffer.from(receivedValue, 'hex');
+  return expected.length === received.length && timingSafeEqual(expected, received);
+}
+
 export function verifyCorvuspayFields(secretKey: string, fields: Record<string, string>): boolean {
   const signature = fields.signature;
   if (!signature || !/^[0-9a-f]{64}$/i.test(signature)) return false;
-  const expected = Buffer.from(signCorvuspayFields(secretKey, fields), 'hex');
-  const received = Buffer.from(signature, 'hex');
-  return expected.length === received.length && timingSafeEqual(expected, received);
+  return signaturesMatch(signCorvuspayFields(secretKey, fields), signature);
+}
+
+export function corvuspayCallbackState(secretKey: string, orderNumber: string): string {
+  return createHmac('sha256', secretKey)
+    .update(`corvuspay-callback:${orderNumber}`, 'utf8')
+    .digest('hex');
+}
+
+export function verifyCorvuspayCallbackState(secretKey: string, orderNumber: string, state: string): boolean {
+  return /^[0-9a-f]{64}$/i.test(state) && signaturesMatch(corvuspayCallbackState(secretKey, orderNumber), state);
+}
+
+export function corvuspayStatusHash(input: {
+  secretKey: string;
+  orderNumber: string;
+  storeId: string;
+  timestamp: string;
+}): string {
+  return createHash('sha1')
+    .update(`${input.secretKey}${input.orderNumber}${input.storeId}978${input.timestamp}1.6`, 'utf8')
+    .digest('hex');
 }
 
 /**

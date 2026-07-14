@@ -119,9 +119,7 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
       amount: subtotal,
       description: `Narudžba ${confirmationNumber}`,
       email: order.customer_email,
-      baseUrl: url.origin,
-      successPath: '/checkout/success?payment=success',
-      cancelPath: '/checkout/success?payment=cancel'
+      baseUrl: url.origin
     });
     if (!redirect) {
       await supabaseAdmin.from('orders').delete().eq('id', order.id);

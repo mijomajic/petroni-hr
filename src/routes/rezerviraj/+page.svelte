@@ -738,12 +738,12 @@
 
           <!-- Extras + summary: right column -->
           <div class="grid gap-6 lg:sticky lg:top-24 h-fit">
-            <div class="card p-6 max-h-[38rem] overflow-hidden flex flex-col">
+            <div class="card p-6">
               <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Dodatna oprema' : 'Extras'}</h2>
               {#if !$booking.selectedVehicle}
                 <p class="text-sm text-[#9aa0a8]">{$locale === 'hr' ? 'Odaberite vozilo za prikaz dodatne opreme.' : 'Select a vehicle to view extras.'}</p>
               {:else}
-                <div class="space-y-4 overflow-y-auto pr-2 -mr-2">
+                <div class="space-y-4">
                   {#each extraGroups as group}
                     <section>
                       <h3 class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9099] mb-2">{$locale === 'hr' ? group.hr : group.en}</h3>
