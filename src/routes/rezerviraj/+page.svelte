@@ -702,19 +702,28 @@
               {@const price = vehiclePricing.get(vehicle.id)}
               <button onclick={() => selectVehicle(vehicle)} class="card text-left overflow-hidden flex flex-row" style="border-color:{$booking.selectedVehicle?.id === vehicle.id ? '#f5c518' : '#ededf0'}">
                 <div class="w-40 sm:w-56 flex-shrink-0 overflow-hidden bg-[#f3f4f6]"><img src={vehicle.images?.[0]} alt={vehicle.name} class="w-full h-full object-cover" /></div>
-                <div class="p-5 flex-1 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_120px] items-center gap-4">
+                <div class="p-5 flex-1 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_190px] items-center gap-4">
                   <div>
                     <h3 class="font-semibold text-[#2b2b2b] mb-1">{vehicle.name}</h3>
-                    <p class="text-xs text-[#9aa0a8]">{vehicle.category} · {vehicle.seats} {$locale === 'hr' ? 'sjedala' : 'seats'}</p>
+                    <p class="flex flex-wrap items-center gap-2 text-xs text-[#8b9099]">
+                      <span class="inline-flex rounded-full border border-[#e2e4e8] bg-[#f8f9fa] px-2.5 py-1 text-[10px] font-bold tracking-[0.08em] text-[#5b6168]">{vehicle.category}</span>
+                      <span>{vehicle.seats} {$locale === 'hr' ? 'sjedala' : 'seats'}</span>
+                    </p>
                   </div>
-                  <div class="flex flex-col items-stretch gap-2 sm:text-right">
-                    <div>
-                      <span class="block whitespace-nowrap text-xl font-bold tabular-nums text-[#2b2b2b]">{formatMoney(price?.payable_total ?? 0)}</span>
-                      <span class="block text-xs text-[#9aa0a8]">{price?.season_name ?? ($locale === 'hr' ? 'Osnovna cijena' : 'Base price')}</span>
-                      {#if price?.min_nights_applied}
-                        <span class="block text-[10px] mt-1" style="color:#b5890a">{price.billable_nights} {$locale === 'hr' ? 'obračunatih noćenja' : 'billable nights'}</span>
-                      {/if}
-                    </div>
+                  <div class="flex flex-col items-stretch gap-2">
+                    <span class="block whitespace-nowrap text-xl font-bold tabular-nums text-[#2b2b2b] sm:text-right">{formatMoney(price?.payable_total ?? 0)}</span>
+                    {#if price?.season_names?.length}
+                      <div class="flex flex-wrap gap-1.5 sm:justify-end" aria-label={$locale === 'hr' ? 'Primijenjene sezone' : 'Applied seasons'}>
+                        {#each price.season_names as season}
+                          <span class="inline-flex max-w-full rounded-full border border-[#e2e4e8] bg-[#f8f9fa] px-2.5 py-1 text-[10px] font-semibold leading-snug text-[#68707a]">{season}</span>
+                        {/each}
+                      </div>
+                    {:else}
+                      <span class="text-xs text-[#9aa0a8] sm:text-right">{$locale === 'hr' ? 'Osnovna cijena' : 'Base price'}</span>
+                    {/if}
+                    {#if price?.min_nights_applied}
+                      <span class="text-[10px] font-semibold sm:text-right" style="color:#b5890a">{price.billable_nights} {$locale === 'hr' ? 'obračunatih noćenja' : 'billable nights'}</span>
+                    {/if}
                     <span class="btn btn-primary w-full px-4 py-2.5 text-[11px]">{$locale === 'hr' ? 'Odaberi' : 'Select'}</span>
                   </div>
                 </div>
@@ -798,11 +807,15 @@
             {#if $booking.selectedVehicle}
               <div class="card p-6">
                 <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Sažetak' : 'Summary'}</h2>
-                {#if selectedPricing.season_name}
-                  <p class="text-xs mb-4 text-[#8b9099]">
-                    {$locale === 'hr' ? 'Sezona' : 'Season'}:
-                    <strong class="text-[#5b6168]">{selectedPricing.season_name}</strong>
-                  </p>
+                {#if selectedPricing.season_names.length}
+                  <div class="mb-4">
+                    <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#8b9099]">{$locale === 'hr' ? 'Primijenjene sezone' : 'Applied seasons'}</p>
+                    <div class="flex flex-wrap gap-1.5">
+                      {#each selectedPricing.season_names as season}
+                        <span class="inline-flex rounded-full border border-[#e2e4e8] bg-[#f8f9fa] px-2.5 py-1 text-[10px] font-semibold leading-snug text-[#68707a]">{season}</span>
+                      {/each}
+                    </div>
+                  </div>
                 {/if}
                 {#if selectedPricing.min_nights_note}
                   <p class="text-xs leading-relaxed p-3 rounded-md mb-4" style="background:#fff7e0;color:#8a6500">{selectedPricing.min_nights_note}</p>
