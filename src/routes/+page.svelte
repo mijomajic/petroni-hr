@@ -131,10 +131,10 @@
   </div>
 
   <div class="container-x relative z-10 w-full flex justify-center md:justify-end">
-    <div class="max-w-xl text-center md:text-right">
-      <h1 class="text-[28px] sm:text-[36px] md:text-5xl font-extrabold uppercase leading-[1.1] tracking-tight mb-5"
+    <div class="max-w-xl md:max-w-none text-center md:text-right">
+      <h1 class="text-[28px] sm:text-[36px] md:text-4xl lg:text-[2.35rem] xl:text-[2.35rem] font-extrabold uppercase leading-[1.1] xl:whitespace-nowrap tracking-tight mb-5"
           style="color:#ffffff; text-shadow:0 2px 14px rgba(0,0,0,0.78), 0 0 30px rgba(0,0,0,0.42)">
-        Putujte bez granica,<br /><span style="color:#f5c518">živite bez ograničenja.</span>
+        Putujte bez granica, <span class="whitespace-nowrap" style="color:#f5c518">živite bez ograničenja.</span>
       </h1>
       <p class="text-[14px] md:text-base mb-8 md:ml-auto max-w-lg" style="color:rgba(255,255,255,0.94); text-shadow:0 1px 10px rgba(0,0,0,0.55)">
         {$_('hero.subtext')}
