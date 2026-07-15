@@ -48,6 +48,29 @@ export function signCorvuspayFields(secretKey: string, fields: Record<string, st
   return createHmac('sha256', secretKey).update(message, 'utf8').digest('hex');
 }
 
+export function corvuspayCheckoutFields(input: {
+  storeId: string;
+  secretKey: string;
+  orderNumber: string;
+  amount: number;
+  description: string;
+  email: string;
+}): Record<string, string> {
+  const fields: Record<string, string> = {
+    version: '1.6',
+    store_id: input.storeId,
+    order_number: input.orderNumber,
+    language: 'hr',
+    currency: 'EUR',
+    amount: input.amount.toFixed(2),
+    cart: input.description.slice(0, 255),
+    require_complete: 'false',
+    cardholder_country_code: 'HR',
+    cardholder_email: input.email
+  };
+  return { ...fields, signature: signCorvuspayFields(input.secretKey, fields) };
+}
+
 function signaturesMatch(expectedValue: string, receivedValue: string): boolean {
   const expected = Buffer.from(expectedValue, 'hex');
   const received = Buffer.from(receivedValue, 'hex');
