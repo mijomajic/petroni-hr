@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   corvuspayBookingOrderNumber,
   corvuspayCallbackState,
+  corvuspayCheckoutFields,
   corvuspayShopOrderNumber,
   corvuspayStatusHash,
   parseCorvuspayOrderNumber,
@@ -11,6 +12,21 @@ import {
   verifyCorvuspayCallbackState,
   verifyCorvuspayFields
 } from './corvuspay.server';
+
+test('uses Merchant Portal return URLs instead of overriding them per checkout', () => {
+  const fields = corvuspayCheckoutFields({
+    storeId: '2029',
+    secretKey: 'test-key',
+    orderNumber: '1234',
+    amount: 10,
+    description: 'Rezervacija TEST',
+    email: 'test@example.com'
+  });
+
+  assert.equal('success_url' in fields, false);
+  assert.equal('cancel_url' in fields, false);
+  assert.equal(verifyCorvuspayFields('test-key', fields), true);
+});
 
 test('signs CorvusPay fields exactly as specified in the integration manual', () => {
   const signature = signCorvuspayFields('UNV3-i2otJw0rUWzA2lpcNRqTOYRWdAeTw', {

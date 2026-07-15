@@ -5,7 +5,7 @@ import { validateSecondPaymentToken } from '$lib/payment-tokens.server';
 import { corvuspayBookingOrderNumber } from '$lib/corvuspay.server';
 import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async ({ request, url }) => {
+export const POST: RequestHandler = async ({ request }) => {
   const form = await request.formData();
   const bookingId = String(form.get('booking_id') ?? '');
   const part = form.get('part') === '2' ? 2 : 1;
@@ -28,8 +28,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
     orderNumber: corvuspayBookingOrderNumber(booking.id, part),
     amount: Number(part === 2 ? booking.second_payment_amount : booking.first_payment_amount),
     description: `${part === 2 ? 'Doplata' : 'Rezervacija'} ${booking.confirmation_number}`,
-    email: booking.driver_email,
-    baseUrl: url.origin
+    email: booking.driver_email
   });
   if (!redirectData) throw error(503, 'CorvusPay nije konfiguriran.');
   await supabaseAdmin.from('payment_attempts').insert({

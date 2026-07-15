@@ -1,9 +1,8 @@
 import { env } from '$env/dynamic/private';
 import bwipjs from 'bwip-js';
 import {
-  corvuspayCallbackState,
+  corvuspayCheckoutFields,
   corvuspayStatusHash,
-  signCorvuspayFields,
   verifyCorvuspayCardSuccessResponse
 } from '$lib/corvuspay.server';
 
@@ -138,35 +137,20 @@ export function createCorvuspayRedirect(input: {
   amount: number;
   description: string;
   email: string;
-  baseUrl: string;
 }): { url: string; fields: Record<string, string> } | null {
   if (!corvuspayAvailable()) return null;
   const environment = env.CORVUSPAY_ENV?.toLowerCase();
   const url = environment === 'production'
     ? 'https://wallet.corvuspay.com/checkout/'
     : 'https://wallet.test.corvuspay.com/checkout/';
-  const callbackState = corvuspayCallbackState(env.CORVUSPAY_SECRET_KEY!, input.orderNumber);
-  const successUrl = new URL('/api/corvuspay/callback', input.baseUrl);
-  successUrl.searchParams.set('order_number', input.orderNumber);
-  successUrl.searchParams.set('state', callbackState);
-  const cancelUrl = new URL('/api/corvuspay/cancel', input.baseUrl);
-  cancelUrl.searchParams.set('order_number', input.orderNumber);
-  cancelUrl.searchParams.set('state', callbackState);
-  const fields: Record<string, string> = {
-    version: '1.6',
-    store_id: env.CORVUSPAY_STORE_ID!,
-    order_number: input.orderNumber,
-    language: 'hr',
-    currency: 'EUR',
-    amount: input.amount.toFixed(2),
-    cart: input.description.slice(0, 255),
-    require_complete: 'false',
-    cardholder_country_code: 'HR',
-    cardholder_email: input.email,
-    success_url: successUrl.toString(),
-    cancel_url: cancelUrl.toString()
+  return {
+    url,
+    fields: corvuspayCheckoutFields({
+      storeId: env.CORVUSPAY_STORE_ID!,
+      secretKey: env.CORVUSPAY_SECRET_KEY!,
+      ...input
+    })
   };
-  return { url, fields: { ...fields, signature: signCorvuspayFields(env.CORVUSPAY_SECRET_KEY!, fields) } };
 }
 
 export function verifyCorvuspayCallback(fields: Record<string, string>): boolean {

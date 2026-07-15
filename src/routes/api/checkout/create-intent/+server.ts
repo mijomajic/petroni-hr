@@ -16,7 +16,7 @@ type CartItem = {
   qty?: number;
 };
 
-export const POST: RequestHandler = async ({ request, locals, url }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
   const body = await request.json();
   const { user } = await locals.safeGetSession();
   const paymentMethod = String(body.payment_method ?? 'bank_transfer');
@@ -118,8 +118,7 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
       orderNumber: corvuspayShopOrderNumber(order.id),
       amount: subtotal,
       description: `Narudžba ${confirmationNumber}`,
-      email: order.customer_email,
-      baseUrl: url.origin
+      email: order.customer_email
     });
     if (!redirect) {
       await supabaseAdmin.from('orders').delete().eq('id', order.id);

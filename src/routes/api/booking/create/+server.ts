@@ -38,7 +38,7 @@ function isValidTime(value: unknown): value is string {
   return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
 }
 
-export const POST: RequestHandler = async ({ request, locals, getClientAddress, url }) => {
+export const POST: RequestHandler = async ({ request, locals, getClientAddress }) => {
   const body = await request.json();
   const { user } = await locals.safeGetSession();
   const driver = body.driverDetails ?? {};
@@ -287,8 +287,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
       orderNumber: corvuspayBookingOrderNumber(data.id, 1),
       amount: firstAmount,
       description: `Rezervacija ${confirmationNumber}`,
-      email: data.driver_email,
-      baseUrl: url.origin
+      email: data.driver_email
     });
     if (!redirect) {
       await supabaseAdmin.from('bookings').delete().eq('id', data.id);
