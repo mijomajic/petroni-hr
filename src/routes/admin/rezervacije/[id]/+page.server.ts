@@ -1,6 +1,6 @@
 import { fail, error } from '@sveltejs/kit';
 import { requireAdministrator, recordAdminEvent } from '$lib/admin.server';
-import { sendBookingConfirmed, sendSecondPaymentLink } from '$lib/email.server';
+import { sendBookingCancelled, sendBookingConfirmed, sendSecondPaymentLink } from '$lib/email.server';
 import {
   createSecondPaymentToken,
   revokeSecondPaymentTokens
@@ -83,6 +83,8 @@ export const actions: Actions = {
         .from('bookings')
         .update({ confirmation_email_sent: emailSent })
         .eq('id', params.id);
+    } else if (status === 'cancelled') {
+      emailSent = await sendBookingCancelled(after, administrator.user.id);
     }
 
     await recordAdminEvent({
@@ -92,7 +94,10 @@ export const actions: Actions = {
       action: 'booking_status_changed',
       beforeState: { status: before.status },
       afterState: { status },
-      metadata: emailSent === null ? {} : { confirmation_email_sent: emailSent }
+      metadata: emailSent === null ? {} : {
+        email_type: status === 'confirmed' ? 'confirmation' : 'cancellation',
+        email_sent: emailSent
+      }
     });
     if (status === 'cancelled' || status === 'completed') {
       await revokeSecondPaymentTokens(params.id);

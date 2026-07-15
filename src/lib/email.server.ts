@@ -170,11 +170,39 @@ export async function sendBookingConfirmed(
   );
 }
 
+export async function sendBookingCancelled(
+  booking: Record<string, any>,
+  attemptedBy?: string
+) {
+  const config = await emailConfig();
+  return send(
+    { from: config.from, replyTo: config.admin, to: booking.driver_email, subject: `Otkazana rezervacija ${booking.confirmation_number}`, html: emailLayout('Rezervacija je otkazana', `<p style="font-size:16px;line-height:1.6">Vaša rezervacija <strong>${escapeHtml(booking.confirmation_number)}</strong> je otkazana.</p>${bookingSummary(booking)}<p style="font-size:14px;line-height:1.6">Ova obavijest nije potvrda povrata novca. Ako je uplata već evidentirana, zasebno ćemo vam potvrditi način i rok povrata.</p>`) },
+    {
+      bookingId: booking.id,
+      messageType: 'booking_cancelled_customer',
+      recipient: booking.driver_email,
+      attemptedBy
+    }
+  );
+}
+
 export async function sendSecondPaymentLink(booking: Record<string, any>, paymentLink: string, attemptedBy?: string) {
   const config = await emailConfig();
   return send(
     { from: config.from, replyTo: config.admin, to: booking.driver_email, subject: `Doplata za rezervaciju ${booking.confirmation_number}`, html: emailLayout('Dostupna je poveznica za doplatu', `<p style="font-size:16px;line-height:1.6">Preostali iznos za vašu rezervaciju je <strong>${euro(booking.second_payment_amount)}</strong>. Rok za uplatu je ${date(booking.second_payment_due_date)}.</p><p style="margin:24px 0"><a href="${escapeHtml(paymentLink)}" style="display:inline-block;padding:13px 18px;background:#252525;color:#ffffff;text-decoration:none;font-weight:700">Otvori doplatu</a></p><p style="font-size:13px;line-height:1.6;color:#666">Poveznica vrijedi do dana preuzimanja. Ako imate pitanje, odgovorite na ovaj email.</p>`) },
     { bookingId: booking.id, messageType: 'booking_second_payment_link_customer', recipient: booking.driver_email, attemptedBy }
+  );
+}
+
+export async function sendSecondPaymentReceived(booking: Record<string, any>) {
+  const config = await emailConfig();
+  return send(
+    { from: config.from, replyTo: config.admin, to: booking.driver_email, subject: `Doplata evidentirana za rezervaciju ${booking.confirmation_number}`, html: emailLayout('Doplata je uspješno evidentirana', `<p style="font-size:16px;line-height:1.6">Evidentirali smo preostalu uplatu od <strong>${euro(booking.second_payment_amount)}</strong> za rezervaciju <strong>${escapeHtml(booking.confirmation_number)}</strong>.</p><p style="font-size:14px;line-height:1.6">Rezervacija je sada u cijelosti plaćena. Ako imate pitanje prije preuzimanja, odgovorite na ovaj email.</p>`) },
+    {
+      bookingId: booking.id,
+      messageType: 'booking_second_payment_received_customer',
+      recipient: booking.driver_email
+    }
   );
 }
 
@@ -192,6 +220,22 @@ export async function sendOrderReceived(order: Record<string, any>) {
       { orderId: order.id, messageType: 'order_received_admin', recipient: config.admin }
     )
   ]);
+}
+
+export async function sendOrderCancelled(
+  order: Record<string, any>,
+  attemptedBy?: string
+) {
+  const config = await emailConfig();
+  return send(
+    { from: config.from, replyTo: config.admin, to: order.customer_email, subject: `Otkazana narudžba ${order.confirmation_number}`, html: emailLayout('Narudžba je otkazana', `<p style="font-size:16px;line-height:1.6">Vaša narudžba <strong>${escapeHtml(order.confirmation_number)}</strong> je otkazana.</p>${orderSummary(order)}<p style="font-size:14px;line-height:1.6">Ova obavijest nije potvrda povrata novca. Ako je uplata već evidentirana, zasebno ćemo vam potvrditi način i rok povrata.</p>`) },
+    {
+      orderId: order.id,
+      messageType: 'order_cancelled_customer',
+      recipient: order.customer_email,
+      attemptedBy
+    }
+  );
 }
 
 export async function sendOrderInvoice(

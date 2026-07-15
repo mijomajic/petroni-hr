@@ -105,6 +105,7 @@
           </label>
           <button class="btn btn-primary w-full text-black">Spremi status</button>
         </form>
+        <p class="mt-3 text-xs text-[#8b5a00]">Otkazivanje narudžbe ne vraća evidentirana sredstva automatski. Povrat se obrađuje zasebno.</p>
         <form method="POST" action="?/payment" class="mt-5 space-y-3">
           <label><span class="field-label">Status plaćanja</span>
             <select name="payment_status" class="field" value={order.payment_status}>

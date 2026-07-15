@@ -1,7 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import { textField } from '$lib/admin-cms.server';
 import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
-import { sendOrderInvoice } from '$lib/email.server';
+import { sendOrderCancelled, sendOrderInvoice } from '$lib/email.server';
 import { supabaseAdmin } from '$lib/supabase.server';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -36,18 +36,22 @@ export const actions: Actions = {
     if (!orderStatuses.has(status)) return fail(400, { message: 'Neispravan status narudžbe.' });
     const { data: before } = await getOrder(params.id);
     if (!before) return fail(404, { message: 'Narudžba nije pronađena.' });
+    if (before.status === status) return { message: 'Status je već postavljen.' };
     const patch: Record<string, unknown> = { status };
     if (status === 'completed') patch.shipped_at = new Date().toISOString();
     const { data: after, error: updateError } = await supabaseAdmin.from('orders').update(patch).eq('id', params.id).select().single();
     if (updateError) return fail(400, { message: updateError.message });
 
     let invoiceSent: boolean | null = null;
+    let cancellationEmailSent: boolean | null = null;
     if (status === 'completed' && after.payment_status === 'paid' && !after.invoice_sent) {
       invoiceSent = await sendOrderInvoice(after, administrator.user.id);
       if (invoiceSent) {
         await supabaseAdmin.from('orders').update({ invoice_sent: true }).eq('id', params.id);
         after.invoice_sent = true;
       }
+    } else if (status === 'cancelled') {
+      cancellationEmailSent = await sendOrderCancelled(after, administrator.user.id);
     }
 
     await recordAdminEvent({
@@ -57,9 +61,18 @@ export const actions: Actions = {
       action: 'order_status_changed',
       beforeState: { status: before.status, shipped_at: before.shipped_at, invoice_sent: before.invoice_sent },
       afterState: { status: after.status, shipped_at: after.shipped_at, invoice_sent: after.invoice_sent },
-      metadata: invoiceSent === null ? {} : { invoice_sent: invoiceSent }
+      metadata: {
+        ...(invoiceSent === null ? {} : { invoice_sent: invoiceSent }),
+        ...(cancellationEmailSent === null ? {} : { cancellation_email_sent: cancellationEmailSent })
+      }
     });
-    return { message: invoiceSent === false ? 'Status je spremljen, ali račun nije poslan.' : 'Status narudžbe je spremljen.' };
+    return {
+      message: invoiceSent === false
+        ? 'Status je spremljen, ali račun nije poslan.'
+        : cancellationEmailSent === false
+          ? 'Status je spremljen, ali email o otkazivanju nije poslan.'
+          : 'Status narudžbe je spremljen.'
+    };
   },
 
   payment: async ({ request, params, locals }) => {
