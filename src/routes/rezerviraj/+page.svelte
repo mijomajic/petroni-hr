@@ -45,8 +45,10 @@
   let termsOpen = $state(false);
   let termsScrolled = $state(false);
   let searchError = $state('');
+  let stepOneErrors = $state<Record<string, string>>({});
   let availabilityLoadedFor = $state('');
   let driverError = $state('');
+  let driverFieldErrors = $state<Record<string, string>>({});
   let submitError = $state('');
   let openExtraInfo = $state<string | null>(null);
   let signedIn = $state(false);
@@ -122,6 +124,9 @@
       $booking.destination.trim()
     )
   );
+  const maxPassengerCapacity = $derived(
+    Math.max(0, ...rentalVehicles.map((vehicle) => Number(vehicle.seats ?? vehicle.max_adults ?? 0)))
+  );
 
   const maxDriverDob = $derived.by(() => {
     const reference = $booking.pickupDate
@@ -153,6 +158,72 @@
       ? `+${formatMoney(Number(location.location_fee))}`
       : 'Free';
     return `${location.name} — ${suffix}`;
+  }
+
+  function formatWorkingWindow(window: string | null | undefined): string {
+    return String(window ?? '').replace('-', '–');
+  }
+
+  function revealError(elementId: string) {
+    void tick().then(() => {
+      const element = document.getElementById(elementId);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const invalidField = element?.closest('.card')?.querySelector<HTMLElement>('[aria-invalid="true"]');
+      invalidField?.focus({ preventScroll: true });
+    });
+  }
+
+  function clearStepOneError(...keys: string[]) {
+    if (!keys.some((key) => stepOneErrors[key])) return;
+    stepOneErrors = Object.fromEntries(
+      Object.entries(stepOneErrors).filter(([key]) => !keys.includes(key))
+    );
+    if (Object.keys(stepOneErrors).length === 0) searchError = '';
+  }
+
+  function validateStepOne(): boolean {
+    const errors: Record<string, string> = {};
+    const today = new Date().toISOString().slice(0, 10);
+    const required = $locale === 'hr' ? 'Ovo polje je obavezno.' : 'This field is required.';
+
+    if (!$booking.pickupLocation) errors.pickupLocation = required;
+    if (!$booking.pickupDate) errors.pickupDate = required;
+    else if ($booking.pickupDate < today) {
+      errors.pickupDate = $locale === 'hr' ? 'Datum preuzimanja ne može biti u prošlosti.' : 'Pickup date cannot be in the past.';
+    }
+    if (!$booking.dropoffDate) errors.dropoffDate = required;
+    else if ($booking.pickupDate && $booking.dropoffDate <= $booking.pickupDate) {
+      errors.dropoffDate = $locale === 'hr'
+        ? 'Povrat mora biti nakon datuma preuzimanja.'
+        : 'Return must be after the pickup date.';
+    }
+    if ($booking.numAdults < 1) errors.numAdults = required;
+    if ($booking.numChildren < 0) {
+      errors.numChildren = $locale === 'hr' ? 'Broj djece ne može biti negativan.' : 'Number of children cannot be negative.';
+    }
+    const passengerCount = Number($booking.numAdults) + Number($booking.numChildren);
+    if (maxPassengerCapacity > 0 && passengerCount > maxPassengerCapacity) {
+      const capacityError = $locale === 'hr'
+        ? `Odabrali ste ${passengerCount} putnika, a najveće dostupno vozilo ima ${maxPassengerCapacity} sjedala.`
+        : `You selected ${passengerCount} passengers, but the largest available vehicle has ${maxPassengerCapacity} seats.`;
+      errors.numAdults = capacityError;
+      errors.numChildren = capacityError;
+    }
+    if ($booking.plannedKm <= 0) {
+      errors.plannedKm = $locale === 'hr' ? 'Unesite planirani broj kilometara.' : 'Enter the planned kilometres.';
+    }
+    if (!$booking.destination.trim()) errors.destination = required;
+
+    stepOneErrors = errors;
+    if (Object.keys(errors).length > 0) {
+      searchError = errors.numAdults || errors.numChildren || ($locale === 'hr'
+        ? 'Provjerite označena polja prije pretraživanja vozila.'
+        : 'Check the highlighted fields before searching for vehicles.');
+      revealError('booking-step-one-error');
+      return false;
+    }
+    searchError = '';
+    return true;
   }
 
   function scheduleStatus(
@@ -268,8 +339,16 @@
         step: current.step > 1 ? 2 : current.step
       }));
       searchError = $locale === 'hr'
-        ? 'Nema vozila za odabrani broj putnika.'
-        : 'No vehicles match the selected number of passengers.';
+        ? `Nema vozila za odabranu kombinaciju putnika. Najveće dostupno vozilo ima ${maxPassengerCapacity} sjedala.`
+        : `No vehicle matches the selected passengers. The largest available vehicle has ${maxPassengerCapacity} seats.`;
+      if ($booking.step === 1) {
+        stepOneErrors = {
+          ...stepOneErrors,
+          numAdults: searchError,
+          numChildren: searchError
+        };
+        revealError('booking-step-one-error');
+      }
       loading = false;
       return;
     }
@@ -315,6 +394,7 @@
   }
 
   async function searchVehicles() {
+    if (!validateStepOne()) return;
     await refreshAvailability();
   }
 
@@ -346,28 +426,29 @@
       return;
     }
     const details = $booking.driverDetails;
-    if (
-      !details.firstName.trim() ||
-      !details.lastName.trim() ||
-      !details.email.trim() ||
-      !details.phone.trim() ||
-      !details.dateOfBirth ||
-      !details.licenseNumber.trim() ||
-      !details.licenseCountry.trim() ||
-      !details.address.trim() ||
-      !details.city.trim() ||
-      !details.zip.trim() ||
-      !details.country.trim()
-    ) {
-      driverError = $locale === 'hr'
-        ? 'Ispunite sva obavezna polja vozača.'
-        : 'Complete all required driver fields.';
-      return;
+    const requiredKeys = [
+      'firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'licenseNumber',
+      'licenseCountry', 'address', 'city', 'zip', 'country'
+    ];
+    const errors = Object.fromEntries(
+      requiredKeys
+        .filter((key) => !String(details[key as keyof typeof details] ?? '').trim())
+        .map((key) => [key, $locale === 'hr' ? 'Ovo polje je obavezno.' : 'This field is required.'])
+    );
+    if (details.email.trim() && !/^\S+@\S+\.\S+$/.test(details.email.trim())) {
+      errors.email = $locale === 'hr' ? 'Unesite valjanu email adresu.' : 'Enter a valid email address.';
     }
-    if (!isDriverOldEnough(details.dateOfBirth)) {
-      driverError = $locale === 'hr'
+    if (details.dateOfBirth && !isDriverOldEnough(details.dateOfBirth)) {
+      errors.dateOfBirth = $locale === 'hr'
         ? `Vozač na dan preuzimanja mora imati najmanje ${minDriverAge} godina.`
         : `The driver must be at least ${minDriverAge} years old on pickup.`;
+    }
+    driverFieldErrors = errors;
+    if (Object.keys(errors).length > 0) {
+      driverError = $locale === 'hr'
+        ? 'Provjerite označena polja vozača.'
+        : 'Check the highlighted driver fields.';
+      revealError('booking-driver-error');
       return;
     }
     driverError = '';
@@ -424,11 +505,13 @@
         submitError = data.error || ($locale === 'hr'
           ? 'Rezervaciju nije moguće spremiti. Pokušajte ponovno.'
           : 'The booking could not be saved. Please try again.');
+        revealError('booking-submit-error');
       }
     } catch {
       submitError = $locale === 'hr'
         ? 'Rezervaciju nije moguće spremiti. Provjerite vezu i pokušajte ponovno.'
         : 'The booking could not be saved. Check your connection and try again.';
+      revealError('booking-submit-error');
     } finally { loading = false; }
   }
 
@@ -601,18 +684,31 @@
     {#if $booking.step === 1}
       <div class="max-w-4xl mx-auto">
         <div class="card p-6 md:p-8">
+          {#if searchError}
+            <div id="booking-step-one-error" role="alert" class="mb-7 flex items-start gap-3 rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-4 text-sm text-[#9f1f18]">
+              <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg>
+              <div><p class="font-bold">{$locale === 'hr' ? 'Provjerite podatke' : 'Check your details'}</p><p class="mt-1 leading-relaxed">{searchError}</p></div>
+            </div>
+          {/if}
           <!-- Pickup -->
           <div class="mb-8">
             <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#f5c518">{$locale === 'hr' ? 'Preuzimanje' : 'Pickup'}</span>
             <div class="border-t-2 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-color:#f5c518">
               <div class="md:col-span-2">
-                <span class="field-label">{$locale === 'hr' ? 'Mjesto preuzimanja vozila' : 'Pickup location'}</span>
-                <select class="field" bind:value={$booking.pickupLocation}>
+                <label class="field-label" for="pickup_location">{$locale === 'hr' ? 'Mjesto preuzimanja vozila' : 'Pickup location'}</label>
+                <select id="pickup_location" class="field" aria-invalid={Boolean(stepOneErrors.pickupLocation)} onchange={() => clearStepOneError('pickupLocation')} bind:value={$booking.pickupLocation}>
                   <option value="">{$locale === 'hr' ? 'Odaberite lokaciju' : 'Select location'}</option>
                   {#each rentalLocations as loc}<option value={loc.name}>{locationOptionLabel(loc)}</option>{/each}
                 </select>
+                {#if stepOneErrors.pickupLocation}<p class="field-error-text">{stepOneErrors.pickupLocation}</p>{/if}
+                {#if selectedPickupLocation?.pickup_window}
+                  <div class="schedule-window">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                    <span><b>{$locale === 'hr' ? 'Preuzimanje bez vremenske naknade:' : 'Pickup without a time surcharge:'}</b> {formatWorkingWindow(selectedPickupLocation.pickup_window)}</span>
+                  </div>
+                {/if}
               </div>
-              <div><span class="field-label">{$locale === 'hr' ? 'Datum preuzimanja' : 'Pickup date'}</span><input type="date" class="field" min={new Date().toISOString().split('T')[0]} bind:value={$booking.pickupDate} /></div>
+              <div><label class="field-label" for="pickup_date">{$locale === 'hr' ? 'Datum preuzimanja' : 'Pickup date'}</label><input id="pickup_date" type="date" class="field" aria-invalid={Boolean(stepOneErrors.pickupDate)} min={new Date().toISOString().split('T')[0]} oninput={() => clearStepOneError('pickupDate', 'dropoffDate')} bind:value={$booking.pickupDate} />{#if stepOneErrors.pickupDate}<p class="field-error-text">{stepOneErrors.pickupDate}</p>{/if}</div>
               <div>
                 <label class="field-label" for="pickup_time">{$locale === 'hr' ? 'Vrijeme preuzimanja' : 'Pickup time'}</label>
                 <div class="flex gap-2"><select id="pickup_time" class="field" bind:value={$booking.pickupTime}>{#each timeOptions as time}<option value={time}>{time}</option>{/each}</select>
@@ -628,13 +724,19 @@
             <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#f5c518">{$locale === 'hr' ? 'Povratak' : 'Return'}</span>
             <div class="border-t-2 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-color:#f5c518">
               <div class="md:col-span-2">
-                <span class="field-label">{$locale === 'hr' ? 'Mjesto povratka vozila' : 'Return location'}</span>
-                <select class="field" bind:value={$booking.dropoffLocation}>
+                <label class="field-label" for="dropoff_location">{$locale === 'hr' ? 'Mjesto povratka vozila' : 'Return location'}</label>
+                <select id="dropoff_location" class="field" bind:value={$booking.dropoffLocation}>
                   <option value="">{$locale === 'hr' ? 'Ista kao preuzimanje' : 'Same as pickup'}</option>
                   {#each rentalLocations as loc}<option value={loc.name}>{locationOptionLabel(loc)}</option>{/each}
                 </select>
+                {#if selectedDropoffLocation?.return_window}
+                  <div class="schedule-window">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                    <span><b>{$locale === 'hr' ? 'Povrat bez vremenske naknade:' : 'Return without a time surcharge:'}</b> {formatWorkingWindow(selectedDropoffLocation.return_window)}</span>
+                  </div>
+                {/if}
               </div>
-              <div><span class="field-label">{$locale === 'hr' ? 'Datum povratka' : 'Return date'}</span><input type="date" class="field" min={$booking.pickupDate || new Date().toISOString().split('T')[0]} bind:value={$booking.dropoffDate} /></div>
+              <div><label class="field-label" for="dropoff_date">{$locale === 'hr' ? 'Datum povratka' : 'Return date'}</label><input id="dropoff_date" type="date" class="field" aria-invalid={Boolean(stepOneErrors.dropoffDate)} min={$booking.pickupDate || new Date().toISOString().split('T')[0]} oninput={() => clearStepOneError('dropoffDate')} bind:value={$booking.dropoffDate} />{#if stepOneErrors.dropoffDate}<p class="field-error-text">{stepOneErrors.dropoffDate}</p>{/if}</div>
               <div>
                 <label class="field-label" for="dropoff_time">{$locale === 'hr' ? 'Vrijeme povratka' : 'Return time'}</label>
                 <div class="flex gap-2"><select id="dropoff_time" class="field" bind:value={$booking.dropoffTime}>{#each timeOptions as time}<option value={time}>{time}</option>{/each}</select>
@@ -650,20 +752,24 @@
             <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#f5c518">{$locale === 'hr' ? 'Putnici i plan puta' : 'Travellers and trip plan'}</span>
             <div class="border-t-2 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-color:#f5c518">
               <div>
-                <span class="field-label">{$locale === 'hr' ? 'Broj odraslih' : 'Adults'}</span>
-                <input type="number" min="1" max="10" class="field" bind:value={$booking.numAdults} />
+                <label class="field-label" for="num_adults">{$locale === 'hr' ? 'Broj odraslih' : 'Adults'}</label>
+                <input id="num_adults" type="number" min="1" max="10" class="field" aria-invalid={Boolean(stepOneErrors.numAdults)} oninput={() => clearStepOneError('numAdults', 'numChildren')} bind:value={$booking.numAdults} />
+                {#if stepOneErrors.numAdults}<p class="field-error-text">{stepOneErrors.numAdults}</p>{/if}
               </div>
               <div>
-                <span class="field-label">{$locale === 'hr' ? 'Broj djece' : 'Children'}</span>
-                <input type="number" min="0" max="10" class="field" bind:value={$booking.numChildren} />
+                <label class="field-label" for="num_children">{$locale === 'hr' ? 'Broj djece' : 'Children'}</label>
+                <input id="num_children" type="number" min="0" max="10" class="field" aria-invalid={Boolean(stepOneErrors.numChildren)} oninput={() => clearStepOneError('numAdults', 'numChildren')} bind:value={$booking.numChildren} />
+                {#if stepOneErrors.numChildren && stepOneErrors.numChildren !== stepOneErrors.numAdults}<p class="field-error-text">{stepOneErrors.numChildren}</p>{/if}
               </div>
               <div>
-                <span class="field-label">{$locale === 'hr' ? 'Planirani kilometri' : 'Planned kilometres'}</span>
-                <input type="number" min="1" step="50" class="field" placeholder="npr. 1200" bind:value={$booking.plannedKm} />
+                <label class="field-label" for="planned_km">{$locale === 'hr' ? 'Planirani kilometri' : 'Planned kilometres'}</label>
+                <input id="planned_km" type="number" min="1" step="50" class="field" aria-invalid={Boolean(stepOneErrors.plannedKm)} placeholder="npr. 1200" oninput={() => clearStepOneError('plannedKm')} bind:value={$booking.plannedKm} />
+                {#if stepOneErrors.plannedKm}<p class="field-error-text">{stepOneErrors.plannedKm}</p>{/if}
               </div>
               <div>
-                <span class="field-label">{$locale === 'hr' ? 'Odredište / plan puta' : 'Destination / route'}</span>
-                <input type="text" class="field" placeholder={$locale === 'hr' ? 'npr. Istra i Kvarner' : 'e.g. Istria and Kvarner'} bind:value={$booking.destination} />
+                <label class="field-label" for="destination">{$locale === 'hr' ? 'Odredište / plan puta' : 'Destination / route'}</label>
+                <input id="destination" type="text" class="field" aria-invalid={Boolean(stepOneErrors.destination)} placeholder={$locale === 'hr' ? 'npr. Istra i Kvarner' : 'e.g. Istria and Kvarner'} oninput={() => clearStepOneError('destination')} bind:value={$booking.destination} />
+                {#if stepOneErrors.destination}<p class="field-error-text">{stepOneErrors.destination}</p>{/if}
               </div>
               <label class="flex items-start gap-3 rounded-md border border-[#e2e4e8] p-3 text-sm text-[#4c5157]">
                 <input type="checkbox" class="mt-1 h-4 w-4 accent-[#f5c518]" bind:checked={$booking.crossesBorder} />
@@ -677,7 +783,7 @@
           </div>
 
           <div class="flex justify-end">
-            <button onclick={searchVehicles} disabled={!canSearch || loading} class="btn btn-primary px-8 py-3.5 disabled:opacity-50">
+            <button onclick={searchVehicles} disabled={loading} class="btn btn-primary px-8 py-3.5 disabled:opacity-50">
               {loading ? ($locale === 'hr' ? 'Učitavanje…' : 'Loading…') : ($locale === 'hr' ? 'Pretražite vozila' : 'Search vehicles')}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
@@ -924,11 +1030,19 @@
                 id="booking_driver_{field.key}"
                 type={field.type}
                 class="field"
+                aria-invalid={Boolean(driverFieldErrors[field.key])}
                 max={field.key === 'dateOfBirth' ? maxDriverDob : undefined}
                 autocomplete={field.key === 'firstName' ? 'given-name' : field.key === 'lastName' ? 'family-name' : field.key === 'email' ? 'email' : field.key === 'phone' ? 'tel' : field.key === 'address' ? 'street-address' : field.key === 'city' ? 'address-level2' : field.key === 'zip' ? 'postal-code' : field.key === 'country' ? 'country-name' : 'off'}
                 required
+                oninput={() => {
+                  if (driverFieldErrors[field.key]) {
+                    driverFieldErrors = Object.fromEntries(Object.entries(driverFieldErrors).filter(([key]) => key !== field.key));
+                    if (Object.keys(driverFieldErrors).length === 0) driverError = '';
+                  }
+                }}
                 bind:value={$booking.driverDetails[field.key as keyof typeof $booking.driverDetails]}
               />
+              {#if driverFieldErrors[field.key]}<p class="field-error-text">{driverFieldErrors[field.key]}</p>{/if}
               {#if field.key === 'dateOfBirth'}
                 <p class="text-xs text-[#8b9099] mt-2">{$locale === 'hr' ? `Vozač mora imati najmanje ${minDriverAge} godina na dan preuzimanja. Najkasniji dopušteni datum rođenja je ${formatDate(maxDriverDob)}.` : `The driver must be at least ${minDriverAge} on pickup. The latest eligible date of birth is ${formatDate(maxDriverDob)}.`}</p>
               {/if}
@@ -936,7 +1050,7 @@
           {/each}
         </div>
         {#if driverError}
-          <p class="text-sm mt-5 p-3 rounded-md" style="background:#fdecec;color:#b42318">{driverError}</p>
+          <p id="booking-driver-error" role="alert" class="text-sm mt-5 p-3 rounded-md" style="background:#fdecec;color:#b42318">{driverError}</p>
         {/if}
         <div class="flex gap-4 mt-8">
           <button onclick={() => goToStep(2)} class="btn btn-ghost px-6 py-3">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
@@ -1007,7 +1121,7 @@
             </span>
           </label>
           {#if submitError}
-            <p class="text-sm mb-5 p-3 rounded-md" style="background:#fdecec;color:#b42318">{submitError}</p>
+            <p id="booking-submit-error" role="alert" class="text-sm mb-5 p-3 rounded-md" style="background:#fdecec;color:#b42318">{submitError}</p>
           {/if}
           <div class="flex gap-4">
             <button onclick={() => goToStep(3)} class="btn btn-ghost px-6 py-3">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
@@ -1044,6 +1158,48 @@
 {/if}
 
 <style>
+  :global(.field[aria-invalid='true']) {
+    border-color: #d92d20;
+    background: #fffafa;
+    box-shadow: 0 0 0 1px rgba(217, 45, 32, 0.12);
+  }
+
+  :global(.field[aria-invalid='true']:focus) {
+    border-color: #b42318;
+    box-shadow: 0 0 0 3px rgba(217, 45, 32, 0.12);
+    outline: none;
+  }
+
+  .field-error-text {
+    margin-top: 0.4rem;
+    color: #b42318;
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .schedule-window {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid #d7eadf;
+    border-radius: 0.5rem;
+    background: #f3faf6;
+    color: #27633f;
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .schedule-window svg {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+  }
+
   :global(.terms-document h2) {
     margin: 1.4rem 0 0.65rem;
     color: #2b2b2b;
