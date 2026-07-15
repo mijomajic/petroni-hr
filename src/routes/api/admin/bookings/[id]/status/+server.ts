@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/supabase.server';
-import { sendBookingConfirmed } from '$lib/email.server';
+import { sendBookingCancelled, sendBookingConfirmed } from '$lib/email.server';
 import { requireAdministrator, recordAdminEvent } from '$lib/admin.server';
 import { revokeSecondPaymentTokens } from '$lib/payment-tokens.server';
 import type { RequestHandler } from './$types';
@@ -16,6 +16,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
   if (status === 'confirmed' && before?.status !== 'confirmed') {
     sent = await sendBookingConfirmed(data, administrator.user.id);
     await supabaseAdmin.from('bookings').update({ confirmation_email_sent: sent }).eq('id', data.id);
+  } else if (status === 'cancelled' && before?.status !== 'cancelled') {
+    sent = await sendBookingCancelled(data, administrator.user.id);
   }
   await recordAdminEvent({
     administrator,
@@ -24,7 +26,10 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
     action: 'booking_status_changed',
     beforeState: before,
     afterState: { status },
-    metadata: sent === null ? {} : { confirmation_email_sent: sent }
+    metadata: sent === null ? {} : {
+      email_type: status === 'confirmed' ? 'confirmation' : 'cancellation',
+      email_sent: sent
+    }
   });
   if (status === 'cancelled' || status === 'completed') {
     await revokeSecondPaymentTokens(params.id);

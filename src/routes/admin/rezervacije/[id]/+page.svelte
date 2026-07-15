@@ -88,6 +88,7 @@
         </select>
         <button class="btn btn-primary hover:brightness-95 active:scale-[0.98] transition">Spremi</button>
       </form>
+      <p class="mt-3 text-xs text-[#8b5a00]">Otkazivanje rezervacije ne vraća evidentirana sredstva automatski. Povrat se obrađuje zasebno.</p>
       <div class="mt-4 flex items-center justify-between gap-3 text-sm">
         <span>Email potvrde: <b>{data.booking.confirmation_email_sent ? 'poslan' : 'nije poslan'}</b></span>
         <form method="POST" action="?/retryConfirmation"><button class="text-sm underline">Pošalji ponovno</button></form>

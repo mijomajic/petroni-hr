@@ -124,7 +124,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       await supabaseAdmin.from('orders').delete().eq('id', order.id);
       return json({ success: false, error: 'CorvusPay je uskoro dostupan. Odaberite bankovnu uplatu.' }, { status: 503 });
     }
-    await supabaseAdmin.from('orders').update({ corvuspay_order_id: corvuspayShopOrderNumber(order.id) }).eq('id', order.id);
+    const providerReference = corvuspayShopOrderNumber(order.id);
+    await Promise.all([
+      supabaseAdmin.from('orders').update({ corvuspay_order_id: providerReference }).eq('id', order.id),
+      supabaseAdmin.from('payment_attempts').insert({
+        order_id: order.id,
+        provider: 'corvuspay',
+        action: 'redirect_created',
+        status: 'started',
+        provider_reference: providerReference
+      })
+    ]);
     response.corvuspay = redirect;
   }
 
