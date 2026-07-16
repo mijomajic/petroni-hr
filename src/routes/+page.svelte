@@ -14,9 +14,9 @@
 
   const galleryImages = [
     'https://www.petroni.hr/wp-content/uploads/2025/02/hero-image-petroni-camping-and-caravaning-rental10-1.jpg',
-    'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg',
-    'https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp',
-    'https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg',
+    '/images/vehicles/ci-horon-79m/01-horon-79-1.webp',
+    '/images/vehicles/roller-team-kronos-277m/01-izvana.webp',
+    '/images/vehicles/rimor-evo-sound/01-rimor-evo-1.webp',
     'https://www.petroni.hr/wp-content/uploads/2025/02/DSC_1792.jpg',
     'https://www.petroni.hr/wp-content/uploads/2025/02/DSC_1684.jpg',
   ];

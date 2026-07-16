@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { vehicleThumbnail } from '$lib/vehicle-images';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
@@ -35,7 +36,7 @@
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
                   {#if vehicle.images?.[0]}
-                    <img src={vehicle.images[0]} alt={vehicle.name} class="h-10 w-14 rounded-md object-cover" />
+                    <img src={vehicleThumbnail(vehicle.images[0])} alt={vehicle.name} width="480" height="360" loading="lazy" class="h-10 w-14 rounded-md object-cover" />
                   {/if}
                   <div>
                     <p class="font-bold text-[#2b2b2b]">{vehicle.name}</p>

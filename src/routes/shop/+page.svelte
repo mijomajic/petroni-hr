@@ -80,7 +80,7 @@
 
 <!-- Hero banner -->
 <section class="relative h-[220px] md:h-[280px] flex items-center overflow-hidden">
-  <img src="https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" />
+  <img src="/images/vehicles/knaus-boxdrive-680me/01-man-1.webp" alt="" width="1440" height="1080" class="absolute inset-0 w-full h-full object-cover" />
   <div class="absolute inset-0" style="background:linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.18) 100%)"></div>
   <div class="container-x relative z-10">
     <span class="block text-[11px] font-bold uppercase tracking-[0.2em] mb-3" style="color:#f5c518">{$locale === 'hr' ? 'Kamping oprema' : 'Camping equipment'}</span>

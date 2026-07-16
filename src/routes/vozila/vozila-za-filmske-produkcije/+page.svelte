@@ -17,7 +17,7 @@
 
 <!-- Hero -->
 <section class="relative h-[300px] md:h-[400px] flex items-center overflow-hidden">
-  <img src="https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp" alt="" class="absolute inset-0 w-full h-full object-cover" />
+  <img src="/images/vehicles/make-up-truck-peugeot-boxer/01-peugeot-sminka-1.webp" alt="" width="1440" height="1080" class="absolute inset-0 w-full h-full object-cover" />
   <div class="absolute inset-0" style="background:linear-gradient(to right, rgba(0,0,0,0.84) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.25) 100%)"></div>
   <div class="container-x relative z-10">
     <nav class="flex items-center gap-2 text-xs mb-5 text-white/60">

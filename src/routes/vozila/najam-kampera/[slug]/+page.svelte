@@ -2,6 +2,7 @@
   import type { Vehicle } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
   import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd, truncateText } from '$lib/seo';
+  import { vehicleThumbnail } from '$lib/vehicle-images';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -65,7 +66,8 @@
   const desc = $derived($locale === 'hr' ? vehicle.description_hr : (vehicle.description_en || vehicle.description_hr));
   const metaDescription = $derived(truncateText(desc || `${vehicle.name} u Petroni ponudi vozila za najam i prodaju.`, 155));
   const vehicleUrl = $derived(absoluteUrl(`/vozila/najam-kampera/${vehicle.slug}`));
-  const vehicleImage = $derived(vehicle.images?.[0] || undefined);
+  const vehicleImages = $derived((vehicle.images ?? []).map(absoluteUrl));
+  const vehicleImage = $derived(vehicleImages[0]);
   const vehicleSchema = $derived(graphSchema([
     breadcrumbSchema([
       { name: 'Petroni', path: '/' },
@@ -77,7 +79,7 @@
       '@id': `${vehicleUrl}#vehicle`,
       name: vehicle.name,
       description: metaDescription,
-      image: vehicle.images ?? [],
+      image: vehicleImages,
       url: vehicleUrl,
       brand: { '@type': 'Brand', name: vehicle.name.split(' ')[0] },
       vehicleSeatingCapacity: vehicle.seats ?? undefined,
@@ -121,7 +123,13 @@
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-10">
           <div class="lg:col-span-3">
             <div class="relative rounded-xl overflow-hidden bg-[#f3f4f6] aspect-[16/10] mb-4 border border-[#ededf0]">
-              <img src={vehicle.images[activeImage]} alt={vehicle.name} class="w-full h-full object-cover" />
+              {#if vehicle.images[activeImage]}
+                <img src={vehicle.images[activeImage]} alt={vehicle.name} width="1440" height="1080" class="w-full h-full object-cover" />
+              {:else}
+                <div class="flex h-full items-center justify-center px-6 text-center text-sm font-semibold uppercase tracking-wider text-[#9aa0a8]">
+                  {$locale === 'hr' ? 'Fotografija nije dostupna' : 'Photo unavailable'}
+                </div>
+              {/if}
               {#if vehicle.images.length > 1}
                 <button onclick={() => activeImage = (activeImage - 1 + vehicle!.images.length) % vehicle!.images.length}
                   class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white" aria-label="Prev">
@@ -134,10 +142,10 @@
               {/if}
             </div>
             {#if vehicle.images.length > 1}
-              <div class="flex gap-3 mb-6">
+              <div class="flex gap-3 mb-6 overflow-x-auto pb-2">
                 {#each vehicle.images as img, i}
-                  <button onclick={() => activeImage = i} class="w-20 h-16 rounded-md overflow-hidden border-2 transition-colors" style="border-color:{activeImage === i ? '#f5c518' : '#ededf0'}">
-                    <img src={img} alt="" class="w-full h-full object-cover" />
+                  <button onclick={() => activeImage = i} class="h-16 w-20 flex-none overflow-hidden rounded-md border-2 transition-colors" style="border-color:{activeImage === i ? '#f5c518' : '#ededf0'}" aria-label={`${$locale === 'hr' ? 'Prikaži fotografiju' : 'Show photo'} ${i + 1}`}>
+                    <img src={vehicleThumbnail(img)} alt="" width="480" height="360" loading="lazy" class="w-full h-full object-cover" />
                   </button>
                 {/each}
               </div>
@@ -183,7 +191,13 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div class="lg:col-span-2">
             <div class="relative rounded-lg overflow-hidden bg-[#f3f4f6] aspect-[4/3] mb-4 border border-[#ededf0]">
-              <img src={vehicle.images[activeImage]} alt={vehicle.name} class="w-full h-full object-cover" />
+              {#if vehicle.images[activeImage]}
+                <img src={vehicle.images[activeImage]} alt={vehicle.name} width="1440" height="1080" class="w-full h-full object-cover" />
+              {:else}
+                <div class="flex h-full items-center justify-center px-6 text-center text-sm font-semibold uppercase tracking-wider text-[#9aa0a8]">
+                  {$locale === 'hr' ? 'Fotografija nije dostupna' : 'Photo unavailable'}
+                </div>
+              {/if}
               {#if vehicle.images.length > 1}
                 <button onclick={() => activeImage = (activeImage - 1 + vehicle!.images.length) % vehicle!.images.length}
                   class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white" aria-label="Prev">
@@ -196,10 +210,10 @@
               {/if}
             </div>
             {#if vehicle.images.length > 1}
-              <div class="flex gap-3 mb-8">
+              <div class="flex gap-3 mb-8 overflow-x-auto pb-2">
                 {#each vehicle.images as img, i}
-                  <button onclick={() => activeImage = i} class="w-20 h-16 rounded-md overflow-hidden border-2 transition-colors" style="border-color:{activeImage === i ? '#f5c518' : '#ededf0'}">
-                    <img src={img} alt="" class="w-full h-full object-cover" />
+                  <button onclick={() => activeImage = i} class="h-16 w-20 flex-none overflow-hidden rounded-md border-2 transition-colors" style="border-color:{activeImage === i ? '#f5c518' : '#ededf0'}" aria-label={`${$locale === 'hr' ? 'Prikaži fotografiju' : 'Show photo'} ${i + 1}`}>
+                    <img src={vehicleThumbnail(img)} alt="" width="480" height="360" loading="lazy" class="w-full h-full object-cover" />
                   </button>
                 {/each}
               </div>
