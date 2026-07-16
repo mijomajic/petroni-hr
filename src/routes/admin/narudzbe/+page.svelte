@@ -9,7 +9,7 @@
 <div>
   <div class="mb-8">
     <h1 class="text-3xl font-black uppercase tracking-tight text-[#2b2b2b]">Narudžbe</h1>
-    <p class="mt-2 text-sm text-[#7a7f86]">Otvorite narudžbu za stavke, adresu, status plaćanja, dostavu i slanje računa.</p>
+    <p class="mt-2 text-sm text-[#7a7f86]">Otvorite narudžbu za stavke, adresu, status plaćanja, dostavu i slanje potvrde kupcu.</p>
   </div>
 
   <div class="overflow-hidden rounded-2xl border border-[#ededf0] bg-white">
@@ -17,7 +17,7 @@
       <table class="w-full text-sm">
         <thead class="border-b border-[#e7e8eb]">
           <tr>
-            {#each ['Broj', 'Kupac', 'Datum', 'Ukupno', 'Status', 'Plaćanje', 'Račun', 'Detalji'] as h}
+            {#each ['Broj', 'Kupac', 'Datum', 'Ukupno', 'Status', 'Plaćanje', 'Potvrda', 'Detalji'] as h}
               <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-[#7a7f86]">{h}</th>
             {/each}
           </tr>

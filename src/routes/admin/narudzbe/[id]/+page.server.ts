@@ -1,7 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import { textField } from '$lib/admin-cms.server';
 import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
-import { sendOrderCancelled, sendOrderInvoice, sendOrderPaymentReceived, sendOrderProcessing } from '$lib/email.server';
+import { sendOrderCancelled, sendOrderConfirmation, sendOrderPaymentReceived, sendOrderProcessing } from '$lib/email.server';
 import { supabaseAdmin } from '$lib/supabase.server';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -45,7 +45,7 @@ export const actions: Actions = {
     let invoiceSent: boolean | null = null;
     let statusEmailSent: boolean | null = null;
     if (status === 'completed' && after.payment_status === 'paid' && !after.invoice_sent) {
-      invoiceSent = await sendOrderInvoice(after, administrator.user.id);
+      invoiceSent = await sendOrderConfirmation(after, administrator.user.id);
       if (invoiceSent) {
         await supabaseAdmin.from('orders').update({ invoice_sent: true }).eq('id', params.id);
         after.invoice_sent = true;
@@ -70,7 +70,7 @@ export const actions: Actions = {
     });
     return {
       message: invoiceSent === false
-        ? 'Status je spremljen, ali račun nije poslan.'
+        ? 'Status je spremljen, ali potvrda nije poslana.'
         : statusEmailSent === false
           ? 'Status je spremljen, ali pripadajući email nije poslan.'
           : 'Status narudžbe je spremljen.'
@@ -95,7 +95,7 @@ export const actions: Actions = {
     let invoiceSent: boolean | null = null;
     let paymentEmailSent: boolean | null = null;
     if (paymentStatus === 'paid' && after.status === 'completed' && !after.invoice_sent) {
-      invoiceSent = await sendOrderInvoice(after, administrator.user.id);
+      invoiceSent = await sendOrderConfirmation(after, administrator.user.id);
       if (invoiceSent) {
         await supabaseAdmin.from('orders').update({ invoice_sent: true }).eq('id', params.id);
         after.invoice_sent = true;
@@ -126,28 +126,28 @@ export const actions: Actions = {
       })
     ]);
     return { message: invoiceSent === false
-      ? 'Status plaćanja je spremljen, ali račun nije poslan.'
+      ? 'Status plaćanja je spremljen, ali potvrda nije poslana.'
       : paymentEmailSent === false
         ? 'Status plaćanja je spremljen, ali email o uplati nije poslan.'
         : 'Status plaćanja je spremljen.' };
   },
 
-  retryInvoice: async ({ params, locals }) => {
+  retryConfirmation: async ({ params, locals }) => {
     const administrator = await requireAdministrator(locals);
     const { data: order } = await getOrder(params.id);
     if (!order) return fail(404, { message: 'Narudžba nije pronađena.' });
     if (order.payment_status !== 'paid' || order.status !== 'completed') {
-      return fail(400, { message: 'Račun se šalje tek kada je narudžba plaćena i završena/poslana.' });
+      return fail(400, { message: 'Potvrda se šalje tek kada je narudžba plaćena i završena/poslana.' });
     }
-    const sent = await sendOrderInvoice(order, administrator.user.id);
+    const sent = await sendOrderConfirmation(order, administrator.user.id);
     if (sent) await supabaseAdmin.from('orders').update({ invoice_sent: true }).eq('id', params.id);
     await recordAdminEvent({
       administrator,
       entityType: 'order',
       entityId: params.id,
-      action: 'order_invoice_retried',
+      action: 'order_confirmation_retried',
       metadata: { sent }
     });
-    return { message: sent ? 'Račun je poslan.' : 'Račun nije poslan. Provjerite email pokušaje.' };
+    return { message: sent ? 'Potvrda je poslana.' : 'Potvrda nije poslana. Provjerite email pokušaje.' };
   }
 };
