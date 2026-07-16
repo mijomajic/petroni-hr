@@ -1,6 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
-export async function createInvoicePdf(input: {
+export async function createOrderConfirmationPdf(input: {
   number: string;
   customerName: string;
   customerEmail: string;
@@ -36,7 +36,7 @@ export async function createInvoicePdf(input: {
   const clean = (value: unknown) => String(value ?? '').replace(/[^\x20-\x7E]/g, '');
   page.drawRectangle({ x: 0, y: height - 115, width, height: 115, color: rgb(0.12, 0.12, 0.12) });
   page.drawText('PETRONI', { x: 48, y: height - 67, size: 28, font: bold, color: yellow });
-  page.drawText('RACUN / POTVRDA', { x: 390, y: height - 64, size: 12, font: bold, color: rgb(1, 1, 1) });
+  page.drawText('POTVRDA NARUDZBE', { x: 369, y: height - 64, size: 12, font: bold, color: rgb(1, 1, 1) });
   let y = height - 155;
   const text = (value: string, x = 48, size = 10, font = regular) => {
     page.drawText(clean(value), { x, y, size, font, color: rgb(0.18, 0.18, 0.18) });
@@ -77,6 +77,7 @@ export async function createInvoicePdf(input: {
   accountLines.forEach((line, index) => {
     page.drawText(clean(line).slice(0, 92), { x: 48, y: 76 - index * 11, size: 7.5, font: regular, color: rgb(0.4, 0.4, 0.4) });
   });
-  page.drawText('Hvala na povjerenju.', { x: 48, y: 36, size: 9, font: regular, color: rgb(0.4, 0.4, 0.4) });
+  page.drawText('OVAJ DOKUMENT NIJE SLUZBENI FISKALIZIRANI RACUN.', { x: 48, y: 36, size: 8, font: bold, color: rgb(0.42, 0.24, 0.04) });
+  page.drawText('Hvala na povjerenju.', { x: 48, y: 21, size: 8, font: regular, color: rgb(0.4, 0.4, 0.4) });
   return pdf.save();
 }

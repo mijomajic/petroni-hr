@@ -49,7 +49,7 @@
           <pre class="overflow-auto whitespace-pre-wrap rounded-xl bg-[#f6f7f9] p-4 text-xs text-[#5b6168]">{json(order.shipping_address)}</pre>
         </div>
         <div class="rounded-2xl border border-[#e7e8eb] bg-white p-6">
-          <h2 class="mb-4 text-sm font-black uppercase tracking-widest text-[#2b2b2b]">Račun</h2>
+          <h2 class="mb-4 text-sm font-black uppercase tracking-widest text-[#2b2b2b]">Adresa za račun</h2>
           <pre class="overflow-auto whitespace-pre-wrap rounded-xl bg-[#f6f7f9] p-4 text-xs text-[#5b6168]">{json(order.billing_address)}</pre>
         </div>
       </section>
@@ -115,10 +115,10 @@
           </label>
           <button class="btn btn-dark w-full">Spremi plaćanje</button>
         </form>
-        <form method="POST" action="?/retryInvoice" class="mt-5">
-          <button class="btn btn-ghost w-full">Ponovno pošalji račun</button>
+        <form method="POST" action="?/retryConfirmation" class="mt-5">
+          <button class="btn btn-ghost w-full">Ponovno pošalji potvrdu</button>
         </form>
-        <p class="mt-4 text-xs text-[#8b9099]">Račun se automatski šalje kada je narudžba plaćena i označena kao završena/poslana.</p>
+        <p class="mt-4 text-xs text-[#8b9099]">PDF potvrda narudžbe i plaćanja automatski se šalje kada je narudžba plaćena i označena kao završena/poslana. Ne predstavlja službeni fiskalizirani račun.</p>
       </section>
     </aside>
   </div>

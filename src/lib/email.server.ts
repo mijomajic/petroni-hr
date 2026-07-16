@@ -1,7 +1,7 @@
 import { env } from '$env/dynamic/private';
 import { Resend } from 'resend';
 import { supabaseAdmin } from '$lib/supabase.server';
-import { createInvoicePdf } from '$lib/invoice.server';
+import { createOrderConfirmationPdf } from '$lib/invoice.server';
 import { renderTermsMarkup } from '$lib/terms-markup';
 
 async function emailConfig() {
@@ -219,7 +219,7 @@ export async function sendOrderReceived(order: Record<string, any>) {
   const payment = order.payment_method === 'bank_transfer' ? 'Odabrali ste bankovnu uplatu. Podaci za uplatu prikazani su nakon narudžbe.' : 'Odabrali ste kartično plaćanje.';
   return Promise.all([
     send(
-      { from: config.from, replyTo: config.admin, to: order.customer_email, subject: `Zaprimili smo narudžbu ${order.confirmation_number}`, html: emailLayout('Hvala na narudžbi', `<p style="font-size:16px;line-height:1.6">Narudžba <strong>${escapeHtml(order.confirmation_number)}</strong> je zaprimljena. ${payment}</p>${summary}<p style="font-size:14px;line-height:1.6">Obavijestit ćemo vas kada narudžba bude plaćena i poslana. Račun ćete dobiti emailom nakon slanja.</p>`) },
+      { from: config.from, replyTo: config.admin, to: order.customer_email, subject: `Zaprimili smo narudžbu ${order.confirmation_number}`, html: emailLayout('Hvala na narudžbi', `<p style="font-size:16px;line-height:1.6">Narudžba <strong>${escapeHtml(order.confirmation_number)}</strong> je zaprimljena. ${payment}</p>${summary}<p style="font-size:14px;line-height:1.6">Obavijestit ćemo vas kada narudžba bude plaćena i poslana. Nakon slanja dobit ćete PDF potvrdu narudžbe i plaćanja.</p>`) },
       { orderId: order.id, messageType: 'order_received_customer', recipient: order.customer_email }
     ),
     send(
@@ -262,17 +262,17 @@ export async function sendOrderPaymentReceived(
 ) {
   const config = await emailConfig();
   return send(
-    { from: config.from, replyTo: config.admin, to: order.customer_email, subject: `Uplata evidentirana za narudžbu ${order.confirmation_number}`, html: emailLayout('Uplata je evidentirana', `<p style="font-size:16px;line-height:1.6">Evidentirali smo uplatu za narudžbu <strong>${escapeHtml(order.confirmation_number)}</strong>.</p>${orderSummary(order)}<p style="font-size:14px;line-height:1.6">Narudžbu ćemo pripremiti za slanje. Račun ćete dobiti emailom kada pošiljka bude poslana.</p>`) },
+    { from: config.from, replyTo: config.admin, to: order.customer_email, subject: `Uplata evidentirana za narudžbu ${order.confirmation_number}`, html: emailLayout('Uplata je evidentirana', `<p style="font-size:16px;line-height:1.6">Evidentirali smo uplatu za narudžbu <strong>${escapeHtml(order.confirmation_number)}</strong>.</p>${orderSummary(order)}<p style="font-size:14px;line-height:1.6">Narudžbu ćemo pripremiti za slanje. Nakon slanja dobit ćete PDF potvrdu narudžbe i plaćanja.</p>`) },
     { orderId: order.id, messageType: 'order_payment_received_customer', recipient: order.customer_email, attemptedBy }
   );
 }
 
-export async function sendOrderInvoice(
+export async function sendOrderConfirmation(
   order: Record<string, any>,
   attemptedBy?: string
 ) {
   const config = await emailConfig();
-  const pdf = await createInvoicePdf({
+  const pdf = await createOrderConfirmationPdf({
     number: order.confirmation_number ?? order.id.slice(0, 8).toUpperCase(),
     customerName: order.customer_name,
     customerEmail: order.customer_email,
@@ -287,13 +287,13 @@ export async function sendOrderInvoice(
       from: config.from,
       replyTo: config.admin,
       to: order.customer_email,
-      subject: `Račun ${order.confirmation_number ?? ''}`.trim(),
-      html: emailLayout('Narudžba je plaćena i poslana', `<p style="font-size:16px;line-height:1.6">Vaša narudžba <strong>${escapeHtml(order.confirmation_number)}</strong> je poslana. Račun je u privitku ovog emaila.</p>${orderSummary(order)}<p style="font-size:14px;line-height:1.6">Hvala što kupujete kod Petronija.</p>`),
-      attachments: [{ filename: `racun-${order.confirmation_number ?? order.id}.pdf`, content: Buffer.from(pdf) }]
+      subject: `Potvrda narudžbe i plaćanja ${order.confirmation_number ?? ''}`.trim(),
+      html: emailLayout('Narudžba je plaćena i poslana', `<p style="font-size:16px;line-height:1.6">Vaša narudžba <strong>${escapeHtml(order.confirmation_number)}</strong> je poslana. PDF potvrda narudžbe i plaćanja nalazi se u privitku. Ovaj dokument nije službeni fiskalizirani račun.</p>${orderSummary(order)}<p style="font-size:14px;line-height:1.6">Hvala što kupujete kod Petronija.</p>`),
+      attachments: [{ filename: `potvrda-narudzbe-${order.confirmation_number ?? order.id}.pdf`, content: Buffer.from(pdf) }]
     },
     {
       orderId: order.id,
-      messageType: 'order_invoice_customer',
+      messageType: 'order_confirmation_customer',
       recipient: order.customer_email,
       attemptedBy
     }

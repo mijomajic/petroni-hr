@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/supabase.server';
-import { sendOrderCancelled, sendOrderInvoice } from '$lib/email.server';
+import { sendOrderCancelled, sendOrderConfirmation } from '$lib/email.server';
 import { requireAdministrator, recordAdminEvent } from '$lib/admin.server';
 import type { RequestHandler } from './$types';
 
@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
   if (error) return json({ error: error.message }, { status: 400 });
   let emailSent: boolean | null = null;
   if (status === 'completed' && data.payment_status === 'paid' && !data.invoice_sent) {
-    emailSent = await sendOrderInvoice(data, administrator.user.id);
+    emailSent = await sendOrderConfirmation(data, administrator.user.id);
     if (emailSent) {
       await supabaseAdmin.from('orders').update({ invoice_sent: true }).eq('id', data.id);
       data.invoice_sent = true;
@@ -32,7 +32,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
     beforeState: before,
     afterState: { status: data.status, payment_status: data.payment_status, invoice_sent: data.invoice_sent },
     metadata: emailSent === null ? {} : {
-      email_type: status === 'completed' ? 'invoice' : 'cancellation',
+      email_type: status === 'completed' ? 'confirmation' : 'cancellation',
       email_sent: emailSent
     }
   });
