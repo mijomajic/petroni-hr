@@ -40,7 +40,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-7">
       {#each cats as cat}
-        <a href={cat.href} class="card group block overflow-hidden">
+        <a href={cat.href} class="card card-interactive group block overflow-hidden">
           <div class="aspect-[4/3] overflow-hidden bg-[#f3f4f6]">
             <img src={cat.img} alt={cat.title} class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
           </div>

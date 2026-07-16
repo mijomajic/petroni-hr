@@ -4,7 +4,7 @@ import { env } from '$env/dynamic/private';
 import { parseCorvuspayOrderNumber, verifyCorvuspayCallbackState } from '$lib/corvuspay.server';
 import { corvuspayTransactionStatus, verifyCorvuspayCallback } from '$lib/payments.server';
 import { revokeSecondPaymentTokens } from '$lib/payment-tokens.server';
-import { sendSecondPaymentReceived } from '$lib/email.server';
+import { sendOrderProcessing, sendSecondPaymentReceived } from '$lib/email.server';
 import type { RequestHandler } from './$types';
 
 const handleCallback: RequestHandler = async ({ request, url }) => {
@@ -35,12 +35,13 @@ const handleCallback: RequestHandler = async ({ request, url }) => {
   if (reference.kind === 'order') {
     const { data: order } = await supabaseAdmin
       .from('orders')
-      .select('id')
+      .select('*')
       .eq('id', reference.orderId)
       .eq('payment_method', 'corvuspay')
       .eq('corvuspay_order_id', orderNumber)
       .single();
     if (!order) throw error(404, 'Narudžba nije pronađena.');
+    const shouldSendProcessingEmail = order.payment_status !== 'paid' || order.status !== 'processing';
     const { error: orderUpdateError } = await supabaseAdmin
       .from('orders')
       .update({ payment_status: 'paid', status: 'processing' })
@@ -55,6 +56,13 @@ const handleCallback: RequestHandler = async ({ request, url }) => {
       metadata: { approval_code: approvalCode, language: fields.language ?? null }
     });
     if (orderAttemptError) console.error('Order payment audit failed', orderAttemptError.message);
+    if (shouldSendProcessingEmail) {
+      try {
+        await sendOrderProcessing({ ...order, payment_status: 'paid', status: 'processing' });
+      } catch (mailError) {
+        console.error('Order processing email failed', mailError);
+      }
+    }
     throw redirect(303, '/checkout/success?payment=success');
   }
 

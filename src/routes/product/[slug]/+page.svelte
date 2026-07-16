@@ -19,6 +19,7 @@
   const metaDescription = $derived(truncateText(desc || `${name} u Petroni shopu za kamping opremu i dijelove.`, 155));
   const productUrl = $derived(absoluteUrl(`/product/${product.slug}`));
   const productImage = $derived(product.images?.[0] || undefined);
+  const inquiryHref = $derived(`/kontakt?topic=Shop&product=${encodeURIComponent(name)}&path=${encodeURIComponent(`/product/${product.slug}`)}`);
   const productSchema = $derived(graphSchema([
     breadcrumbSchema([
       { name: 'Petroni', path: '/' },
@@ -108,10 +109,13 @@
               <span class="px-4 font-semibold text-[#2b2b2b] w-12 text-center">{qty}</span>
               <button onclick={() => qty = qty + 1} class="px-4 py-3 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9]">+</button>
             </div>
-            <button onclick={handleAdd} disabled={product.stock === 0}
-              class="btn flex-1 py-3.5 disabled:opacity-50" style="background:{added ? '#16a34a' : '#f5c518'};color:#fff">
-              {added ? ($locale === 'hr' ? 'Dodano u košaricu ✓' : 'Added ✓') : (product.stock === 0 ? ($locale === 'hr' ? 'Nedostupno' : 'Out of stock') : ($locale === 'hr' ? 'Dodaj u košaricu' : 'Add to cart'))}
-            </button>
+            {#if product.stock === 0}
+              <a href={inquiryHref} class="btn flex-1 border border-[#2b2b2b] bg-white py-3.5 text-center text-[#2b2b2b] hover:bg-[#2b2b2b] hover:text-white">{$locale === 'hr' ? 'Pošalji upit' : 'Send inquiry'}</a>
+            {:else}
+              <button onclick={handleAdd} class="btn flex-1 py-3.5" style="background:{added ? '#16a34a' : '#f5c518'};color:#fff">
+                {added ? ($locale === 'hr' ? 'Dodano u košaricu ✓' : 'Added ✓') : ($locale === 'hr' ? 'Dodaj u košaricu' : 'Add to cart')}
+              </button>
+            {/if}
           </div>
 
           <div class="text-[13px] text-[#7a7f86] space-y-1 mb-6">

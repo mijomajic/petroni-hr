@@ -22,6 +22,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const paymentMethod = String(body.payment_method ?? 'bank_transfer');
   const items = Array.isArray(body.items) ? body.items as CartItem[] : [];
   const customer = body.customer ?? {};
+  const customerRecord = {
+    name: String(customer.name ?? '').trim(),
+    email: String(customer.email ?? '').trim(),
+    phone: String(customer.phone ?? '').trim(),
+    address: String(customer.address ?? '').trim(),
+    city: String(customer.city ?? '').trim(),
+    zip: String(customer.zip ?? '').trim(),
+    country: String(customer.country ?? '').trim()
+  };
+
+  if (Object.values(customerRecord).some((value) => !value) || !/^\S+@\S+\.\S+$/.test(customerRecord.email)) {
+    return json({ success: false, error: 'Ispunite sve podatke kupca i unesite valjanu email adresu.' }, { status: 400 });
+  }
+  if (Object.values(customerRecord).some((value) => value.length > 240)) {
+    return json({ success: false, error: 'Jedno ili više polja kupca je predugačko.' }, { status: 400 });
+  }
 
   if (!['bank_transfer', 'corvuspay'].includes(paymentMethod)) {
     return json({ success: false, error: 'Odaberite valjan način plaćanja.' }, { status: 400 });
@@ -51,6 +67,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   if (!products?.length || products.length !== ids.length) {
     return json({ success: false, error: 'Neki proizvodi više nisu dostupni.' }, { status: 400 });
   }
+  const insufficientStock = products.find((product) => Number(product.stock) < (quantities.get(product.id) ?? 1));
+  if (insufficientStock) {
+    return json({ success: false, error: `Proizvod “${insufficientStock.name_hr}” nema dovoljnu dostupnu količinu.` }, { status: 409 });
+  }
 
   const orderItems = products.map((product) => {
     const qty = quantities.get(product.id) ?? 1;
@@ -70,11 +90,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const { data: order, error } = await supabaseAdmin.from('orders').insert({
     confirmation_number: confirmationNumber,
     user_id: user?.id ?? null,
-    customer_name: String(customer.name ?? ''),
-    customer_email: String(customer.email ?? ''),
-    customer_phone: String(customer.phone ?? ''),
-    shipping_address: customer,
-    billing_address: customer,
+    customer_name: customerRecord.name,
+    customer_email: customerRecord.email,
+    customer_phone: customerRecord.phone,
+    shipping_address: customerRecord,
+    billing_address: customerRecord,
     items: orderItems,
     subtotal,
     total: subtotal,

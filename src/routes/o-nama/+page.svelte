@@ -21,7 +21,7 @@
 
 <!-- Hero banner -->
 <section class="relative h-[320px] md:h-[400px] flex items-center justify-center overflow-hidden">
-  <img src="https://www.petroni.hr/wp-content/uploads/2024/03/DSC_0001-768x512.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" />
+  <img src="/images/about/onama3.webp" alt="Moni s gostima uz Petroni kamper" width="1600" height="1068" class="absolute inset-0 w-full h-full object-cover object-center" />
   <div class="absolute inset-0" style="background:rgba(0,0,0,0.65)"></div>
   <div class="relative z-10 text-center px-4">
     <span class="block text-[11px] font-bold uppercase tracking-[0.22em] mb-4" style="color:#f5c518">{$locale === 'hr' ? 'Upoznajte nas' : 'Get to know us'}</span>
@@ -46,8 +46,8 @@
           : 'Our mission is to give you the freedom of the road with maximum comfort and safety. Every vehicle undergoes a strict technical inspection before rental.'}
       </p>
     </div>
-    <div class="card overflow-hidden aspect-[4/3]">
-      <img src="/images/vehicles/ci-horon-79m/01-horon-79-1.webp" alt="Petroni CI Horon 79M kamper" width="1440" height="1080" loading="lazy" class="w-full h-full object-cover" />
+    <div class="card card-static overflow-hidden aspect-[4/3]">
+      <img src="/images/about/onama1.webp" alt="Moni i gošća uživaju uz Petroni kamper" width="1600" height="1068" loading="lazy" class="w-full h-full object-cover" />
     </div>
   </div>
 </section>
@@ -55,8 +55,8 @@
 <!-- Story 2 -->
 <section class="pb-4">
   <div class="container-x grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-    <div class="card overflow-hidden aspect-[4/3] order-2 lg:order-1">
-      <img src="/images/vehicles/roller-team-kronos-277m/01-izvana.webp" alt="Petroni Roller Team Kronos 277M kamper" width="1440" height="1080" loading="lazy" class="w-full h-full object-cover" />
+    <div class="card card-static overflow-hidden aspect-[4/3] order-2 lg:order-1">
+      <img src="/images/about/onama2.webp" alt="Moni uz Petroni kamper" width="1600" height="1068" loading="lazy" class="w-full h-full object-cover" />
     </div>
     <div class="order-1 lg:order-2">
       <span class="eyebrow mb-3">{$locale === 'hr' ? 'Naše iskustvo' : 'Our experience'}</span>
@@ -79,7 +79,7 @@
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {#each testimonials as quote}
-        <div class="card p-7">
+        <div class="card card-static p-7">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="#f5c518" class="mb-4"><path d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z"/></svg>
           <p class="text-[14px] leading-relaxed text-[#5b6168] italic">"{quote}"</p>
         </div>
@@ -91,8 +91,8 @@
 <!-- CTA -->
 <section class="section">
   <div class="container-x grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-    <div class="card overflow-hidden aspect-[4/3]">
-      <img src="/images/vehicles/rimor-evo-sound/01-rimor-evo-1.webp" alt="Petroni Rimor EVO Sound kamper" width="1440" height="1080" loading="lazy" class="w-full h-full object-cover" />
+    <div class="card card-static overflow-hidden aspect-[4/3]">
+      <img src="/images/vehicles/rimor-evo-sound/05-eso-11.webp" alt="Petroni Rimor EVO Sound kamper" width="1440" height="1080" loading="lazy" class="w-full h-full object-cover" />
     </div>
     <div>
       <h2 class="section-title mb-4">{$locale === 'hr' ? 'S kamperom nema žurbe' : 'No rush with a camper'}</h2>

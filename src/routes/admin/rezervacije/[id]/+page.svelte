@@ -78,41 +78,28 @@
     </div>
   </div>
 
-  <div class="grid lg:grid-cols-2 gap-6">
-    <section class="p-6 rounded-2xl bg-white border border-[#ededf0]">
-      <h2 class="font-bold uppercase tracking-wider mb-4">Status rezervacije</h2>
-      <form method="POST" action="?/status" class="flex gap-3">
-        <select name="status" value={data.booking.status} class="field">
-          <option value="pending">Na čekanju</option><option value="confirmed">Potvrđena</option>
-          <option value="cancelled">Otkazana</option><option value="completed">Završena</option>
-        </select>
-        <button class="btn btn-primary hover:brightness-95 active:scale-[0.98] transition">Spremi</button>
-      </form>
-      <p class="mt-3 text-xs text-[#8b5a00]">Otkazivanje rezervacije ne vraća evidentirana sredstva automatski. Povrat se obrađuje zasebno.</p>
-      <div class="mt-4 flex items-center justify-between gap-3 text-sm">
-        <span>Email potvrde: <b>{data.booking.confirmation_email_sent ? 'poslan' : 'nije poslan'}</b></span>
-        <form method="POST" action="?/retryConfirmation"><button class="text-sm underline">Pošalji ponovno</button></form>
+  <section class="rounded-2xl border border-[#dedfe2] bg-white p-6 md:p-7">
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-3 border-b border-[#ededf0] pb-5">
+      <div><h2 class="font-bold uppercase tracking-wider text-[#2b2b2b]">Status i plaćanje</h2><p class="mt-1 text-sm text-[#7a7f86]">Sve operativne promjene spremate jednim klikom.</p></div>
+      <span class="rounded-md bg-[#f5f6f7] px-3 py-2 text-xs font-semibold text-[#5b6168]">{data.booking.payment_method} · {data.booking.payment_status}</span>
+    </div>
+    <form method="POST" action="?/operations" class="grid gap-5 md:grid-cols-3">
+      <label><span class="field-label">Status rezervacije</span><select name="status" value={data.booking.status} class="field"><option value="pending">Na čekanju</option><option value="confirmed">Potvrđena</option><option value="cancelled">Otkazana</option><option value="completed">Završena</option></select></label>
+      <label><span class="field-label">Prva rata · {money(data.booking.first_payment_amount)}</span><select name="first_payment_status" value={data.booking.first_payment_status} class="field"><option value="unpaid">Nije plaćena</option><option value="paid">Plaćena</option></select></label>
+      {#if data.booking.payment_split}
+        <label><span class="field-label">Druga rata · {money(data.booking.second_payment_amount)}</span><select name="second_payment_status" value={data.booking.second_payment_status} class="field"><option value="unpaid">Nije plaćena</option><option value="paid">Plaćena</option></select><span class="mt-1 block text-xs text-[#8b9099]">Rok: {data.booking.second_payment_due_date}</span></label>
+      {:else}<input type="hidden" name="second_payment_status" value={data.booking.second_payment_status ?? 'unpaid'} />{/if}
+      <div class="flex flex-wrap items-center justify-between gap-4 border-t border-[#ededf0] pt-5 md:col-span-3">
+        <p class="max-w-2xl text-xs leading-relaxed text-[#8b5a00]">Otkazivanje ne vraća evidentirana sredstva automatski. Povrat se obrađuje zasebno.</p>
+        <button class="btn btn-primary min-w-52 px-6 py-3 text-black">Spremi sve promjene</button>
       </div>
-    </section>
-
-    <section class="p-6 rounded-2xl bg-white border border-[#ededf0]">
-      <h2 class="font-bold uppercase tracking-wider mb-4">Plaćanje</h2>
-      <p class="text-sm mb-4">Način: <b>{data.booking.payment_method}</b> · ukupni status: <b>{data.booking.payment_status}</b></p>
-      <div class="space-y-3">
-        <form method="POST" action="?/payment" class="flex items-center gap-3">
-          <input type="hidden" name="part" value="1" />
-          <span class="text-sm flex-1">Prva rata ({money(data.booking.first_payment_amount)})</span>
-          <select name="status" value={data.booking.first_payment_status} class="px-3 py-2 border rounded-lg text-sm"><option value="unpaid">Nije plaćena</option><option value="paid">Plaćena</option></select>
-          <button class="px-3 py-2 rounded-lg text-sm font-bold bg-[#F5C518] text-black hover:bg-[#dfb314] active:scale-[0.97] transition">Spremi</button>
-        </form>
-        {#if data.booking.payment_split}
-          <form method="POST" action="?/payment" class="flex items-center gap-3">
-            <input type="hidden" name="part" value="2" />
-            <span class="text-sm flex-1">Druga rata ({money(data.booking.second_payment_amount)}), do {data.booking.second_payment_due_date}</span>
-            <select name="status" value={data.booking.second_payment_status} class="px-3 py-2 border rounded-lg text-sm"><option value="unpaid">Nije plaćena</option><option value="paid">Plaćena</option></select>
-            <button class="px-3 py-2 rounded-lg text-sm font-bold bg-[#F5C518] text-black hover:bg-[#dfb314] active:scale-[0.97] transition">Spremi</button>
-          </form>
-          <div class="pt-3 border-t border-[#ededf0]">
+    </form>
+    <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#fafafa] px-4 py-3 text-sm">
+      <span>Email potvrde: <b>{data.booking.confirmation_email_sent ? 'poslan' : 'nije poslan'}</b></span>
+      <form method="POST" action="?/retryConfirmation"><button class="text-sm font-semibold underline underline-offset-4">Pošalji potvrdu ponovno</button></form>
+    </div>
+    {#if data.booking.payment_split}
+          <div class="mt-5 border-t border-[#ededf0] pt-5">
             <p class="text-xs leading-relaxed text-[#7a7f86] mb-3">Nakon evidentirane prve rate izradite sigurnu poveznicu. Ona se automatski šalje klijentu emailom; izrada nove poveznice poništava prethodnu.</p>
             {#if form?.paymentLink}
               <label class="text-xs font-bold text-[#5b6168]">Sigurna poveznica — kopirajte je sada
@@ -129,10 +116,8 @@
             </div>
             {#if data.activeToken}<p class="text-xs text-[#7a7f86] mt-2">Aktivna do {dateTime(data.activeToken.expires_at)}</p>{/if}
           </div>
-        {/if}
-      </div>
-    </section>
-  </div>
+    {/if}
+  </section>
 
   <div class="grid lg:grid-cols-2 gap-6">
     <section class="p-6 rounded-2xl bg-white border border-[#ededf0]">
