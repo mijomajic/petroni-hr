@@ -13,8 +13,15 @@ async function emailConfig() {
   return {
     admin: String(settings.admin_email ?? 'info@petroni.hr'),
     from: env.RESEND_FROM_EMAIL || String(settings.email_from ?? 'Petroni <onboarding@resend.dev>'),
-    company: (settings.company ?? {}) as { name?: string; oib?: string; address?: string },
-    ibans: Array.isArray(settings.ibans) ? settings.ibans as Array<{ label?: string; iban?: string }> : []
+    company: (settings.company ?? {}) as {
+      name?: string;
+      oib?: string;
+      address?: string;
+      email?: string;
+      phone?: string;
+      website?: string;
+    },
+    ibans: Array.isArray(settings.ibans) ? settings.ibans as Array<{ label?: string; bank?: string; iban?: string }> : []
   };
 }
 
@@ -270,6 +277,7 @@ export async function sendOrderInvoice(
     customerName: order.customer_name,
     customerEmail: order.customer_email,
     company: config.company,
+    ibans: config.ibans,
     items: Array.isArray(order.items) ? order.items : [],
     total: Number(order.total),
     paymentStatus: order.payment_status
