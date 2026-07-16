@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { cart, clearCart } from '$lib/stores/cart';
+  import { onMount } from 'svelte';
+  import { cart, clearCart, syncCartStock } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
   import type { PageProps } from './$types';
 
@@ -15,8 +16,31 @@
   let submitError = $state('');
   let fieldErrors = $state<Record<string, string>>({});
   let paymentMethod = $state<'bank_transfer' | 'corvuspay'>('bank_transfer');
+  let checkingStock = $state(true);
+  const hasUnavailableItems = $derived($cart.some((item) => item.stock !== undefined && item.stock <= 0));
 
   const total = $derived($cart.reduce((acc, i) => acc + i.price * i.qty, 0));
+
+  onMount(async () => {
+    try {
+      const result = await syncCartStock();
+      if (result.unavailable.length) {
+        submitError = $locale === 'hr'
+          ? 'Jedan ili više proizvoda više nije dostupno. Vratite se u košaricu.'
+          : 'One or more products are no longer available. Return to your cart.';
+      } else if (result.adjusted) {
+        submitError = $locale === 'hr'
+          ? 'Količine su usklađene s trenutačnom zalihom. Pregledajte narudžbu prije nastavka.'
+          : 'Quantities were adjusted to current stock. Review your order before continuing.';
+      }
+    } catch {
+      submitError = $locale === 'hr'
+        ? 'Stanje zalihe trenutačno nije moguće provjeriti.'
+        : 'Stock could not be checked.';
+    } finally {
+      checkingStock = false;
+    }
+  });
 
   function clearFieldError(key: string) {
     if (!fieldErrors[key]) return;
@@ -51,6 +75,19 @@
     loading = true;
     submitError = '';
     try {
+      const stockResult = await syncCartStock();
+      if (stockResult.unavailable.length) {
+        submitError = $locale === 'hr'
+          ? 'Jedan ili više proizvoda više nije dostupno. Vratite se u košaricu.'
+          : 'One or more products are no longer available. Return to your cart.';
+        return;
+      }
+      if (stockResult.adjusted) {
+        submitError = $locale === 'hr'
+          ? 'Količine su promijenjene prema trenutačnoj zalihi. Pregledajte narudžbu i pokušajte ponovno.'
+          : 'Quantities changed to match current stock. Review the order and try again.';
+        return;
+      }
       const res = await fetch('/api/checkout/create-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -151,8 +188,8 @@
           {#if submitError}
             <p id="checkout-error" role="alert" class="mb-4 rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-3 text-sm text-[#9f1f18]">{submitError}</p>
           {/if}
-          <button onclick={handleCheckout} disabled={loading || $cart.length === 0} class="btn btn-primary w-full disabled:opacity-50">
-            {loading ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…') : `${$locale === 'hr' ? 'Naruči' : 'Place order'} ${total.toFixed(2)} €`}
+          <button onclick={handleCheckout} disabled={loading || checkingStock || hasUnavailableItems || $cart.length === 0} class="btn btn-primary w-full disabled:opacity-50">
+            {checkingStock ? ($locale === 'hr' ? 'Provjeravam zalihu…' : 'Checking stock…') : loading ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…') : `${$locale === 'hr' ? 'Naruči' : 'Place order'} ${total.toFixed(2)} €`}
           </button>
         </div>
       </div>

@@ -96,24 +96,24 @@
         <h2 class="mb-4 text-sm font-black uppercase tracking-widest text-[#2b2b2b]">Operacije</h2>
         <form method="POST" action="?/status" class="space-y-3">
           <label><span class="field-label">Status narudžbe</span>
-            <select name="status" class="field" value={order.status}>
+            <select name="status" class="field" value={order.status} disabled={order.status === 'cancelled'}>
               <option value="pending">Na čekanju</option>
               <option value="processing">U obradi</option>
               <option value="completed">Završena/poslana</option>
               <option value="cancelled">Otkazana</option>
             </select>
           </label>
-          <button class="btn btn-primary w-full text-black">Spremi status</button>
+          <button disabled={order.status === 'cancelled'} class="btn btn-primary w-full text-black disabled:opacity-50">Spremi status</button>
         </form>
         <p class="mt-3 text-xs text-[#8b5a00]">Otkazivanje narudžbe ne vraća evidentirana sredstva automatski. Povrat se obrađuje zasebno.</p>
         <form method="POST" action="?/payment" class="mt-5 space-y-3">
           <label><span class="field-label">Status plaćanja</span>
-            <select name="payment_status" class="field" value={order.payment_status}>
-              <option value="unpaid">Nije plaćeno</option>
+            <select name="payment_status" class="field" value={order.payment_status} disabled={order.status === 'cancelled'}>
+              <option value="unpaid" disabled={order.payment_status === 'paid'}>Nije plaćeno</option>
               <option value="paid">Plaćeno</option>
             </select>
           </label>
-          <button class="btn btn-dark w-full">Spremi plaćanje</button>
+          <button disabled={order.status === 'cancelled'} class="btn btn-dark w-full disabled:opacity-50">Spremi plaćanje</button>
         </form>
         <form method="POST" action="?/retryConfirmation" class="mt-5">
           <button class="btn btn-ghost w-full">Ponovno pošalji potvrdu</button>

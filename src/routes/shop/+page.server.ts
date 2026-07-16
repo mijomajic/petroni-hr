@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '$lib/supabase.server';
+import { withAvailableStock, type AvailableProduct } from '$lib/shop-stock.server';
 import type { PageServerLoad } from './$types';
 
 const PAGE_SIZE = 24;
@@ -20,7 +21,7 @@ export const load: PageServerLoad = async ({ url }) => {
   const to = from + PAGE_SIZE - 1;
 
   let productsQuery = supabaseAdmin
-    .from('products')
+    .from('shop_products_available')
     .select('*', { count: 'exact' })
     .eq('is_active', true);
 
@@ -43,7 +44,7 @@ export const load: PageServerLoad = async ({ url }) => {
     productsQuery.range(from, to),
     supabaseAdmin.from('product_categories').select('*').order('sort_order'),
     supabaseAdmin
-      .from('products')
+      .from('shop_products_available')
       .select('category_id')
       .eq('is_active', true)
       .not('category_id', 'is', null)
@@ -59,7 +60,7 @@ export const load: PageServerLoad = async ({ url }) => {
   const visibleCategories = allCategories.filter((category) => visibleCategoryIds.has(category.id));
 
   return {
-    products: products.data ?? [],
+    products: (products.data ?? []).map((product) => withAvailableStock(product as AvailableProduct)),
     categories: visibleCategories,
     total: products.count ?? 0,
     page,

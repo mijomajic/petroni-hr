@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '$lib/supabase.server';
+import { withAvailableStock, type AvailableProduct } from '$lib/shop-stock.server';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -34,7 +35,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
   ];
 
   let productsQuery = supabaseAdmin
-    .from('products')
+    .from('shop_products_available')
     .select('*', { count: 'exact' })
     .in('category_id', categoryIds)
     .eq('is_active', true);
@@ -57,7 +58,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
   const [{ data: products, error: productsError, count }, { data: productCategories }] = await Promise.all([
     productsQuery.range(from, to),
     supabaseAdmin
-      .from('products')
+      .from('shop_products_available')
       .select('category_id')
       .eq('is_active', true)
       .not('category_id', 'is', null)
@@ -73,7 +74,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
   return {
     category,
     categories: allCategories.filter((item) => visibleCategoryIds.has(item.id)),
-    products: products ?? [],
+    products: (products ?? []).map((product) => withAvailableStock(product as AvailableProduct)),
     total: count ?? 0,
     page,
     pageSize: PAGE_SIZE,

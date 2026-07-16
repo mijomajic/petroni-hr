@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 import { checkboxField, integerField, linesField, numberField, optionalTextField, slugField, textField } from '$lib/admin-cms.server';
 import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
 import { supabaseAdmin } from '$lib/supabase.server';
+import { getActiveReservedQuantity } from '$lib/shop-stock.server';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -47,6 +48,13 @@ export const actions: Actions = {
       payload = productPayload(form);
     } catch (saveError) {
       return { message: saveError instanceof Error ? saveError.message : 'Proizvod nije spremljen.' };
+    }
+    const reserved = await getActiveReservedQuantity(params.id);
+    if (reserved.error) return { message: reserved.error.message };
+    if (payload.stock < reserved.quantity) {
+      return {
+        message: `Zaliha ne može biti manja od ${reserved.quantity}, jer je ta količina rezervirana u aktivnim narudžbama.`
+      };
     }
     const { data: before } = await supabaseAdmin.from('products').select('*').eq('id', params.id).single();
     const { data: after, error } = await supabaseAdmin.from('products').update(payload).eq('id', params.id).select().single();

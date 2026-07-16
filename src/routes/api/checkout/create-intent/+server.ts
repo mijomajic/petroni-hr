@@ -10,6 +10,7 @@ import {
 import { corvuspayShopOrderNumber } from '$lib/corvuspay.server';
 import type { RequestHandler } from './$types';
 import { sendOrderReceived } from '$lib/email.server';
+import { getAvailableProducts, reserveOrderStock } from '$lib/shop-stock.server';
 
 type CartItem = {
   id?: string;
@@ -59,12 +60,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   if (!ids.length) return json({ success: false, error: 'Košarica je prazna.' }, { status: 400 });
 
   const [{ data: products, error: productsError }, { data: paymentSettings }] = await Promise.all([
-    supabaseAdmin.from('products').select('id,slug,name_hr,name_en,price,images,stock,is_active').in('id', ids).eq('is_active', true),
+    getAvailableProducts(ids),
     supabaseAdmin.from('settings').select('key,value').in('key', ['ibans', 'company'])
   ]);
 
   if (productsError) return json({ success: false, error: productsError.message }, { status: 400 });
-  if (!products?.length || products.length !== ids.length) {
+  if (!products?.length || products.length !== ids.length || products.some((product) => !product.is_active)) {
     return json({ success: false, error: 'Neki proizvodi više nisu dostupni.' }, { status: 400 });
   }
   const insufficientStock = products.find((product) => Number(product.stock) < (quantities.get(product.id) ?? 1));
@@ -104,6 +105,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   }).select().single();
 
   if (error) return json({ success: false, error: error.message }, { status: 400 });
+
+  const reservation = await reserveOrderStock(order.id);
+  if (reservation.error) {
+    await supabaseAdmin.from('orders').delete().eq('id', order.id);
+    return json({
+      success: false,
+      error: reservation.error.message || 'Neki proizvodi više nemaju dovoljnu dostupnu količinu.'
+    }, { status: 409 });
+  }
 
   sendOrderReceived(order).catch((mailError) => console.error('Order email failed', mailError));
 

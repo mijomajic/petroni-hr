@@ -3,6 +3,7 @@ import { textField } from '$lib/admin-cms.server';
 import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
 import { sendOrderCancelled, sendOrderConfirmation, sendOrderPaymentReceived, sendOrderProcessing } from '$lib/email.server';
 import { supabaseAdmin } from '$lib/supabase.server';
+import { cancelOrderAndReleaseStock, commitOrderStock } from '$lib/shop-stock.server';
 import type { Actions, PageServerLoad } from './$types';
 
 const orderStatuses = new Set(['pending', 'processing', 'completed', 'cancelled']);
@@ -37,10 +38,23 @@ export const actions: Actions = {
     const { data: before } = await getOrder(params.id);
     if (!before) return fail(404, { message: 'Narudžba nije pronađena.' });
     if (before.status === status) return { message: 'Status je već postavljen.' };
+    if (before.status === 'cancelled') {
+      return fail(400, { message: 'Otkazana narudžba je zaključana. Izradite novu narudžbu umjesto ponovnog otvaranja.' });
+    }
     const patch: Record<string, unknown> = { status };
     if (status === 'completed') patch.shipped_at = new Date().toISOString();
-    const { data: after, error: updateError } = await supabaseAdmin.from('orders').update(patch).eq('id', params.id).select().single();
-    if (updateError) return fail(400, { message: updateError.message });
+    let after: Record<string, any>;
+    if (status === 'cancelled') {
+      const cancelled = await cancelOrderAndReleaseStock(params.id);
+      if (cancelled.error || !cancelled.data) {
+        return fail(400, { message: cancelled.error?.message ?? 'Narudžbu nije moguće otkazati.' });
+      }
+      after = cancelled.data as Record<string, any>;
+    } else {
+      const updated = await supabaseAdmin.from('orders').update(patch).eq('id', params.id).select().single();
+      if (updated.error) return fail(400, { message: updated.error.message });
+      after = updated.data;
+    }
 
     let invoiceSent: boolean | null = null;
     let statusEmailSent: boolean | null = null;
@@ -84,13 +98,27 @@ export const actions: Actions = {
     if (!paymentStatuses.has(paymentStatus)) return fail(400, { message: 'Neispravan status plaćanja.' });
     const { data: before } = await getOrder(params.id);
     if (!before) return fail(404, { message: 'Narudžba nije pronađena.' });
-    const { data: after, error: updateError } = await supabaseAdmin
-      .from('orders')
-      .update({ payment_status: paymentStatus })
-      .eq('id', params.id)
-      .select()
-      .single();
-    if (updateError) return fail(400, { message: updateError.message });
+    if (before.status === 'cancelled') return fail(400, { message: 'Otkazanoj narudžbi nije moguće mijenjati plaćanje.' });
+    if (before.payment_status === 'paid' && paymentStatus === 'unpaid') {
+      return fail(400, { message: 'Plaćenu narudžbu nije moguće vratiti na neplaćeno. Za povrat koristite otkazivanje i zasebno obradite povrat sredstava.' });
+    }
+    let after: Record<string, any>;
+    if (paymentStatus === 'paid') {
+      const committed = await commitOrderStock(params.id);
+      if (committed.error || !committed.data) {
+        return fail(400, { message: committed.error?.message ?? 'Plaćanje i zalihu nije moguće evidentirati.' });
+      }
+      after = committed.data as Record<string, any>;
+    } else {
+      const updated = await supabaseAdmin
+        .from('orders')
+        .update({ payment_status: paymentStatus })
+        .eq('id', params.id)
+        .select()
+        .single();
+      if (updated.error) return fail(400, { message: updated.error.message });
+      after = updated.data;
+    }
 
     let invoiceSent: boolean | null = null;
     let paymentEmailSent: boolean | null = null;

@@ -1,11 +1,36 @@
 <script lang="ts">
-  import { cart, updateQty, removeFromCart } from '$lib/stores/cart';
+  import { onMount } from 'svelte';
+  import { cart, updateQty, removeFromCart, syncCartStock } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
 
   const total = $derived($cart.reduce((acc, i) => acc + i.price * i.qty, 0));
 
   let couponCode = $state('');
   let couponMessage = $state('');
+  let checkingStock = $state(true);
+  let stockMessage = $state('');
+  const hasUnavailableItems = $derived($cart.some((item) => item.stock !== undefined && item.stock <= 0));
+
+  onMount(async () => {
+    try {
+      const result = await syncCartStock();
+      if (result.unavailable.length) {
+        stockMessage = $locale === 'hr'
+          ? 'Jedan ili više proizvoda više nije dostupno. Uklonite ih iz košarice.'
+          : 'One or more products are no longer available. Remove them from your cart.';
+      } else if (result.adjusted) {
+        stockMessage = $locale === 'hr'
+          ? 'Količine u košarici usklađene su s trenutačnom zalihom.'
+          : 'Cart quantities were adjusted to current stock.';
+      }
+    } catch {
+      stockMessage = $locale === 'hr'
+        ? 'Stanje zalihe trenutačno nije moguće provjeriti. Pokušajte ponovno.'
+        : 'Stock could not be checked. Please try again.';
+    } finally {
+      checkingStock = false;
+    }
+  });
 
   function applyCoupon() {
     if (!couponCode.trim()) return;
@@ -43,10 +68,17 @@
                   <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
                     <button onclick={() => updateQty(item.id, item.qty - 1)} class="px-3 py-2 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9]">−</button>
                     <span class="px-3 text-sm font-semibold text-[#2b2b2b]">{item.qty}</span>
-                    <button onclick={() => updateQty(item.id, item.qty + 1)} class="px-3 py-2 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9]">+</button>
+                    <button onclick={() => updateQty(item.id, item.qty + 1)} disabled={item.stock !== undefined && item.qty >= item.stock} class="px-3 py-2 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-35">+</button>
                   </div>
                   <button onclick={() => removeFromCart(item.id)} class="text-xs text-[#8b9099] hover:text-[#e11d48] underline">{$locale === 'hr' ? 'Ukloni' : 'Remove'}</button>
                 </div>
+                {#if item.stock !== undefined}
+                  <p class="mt-2 text-xs" class:text-[#b42318]={item.stock <= 0} class:text-[#7a7f86]={item.stock > 0}>
+                    {item.stock > 0
+                      ? ($locale === 'hr' ? `Dostupno: ${item.stock}` : `Available: ${item.stock}`)
+                      : ($locale === 'hr' ? 'Trenutačno nije dostupno' : 'Currently unavailable')}
+                  </p>
+                {/if}
               </div>
             </div>
           {/each}
@@ -72,7 +104,12 @@
               <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Dostava' : 'Shipping'}</span><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Izračun pri naplati' : 'At checkout'}</span></div>
               <div class="pt-3 flex justify-between font-bold text-lg border-t border-[#ededf0]"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span><span style="color:#b5890a">{total.toFixed(2)} €</span></div>
             </div>
-            <a href="/checkout" class="btn btn-primary w-full">{$locale === 'hr' ? 'Naruči' : 'Checkout'}</a>
+            {#if stockMessage}<p class="mb-4 rounded-lg border border-[#f0d49b] bg-[#fffaf0] p-3 text-sm text-[#805b12]">{stockMessage}</p>{/if}
+            {#if hasUnavailableItems || checkingStock}
+              <button disabled class="btn btn-primary w-full opacity-50">{checkingStock ? ($locale === 'hr' ? 'Provjeravam zalihu…' : 'Checking stock…') : ($locale === 'hr' ? 'Provjerite košaricu' : 'Check your cart')}</button>
+            {:else}
+              <a href="/checkout" class="btn btn-primary w-full">{$locale === 'hr' ? 'Naruči' : 'Checkout'}</a>
+            {/if}
             <a href="/shop" class="mt-2 flex items-center justify-center w-full py-2.5 text-sm font-medium text-[#7a7f86] hover:text-[#2b2b2b]">{$locale === 'hr' ? 'Nastavi kupovinu' : 'Continue shopping'}</a>
           </div>
         </div>

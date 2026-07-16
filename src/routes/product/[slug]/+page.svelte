@@ -11,6 +11,7 @@
   const loading = false;
   let qty = $state(1);
   let added = $state(false);
+  let stockNotice = $state('');
   let activeImg = $state(0);
   const relatedProducts: Product[] = $derived(data.relatedProducts as Product[]);
 
@@ -47,8 +48,11 @@
 
   function handleAdd() {
     if (!product) return;
-    addToCart({ id: product.id, slug: product.slug, name_hr: product.name_hr, name_en: product.name_en ?? undefined, price: product.price, images: product.images }, qty);
-    added = true;
+    const result = addToCart({ id: product.id, slug: product.slug, name_hr: product.name_hr, name_en: product.name_en ?? undefined, price: product.price, images: product.images, stock: product.stock }, qty);
+    added = result.added > 0;
+    stockNotice = result.added === 0
+      ? ($locale === 'hr' ? `U košarici je već maksimalna dostupna količina (${product.stock}).` : `Your cart already contains the maximum available quantity (${product.stock}).`)
+      : '';
     setTimeout(() => added = false, 2000);
   }
 
@@ -107,7 +111,7 @@
             <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
               <button onclick={() => qty = Math.max(1, qty - 1)} class="px-4 py-3 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9]">−</button>
               <span class="px-4 font-semibold text-[#2b2b2b] w-12 text-center">{qty}</span>
-              <button onclick={() => qty = qty + 1} class="px-4 py-3 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9]">+</button>
+              <button onclick={() => qty = Math.min(product.stock, qty + 1)} disabled={qty >= product.stock} class="px-4 py-3 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-35">+</button>
             </div>
             {#if product.stock === 0}
               <a href={inquiryHref} class="btn flex-1 border border-[#2b2b2b] bg-white py-3.5 text-center text-[#2b2b2b] hover:bg-[#2b2b2b] hover:text-white">{$locale === 'hr' ? 'Pošalji upit' : 'Send inquiry'}</a>
@@ -117,6 +121,7 @@
               </button>
             {/if}
           </div>
+          {#if stockNotice}<p class="-mt-3 mb-5 text-sm text-[#9f1f18]">{stockNotice}</p>{/if}
 
           <div class="text-[13px] text-[#7a7f86] space-y-1 mb-6">
             {#if product.sku}<p><span class="font-semibold text-[#2b2b2b]">SKU:</span> {product.sku}</p>{/if}

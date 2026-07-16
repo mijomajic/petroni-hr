@@ -5,6 +5,7 @@ import { parseCorvuspayOrderNumber, verifyCorvuspayCallbackState } from '$lib/co
 import { corvuspayTransactionStatus, verifyCorvuspayCallback } from '$lib/payments.server';
 import { revokeSecondPaymentTokens } from '$lib/payment-tokens.server';
 import { sendOrderProcessing, sendSecondPaymentReceived } from '$lib/email.server';
+import { commitOrderStock } from '$lib/shop-stock.server';
 import type { RequestHandler } from './$types';
 
 const handleCallback: RequestHandler = async ({ request, url }) => {
@@ -42,11 +43,11 @@ const handleCallback: RequestHandler = async ({ request, url }) => {
       .single();
     if (!order) throw error(404, 'Narudžba nije pronađena.');
     const shouldSendProcessingEmail = order.payment_status !== 'paid' || order.status !== 'processing';
-    const { error: orderUpdateError } = await supabaseAdmin
-      .from('orders')
-      .update({ payment_status: 'paid', status: 'processing' })
-      .eq('id', order.id);
-    if (orderUpdateError) throw error(500, 'Plaćanje je potvrđeno, ali narudžbu nije moguće ažurirati.');
+    const committed = await commitOrderStock(order.id, 'processing');
+    if (committed.error || !committed.data) {
+      throw error(500, 'Plaćanje je potvrđeno, ali zalihu i narudžbu nije moguće ažurirati.');
+    }
+    const committedOrder = committed.data as Record<string, any>;
     const { error: orderAttemptError } = await supabaseAdmin.from('payment_attempts').insert({
       order_id: order.id,
       provider: 'corvuspay',
@@ -58,7 +59,7 @@ const handleCallback: RequestHandler = async ({ request, url }) => {
     if (orderAttemptError) console.error('Order payment audit failed', orderAttemptError.message);
     if (shouldSendProcessingEmail) {
       try {
-        await sendOrderProcessing({ ...order, payment_status: 'paid', status: 'processing' });
+        await sendOrderProcessing(committedOrder);
       } catch (mailError) {
         console.error('Order processing email failed', mailError);
       }
