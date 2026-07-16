@@ -47,7 +47,7 @@
       </p>
     </div>
     <div class="card overflow-hidden aspect-[4/3]">
-      <img src="https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg" alt="Petroni" class="w-full h-full object-cover" />
+      <img src="/images/vehicles/ci-horon-79m/01-horon-79-1.webp" alt="Petroni CI Horon 79M kamper" width="1440" height="1080" loading="lazy" class="w-full h-full object-cover" />
     </div>
   </div>
 </section>
@@ -56,7 +56,7 @@
 <section class="pb-4">
   <div class="container-x grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
     <div class="card overflow-hidden aspect-[4/3] order-2 lg:order-1">
-      <img src="https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp" alt="Petroni" class="w-full h-full object-cover" />
+      <img src="/images/vehicles/roller-team-kronos-277m/01-izvana.webp" alt="Petroni Roller Team Kronos 277M kamper" width="1440" height="1080" loading="lazy" class="w-full h-full object-cover" />
     </div>
     <div class="order-1 lg:order-2">
       <span class="eyebrow mb-3">{$locale === 'hr' ? 'Naše iskustvo' : 'Our experience'}</span>
@@ -92,7 +92,7 @@
 <section class="section">
   <div class="container-x grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
     <div class="card overflow-hidden aspect-[4/3]">
-      <img src="https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg" alt="Petroni" class="w-full h-full object-cover" />
+      <img src="/images/vehicles/rimor-evo-sound/01-rimor-evo-1.webp" alt="Petroni Rimor EVO Sound kamper" width="1440" height="1080" loading="lazy" class="w-full h-full object-cover" />
     </div>
     <div>
       <h2 class="section-title mb-4">{$locale === 'hr' ? 'S kamperom nema žurbe' : 'No rush with a camper'}</h2>

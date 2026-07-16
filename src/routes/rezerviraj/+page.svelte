@@ -6,6 +6,7 @@
   import { calculatePricing, type PricingConfig, type PricingResult } from '$lib/pricing';
   import { isCroatianPublicHoliday, isSunday } from '$lib/holidays';
   import { renderTermsMarkup } from '$lib/terms-markup';
+  import { vehicleThumbnail } from '$lib/vehicle-images';
   import type {
     BookingExtra,
     Fee,
@@ -807,7 +808,7 @@
             {#each availableVehicles as vehicle}
               {@const price = vehiclePricing.get(vehicle.id)}
               <button onclick={() => selectVehicle(vehicle)} class="card text-left overflow-hidden flex flex-row" style="border-color:{$booking.selectedVehicle?.id === vehicle.id ? '#f5c518' : '#ededf0'}">
-                <div class="w-40 sm:w-56 flex-shrink-0 overflow-hidden bg-[#f3f4f6]"><img src={vehicle.images?.[0]} alt={vehicle.name} class="w-full h-full object-cover" /></div>
+                <div class="w-40 sm:w-56 flex-shrink-0 overflow-hidden bg-[#f3f4f6]"><img src={vehicleThumbnail(vehicle.images?.[0])} alt={vehicle.name} width="480" height="360" loading="lazy" class="w-full h-full object-cover" /></div>
                 <div class="p-5 flex-1 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_190px] items-center gap-4">
                   <div>
                     <h3 class="font-semibold text-[#2b2b2b] mb-1">{vehicle.name}</h3>

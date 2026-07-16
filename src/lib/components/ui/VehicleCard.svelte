@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Vehicle } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
+  import { vehicleThumbnail } from '$lib/vehicle-images';
 
   type Props = {
     vehicle: Vehicle;
@@ -8,7 +9,7 @@
   };
   let { vehicle, detailHref }: Props = $props();
 
-  const img = $derived(vehicle.images?.[0] || 'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg');
+  const img = $derived(vehicleThumbnail(vehicle.images?.[0]));
   const desc = $derived(
     ($locale === 'hr' ? vehicle.description_hr : (vehicle.description_en || vehicle.description_hr)) || ''
   );
@@ -19,15 +20,20 @@
 <div class="card flex flex-col overflow-hidden h-full">
   <a href={href} class="block overflow-hidden group">
     <div class="aspect-[4/3] overflow-hidden bg-[#f3f4f6]">
-      <img
-        src={img}
-        alt={vehicle.name}
-        width="768"
-        height="576"
-        loading="lazy"
-        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-        onerror={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = '0'; }}
-      />
+      {#if img}
+        <img
+          src={img}
+          alt={vehicle.name}
+          width="480"
+          height="360"
+          loading="lazy"
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+        />
+      {:else}
+        <div class="flex h-full items-center justify-center px-6 text-center text-xs font-semibold uppercase tracking-wider text-[#9aa0a8]">
+          {$locale === 'hr' ? 'Fotografija nije dostupna' : 'Photo unavailable'}
+        </div>
+      {/if}
     </div>
   </a>
 

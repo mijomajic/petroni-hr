@@ -4,19 +4,19 @@
   const cats = $derived([
     {
       href: '/vozila/najam-kampera',
-      img: 'https://www.petroni.hr/wp-content/uploads/2025/05/CO550QDK-2-768x576.jpg',
+      img: '/images/vehicles/ci-horon-79m/01-horon-79-1-thumb.webp',
       title: $locale === 'hr' ? 'Najam kampera' : 'Camper rental',
       desc: $locale === 'hr' ? 'Kratkoročni i dugoročni najam vrhunskih kampera i karavana za nezaboravna putovanja.' : 'Short and long-term rental of premium campers and caravans.'
     },
     {
       href: '/vozila/vozila-za-prodaju',
-      img: 'https://www.petroni.hr/wp-content/uploads/2024/06/CO550UK-4-768x576.jpg',
+      img: '/images/vehicles/weinsberg-caracompact-suite-640meq/01-3300-caracompact-suite-pepper-mb-640meg-exbp-presse-8616-thumb.webp',
       title: $locale === 'hr' ? 'Vozila za prodaju' : 'Vehicles for sale',
       desc: $locale === 'hr' ? 'Kvalitetni rabljeni i novi kamperi i karavani po konkurentnim cijenama.' : 'Quality new and used campers and caravans at competitive prices.'
     },
     {
       href: '/vozila/vozila-za-filmske-produkcije',
-      img: 'https://www.petroni.hr/wp-content/uploads/2025/02/2-caratour-768x533.webp',
+      img: '/images/vehicles/make-up-truck-peugeot-boxer/01-peugeot-sminka-1-thumb.webp',
       title: $locale === 'hr' ? 'Filmske produkcije' : 'Film productions',
       desc: $locale === 'hr' ? 'Posebno opremljena vozila za filmske i TV produkcije po cijeloj regiji.' : 'Specially equipped vehicles for film and TV productions across the region.'
     },

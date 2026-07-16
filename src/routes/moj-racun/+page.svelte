@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { vehicleThumbnail } from '$lib/vehicle-images';
   import type { PageProps } from './$types';
   let { data, form }: PageProps = $props();
   let activeTab = $state<'bookings' | 'orders' | 'profile'>('bookings');
@@ -60,7 +61,7 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
               <div class="flex items-center gap-4">
                 {#if booking.vehicles?.images?.[0]}
-                  <img src={booking.vehicles.images[0]} alt="" class="w-24 h-16 rounded-md object-cover bg-[#f3f4f6]" />
+                  <img src={vehicleThumbnail(booking.vehicles.images[0])} alt="" width="480" height="360" loading="lazy" class="w-24 h-16 rounded-md object-cover bg-[#f3f4f6]" />
                 {/if}
                 <div>
                   <p class="font-bold text-[#2b2b2b]">{booking.vehicles?.name ?? 'Rezervacija vozila'}</p>
