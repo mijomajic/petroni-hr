@@ -9,6 +9,7 @@
   const name = $derived($locale === 'hr' ? product.name_hr : (product.name_en || product.name_hr));
   const img = $derived(product.images?.[0] || '');
   const addLabel = $derived($locale === 'hr' ? 'Dodaj u košaricu' : 'Add to cart');
+  const inquiryHref = $derived(`/kontakt?topic=Shop&product=${encodeURIComponent(name)}&path=${encodeURIComponent(`/product/${product.slug}`)}`);
 
   let added = $state(false);
 
@@ -46,19 +47,12 @@
       <h3 class="text-[13px] font-medium text-[#3a3f45] leading-snug line-clamp-2 min-h-[2.4em] mb-2 hover:text-[#b5890a] transition-colors">{name}</h3>
     </a>
     <p class="text-[15px] font-semibold text-[#2b2b2b] mb-3">{product.price.toFixed(2)} €</p>
-    <button
-      onclick={handleAdd}
-      disabled={product.stock === 0}
-      class="btn w-full mt-auto text-[11px] py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
-      style="background:{added ? '#16a34a' : '#f5c518'};color:#fff"
-    >
-      {#if added}
-        {$locale === 'hr' ? 'Dodano ✓' : 'Added ✓'}
-      {:else if product.stock === 0}
-        {$locale === 'hr' ? 'Nedostupno' : 'Out of stock'}
-      {:else}
-        {addLabel}
-      {/if}
-    </button>
+    {#if product.stock === 0}
+      <a href={inquiryHref} class="btn mt-auto w-full border border-[#d9dce1] bg-white py-2.5 text-[11px] text-[#2b2b2b] hover:border-[#2b2b2b]">{$locale === 'hr' ? 'Pošalji upit' : 'Send inquiry'}</a>
+    {:else}
+      <button onclick={handleAdd} class="btn w-full mt-auto text-[11px] py-2.5" style="background:{added ? '#16a34a' : '#f5c518'};color:#fff">
+        {added ? ($locale === 'hr' ? 'Dodano ✓' : 'Added ✓') : addLabel}
+      </button>
+    {/if}
   </div>
 </div>

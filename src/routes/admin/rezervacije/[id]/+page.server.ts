@@ -58,6 +58,70 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions: Actions = {
+  operations: async ({ request, params, locals }) => {
+    const administrator = await requireAdministrator(locals);
+    const form = await request.formData();
+    const status = String(form.get('status') ?? '');
+    const firstPaymentStatus = String(form.get('first_payment_status') ?? '');
+    const secondPaymentStatus = String(form.get('second_payment_status') ?? 'unpaid');
+    if (!bookingStatuses.has(status) || !paymentStatuses.has(firstPaymentStatus) || !paymentStatuses.has(secondPaymentStatus)) {
+      return fail(400, { message: 'Jedan ili više odabranih statusa nije valjan.' });
+    }
+
+    const { data: before } = await getBooking(params.id);
+    if (!before) return fail(404, { message: 'Rezervacija nije pronađena.' });
+    const effectiveSecond = before.payment_split ? secondPaymentStatus : before.second_payment_status;
+    const paymentStatus = firstPaymentStatus === 'paid' && (!before.payment_split || effectiveSecond === 'paid')
+      ? 'paid'
+      : firstPaymentStatus === 'paid' || effectiveSecond === 'paid'
+        ? 'partial'
+        : 'unpaid';
+    const patch = {
+      status,
+      first_payment_status: firstPaymentStatus,
+      second_payment_status: effectiveSecond,
+      payment_status: paymentStatus
+    };
+    const { data: after, error: updateError } = await supabaseAdmin.from('bookings').update(patch).eq('id', params.id).select().single();
+    if (updateError) return fail(400, { message: updateError.message });
+
+    let statusEmailSent: boolean | null = null;
+    if (before.status !== status && status === 'confirmed') {
+      statusEmailSent = await sendBookingConfirmed({ ...before, ...after }, administrator.user.id);
+      await supabaseAdmin.from('bookings').update({ confirmation_email_sent: statusEmailSent }).eq('id', params.id);
+    } else if (before.status !== status && status === 'cancelled') {
+      statusEmailSent = await sendBookingCancelled({ ...before, ...after }, administrator.user.id);
+    }
+
+    const paymentChanges = [
+      { part: 1, before: before.first_payment_status, after: firstPaymentStatus },
+      ...(before.payment_split ? [{ part: 2, before: before.second_payment_status, after: effectiveSecond }] : [])
+    ].filter((change) => change.before !== change.after);
+    await Promise.all(paymentChanges.map((change) => supabaseAdmin.from('payment_attempts').insert({
+      booking_id: params.id,
+      payment_part: change.part,
+      provider: 'admin',
+      action: 'manual_status_change',
+      status: change.after,
+      metadata: { actor_email: administrator.email, combined_save: true }
+    })));
+
+    await recordAdminEvent({
+      administrator,
+      entityType: 'booking',
+      entityId: params.id,
+      action: 'booking_operations_saved',
+      beforeState: { status: before.status, first_payment_status: before.first_payment_status, second_payment_status: before.second_payment_status, payment_status: before.payment_status },
+      afterState: patch,
+      metadata: { status_email_sent: statusEmailSent, changed_payment_parts: paymentChanges.map((change) => change.part) }
+    });
+    if (status === 'cancelled' || status === 'completed' || effectiveSecond === 'paid') await revokeSecondPaymentTokens(params.id);
+
+    return { message: statusEmailSent === false
+      ? 'Promjene su spremljene, ali statusni email nije poslan.'
+      : 'Status rezervacije i plaćanja su spremljeni.' };
+  },
+
   status: async ({ request, params, locals }) => {
     const administrator = await requireAdministrator(locals);
     const form = await request.formData();

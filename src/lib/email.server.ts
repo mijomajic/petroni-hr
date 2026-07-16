@@ -238,6 +238,28 @@ export async function sendOrderCancelled(
   );
 }
 
+export async function sendOrderProcessing(
+  order: Record<string, any>,
+  attemptedBy?: string
+) {
+  const config = await emailConfig();
+  return send(
+    { from: config.from, replyTo: config.admin, to: order.customer_email, subject: `Narudžba ${order.confirmation_number} je potvrđena`, html: emailLayout('Narudžba je potvrđena i u obradi', `<p style="font-size:16px;line-height:1.6">Potvrdili smo narudžbu <strong>${escapeHtml(order.confirmation_number)}</strong> i započeli obradu.</p>${orderSummary(order)}<p style="font-size:14px;line-height:1.6">Poslat ćemo vam novu obavijest kada pošiljka bude spremna i poslana.</p>`) },
+    { orderId: order.id, messageType: 'order_processing_customer', recipient: order.customer_email, attemptedBy }
+  );
+}
+
+export async function sendOrderPaymentReceived(
+  order: Record<string, any>,
+  attemptedBy?: string
+) {
+  const config = await emailConfig();
+  return send(
+    { from: config.from, replyTo: config.admin, to: order.customer_email, subject: `Uplata evidentirana za narudžbu ${order.confirmation_number}`, html: emailLayout('Uplata je evidentirana', `<p style="font-size:16px;line-height:1.6">Evidentirali smo uplatu za narudžbu <strong>${escapeHtml(order.confirmation_number)}</strong>.</p>${orderSummary(order)}<p style="font-size:14px;line-height:1.6">Narudžbu ćemo pripremiti za slanje. Račun ćete dobiti emailom kada pošiljka bude poslana.</p>`) },
+    { orderId: order.id, messageType: 'order_payment_received_customer', recipient: order.customer_email, attemptedBy }
+  );
+}
+
 export async function sendOrderInvoice(
   order: Record<string, any>,
   attemptedBy?: string
@@ -268,4 +290,35 @@ export async function sendOrderInvoice(
       attemptedBy
     }
   );
+}
+
+export async function sendContactInquiry(inquiry: {
+  name: string;
+  email: string;
+  phone?: string;
+  topic: string;
+  message: string;
+  product?: string;
+  productUrl?: string;
+}) {
+  const config = await emailConfig();
+  if (!env.RESEND_API_KEY) return false;
+  const productBlock = inquiry.product
+    ? detailRows([
+        ['Proizvod', inquiry.product],
+        ['Poveznica', inquiry.productUrl || '—']
+      ])
+    : '';
+  try {
+    const result = await new Resend(env.RESEND_API_KEY).emails.send({
+      from: config.from,
+      replyTo: inquiry.email,
+      to: config.admin,
+      subject: `${inquiry.product ? 'Upit za proizvod' : 'Kontakt upit'} — ${inquiry.topic}`,
+      html: emailLayout('Novi upit sa stranice', `<p style="font-size:15px;line-height:1.6"><strong>${escapeHtml(inquiry.name)}</strong><br>${escapeHtml(inquiry.email)}${inquiry.phone ? ` · ${escapeHtml(inquiry.phone)}` : ''}</p>${productBlock}<p style="margin-top:20px;font-size:15px;line-height:1.7;white-space:pre-wrap">${escapeHtml(inquiry.message)}</p>`)
+    });
+    return !result.error;
+  } catch {
+    return false;
+  }
 }

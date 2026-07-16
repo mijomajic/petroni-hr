@@ -92,7 +92,7 @@
     <h2 class="text-[20px] font-bold text-[#2b2b2b] mb-6">{$locale === 'hr' ? 'Povezane objave' : 'Related posts'}</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {#each related as r}
-        <a href="/novosti/{r.slug}" class="card group overflow-hidden">
+        <a href="/novosti/{r.slug}" class="card card-interactive group overflow-hidden">
           <div class="aspect-video overflow-hidden bg-[#f3f4f6]">
             <img src={r.img} alt="" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
           </div>

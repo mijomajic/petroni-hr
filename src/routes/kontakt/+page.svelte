@@ -1,20 +1,43 @@
 <script lang="ts">
+  import { page } from '$app/state';
   import { locale } from '$lib/stores/locale';
 
+  const product = page.url.searchParams.get('product')?.trim() ?? '';
+  const productPath = page.url.searchParams.get('path')?.trim() ?? '';
   let name = $state('');
   let email = $state('');
   let phone = $state('');
-  let topic = $state('Prodaja');
-  let message = $state('');
+  let topic = $state(product ? 'Shop' : 'Prodaja');
+  let message = $state(product ? `Zanima me dostupnost proizvoda: ${product}` : '');
   let agree = $state(false);
   let sent = $state(false);
   let loading = $state(false);
+  let submitError = $state('');
+  let website = $state('');
 
   async function handleSubmit() {
+    submitError = '';
+    if (!name.trim() || !email.trim() || !message.trim() || !agree) {
+      submitError = $locale === 'hr' ? 'Ispunite obavezna polja i prihvatite Politiku privatnosti.' : 'Complete the required fields and accept the Privacy Policy.';
+      return;
+    }
     loading = true;
-    await new Promise(r => setTimeout(r, 800));
-    sent = true;
-    loading = false;
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, topic, message, product, productPath, website })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error);
+      sent = true;
+    } catch (error) {
+      submitError = error instanceof Error && error.message
+        ? error.message
+        : ($locale === 'hr' ? 'Poruku trenutno nije moguće poslati.' : 'The message could not be sent.');
+    } finally {
+      loading = false;
+    }
   }
 
   let openFaq = $state<number | null>(0);
@@ -49,29 +72,37 @@
             <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style="background:#fff7e0">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <h3 class="font-bold text-[#2b2b2b] text-lg mb-1">{$locale === 'hr' ? 'Poruka poslana!' : 'Message sent!'}</h3>
+            <h3 class="font-bold text-[#2b2b2b] text-lg mb-1">{$locale === 'hr' ? 'Poruka je poslana' : 'Message sent'}</h3>
             <p class="text-sm text-[#7a7f86]">{$locale === 'hr' ? 'Javit ćemo Vam se što je prije moguće.' : 'We will get back to you as soon as possible.'}</p>
           </div>
         {:else}
           <div class="space-y-5">
-            <div><span class="field-label">{$locale === 'hr' ? 'Ime i prezime' : 'Full name'}</span><input class="field" bind:value={name} /></div>
-            <div><span class="field-label">{$locale === 'hr' ? 'E-mail' : 'Email'}</span><input type="email" class="field" bind:value={email} /></div>
-            <div><span class="field-label">{$locale === 'hr' ? 'Broj telefona' : 'Phone number'}</span><input type="tel" class="field" bind:value={phone} /></div>
+            {#if product}
+              <div class="rounded-xl border border-[#eadfba] bg-[#fffaf0] p-4">
+                <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9a7600]">{$locale === 'hr' ? 'Upit za proizvod' : 'Product inquiry'}</p>
+                <p class="mt-1 text-sm font-semibold text-[#2b2b2b]">{product}</p>
+              </div>
+            {/if}
+            <div><label class="field-label" for="contact_name">{$locale === 'hr' ? 'Ime i prezime' : 'Full name'} *</label><input id="contact_name" class="field" required bind:value={name} /></div>
+            <div><label class="field-label" for="contact_email">{$locale === 'hr' ? 'E-mail' : 'Email'} *</label><input id="contact_email" type="email" class="field" required bind:value={email} /></div>
+            <div><label class="field-label" for="contact_phone">{$locale === 'hr' ? 'Broj telefona' : 'Phone number'}</label><input id="contact_phone" type="tel" class="field" bind:value={phone} /></div>
             <div>
-              <span class="field-label">{$locale === 'hr' ? 'Tema' : 'Topic'}</span>
-              <select class="field" bind:value={topic}>
+              <label class="field-label" for="contact_topic">{$locale === 'hr' ? 'Tema' : 'Topic'} *</label>
+              <select id="contact_topic" class="field" bind:value={topic}>
                 <option>{$locale === 'hr' ? 'Prodaja' : 'Sales'}</option>
                 <option>{$locale === 'hr' ? 'Najam' : 'Rental'}</option>
                 <option>Shop</option>
                 <option>{$locale === 'hr' ? 'Ostalo' : 'Other'}</option>
               </select>
             </div>
-            <div><span class="field-label">{$locale === 'hr' ? 'Poruka' : 'Message'}</span><textarea rows="5" class="field resize-none" bind:value={message}></textarea></div>
+            <div><label class="field-label" for="contact_message">{$locale === 'hr' ? 'Poruka' : 'Message'} *</label><textarea id="contact_message" rows="5" class="field resize-none" required bind:value={message}></textarea></div>
+            <div class="hidden" aria-hidden="true"><label for="contact_website">Website</label><input id="contact_website" tabindex="-1" autocomplete="off" bind:value={website} /></div>
             <label class="flex items-start gap-2 text-[13px] text-[#7a7f86]">
               <input type="checkbox" class="mt-1 accent-[#f5c518]" bind:checked={agree} />
               <span>{$locale === 'hr' ? 'Prihvaćam i slažem se s' : 'I accept and agree to the'} <a href="/privatnost" class="font-semibold" style="color:#f5c518">{$locale === 'hr' ? 'uvjetima poslovanja & Politikom privatnosti' : 'terms of business & Privacy Policy'}</a></span>
             </label>
-            <button onclick={handleSubmit} disabled={loading || !name || !email || !message || !agree} class="btn btn-primary px-8 py-3.5 disabled:opacity-50">
+            {#if submitError}<p role="alert" class="rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-3 text-sm text-[#9f1f18]">{submitError}</p>{/if}
+            <button onclick={handleSubmit} disabled={loading} class="btn btn-primary px-8 py-3.5 disabled:opacity-50">
               {loading ? ($locale === 'hr' ? 'Šaljem…' : 'Sending…') : ($locale === 'hr' ? 'Pošalji' : 'Send')}
             </button>
           </div>

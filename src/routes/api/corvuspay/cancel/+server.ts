@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { parseCorvuspayOrderNumber } from '$lib/corvuspay.server';
 import { supabaseAdmin } from '$lib/supabase.server';
+import { sendOrderCancelled } from '$lib/email.server';
 import type { RequestHandler } from './$types';
 
 const handleCancel: RequestHandler = async ({ request, url }) => {
@@ -37,19 +38,27 @@ async function recordCancelledAttempt(
   if (reference.kind === 'order') {
     const { data: order } = await supabaseAdmin
       .from('orders')
-      .select('id')
+      .select('*')
       .eq('id', reference.orderId)
       .eq('payment_method', 'corvuspay')
       .eq('corvuspay_order_id', orderNumber)
       .maybeSingle();
     if (!order) return;
-    await supabaseAdmin.from('payment_attempts').insert({
-      order_id: order.id,
-      provider: 'corvuspay',
-      action: 'cancel_redirect_received',
-      status: 'cancelled',
-      provider_reference: orderNumber
-    });
+    await Promise.all([
+      supabaseAdmin.from('payment_attempts').insert({
+        order_id: order.id,
+        provider: 'corvuspay',
+        action: 'cancel_redirect_received',
+        status: 'cancelled',
+        provider_reference: orderNumber
+      }),
+      supabaseAdmin.from('orders').update({ status: 'cancelled' }).eq('id', order.id)
+    ]);
+    try {
+      await sendOrderCancelled({ ...order, status: 'cancelled' });
+    } catch (mailError) {
+      console.error('Cancelled order email failed', mailError);
+    }
     return;
   }
 

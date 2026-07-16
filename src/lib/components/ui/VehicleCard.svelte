@@ -17,7 +17,7 @@
   const moreLabel = $derived($locale === 'hr' ? 'Vidi više' : 'View more');
 </script>
 
-<div class="card flex flex-col overflow-hidden h-full">
+<div class="card card-interactive flex flex-col overflow-hidden h-full">
   <a href={href} class="block overflow-hidden group">
     <div class="aspect-[4/3] overflow-hidden bg-[#f3f4f6]">
       {#if img}
