@@ -223,7 +223,7 @@
               <p class="text-[14px] leading-relaxed text-[#6b7178] mb-8">{desc}</p>
             {/if}
             <div class="flex flex-wrap gap-3">
-              <a href="/rezerviraj" class="btn btn-primary px-7 py-3.5">{$locale === 'hr' ? 'Rezerviraj' : 'Book'}</a>
+              <a href={vehicle.type === 'rental' ? `/rezerviraj?vehicle=${encodeURIComponent(vehicle.slug)}` : '/rezerviraj'} class="btn btn-primary px-7 py-3.5">{$locale === 'hr' ? 'Rezerviraj' : 'Book'}</a>
               <a href="/kontakt" class="btn btn-outline px-7 py-3.5">{$locale === 'hr' ? 'Kontaktirajte nas' : 'Contact us'}</a>
             </div>
           </div>

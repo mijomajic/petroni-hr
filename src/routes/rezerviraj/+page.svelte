@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
+  import { page } from '$app/state';
   import { booking, resetBooking } from '$lib/stores/booking';
   import { supabase } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
@@ -63,6 +64,7 @@
   let authError = $state('');
   let authMessage = $state('');
   let authLoading = $state(false);
+  const requestedVehicleSlug = $derived(page.url.searchParams.get('vehicle')?.trim() ?? '');
 
   const timeOptions = Array.from({ length: 96 }, (_, index) => {
     const hours = Math.floor(index / 4).toString().padStart(2, '0');
@@ -629,6 +631,17 @@
 
   onMount(() => {
     sanitizeStoredBooking();
+    if (requestedVehicleSlug) {
+      const requestedVehicle = rentalVehicles.find((vehicle) => vehicle.slug === requestedVehicleSlug);
+      if (requestedVehicle) {
+        booking.update((current) => ({
+          ...current,
+          selectedVehicle: requestedVehicle,
+          extras: {},
+          step: 1
+        }));
+      }
+    }
     if ($booking.step >= 2 && canSearch) void refreshAvailability({ keepStep: true });
     if (data.profile) {
       signedIn = true;
@@ -685,6 +698,16 @@
     {#if $booking.step === 1}
       <div class="max-w-4xl mx-auto">
         <div class="card p-6 md:p-8">
+          {#if requestedVehicleSlug && $booking.selectedVehicle?.slug === requestedVehicleSlug}
+            <div class="mb-7 flex items-center gap-4 rounded-lg border border-[#f5c518]/50 bg-[#fffaf0] p-4">
+              <img src={vehicleThumbnail($booking.selectedVehicle.images?.[0])} alt="" class="h-16 w-24 shrink-0 rounded-md object-cover" />
+              <div>
+                <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#a87900]">{$locale === 'hr' ? 'Odabrano vozilo' : 'Selected vehicle'}</p>
+                <p class="mt-1 font-bold text-[#2b2b2b]">{$booking.selectedVehicle.name}</p>
+                <p class="mt-1 text-xs leading-relaxed text-[#6f747c]">{$locale === 'hr' ? 'Unesite termin kako bismo provjerili dostupnost ovog vozila.' : 'Enter your dates so we can confirm this vehicle is available.'}</p>
+              </div>
+            </div>
+          {/if}
           {#if searchError}
             <div id="booking-step-one-error" role="alert" class="mb-7 flex items-start gap-3 rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-4 text-sm text-[#9f1f18]">
               <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg>
