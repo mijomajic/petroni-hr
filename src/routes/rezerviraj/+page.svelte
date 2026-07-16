@@ -307,8 +307,18 @@
     ].join('|');
   }
 
+  function scrollToWizardTop() {
+    void tick().then(() => {
+      document.getElementById('booking-wizard-top')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    });
+  }
+
   function goToStep(step: number) {
     booking.update((current) => ({ ...current, step }));
+    scrollToWizardTop();
     if (step === 2 && canSearch) void refreshAvailability({ keepStep: true });
   }
 
@@ -392,7 +402,10 @@
         : 'Availability could not be checked. Please try again.';
       if (options.keepStep) booking.update((current) => ({ ...current, step: current.step > 2 ? 2 : current.step }));
     }
-    if (!options.keepStep) booking.update(b => ({ ...b, step: 2 }));
+    if (!options.keepStep) {
+      booking.update(b => ({ ...b, step: 2 }));
+      scrollToWizardTop();
+    }
     loading = false;
   }
 
@@ -456,6 +469,7 @@
     }
     driverError = '';
     booking.update((current) => ({ ...current, step: 4, totalPrice }));
+    scrollToWizardTop();
   }
 
   async function submitBooking() {
@@ -672,7 +686,7 @@
   <meta property="og:description" content="Online rezervacija Petroni kampera: odaberite lokaciju, datume, vozilo, dodatnu opremu i način plaćanja u nekoliko koraka." />
 </svelte:head>
 
-<div class="section" style="background:#fafbfc">
+<div id="booking-wizard-top" class="section scroll-mt-24" style="background:#fafbfc">
   <div class="container-x">
     <!-- Progress -->
     <div class="flex items-start justify-center mb-12 max-w-3xl mx-auto">
