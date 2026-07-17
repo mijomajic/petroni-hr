@@ -33,8 +33,11 @@ function vehiclePayload(form: FormData) {
     description_hr: optionalTextField(form, 'description_hr'),
     description_en: optionalTextField(form, 'description_en'),
     images: linesField(form, 'images'),
+    bed_dimensions_hr: linesField(form, 'bed_dimensions_hr'),
+    bed_dimensions_en: linesField(form, 'bed_dimensions_en'),
     specs: jsonObjectField(form, 'specs_json'),
     is_available: checkboxField(form, 'is_available'),
+    is_for_sale: checkboxField(form, 'is_for_sale'),
     sort_order: integerField(form, 'sort_order') ?? 0
   };
 }
@@ -54,6 +57,8 @@ export const load: PageServerLoad = async ({ params }) => {
     vehicle: {
       ...vehicle.data,
       images_text: (vehicle.data.images ?? []).join('\n'),
+      bed_dimensions_hr_text: (vehicle.data.bed_dimensions_hr ?? []).join('\n'),
+      bed_dimensions_en_text: (vehicle.data.bed_dimensions_en ?? []).join('\n'),
       specs_text: jsonPretty(vehicle.data.specs)
     },
     blockedDates: blocks.data ?? []

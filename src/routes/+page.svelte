@@ -21,7 +21,7 @@
     'https://www.petroni.hr/wp-content/uploads/2025/02/DSC_1684.jpg',
   ];
 
-  const partners = [
+  const partners: Array<{ name: string; href: string; src: string; filter?: string }> = [
     {
       name: 'Udruga Kampista Hrvatske',
       src: '/partners/logos/udruga-kampista.png',
@@ -33,15 +33,19 @@
       href: 'https://www.campingpolidor.com/'
     },
     {
-      name: 'Camping Adriatic / Valamar',
-      src: '/partners/logos/valamar-camping.svg',
-      href: 'https://www.valamarcamping.com/camping-adriatic',
-      filter: 'invert(1)'
+      name: 'Jadranka Camping — Cres & Lošinj',
+      src: 'https://www.camps-cres-losinj.com/assets/images/interface/logo.svg',
+      href: 'https://www.camps-cres-losinj.com/'
     },
     {
-      name: 'Plitvice Holiday Resort',
-      src: '/partners/logos/plitvice.svg',
-      href: 'https://www.plitvice.com/'
+      name: 'Camping Plitvice',
+      src: 'https://campingplitvice.hr/wp-content/uploads/2019/08/campingplitvice_logo.png',
+      href: 'https://campingplitvice.hr/'
+    },
+    {
+      name: 'Amadria Park Camping Šibenik',
+      src: 'https://www.amcham.hr/storage/upload/gen_blog/amadria_park_logo-500x400_9557.jpg',
+      href: 'https://www.amadriapark.com/hr/sibenik/camping/'
     },
     {
       name: 'Kamping udruženje Hrvatske',
@@ -169,7 +173,7 @@
 <!-- ═══════════════════════ PARTNERS ═══════════════════════ -->
 <div class="py-10" style="background:#f6f7f9">
   <div class="container-x">
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
       {#each partners as partner}
         <a
           href={partner.href}

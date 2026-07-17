@@ -29,6 +29,12 @@ export type Vehicle = {
   images: string[];
   specs: Record<string, unknown> | null;
   is_available: boolean;
+  /** Can be listed for sale while retaining its rental/film business type. */
+  is_for_sale?: boolean;
+  /** Individual Croatian bed labels/dimensions, managed as one line per entry. */
+  bed_dimensions_hr?: string[];
+  /** Individual English bed labels/dimensions; Croatian is the public fallback. */
+  bed_dimensions_en?: string[];
   created_at: string;
   beds: number | null;
   max_adults: number | null;

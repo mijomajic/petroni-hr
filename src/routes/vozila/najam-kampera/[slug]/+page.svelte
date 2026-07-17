@@ -64,6 +64,11 @@
     ].filter((metric): metric is { value: string; label: string } => metric !== null);
   });
   const desc = $derived($locale === 'hr' ? vehicle.description_hr : (vehicle.description_en || vehicle.description_hr));
+  const bedDimensions = $derived(
+    $locale === 'en' && (vehicle.bed_dimensions_en?.length ?? 0) > 0
+      ? (vehicle.bed_dimensions_en ?? [])
+      : (vehicle.bed_dimensions_hr ?? [])
+  );
   const metaDescription = $derived(truncateText(desc || `${vehicle.name} u Petroni ponudi vozila za najam i prodaju.`, 155));
   const vehicleUrl = $derived(absoluteUrl(`/vozila/najam-kampera/${vehicle.slug}`));
   const vehicleImages = $derived((vehicle.images ?? []).map(absoluteUrl));
@@ -124,7 +129,7 @@
           <div class="lg:col-span-3">
             <div class="relative rounded-xl overflow-hidden bg-[#f3f4f6] aspect-[16/10] mb-4 border border-[#ededf0]">
               {#if vehicle.images[activeImage]}
-                <img src={vehicle.images[activeImage]} alt={vehicle.name} width="1440" height="1080" class="w-full h-full object-cover" />
+                <img src={vehicle.images[activeImage]} alt={vehicle.name} width="1440" height="1080" class="w-full h-full object-contain" />
               {:else}
                 <div class="flex h-full items-center justify-center px-6 text-center text-sm font-semibold uppercase tracking-wider text-[#9aa0a8]">
                   {$locale === 'hr' ? 'Fotografija nije dostupna' : 'Photo unavailable'}
@@ -192,7 +197,7 @@
           <div class="lg:col-span-2">
             <div class="relative rounded-lg overflow-hidden bg-[#f3f4f6] aspect-[4/3] mb-4 border border-[#ededf0]">
               {#if vehicle.images[activeImage]}
-                <img src={vehicle.images[activeImage]} alt={vehicle.name} width="1440" height="1080" class="w-full h-full object-cover" />
+                <img src={vehicle.images[activeImage]} alt={vehicle.name} width="1440" height="1080" class="w-full h-full object-contain" />
               {:else}
                 <div class="flex h-full items-center justify-center px-6 text-center text-sm font-semibold uppercase tracking-wider text-[#9aa0a8]">
                   {$locale === 'hr' ? 'Fotografija nije dostupna' : 'Photo unavailable'}
@@ -217,6 +222,21 @@
                   </button>
                 {/each}
               </div>
+            {/if}
+            {#if bedDimensions.length}
+              <section class="mb-8 rounded-xl border border-[#eedc9a] bg-[#fffaf0] p-5" aria-labelledby="bed-dimensions-title">
+                <h2 id="bed-dimensions-title" class="text-[13px] font-black uppercase tracking-[0.12em] text-[#8f6c00]">
+                  {$locale === 'hr' ? 'Dimenzije ležajeva' : 'Bed dimensions'}
+                </h2>
+                <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+                  {#each bedDimensions as bed}
+                    <li class="flex items-start gap-2 text-[14px] font-semibold leading-relaxed text-[#454a50]">
+                      <span class="mt-[0.55em] h-1.5 w-1.5 flex-none rounded-full bg-[#F5C518]"></span>
+                      <span>{bed}</span>
+                    </li>
+                  {/each}
+                </ul>
+              </section>
             {/if}
             <h2 class="text-[20px] font-bold text-[#2b2b2b] mb-3">{vehicle.name}</h2>
             {#if desc}

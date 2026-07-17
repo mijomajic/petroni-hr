@@ -32,8 +32,11 @@ function vehiclePayload(form: FormData) {
     description_hr: optionalTextField(form, 'description_hr'),
     description_en: optionalTextField(form, 'description_en'),
     images: linesField(form, 'images'),
+    bed_dimensions_hr: linesField(form, 'bed_dimensions_hr'),
+    bed_dimensions_en: linesField(form, 'bed_dimensions_en'),
     specs: jsonObjectField(form, 'specs_json'),
     is_available: checkboxField(form, 'is_available'),
+    is_for_sale: checkboxField(form, 'is_for_sale'),
     sort_order: integerField(form, 'sort_order') ?? 0
   };
 }

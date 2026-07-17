@@ -5,7 +5,21 @@
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
-  const vehicles: Vehicle[] = $derived(data.vehicles as Vehicle[]);
+  const vehicles = $derived.by<Vehicle[]>(() => {
+    const unique = new Map<string, Vehicle>();
+    for (const vehicle of data.vehicles as Vehicle[]) {
+      const key = vehicle.name
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/gi, '')
+        .toLocaleLowerCase('hr');
+      const existing = unique.get(key);
+      // A dedicated sale record can carry a confirmed sale price, so keep it
+      // when the same physical model also exists as a rental record.
+      if (!existing || (vehicle.type === 'sale' && existing.type !== 'sale')) unique.set(key, vehicle);
+    }
+    return [...unique.values()];
+  });
 </script>
 
 <svelte:head>
@@ -39,11 +53,10 @@
       </div>
     {/if}
 
-    <p class="text-center text-[14px] text-[#7a7f86] mt-10">
-      {$locale === 'hr' ? 'Zanima Vas više?' : 'Want to see more?'}
-      <a href="/vozila/vozila-za-prodaju" class="font-semibold" style="color:#f5c518">{$locale === 'hr' ? 'Pogledajte sva vozila za prodaju' : 'See all vehicles for sale'}</a>
-      {$locale === 'hr' ? 'ili posjetite naš' : 'or visit our'}
-      <a href="https://www.njuskalo.hr" target="_blank" rel="noopener" class="font-semibold" style="color:#f5c518">Njuškalo profil</a>!
-    </p>
+    <div class="mt-10 text-center">
+      <a href="https://www.njuskalo.hr" target="_blank" rel="noopener" class="btn btn-outline px-7 py-3.5">
+        {$locale === 'hr' ? 'Petroni oglasi na Njuškalu' : 'Petroni listings on Njuškalo'}
+      </a>
+    </div>
   </div>
 </div>

@@ -53,7 +53,13 @@
       {#each navLinks as link}
         <div class="relative" role="none"
              onmouseenter={() => { if (link.children) vozilaOpen = true; }}
-             onmouseleave={() => { if (link.children) vozilaOpen = false; }}>
+             onmouseleave={() => { if (link.children) vozilaOpen = false; }}
+             onfocusin={() => { if (link.children) vozilaOpen = true; }}
+             onfocusout={(event) => {
+               if (link.children && !(event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget))) {
+                 vozilaOpen = false;
+               }
+             }}>
           <a
             href={link.href}
             class="flex items-center gap-1 px-3.5 py-2 text-[13px] font-semibold uppercase tracking-wide rounded transition-colors duration-200"
@@ -61,6 +67,8 @@
               ? 'background:#f5c518;color:#2b2b2b'
               : 'color:#3a3f45'}"
             class:hover:text-[#b5890a]={!isActive(link.href)}
+            aria-haspopup={link.children ? 'true' : undefined}
+            aria-expanded={link.children ? vozilaOpen : undefined}
           >
             {link.label()}
             {#if link.children}
@@ -74,7 +82,7 @@
                 {#each link.children as child}
                   <a
                     href={child.href}
-                    class="block px-5 py-2.5 text-[13px] font-medium transition-colors duration-150 hover:bg-[#faf6e6] hover:text-[#b5890a]"
+                    class="block px-5 py-3 text-[13px] font-bold uppercase tracking-wide transition-colors duration-150 hover:bg-[#faf6e6] hover:text-[#b5890a] focus-visible:bg-[#faf6e6] focus-visible:text-[#b5890a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#f5c518]"
                     style="color:{isActive(child.href) ? '#b5890a' : '#3a3f45'}"
                   >
                     {child.label()}
@@ -158,7 +166,7 @@
         {#if link.children}
           {#each link.children as child}
             <a href={child.href} onclick={() => mobileOpen = false}
-               class="text-sm py-2.5 pl-4 border-b border-[#f3f4f6]" style="color:#6b7178">
+               class="text-sm font-semibold uppercase tracking-wide py-3 pl-4 border-b border-[#f3f4f6]" style="color:#6b7178">
               — {child.label()}
             </a>
           {/each}

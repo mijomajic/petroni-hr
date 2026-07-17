@@ -60,13 +60,30 @@
         <label class="block"><span class="field-label">Opis HR</span><textarea name="description_hr" rows="7" class="field">{vehicle.description_hr ?? ''}</textarea></label>
         <label class="block"><span class="field-label">Opis EN</span><textarea name="description_en" rows="7" class="field">{vehicle.description_en ?? ''}</textarea></label>
         <label class="block"><span class="field-label">Slike, jedan URL po retku</span><textarea name="images" rows="8" class="field font-mono text-xs">{vehicle.images_text}</textarea></label>
+        <label class="block">
+          <span class="field-label">Dimenzije ležajeva HR, jedan po retku</span>
+          <textarea name="bed_dimensions_hr" rows="8" class="field" placeholder="Stražnji bračni ležaj — 200 × 140 cm&#10;Krevet na kat — 190 × 80 cm">{vehicle.bed_dimensions_hr_text}</textarea>
+          <span class="mt-1.5 block text-xs leading-relaxed text-[#8b9099]">Svaki red postaje zasebna stavka na hrvatskoj stranici.</span>
+        </label>
+        <label class="block">
+          <span class="field-label">Dimenzije ležajeva EN, jedan po retku</span>
+          <textarea name="bed_dimensions_en" rows="8" class="field" placeholder="Rear double bed — 200 × 140 cm&#10;Bunk bed — 190 × 80 cm">{vehicle.bed_dimensions_en_text}</textarea>
+          <span class="mt-1.5 block text-xs leading-relaxed text-[#8b9099]">Ako je prazno, engleska stranica prikazuje hrvatske stavke.</span>
+        </label>
         <label class="block"><span class="field-label">Specifikacije JSON</span><textarea name="specs_json" rows="8" class="field font-mono text-xs">{vehicle.specs_text}</textarea></label>
       </div>
 
-      <label class="mt-5 flex items-center gap-3 text-sm font-bold text-[#2b2b2b]">
-        <input name="is_available" type="checkbox" checked={vehicle.is_available} class="h-4 w-4 accent-[#F5C518]" />
-        Dostupno na javnim stranicama i u rezervacijama
-      </label>
+      <div class="mt-5 space-y-3">
+        <label class="flex items-center gap-3 text-sm font-bold text-[#2b2b2b]">
+          <input name="is_available" type="checkbox" checked={vehicle.is_available} class="h-4 w-4 accent-[#F5C518]" />
+          Dostupno na javnim stranicama i u rezervacijama
+        </label>
+        <label class="flex items-center gap-3 text-sm font-bold text-[#2b2b2b]">
+          <input name="is_for_sale" type="checkbox" checked={vehicle.is_for_sale} class="h-4 w-4 accent-[#F5C518]" />
+          Prikaži i među vozilima za prodaju
+        </label>
+        <p class="pl-7 text-xs leading-relaxed text-[#8b9099]">Ova oznaka ne mijenja tip vozila: kamper za najam ostaje dostupan za rezervacije.</p>
+      </div>
 
       <button class="btn btn-primary mt-6 text-black">Spremi promjene</button>
     </form>
