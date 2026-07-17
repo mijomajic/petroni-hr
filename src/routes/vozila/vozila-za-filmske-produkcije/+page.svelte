@@ -63,7 +63,7 @@
   <div class="container-x">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
       {#each vehicles as vehicle}
-        <VehicleCard {vehicle} detailHref={`/vozila/najam-kampera/${vehicle.slug}`} />
+        <VehicleCard {vehicle} />
       {/each}
     </div>
 

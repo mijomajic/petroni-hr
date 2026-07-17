@@ -5,7 +5,9 @@ import { legacyRedirectTarget } from './legacy-redirects';
 test('maps the legacy rental and content URLs to their current equivalents', () => {
   assert.equal(legacyRedirectTarget('/webshop/rezerviraj/'), '/rezerviraj');
   assert.equal(legacyRedirectTarget('/faqs/'), '/faq');
-  assert.equal(legacyRedirectTarget('/vehicle/caravans-international-horon-79m/'), '/vozila/najam-kampera/ci-horon-79m');
+  assert.equal(legacyRedirectTarget('/vehicle/caravans-international-horon-79m/'), '/vozila/ci-horon-79m');
+  assert.equal(legacyRedirectTarget('/vozila/najam-kampera/ci-horon-79m'), '/vozila/ci-horon-79m');
+  assert.equal(legacyRedirectTarget('/vozila/caratour-ford-600mq-prodaja'), '/vozila/caratour-ford-600mq');
 });
 
 test('maps renamed WooCommerce category URLs to imported shop categories', () => {

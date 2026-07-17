@@ -14,9 +14,9 @@
         .replace(/[^a-z0-9]/gi, '')
         .toLocaleLowerCase('hr');
       const existing = unique.get(key);
-      // A dedicated sale record can carry a confirmed sale price, so keep it
-      // when the same physical model also exists as a rental record.
-      if (!existing || (vehicle.type === 'sale' && existing.type !== 'sale')) unique.set(key, vehicle);
+      // Prefer the rental row when the physical camper is also for sale. It is
+      // the canonical record that keeps booking and sale actions together.
+      if (!existing || (vehicle.type === 'rental' && existing.type !== 'rental')) unique.set(key, vehicle);
     }
     return [...unique.values()];
   });
@@ -48,13 +48,13 @@
     {:else}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
         {#each vehicles as vehicle}
-          <VehicleCard {vehicle} detailHref={`/vozila/najam-kampera/${vehicle.slug}`} />
+          <VehicleCard {vehicle} />
         {/each}
       </div>
     {/if}
 
     <div class="mt-10 text-center">
-      <a href="https://www.njuskalo.hr" target="_blank" rel="noopener" class="btn btn-outline px-7 py-3.5">
+      <a href="https://www.njuskalo.hr/trgovina/ronicaravans" target="_blank" rel="noopener" class="btn btn-outline px-7 py-3.5">
         {$locale === 'hr' ? 'Petroni oglasi na Njuškalu' : 'Petroni listings on Njuškalo'}
       </a>
     </div>

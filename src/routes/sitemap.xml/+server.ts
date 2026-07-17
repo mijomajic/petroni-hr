@@ -80,7 +80,7 @@ export const GET: RequestHandler = async () => {
   const entries: SitemapEntry[] = [
     ...staticEntries,
     ...(vehicles.data ?? []).map((vehicle) => ({
-      path: `/vozila/najam-kampera/${vehicle.slug}`,
+      path: `/vozila/${vehicle.slug}`,
       lastmod: vehicle.created_at,
       changefreq: 'weekly' as const,
       priority: '0.8'

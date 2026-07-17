@@ -5,6 +5,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     .from('vehicles')
     .select('*')
     .or('type.eq.sale,is_for_sale.eq.true')
+    .eq('is_available', true)
     .order('sort_order');
 
   // Keep the public catalogue usable during the short deploy window before
@@ -15,6 +16,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       .from('vehicles')
       .select('*')
       .eq('type', 'sale')
+      .eq('is_available', true)
       .order('sort_order');
     data = fallback.data;
     error = fallback.error;

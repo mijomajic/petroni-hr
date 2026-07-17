@@ -206,7 +206,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-7 reveal">
       {#each saleVehicles.slice(0, 3) as vehicle}
-        <VehicleCard {vehicle} detailHref={`/vozila/najam-kampera/${vehicle.slug}`} />
+        <VehicleCard {vehicle} />
       {/each}
     </div>
 

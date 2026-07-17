@@ -13,7 +13,7 @@
   const desc = $derived(
     ($locale === 'hr' ? vehicle.description_hr : (vehicle.description_en || vehicle.description_hr)) || ''
   );
-  const href = $derived(detailHref ?? `/vozila/najam-kampera/${vehicle.slug}`);
+  const href = $derived(detailHref ?? `/vozila/${vehicle.slug}`);
   const moreLabel = $derived($locale === 'hr' ? 'Vidi više' : 'View more');
 </script>
 

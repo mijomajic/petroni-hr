@@ -16,11 +16,13 @@ const redirects: Record<string, string> = {
   '/vozila/najam-kampera': '/vozila/najam-kampera',
   '/vozila/vozila-za-filmske-produkcije': '/vozila/vozila-za-filmske-produkcije',
   '/vozila/vozila-za-prodaju': '/vozila/vozila-za-prodaju',
-  '/vehicle/caratour-ford-600mq': '/vozila/najam-kampera/caratour-ford-600mq',
-  '/vehicle/caravans-international-horon-79m': '/vozila/najam-kampera/ci-horon-79m',
-  '/vehicle/knaus-boxdrive-680me': '/vozila/najam-kampera/knaus-boxdrive-680me',
-  '/vehicle/mclouis-mc4-873': '/vozila/najam-kampera/mclouis-mc4-873',
-  '/vehicle/roller-team-kronos-277m': '/vozila/najam-kampera/roller-team-kronos-277m',
+  '/vozila/caratour-ford-600mq-prodaja': '/vozila/caratour-ford-600mq',
+  '/vozila/caravans-international-horon-79m': '/vozila/ci-horon-79m',
+  '/vehicle/caratour-ford-600mq': '/vozila/caratour-ford-600mq',
+  '/vehicle/caravans-international-horon-79m': '/vozila/ci-horon-79m',
+  '/vehicle/knaus-boxdrive-680me': '/vozila/knaus-boxdrive-680me',
+  '/vehicle/mclouis-mc4-873': '/vozila/mclouis-mc4-873',
+  '/vehicle/roller-team-kronos-277m': '/vozila/roller-team-kronos-277m',
   '/vehicle/weinsberg-caracompact-suite-640meg-edition-pepper': '/vozila/vozila-za-prodaju',
   '/product-category/awning-and-other': '/shop/tende-i-dodaci',
   '/product-category/awning-and-other/awning-parts': '/shop/tende-i-dodaci-dodaci',
@@ -75,5 +77,7 @@ const redirects: Record<string, string> = {
 
 export function legacyRedirectTarget(pathname: string) {
   const normalizedPath = pathname === '/' ? pathname : pathname.replace(/\/+$/, '');
+  const oldVehicleDetail = normalizedPath.match(/^\/vozila\/najam-kampera\/([^/]+)$/);
+  if (oldVehicleDetail) return `/vozila/${oldVehicleDetail[1]}`;
   return redirects[normalizedPath];
 }

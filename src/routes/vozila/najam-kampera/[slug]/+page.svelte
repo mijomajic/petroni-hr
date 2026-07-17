@@ -8,6 +8,8 @@
   let { data }: PageProps = $props();
   const vehicle: Vehicle = $derived(data.vehicle as Vehicle);
   let activeImage = $state(0);
+  const isRentable = $derived(vehicle.type === 'rental');
+  const isForSale = $derived(vehicle.type === 'sale' || Boolean(vehicle.is_for_sale));
 
   type DisplaySpec = { label: string; value: string };
 
@@ -69,15 +71,18 @@
       ? (vehicle.bed_dimensions_en ?? [])
       : (vehicle.bed_dimensions_hr ?? [])
   );
+  const showSpecsSidebar = $derived(
+    isRentable && (specEntries.length > 0 || Boolean(vehicle.base_price_per_day) || Boolean(vehicle.sale_price))
+  );
   const metaDescription = $derived(truncateText(desc || `${vehicle.name} u Petroni ponudi vozila za najam i prodaju.`, 155));
-  const vehicleUrl = $derived(absoluteUrl(`/vozila/najam-kampera/${vehicle.slug}`));
+  const vehicleUrl = $derived(absoluteUrl(`/vozila/${vehicle.slug}`));
   const vehicleImages = $derived((vehicle.images ?? []).map(absoluteUrl));
   const vehicleImage = $derived(vehicleImages[0]);
   const vehicleSchema = $derived(graphSchema([
     breadcrumbSchema([
       { name: 'Petroni', path: '/' },
       { name: 'Vozila', path: '/vozila' },
-      { name: vehicle.name, path: `/vozila/najam-kampera/${vehicle.slug}` }
+      { name: vehicle.name, path: `/vozila/${vehicle.slug}` }
     ]),
     {
       '@type': 'Vehicle',
@@ -193,8 +198,8 @@
             </div>
           </section>
         {/if}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <div class="lg:col-span-2">
+        <div class={showSpecsSidebar ? 'grid grid-cols-1 gap-10 lg:grid-cols-3' : 'grid grid-cols-1'}>
+          <div class={showSpecsSidebar ? 'lg:col-span-2' : ''}>
             <div class="relative rounded-lg overflow-hidden bg-[#f3f4f6] aspect-[4/3] mb-4 border border-[#ededf0]">
               {#if vehicle.images[activeImage]}
                 <img src={vehicle.images[activeImage]} alt={vehicle.name} width="1440" height="1080" class="w-full h-full object-contain" />
@@ -243,39 +248,49 @@
               <p class="text-[14px] leading-relaxed text-[#6b7178] mb-8">{desc}</p>
             {/if}
             <div class="flex flex-wrap gap-3">
-              <a href={vehicle.type === 'rental' ? `/rezerviraj?vehicle=${encodeURIComponent(vehicle.slug)}` : '/rezerviraj'} class="btn btn-primary px-7 py-3.5">{$locale === 'hr' ? 'Rezerviraj' : 'Book'}</a>
-              <a href="/kontakt" class="btn btn-outline px-7 py-3.5">{$locale === 'hr' ? 'Kontaktirajte nas' : 'Contact us'}</a>
+              {#if isRentable}
+                <a href={`/rezerviraj?vehicle=${encodeURIComponent(vehicle.slug)}`} class="btn btn-primary px-7 py-3.5">{$locale === 'hr' ? 'Rezerviraj' : 'Book'}</a>
+              {/if}
+              {#if isForSale}
+                <a href="/kontakt" class={isRentable ? 'btn btn-outline px-7 py-3.5' : 'btn btn-primary px-7 py-3.5'}>
+                  {$locale === 'hr' ? 'Pošaljite upit za kupnju' : 'Enquire about buying'}
+                </a>
+              {:else}
+                <a href="/kontakt" class="btn btn-outline px-7 py-3.5">{$locale === 'hr' ? 'Kontaktirajte nas' : 'Contact us'}</a>
+              {/if}
             </div>
           </div>
 
-          <aside class="lg:col-span-1">
-            <div class="card p-6">
-              {#each specEntries as spec}
-                <div class="flex items-center justify-between py-2.5 border-b border-[#f0f1f3] last:border-0">
-                  <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{spec.label}:</span>
-                  <span class="text-right text-[13px] text-[#6b7178]">{spec.value}</span>
-                </div>
-              {/each}
-              {#if vehicle.base_price_per_day}
-                <div class="flex items-center justify-between py-2.5 border-b border-[#f0f1f3]">
-                  <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{$locale === 'hr' ? 'Cijena od' : 'Price from'}:</span>
-                  <span class="text-[14px] font-bold" style="color:#b5890a">{vehicle.base_price_per_day} €/{$locale === 'hr' ? 'dan' : 'day'}</span>
-                </div>
-              {/if}
-              {#if vehicle.sale_price}
-                <div class="flex items-center justify-between py-2.5">
-                  <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{$locale === 'hr' ? 'Prodajna cijena' : 'Sale price'}:</span>
-                  <span class="text-[14px] font-bold" style="color:#b5890a">{vehicle.sale_price.toLocaleString('hr-HR')} €</span>
-                </div>
-              {/if}
-            </div>
-          </aside>
+          {#if showSpecsSidebar}
+            <aside class="lg:col-span-1">
+              <div class="card p-6">
+                {#each specEntries as spec}
+                  <div class="flex items-center justify-between py-2.5 border-b border-[#f0f1f3] last:border-0">
+                    <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{spec.label}:</span>
+                    <span class="text-right text-[13px] text-[#6b7178]">{spec.value}</span>
+                  </div>
+                {/each}
+                {#if vehicle.base_price_per_day}
+                  <div class="flex items-center justify-between py-2.5 border-b border-[#f0f1f3]">
+                    <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{$locale === 'hr' ? 'Cijena od' : 'Price from'}:</span>
+                    <span class="text-[14px] font-bold" style="color:#b5890a">{vehicle.base_price_per_day} €/{$locale === 'hr' ? 'dan' : 'day'}</span>
+                  </div>
+                {/if}
+                {#if vehicle.sale_price}
+                  <div class="flex items-center justify-between py-2.5">
+                    <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{$locale === 'hr' ? 'Prodajna cijena' : 'Sale price'}:</span>
+                    <span class="text-[14px] font-bold" style="color:#b5890a">{vehicle.sale_price.toLocaleString('hr-HR')} €</span>
+                  </div>
+                {/if}
+              </div>
+            </aside>
+          {/if}
         </div>
       {/if}
     {:else}
       <div class="text-center py-20 text-[#8b9099]">
         <p>{$locale === 'hr' ? 'Vozilo nije pronađeno.' : 'Vehicle not found.'}</p>
-        <a href="/vozila/najam-kampera" class="mt-4 inline-block text-sm underline" style="color:#b5890a">{$locale === 'hr' ? 'Natrag na listu' : 'Back to list'}</a>
+        <a href="/vozila" class="mt-4 inline-block text-sm underline" style="color:#b5890a">{$locale === 'hr' ? 'Natrag na vozila' : 'Back to vehicles'}</a>
       </div>
     {/if}
   </div>

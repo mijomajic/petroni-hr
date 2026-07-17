@@ -82,7 +82,7 @@
         itemListElement: vehicles.slice(0, 20).map((vehicle, index) => ({
           '@type': 'ListItem',
           position: index + 1,
-          url: absoluteUrl(`/vozila/najam-kampera/${vehicle.slug}`),
+          url: absoluteUrl(`/vozila/${vehicle.slug}`),
           name: vehicle.name
         }))
       }
