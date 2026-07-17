@@ -168,6 +168,8 @@ export type Product = {
   images: string[];
   stock: number;
   sku: string | null;
+  brand: string | null;
+  pickup_only: boolean;
   is_active: boolean;
   created_at: string;
 };
@@ -194,6 +196,7 @@ export type Order = {
   subtotal: number;
   shipping_method: string | null;
   shipping_cost: number;
+  payment_surcharge: number;
   total: number;
   payment_method: string | null;
   payment_status: 'unpaid' | 'paid' | string;

@@ -34,7 +34,7 @@
       description: metaDescription,
       image: product.images ?? [],
       sku: product.sku ?? undefined,
-      brand: { '@type': 'Brand', name: 'Petroni' },
+      brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
       offers: {
         '@type': 'Offer',
         url: productUrl,
@@ -48,7 +48,7 @@
 
   function handleAdd() {
     if (!product) return;
-    const result = addToCart({ id: product.id, slug: product.slug, name_hr: product.name_hr, name_en: product.name_en ?? undefined, price: product.price, images: product.images, stock: product.stock }, qty);
+    const result = addToCart({ id: product.id, slug: product.slug, name_hr: product.name_hr, name_en: product.name_en ?? undefined, price: product.price, images: product.images, stock: product.stock, pickup_only: product.pickup_only }, qty);
     added = result.added > 0;
     stockNotice = result.added === 0
       ? ($locale === 'hr' ? `U košarici je već maksimalna dostupna količina (${product.stock}).` : `Your cart already contains the maximum available quantity (${product.stock}).`)
@@ -106,6 +106,12 @@
         <div>
           <h1 class="text-[28px] font-bold text-[#2b2b2b] mb-3 leading-tight">{name}</h1>
           <div class="text-[26px] font-semibold text-[#2b2b2b] mb-6">{product.price.toFixed(2)} €</div>
+          {#if product.pickup_only}
+            <div class="mb-6 rounded-lg border border-[#eed68a] bg-[#fffaf0] p-4 text-sm text-[#6f5600]">
+              <b>{$locale === 'hr' ? 'Samo osobno preuzimanje' : 'Personal pickup only'}</b><br />
+              {$locale === 'hr' ? 'Ovaj proizvod zbog svojih dimenzija ili načina rukovanja nije dostupan za dostavu.' : 'Due to its size or handling requirements, this product is not available for delivery.'}
+            </div>
+          {/if}
 
           <div class="flex items-center gap-4 mb-6">
             <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
@@ -125,6 +131,7 @@
 
           <div class="text-[13px] text-[#7a7f86] space-y-1 mb-6">
             {#if product.sku}<p><span class="font-semibold text-[#2b2b2b]">SKU:</span> {product.sku}</p>{/if}
+            {#if product.brand}<p><span class="font-semibold text-[#2b2b2b]">{$locale === 'hr' ? 'Brend' : 'Brand'}:</span> {product.brand}</p>{/if}
             <p>
               <span class="font-semibold text-[#2b2b2b]">{$locale === 'hr' ? 'Stanje' : 'Status'}:</span>
               <span style="color:{product.stock > 0 ? '#16a34a' : '#e11d48'}">{product.stock > 0 ? ($locale === 'hr' ? `Na zalihi (${product.stock})` : `In stock (${product.stock})`) : ($locale === 'hr' ? 'Nema na zalihi' : 'Out of stock')}</span>

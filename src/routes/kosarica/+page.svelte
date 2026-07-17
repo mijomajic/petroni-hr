@@ -64,6 +64,9 @@
               <div class="flex-1">
                 <p class="font-medium text-[#2b2b2b] mb-1">{$locale === 'hr' ? item.name_hr : (item.name_en || item.name_hr)}</p>
                 <p class="font-semibold mb-3" style="color:#b5890a">{(item.price * item.qty).toFixed(2)} €</p>
+                {#if item.pickup_only}
+                  <p class="mb-3 inline-flex rounded-md bg-[#fff7e0] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#7a5d00]">{$locale === 'hr' ? 'Samo osobno preuzimanje' : 'Pickup only'}</p>
+                {/if}
                 <div class="flex items-center gap-3">
                   <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
                     <button onclick={() => updateQty(item.id, item.qty - 1)} class="px-3 py-2 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9]">−</button>

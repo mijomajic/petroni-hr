@@ -3,10 +3,15 @@
 
   let { data, form }: PageProps = $props();
   const totalPages = $derived(Math.max(1, Math.ceil(data.total / data.pageSize)));
+  function categoryLabel(category: (typeof data.categories)[number]) {
+    const parent = data.categories.find((item) => item.id === category.parent_id);
+    return parent ? `${parent.name_hr} → ${category.name_hr}` : category.name_hr;
+  }
   function pageHref(page: number) {
     const params = new URLSearchParams();
     if (data.filters.query) params.set('q', data.filters.query);
     if (data.filters.category) params.set('category', data.filters.category);
+    if (data.filters.brand) params.set('brand', data.filters.brand);
     if (data.filters.status) params.set('status', data.filters.status);
     params.set('page', String(page));
     return `/admin/proizvodi?${params.toString()}`;
@@ -28,13 +33,17 @@
     <div class="mb-6 rounded-xl bg-[#fff7e0] p-4 text-sm text-[#6f5600]">{form.message}</div>
   {/if}
 
-  <form method="GET" class="mb-6 grid gap-3 rounded-2xl border border-[#e7e8eb] bg-white p-4 lg:grid-cols-[1fr_260px_180px_auto]">
+  <form method="GET" class="mb-6 grid gap-3 rounded-2xl border border-[#e7e8eb] bg-white p-4 lg:grid-cols-[1fr_240px_180px_160px_auto]">
     <input name="q" class="field" placeholder="Pretraži naziv ili SKU" value={data.filters.query} />
     <select name="category" class="field" value={data.filters.category}>
       <option value="">Sve kategorije</option>
       {#each data.categories as category}
-        <option value={category.id}>{category.name_hr}</option>
+        <option value={category.id}>{categoryLabel(category)}</option>
       {/each}
+    </select>
+    <select name="brand" class="field" value={data.filters.brand}>
+      <option value="">Svi brendovi</option>
+      {#each data.brands as brand}<option value={brand}>{brand}</option>{/each}
     </select>
     <select name="status" class="field" value={data.filters.status}>
       <option value="">Svi statusi</option>
@@ -49,7 +58,7 @@
       <table class="w-full text-sm">
         <thead class="border-b border-[#e7e8eb]">
           <tr>
-            {#each ['Proizvod', 'SKU', 'Kategorija', 'Cijena', 'Zaliha', 'Status', 'Akcije'] as h}
+            {#each ['Proizvod', 'SKU', 'Brend', 'Kategorija', 'Cijena', 'Zaliha', 'Status', 'Akcije'] as h}
               <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-[#7a7f86]">{h}</th>
             {/each}
           </tr>
@@ -67,6 +76,7 @@
                 </div>
               </td>
               <td class="px-4 py-3 font-mono text-xs text-[#7a7f86]">{product.sku ?? '-'}</td>
+              <td class="px-4 py-3 text-[#5b6168]">{product.brand ?? '-'}</td>
               <td class="px-4 py-3 text-[#5b6168]">{product.product_categories?.[0]?.name_hr ?? '-'}</td>
               <td class="px-4 py-3 font-bold text-[#b5890a]">{Number(product.price).toFixed(2)} EUR</td>
               <td class="px-4 py-3 text-[#5b6168]">{product.stock}</td>
@@ -118,7 +128,7 @@
               <span class="field-label">Nadkategorija</span>
               <select form="category-{category.id}" name="parent_id" class="field" value={category.parent_id ?? ''}>
                 <option value="">Bez nadkategorije</option>
-                {#each data.categories.filter((item) => item.id !== category.id) as parent}
+                {#each data.categories.filter((item) => item.id !== category.id && !item.parent_id) as parent}
                   <option value={parent.id}>{parent.name_hr}</option>
                 {/each}
               </select>
@@ -144,7 +154,7 @@
         <span class="field-label">Nadkategorija</span>
         <select name="parent_id" class="field">
           <option value="">Bez nadkategorije</option>
-          {#each data.categories as parent}
+          {#each data.categories.filter((item) => !item.parent_id) as parent}
             <option value={parent.id}>{parent.name_hr}</option>
           {/each}
         </select>

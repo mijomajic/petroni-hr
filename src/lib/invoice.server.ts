@@ -25,6 +25,11 @@ export async function createOrderConfirmationPdf(input: {
     amount?: number;
   }>;
   total: number;
+  subtotal?: number;
+  shippingCost?: number;
+  paymentSurcharge?: number;
+  deliveryMethod?: string;
+  paymentMethod?: string;
   paymentStatus: string;
 }): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
@@ -66,6 +71,16 @@ export async function createOrderConfirmationPdf(input: {
     y -= 22;
     page.drawLine({ start: { x: 48, y: y + 7 }, end: { x: 547, y: y + 7 }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
   }
+  y -= 18;
+  const deliveryLabels: Record<string, string> = { overseas: 'Overseas dostava', boxnow: 'BoxNow paketomat', personal_pickup: 'Osobno preuzimanje' };
+  const paymentLabels: Record<string, string> = { bank_transfer: 'Bankovna uplata', corvuspay: 'Karticno placanje', cash_on_delivery: 'Placanje pouzecem' };
+  text(`Dostava (${deliveryLabels[input.deliveryMethod ?? ''] ?? input.deliveryMethod ?? '-'}): ${Number(input.shippingCost ?? 0).toFixed(2)} EUR`, 315);
+  y -= 16;
+  if (Number(input.paymentSurcharge ?? 0) > 0) {
+    text(`Naknada za pouzece: ${Number(input.paymentSurcharge).toFixed(2)} EUR`, 315);
+    y -= 16;
+  }
+  text(`Nacin placanja: ${paymentLabels[input.paymentMethod ?? ''] ?? input.paymentMethod ?? '-'}`, 315);
   y -= 18;
   text('UKUPNO', 390, 12, bold);
   text(`${input.total.toFixed(2)} EUR`, 470, 12, bold);

@@ -18,7 +18,8 @@ export const POST: RequestHandler = async ({ request }) => {
     products: (data ?? []).map((product) => ({
       id: product.id,
       stock: product.stock,
-      is_active: product.is_active
+      is_active: product.is_active,
+      pickup_only: Boolean(product.pickup_only)
     }))
   });
 };

@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import type { Product, ProductCategory } from '$lib/supabase';
   import ProductCard from '$lib/components/ui/ProductCard.svelte';
+  import CategoryNavigation from '$lib/components/shop/CategoryNavigation.svelte';
   import { locale } from '$lib/stores/locale';
   import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd } from '$lib/seo';
   import type { PageProps } from './$types';
@@ -10,6 +11,7 @@
   let { data }: PageProps = $props();
   const allCategories: ProductCategory[] = $derived(data.categories as ProductCategory[]);
   const products: Product[] = $derived(data.products as Product[]);
+  const brands: string[] = $derived(data.brands as string[]);
   const loading = false;
   const total = $derived(data.total as number);
   const pageNumber = $derived(data.page as number);
@@ -19,6 +21,7 @@
   let search = $state('');
   let minPrice = $state('');
   let maxPrice = $state('');
+  let brand = $state('');
 
   $effect(() => {
     $page.url.href;
@@ -26,6 +29,7 @@
     search = data.query as string;
     minPrice = data.minPrice as string;
     maxPrice = data.maxPrice as string;
+    brand = data.brand as string;
   });
 
   function applyFilters(nextPage = 1) {
@@ -34,6 +38,7 @@
     if (sort && sort !== 'newest') params.set('sort', sort); else params.delete('sort');
     if (minPrice) params.set('min', minPrice); else params.delete('min');
     if (maxPrice) params.set('max', maxPrice); else params.delete('max');
+    if (brand) params.set('brand', brand); else params.delete('brand');
     if (nextPage > 1) params.set('page', String(nextPage)); else params.delete('page');
     goto(`?${params.toString()}`, { keepFocus: true, noScroll: true, replaceState: true });
   }
@@ -43,6 +48,7 @@
     maxPrice = '';
     search = '';
     sort = 'newest';
+    brand = '';
     goto($page.url.pathname, { keepFocus: true, noScroll: true, replaceState: true });
   }
   const description = 'Petroni shop za kamping opremu, dijelove za kampere i karavane, dodatnu opremu i proizvode za putovanja.';
@@ -192,16 +198,21 @@
         <!-- Categories -->
         <div class="card p-5">
           <p class="text-[11px] font-bold uppercase tracking-widest text-[#b5890a] mb-3">{$locale === 'hr' ? 'Kategorije' : 'Categories'}</p>
-          <div class="space-y-0.5">
-            {#each allCategories as cat}
-              <a href="/shop/{cat.slug}"
-                class="flex items-center justify-between py-2 px-2 rounded text-[13px] transition-colors hover:bg-[#fafbfc]"
-                style="color:#5b6168">
-                <span>{$locale === 'hr' ? cat.name_hr : cat.name_en}</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-              </a>
+          <CategoryNavigation categories={allCategories} />
+        </div>
+
+        <!-- Brand -->
+        <div class="card p-5">
+          <label for="shop-brand" class="mb-3 block text-[11px] font-bold uppercase tracking-widest text-[#b5890a]">{$locale === 'hr' ? 'Brend' : 'Brand'}</label>
+          <select id="shop-brand" class="field text-[13px]" bind:value={brand} onchange={() => applyFilters(1)}>
+            <option value="">{$locale === 'hr' ? 'Svi brendovi' : 'All brands'}</option>
+            {#each brands as productBrand}
+              <option value={productBrand}>{productBrand}</option>
             {/each}
-          </div>
+          </select>
+          {#if brands.length === 0}
+            <p class="mt-2 text-[11px] leading-relaxed text-[#9aa0a8]">{$locale === 'hr' ? 'Brendovi će se pojaviti nakon dodjele proizvodima.' : 'Brands will appear after they are assigned to products.'}</p>
+          {/if}
         </div>
 
         <!-- Price range -->

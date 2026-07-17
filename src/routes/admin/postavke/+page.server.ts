@@ -1,6 +1,7 @@
 import { fail } from '@sveltejs/kit';
-import { numberField, textField } from '$lib/admin-cms.server';
+import { checkboxField, numberField, textField } from '$lib/admin-cms.server';
 import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
+import { normalizeCheckoutConfig } from '$lib/shop-checkout';
 import { supabaseAdmin } from '$lib/supabase.server';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -12,7 +13,10 @@ const managedKeys = [
   'min_driver_age',
   'km_per_day_included',
   'split_payment_due_days',
-  'email_from'
+  'email_from',
+  'shop_shipping_methods',
+  'cash_on_delivery_enabled',
+  'cash_on_delivery_surcharge'
 ];
 
 function pretty(value: unknown) {
@@ -23,6 +27,8 @@ export const load: PageServerLoad = async () => {
   const { data, error } = await supabaseAdmin.from('settings').select('key,value').in('key', managedKeys);
   if (error) throw new Error(error.message);
   const settings = Object.fromEntries((data ?? []).map((row) => [row.key, row.value]));
+  const checkout = normalizeCheckoutConfig(settings);
+  const delivery = Object.fromEntries(checkout.deliveryMethods.map((method) => [method.id, method]));
   return {
     settings: {
       admin_email: String(settings.admin_email ?? 'info@petroni.hr'),
@@ -31,6 +37,16 @@ export const load: PageServerLoad = async () => {
       min_driver_age: Number(settings.min_driver_age ?? 28),
       km_per_day_included: Number(settings.km_per_day_included ?? 300),
       split_payment_due_days: Number(settings.split_payment_due_days ?? 3),
+      overseas_enabled: delivery.overseas.enabled,
+      overseas_price: delivery.overseas.price,
+      overseas_allows_cod: delivery.overseas.allows_cod,
+      boxnow_enabled: delivery.boxnow.enabled,
+      boxnow_price: delivery.boxnow.price,
+      boxnow_allows_cod: delivery.boxnow.allows_cod,
+      personal_pickup_enabled: delivery.personal_pickup.enabled,
+      personal_pickup_allows_cod: delivery.personal_pickup.allows_cod,
+      cash_on_delivery_enabled: checkout.cashOnDeliveryEnabled,
+      cash_on_delivery_surcharge: checkout.cashOnDeliverySurcharge,
       company_json: pretty(settings.company ?? {}),
       ibans_json: pretty(settings.ibans ?? [])
     }
@@ -63,7 +79,14 @@ export const actions: Actions = {
       free_shipping_threshold: numberField(form, 'free_shipping_threshold') ?? 1000,
       min_driver_age: numberField(form, 'min_driver_age') ?? 28,
       km_per_day_included: numberField(form, 'km_per_day_included') ?? 300,
-      split_payment_due_days: numberField(form, 'split_payment_due_days') ?? 3
+      split_payment_due_days: numberField(form, 'split_payment_due_days') ?? 3,
+      shop_shipping_methods: {
+        overseas: { enabled: checkboxField(form, 'overseas_enabled'), price: numberField(form, 'overseas_price') ?? 11, allows_cod: checkboxField(form, 'overseas_allows_cod'), label_hr: 'Overseas dostava', label_en: 'Overseas delivery' },
+        boxnow: { enabled: checkboxField(form, 'boxnow_enabled'), price: numberField(form, 'boxnow_price') ?? 9, allows_cod: checkboxField(form, 'boxnow_allows_cod'), label_hr: 'BoxNow paketomat', label_en: 'BoxNow locker' },
+        personal_pickup: { enabled: checkboxField(form, 'personal_pickup_enabled'), price: 0, allows_cod: checkboxField(form, 'personal_pickup_allows_cod'), label_hr: 'Osobno preuzimanje', label_en: 'Personal pickup' }
+      },
+      cash_on_delivery_enabled: checkboxField(form, 'cash_on_delivery_enabled'),
+      cash_on_delivery_surcharge: numberField(form, 'cash_on_delivery_surcharge') ?? 1
     };
 
     const { data: before } = await supabaseAdmin.from('settings').select('key,value').in('key', managedKeys);

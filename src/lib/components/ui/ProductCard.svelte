@@ -23,6 +23,7 @@
       price: product.price,
       images: product.images,
       stock: product.stock,
+      pickup_only: product.pickup_only,
     });
     added = result.added > 0;
     limitReached = result.added === 0;
@@ -50,6 +51,9 @@
       <h3 class="text-[13px] font-medium text-[#3a3f45] leading-snug line-clamp-2 min-h-[2.4em] mb-2 hover:text-[#b5890a] transition-colors">{name}</h3>
     </a>
     <p class="text-[15px] font-semibold text-[#2b2b2b] mb-3">{product.price.toFixed(2)} €</p>
+    {#if product.pickup_only}
+      <p class="mb-3 rounded-md bg-[#fff7e0] px-2 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#7a5d00]">{$locale === 'hr' ? 'Samo osobno preuzimanje' : 'Pickup only'}</p>
+    {/if}
     {#if product.stock === 0}
       <a href={inquiryHref} class="btn mt-auto w-full border border-[#d9dce1] bg-white py-2.5 text-[11px] text-[#2b2b2b] hover:border-[#2b2b2b]">{$locale === 'hr' ? 'Pošalji upit' : 'Send inquiry'}</a>
     {:else}

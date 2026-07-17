@@ -11,6 +11,7 @@
 		"test:pricing": "tsx --test src/lib/pricing.test.ts",
 		"test:corvuspay": "tsx --test src/lib/corvuspay.test.ts",
 		"test:seo": "tsx --test src/lib/legacy-redirects.test.ts",
+		"test:checkout": "tsx --test src/lib/shop-checkout.test.ts",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},

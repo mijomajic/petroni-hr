@@ -8,6 +8,17 @@
   function json(value: unknown) {
     return JSON.stringify(value ?? {}, null, 2);
   }
+
+  const deliveryLabels: Record<string, string> = {
+    overseas: 'Overseas dostava',
+    boxnow: 'BoxNow paketomat',
+    personal_pickup: 'Osobno preuzimanje'
+  };
+  const paymentLabels: Record<string, string> = {
+    bank_transfer: 'Bankovna uplata',
+    corvuspay: 'Kartično plaćanje',
+    cash_on_delivery: 'Plaćanje pouzećem'
+  };
 </script>
 
 <svelte:head><title>Narudžba {order.confirmation_number ?? order.id.slice(0, 8)} — Admin — Petroni</title></svelte:head>
@@ -46,6 +57,7 @@
       <section class="grid gap-6 md:grid-cols-2">
         <div class="rounded-2xl border border-[#e7e8eb] bg-white p-6">
           <h2 class="mb-4 text-sm font-black uppercase tracking-widest text-[#2b2b2b]">Dostava</h2>
+          <p class="mb-3 text-sm font-bold text-[#2b2b2b]">{deliveryLabels[order.shipping_method] ?? order.shipping_method ?? 'Nije odabrano'} · {Number(order.shipping_cost).toFixed(2)} EUR</p>
           <pre class="overflow-auto whitespace-pre-wrap rounded-xl bg-[#f6f7f9] p-4 text-xs text-[#5b6168]">{json(order.shipping_address)}</pre>
         </div>
         <div class="rounded-2xl border border-[#e7e8eb] bg-white p-6">
@@ -88,6 +100,8 @@
         <div class="mt-5 grid grid-cols-2 gap-3 text-sm">
           <div><span class="field-label">Subtotal</span><p>{Number(order.subtotal).toFixed(2)} EUR</p></div>
           <div><span class="field-label">Dostava</span><p>{Number(order.shipping_cost).toFixed(2)} EUR</p></div>
+          <div><span class="field-label">Plaćanje</span><p>{paymentLabels[order.payment_method] ?? order.payment_method ?? '-'}</p></div>
+          {#if Number(order.payment_surcharge) > 0}<div><span class="field-label">Naknada za pouzeće</span><p>{Number(order.payment_surcharge).toFixed(2)} EUR</p></div>{/if}
           <div class="col-span-2"><span class="field-label">Ukupno</span><p class="text-xl font-black text-[#b5890a]">{Number(order.total).toFixed(2)} EUR</p></div>
         </div>
       </section>

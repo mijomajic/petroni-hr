@@ -11,6 +11,13 @@ import { corvuspayShopOrderNumber } from '$lib/corvuspay.server';
 import type { RequestHandler } from './$types';
 import { sendOrderReceived } from '$lib/email.server';
 import { getAvailableProducts, reserveOrderStock } from '$lib/shop-stock.server';
+import {
+  calculateShopOrderTotals,
+  normalizeCheckoutConfig,
+  pickupOnlyRequiresPersonalPickup,
+  type ShopDeliveryMethod,
+  type ShopPaymentMethod
+} from '$lib/shop-checkout';
 
 type CartItem = {
   id?: string;
@@ -20,7 +27,8 @@ type CartItem = {
 export const POST: RequestHandler = async ({ request, locals }) => {
   const body = await request.json();
   const { user } = await locals.safeGetSession();
-  const paymentMethod = String(body.payment_method ?? 'bank_transfer');
+  const paymentMethod = String(body.payment_method ?? 'bank_transfer') as ShopPaymentMethod;
+  const deliveryMethod = String(body.delivery_method ?? '') as ShopDeliveryMethod;
   const items = Array.isArray(body.items) ? body.items as CartItem[] : [];
   const customer = body.customer ?? {};
   const customerRecord = {
@@ -33,14 +41,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     country: String(customer.country ?? '').trim()
   };
 
-  if (Object.values(customerRecord).some((value) => !value) || !/^\S+@\S+\.\S+$/.test(customerRecord.email)) {
+  const requiredCustomerValues = deliveryMethod === 'personal_pickup'
+    ? [customerRecord.name, customerRecord.email, customerRecord.phone]
+    : Object.values(customerRecord);
+  if (requiredCustomerValues.some((value) => !value) || !/^\S+@\S+\.\S+$/.test(customerRecord.email)) {
     return json({ success: false, error: 'Ispunite sve podatke kupca i unesite valjanu email adresu.' }, { status: 400 });
   }
   if (Object.values(customerRecord).some((value) => value.length > 240)) {
     return json({ success: false, error: 'Jedno ili više polja kupca je predugačko.' }, { status: 400 });
   }
 
-  if (!['bank_transfer', 'corvuspay'].includes(paymentMethod)) {
+  if (!['bank_transfer', 'corvuspay', 'cash_on_delivery'].includes(paymentMethod)) {
     return json({ success: false, error: 'Odaberite valjan način plaćanja.' }, { status: 400 });
   }
   if (paymentMethod === 'corvuspay' && !corvuspayAvailable()) {
@@ -48,6 +59,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   }
   if (!items.length) {
     return json({ success: false, error: 'Košarica je prazna.' }, { status: 400 });
+  }
+  if (!['overseas', 'boxnow', 'personal_pickup'].includes(deliveryMethod)) {
+    return json({ success: false, error: 'Odaberite valjan način dostave.' }, { status: 400 });
   }
 
   const quantities = new Map<string, number>();
@@ -61,7 +75,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
   const [{ data: products, error: productsError }, { data: paymentSettings }] = await Promise.all([
     getAvailableProducts(ids),
-    supabaseAdmin.from('settings').select('key,value').in('key', ['ibans', 'company'])
+    supabaseAdmin.from('settings').select('key,value').in('key', [
+      'ibans',
+      'company',
+      'shop_shipping_methods',
+      'free_shipping_threshold',
+      'cash_on_delivery_enabled',
+      'cash_on_delivery_surcharge'
+    ])
   ]);
 
   if (productsError) return json({ success: false, error: productsError.message }, { status: 400 });
@@ -71,6 +92,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const insufficientStock = products.find((product) => Number(product.stock) < (quantities.get(product.id) ?? 1));
   if (insufficientStock) {
     return json({ success: false, error: `Proizvod “${insufficientStock.name_hr}” nema dovoljnu dostupnu količinu.` }, { status: 409 });
+  }
+  const settings = Object.fromEntries((paymentSettings ?? []).map((row) => [row.key, row.value]));
+  const checkoutConfig = normalizeCheckoutConfig(settings);
+  const hasPickupOnlyItems = products.some((product) => Boolean(product.pickup_only));
+  if (pickupOnlyRequiresPersonalPickup(hasPickupOnlyItems, deliveryMethod)) {
+    return json({ success: false, error: 'Košarica sadrži proizvod dostupan samo za osobno preuzimanje.' }, { status: 400 });
   }
 
   const orderItems = products.map((product) => {
@@ -82,10 +109,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       name_en: product.name_en,
       price: Number(product.price),
       qty,
-      images: product.images
+      images: product.images,
+      pickup_only: Boolean(product.pickup_only)
     };
   });
   const subtotal = Math.round(orderItems.reduce((sum, item) => sum + item.price * item.qty, 0) * 100) / 100;
+  let totals;
+  try {
+    totals = calculateShopOrderTotals(subtotal, deliveryMethod, paymentMethod, checkoutConfig);
+  } catch (pricingError) {
+    return json({ success: false, error: pricingError instanceof Error ? pricingError.message : 'Odabrana kombinacija dostave i plaćanja nije dostupna.' }, { status: 400 });
+  }
   const confirmationNumber = `NAR-${Date.now().toString(36).toUpperCase()}`;
 
   const { data: order, error } = await supabaseAdmin.from('orders').insert({
@@ -97,11 +131,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     shipping_address: customerRecord,
     billing_address: customerRecord,
     items: orderItems,
-    subtotal,
-    total: subtotal,
+    subtotal: totals.subtotal,
+    shipping_method: deliveryMethod,
+    shipping_cost: totals.shippingCost,
+    payment_surcharge: totals.paymentSurcharge,
+    total: totals.total,
     status: 'pending',
     payment_status: 'unpaid',
-    payment_method: paymentMethod
+    payment_method: paymentMethod,
+    notes: null
   }).select().single();
 
   if (error) return json({ success: false, error: error.message }, { status: 400 });
@@ -123,30 +161,32 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       id: order.id,
       confirmation_number: order.confirmation_number,
       payment_method: order.payment_method,
+      delivery_method: order.shipping_method,
+      shipping_cost: order.shipping_cost,
+      payment_surcharge: order.payment_surcharge,
       total: order.total
     }
   };
 
-  const settings = Object.fromEntries((paymentSettings ?? []).map((row) => [row.key, row.value]));
   if (paymentMethod === 'bank_transfer') {
     const company = (settings.company ?? {}) as { name?: string; address?: string };
     response.bankTransfers = await Promise.all(((settings.ibans ?? []) as IbanSetting[]).map(async (account) => {
       const payload = hub3Payload({
-        amount: subtotal,
+        amount: totals.total,
         recipient: company.name ?? 'Petroni d.o.o.',
         address: company.address ?? '',
         iban: account.iban,
         reference: confirmationNumber,
         description: `Narudžba ${confirmationNumber}`
       });
-      return { ...account, amount: subtotal, reference: confirmationNumber, barcode: await hub3BarcodeDataUrl(payload) };
+      return { ...account, amount: totals.total, reference: confirmationNumber, barcode: await hub3BarcodeDataUrl(payload) };
     }));
   }
 
   if (paymentMethod === 'corvuspay') {
     const redirect = createCorvuspayRedirect({
       orderNumber: corvuspayShopOrderNumber(order.id),
-      amount: subtotal,
+      amount: totals.total,
       description: `Narudžba ${confirmationNumber}`,
       email: order.customer_email
     });

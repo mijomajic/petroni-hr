@@ -3,20 +3,22 @@
 
   const paymentMethods = $derived($locale === 'hr' ? [
     { name: 'Bankovna doznaka', desc: 'Plaćanje uplatom na bankovni račun tvrtke Petroni d.o.o. Detalji za uplatu dostavljaju se uz potvrdu narudžbe.' },
-    { name: 'Kartično plaćanje (CorvusPay)', desc: 'Sigurno plaćanje karticama (Visa, Mastercard, Maestro) putem CorvusPay sustava.' },
+    { name: 'Kartično plaćanje (CorvusPay)', desc: 'Uskoro dostupno nakon aktivacije produkcijskih vjerodajnica.' },
+    { name: 'Plaćanje pouzećem', desc: 'Plaćanje dostavljaču prilikom Overseas isporuke, uz dodatnu naknadu od 1 €.' },
   ] : [
     { name: 'Bank transfer', desc: 'Payment via transfer to the Petroni d.o.o. bank account. Payment details are sent with the order confirmation.' },
-    { name: 'Card payment (CorvusPay)', desc: 'Secure card payment (Visa, Mastercard, Maestro) via the CorvusPay system.' },
+    { name: 'Card payment (CorvusPay)', desc: 'Coming soon after production credentials are activated.' },
+    { name: 'Cash on delivery', desc: 'Payment to the courier upon Overseas delivery, with an additional €1 fee.' },
   ]);
 
   const shippingOptions = $derived($locale === 'hr' ? [
     { name: 'Overseas Express', price: '11 €', desc: 'Dostava kurirskom službom, 2–4 radna dana.' },
     { name: 'Osobno preuzimanje', price: '0 €', desc: 'Preuzimanje u našem skladištu u Sesvetama, Zagreb.' },
-    { name: 'BoxNow', price: '9 €', desc: 'Preuzimanje u BoxNow paketomatu po izboru, 2–4 radna dana.' },
+    { name: 'BoxNow', price: '9 €', desc: 'Preuzimanje u BoxNow paketomatu, 2–4 radna dana. Petroni potvrđuje paketomat nakon narudžbe.' },
   ] : [
     { name: 'Overseas Express', price: '€11', desc: 'Courier delivery, 2–4 business days.' },
     { name: 'Personal pickup', price: '€0', desc: 'Pickup at our warehouse in Sesvete, Zagreb.' },
-    { name: 'BoxNow', price: '€9', desc: 'Pickup at a BoxNow parcel locker of your choice, 2–4 business days.' },
+    { name: 'BoxNow', price: '€9', desc: 'Pickup at a BoxNow parcel locker, 2–4 business days. Petroni confirms the locker after the order.' },
   ]);
 </script>
 

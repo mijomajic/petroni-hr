@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { cart, clearCart, syncCartStock } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
+  import { calculateShopOrderTotals, deliverySupportsCashOnDelivery, type ShopDeliveryMethod, type ShopPaymentMethod } from '$lib/shop-checkout';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -15,11 +16,31 @@
   let loading = $state(false);
   let submitError = $state('');
   let fieldErrors = $state<Record<string, string>>({});
-  let paymentMethod = $state<'bank_transfer' | 'corvuspay'>('bank_transfer');
+  let deliveryMethod = $state<ShopDeliveryMethod>('overseas');
+  let paymentMethod = $state<ShopPaymentMethod>('bank_transfer');
   let checkingStock = $state(true);
   const hasUnavailableItems = $derived($cart.some((item) => item.stock !== undefined && item.stock <= 0));
 
-  const total = $derived($cart.reduce((acc, i) => acc + i.price * i.qty, 0));
+  const subtotal = $derived($cart.reduce((acc, i) => acc + i.price * i.qty, 0));
+  const hasPickupOnlyItems = $derived($cart.some((item) => item.pickup_only));
+  const enabledDeliveryMethods = $derived(data.checkoutConfig.deliveryMethods.filter((method) => method.enabled && (!hasPickupOnlyItems || method.id === 'personal_pickup')));
+  const selectedDeliveryAvailable = $derived(enabledDeliveryMethods.some((method) => method.id === deliveryMethod));
+  const codAvailable = $derived(deliverySupportsCashOnDelivery(deliveryMethod, data.checkoutConfig));
+  const totals = $derived.by(() => {
+    if (!selectedDeliveryAvailable) return { subtotal, shippingCost: 0, paymentSurcharge: 0, total: subtotal };
+    try {
+      return calculateShopOrderTotals(subtotal, deliveryMethod, paymentMethod, data.checkoutConfig);
+    } catch {
+      return { subtotal, shippingCost: 0, paymentSurcharge: 0, total: subtotal };
+    }
+  });
+  const total = $derived(totals.total);
+
+  $effect(() => {
+    const nextDelivery = enabledDeliveryMethods[0]?.id;
+    if (!selectedDeliveryAvailable && nextDelivery) deliveryMethod = nextDelivery;
+    if (!codAvailable && paymentMethod === 'cash_on_delivery') paymentMethod = 'bank_transfer';
+  });
 
   onMount(async () => {
     try {
@@ -54,10 +75,12 @@
     if (!email.trim()) errors.email = required;
     else if (!/^\S+@\S+\.\S+$/.test(email.trim())) errors.email = $locale === 'hr' ? 'Unesite valjanu email adresu.' : 'Enter a valid email address.';
     if (!phone.trim()) errors.phone = required;
-    if (!address.trim()) errors.address = required;
-    if (!city.trim()) errors.city = required;
-    if (!zip.trim()) errors.zip = required;
-    if (!country.trim()) errors.country = required;
+    if (deliveryMethod !== 'personal_pickup') {
+      if (!address.trim()) errors.address = required;
+      if (!city.trim()) errors.city = required;
+      if (!zip.trim()) errors.zip = required;
+      if (!country.trim()) errors.country = required;
+    }
     fieldErrors = errors;
     if (Object.keys(errors).length) {
       submitError = $locale === 'hr' ? 'Provjerite označena polja prije naručivanja.' : 'Check the highlighted fields before placing the order.';
@@ -71,6 +94,12 @@
   }
 
   async function handleCheckout() {
+    if (!selectedDeliveryAvailable) {
+      submitError = $locale === 'hr'
+        ? 'Za ovu košaricu trenutačno nema dostupnog načina preuzimanja.'
+        : 'No delivery or pickup method is currently available for this cart.';
+      return;
+    }
     if (!validateCustomer()) return;
     loading = true;
     submitError = '';
@@ -94,7 +123,8 @@
         body: JSON.stringify({
           items: $cart,
           customer: { name, email, phone, address, city, zip, country },
-          payment_method: paymentMethod
+          payment_method: paymentMethod,
+          delivery_method: deliveryMethod
         }),
       });
       const data = await res.json();
@@ -147,16 +177,38 @@
             <div class="md:col-span-2"><label for="checkout_name" class="field-label">{$locale === 'hr' ? 'Ime i prezime' : 'Full name'} *</label><input id="checkout_name" autocomplete="name" class="field" aria-invalid={Boolean(fieldErrors.name)} oninput={() => clearFieldError('name')} bind:value={name} />{#if fieldErrors.name}<p class="checkout-field-error">{fieldErrors.name}</p>{/if}</div>
             <div><label for="checkout_email" class="field-label">Email *</label><input id="checkout_email" type="email" autocomplete="email" class="field" aria-invalid={Boolean(fieldErrors.email)} oninput={() => clearFieldError('email')} bind:value={email} />{#if fieldErrors.email}<p class="checkout-field-error">{fieldErrors.email}</p>{/if}</div>
             <div><label for="checkout_phone" class="field-label">{$locale === 'hr' ? 'Telefon' : 'Phone'} *</label><input id="checkout_phone" type="tel" autocomplete="tel" class="field" aria-invalid={Boolean(fieldErrors.phone)} oninput={() => clearFieldError('phone')} bind:value={phone} />{#if fieldErrors.phone}<p class="checkout-field-error">{fieldErrors.phone}</p>{/if}</div>
-            <div class="md:col-span-2"><label for="checkout_address" class="field-label">{$locale === 'hr' ? 'Adresa' : 'Address'} *</label><input id="checkout_address" autocomplete="street-address" class="field" aria-invalid={Boolean(fieldErrors.address)} oninput={() => clearFieldError('address')} bind:value={address} />{#if fieldErrors.address}<p class="checkout-field-error">{fieldErrors.address}</p>{/if}</div>
-            <div><label for="checkout_city" class="field-label">{$locale === 'hr' ? 'Grad' : 'City'} *</label><input id="checkout_city" autocomplete="address-level2" class="field" aria-invalid={Boolean(fieldErrors.city)} oninput={() => clearFieldError('city')} bind:value={city} />{#if fieldErrors.city}<p class="checkout-field-error">{fieldErrors.city}</p>{/if}</div>
-            <div><label for="checkout_zip" class="field-label">{$locale === 'hr' ? 'Poštanski broj' : 'ZIP'} *</label><input id="checkout_zip" autocomplete="postal-code" class="field" aria-invalid={Boolean(fieldErrors.zip)} oninput={() => clearFieldError('zip')} bind:value={zip} />{#if fieldErrors.zip}<p class="checkout-field-error">{fieldErrors.zip}</p>{/if}</div>
-            <div class="md:col-span-2"><label for="checkout_country" class="field-label">{$locale === 'hr' ? 'Država' : 'Country'} *</label><input id="checkout_country" autocomplete="country-name" class="field" aria-invalid={Boolean(fieldErrors.country)} oninput={() => clearFieldError('country')} bind:value={country} />{#if fieldErrors.country}<p class="checkout-field-error">{fieldErrors.country}</p>{/if}</div>
+            {#if deliveryMethod !== 'personal_pickup'}
+              <div class="md:col-span-2"><label for="checkout_address" class="field-label">{$locale === 'hr' ? 'Adresa dostave' : 'Delivery address'} *</label><input id="checkout_address" autocomplete="street-address" class="field" aria-invalid={Boolean(fieldErrors.address)} oninput={() => clearFieldError('address')} bind:value={address} />{#if fieldErrors.address}<p class="checkout-field-error">{fieldErrors.address}</p>{/if}</div>
+              <div><label for="checkout_city" class="field-label">{$locale === 'hr' ? 'Grad' : 'City'} *</label><input id="checkout_city" autocomplete="address-level2" class="field" aria-invalid={Boolean(fieldErrors.city)} oninput={() => clearFieldError('city')} bind:value={city} />{#if fieldErrors.city}<p class="checkout-field-error">{fieldErrors.city}</p>{/if}</div>
+              <div><label for="checkout_zip" class="field-label">{$locale === 'hr' ? 'Poštanski broj' : 'ZIP'} *</label><input id="checkout_zip" autocomplete="postal-code" class="field" aria-invalid={Boolean(fieldErrors.zip)} oninput={() => clearFieldError('zip')} bind:value={zip} />{#if fieldErrors.zip}<p class="checkout-field-error">{fieldErrors.zip}</p>{/if}</div>
+              <div class="md:col-span-2"><label for="checkout_country" class="field-label">{$locale === 'hr' ? 'Država' : 'Country'} *</label><input id="checkout_country" autocomplete="country-name" class="field" aria-invalid={Boolean(fieldErrors.country)} oninput={() => clearFieldError('country')} bind:value={country} />{#if fieldErrors.country}<p class="checkout-field-error">{fieldErrors.country}</p>{/if}</div>
+            {:else}
+              <p class="md:col-span-2 rounded-lg bg-[#fffaf0] p-4 text-sm text-[#6f5600]">{$locale === 'hr' ? 'Adresa dostave nije potrebna. Petroni će vam potvrditi termin i lokaciju osobnog preuzimanja.' : 'A delivery address is not required. Petroni will confirm the personal pickup time and location.'}</p>
+            {/if}
           </div>
         </div>
 
         <div class="card card-static p-7">
+          <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-4">{$locale === 'hr' ? 'Dostava' : 'Delivery'}</h2>
+          {#if hasPickupOnlyItems}
+            <p class="mb-4 rounded-lg border border-[#eed68a] bg-[#fffaf0] p-3 text-sm text-[#6f5600]">{$locale === 'hr' ? 'Košarica sadrži proizvod koji je dostupan samo za osobno preuzimanje.' : 'Your cart contains an item available for personal pickup only.'}</p>
+          {/if}
+          <div class="grid grid-cols-1 gap-3">
+            {#each enabledDeliveryMethods as method}
+              <button type="button" onclick={() => deliveryMethod = method.id} class="flex items-center justify-between rounded-md p-4 text-left" style="border:2px solid {deliveryMethod === method.id ? '#f5c518' : '#e2e4e8'}">
+                <span><b class="text-sm text-[#2b2b2b]">{$locale === 'hr' ? method.label_hr : method.label_en}</b>{#if method.id === 'boxnow'}<small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? 'Paketomat ćemo potvrditi nakon narudžbe.' : 'We will confirm the locker after the order.'}</small>{/if}</span>
+                <span class="font-bold text-[#b5890a]">{method.price === 0 || (data.checkoutConfig.freeShippingThreshold > 0 && subtotal >= data.checkoutConfig.freeShippingThreshold) ? '0.00 €' : `${method.price.toFixed(2)} €`}</span>
+              </button>
+            {/each}
+          </div>
+          {#if enabledDeliveryMethods.length === 0}
+            <p class="mt-3 rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-3 text-sm text-[#9f1f18]">{$locale === 'hr' ? 'Za ovu košaricu trenutačno nema dostupnog načina preuzimanja. Kontaktirajte Petroni prije naručivanja.' : 'No delivery or pickup method is currently available for this cart. Contact Petroni before ordering.'}</p>
+          {/if}
+        </div>
+
+        <div class="card card-static p-7">
           <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-4">{$locale === 'hr' ? 'Plaćanje' : 'Payment'}</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button type="button" onclick={() => paymentMethod = 'bank_transfer'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'bank_transfer' ? '#f5c518' : '#e2e4e8'}">
               <p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Bankovna uplata' : 'Bank transfer'}</p>
               <p class="text-xs text-[#9aa0a8] mt-1">HUB-3 / PDF417</p>
@@ -164,6 +216,10 @@
             <button type="button" onclick={() => data.corvuspayAvailable && (paymentMethod = 'corvuspay')} disabled={!data.corvuspayAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'corvuspay' ? '#f5c518' : '#e2e4e8'}">
               <p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Kartica' : 'Card'}</p>
               <p class="text-xs text-[#9aa0a8] mt-1">{data.corvuspayAvailable ? 'CorvusPay' : ($locale === 'hr' ? 'Uskoro dostupno' : 'Coming soon')}</p>
+            </button>
+            <button type="button" onclick={() => codAvailable && (paymentMethod = 'cash_on_delivery')} disabled={!codAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'cash_on_delivery' ? '#f5c518' : '#e2e4e8'}">
+              <p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Pouzeće' : 'Cash on delivery'}</p>
+              <p class="text-xs text-[#9aa0a8] mt-1">{codAvailable ? `+${data.checkoutConfig.cashOnDeliverySurcharge.toFixed(2)} €` : ($locale === 'hr' ? 'Nije dostupno za ovu dostavu' : 'Unavailable for this delivery')}</p>
             </button>
           </div>
         </div>
@@ -182,13 +238,15 @@
             </div>
           {/if}
           <div class="pt-4 space-y-2 mb-5 border-t border-[#ededf0]">
-            <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Međuzbroj' : 'Subtotal'}</span><span class="text-[#2b2b2b]">{total.toFixed(2)} €</span></div>
+            <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Međuzbroj' : 'Subtotal'}</span><span class="text-[#2b2b2b]">{subtotal.toFixed(2)} €</span></div>
+            <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Dostava' : 'Delivery'}</span><span class="text-[#2b2b2b]">{totals.shippingCost.toFixed(2)} €</span></div>
+            {#if totals.paymentSurcharge > 0}<div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Naknada za pouzeće' : 'Cash-on-delivery fee'}</span><span class="text-[#2b2b2b]">{totals.paymentSurcharge.toFixed(2)} €</span></div>{/if}
             <div class="flex justify-between font-bold text-lg"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span><span style="color:#b5890a">{total.toFixed(2)} €</span></div>
           </div>
           {#if submitError}
             <p id="checkout-error" role="alert" class="mb-4 rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-3 text-sm text-[#9f1f18]">{submitError}</p>
           {/if}
-          <button onclick={handleCheckout} disabled={loading || checkingStock || hasUnavailableItems || $cart.length === 0} class="btn btn-primary w-full disabled:opacity-50">
+          <button onclick={handleCheckout} disabled={loading || checkingStock || hasUnavailableItems || !selectedDeliveryAvailable || $cart.length === 0} class="btn btn-primary w-full disabled:opacity-50">
             {checkingStock ? ($locale === 'hr' ? 'Provjeravam zalihu…' : 'Checking stock…') : loading ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…') : `${$locale === 'hr' ? 'Naruči' : 'Place order'} ${total.toFixed(2)} €`}
           </button>
         </div>

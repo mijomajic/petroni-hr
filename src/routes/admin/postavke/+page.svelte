@@ -25,6 +25,22 @@
       <label><span class="field-label">Minimalna dob vozača</span><input name="min_driver_age" type="number" class="field" value={data.settings.min_driver_age} /></label>
       <label><span class="field-label">Uključeni km po danu</span><input name="km_per_day_included" type="number" class="field" value={data.settings.km_per_day_included} /></label>
       <label><span class="field-label">Druga rata, dana prije preuzimanja</span><input name="split_payment_due_days" type="number" class="field" value={data.settings.split_payment_due_days} /></label>
+      <fieldset class="md:col-span-2 rounded-xl border border-[#e7e8eb] p-5">
+        <legend class="px-2 text-sm font-black uppercase tracking-wide text-[#2b2b2b]">Shop dostava i pouzeće</legend>
+        <div class="grid gap-5 md:grid-cols-2">
+          <label><span class="field-label">Overseas cijena EUR</span><input name="overseas_price" type="number" min="0" step="0.01" class="field" value={data.settings.overseas_price} /></label>
+          <div class="space-y-2 self-end pb-3"><label class="flex items-center gap-3 text-sm font-bold"><input name="overseas_enabled" type="checkbox" checked={data.settings.overseas_enabled} class="h-4 w-4 accent-[#F5C518]" /> Overseas dostupan</label><label class="flex items-center gap-3 text-sm"><input name="overseas_allows_cod" type="checkbox" checked={data.settings.overseas_allows_cod} class="h-4 w-4 accent-[#F5C518]" /> Dopušta pouzeće</label></div>
+          <label><span class="field-label">BoxNow cijena EUR</span><input name="boxnow_price" type="number" min="0" step="0.01" class="field" value={data.settings.boxnow_price} /></label>
+          <div class="space-y-2 self-end pb-3"><label class="flex items-center gap-3 text-sm font-bold"><input name="boxnow_enabled" type="checkbox" checked={data.settings.boxnow_enabled} class="h-4 w-4 accent-[#F5C518]" /> BoxNow dostupan</label><label class="flex items-center gap-3 text-sm"><input name="boxnow_allows_cod" type="checkbox" checked={data.settings.boxnow_allows_cod} class="h-4 w-4 accent-[#F5C518]" /> Dopušta pouzeće</label></div>
+          <label><span class="field-label">Naknada za pouzeće EUR</span><input name="cash_on_delivery_surcharge" type="number" min="0" step="0.01" class="field" value={data.settings.cash_on_delivery_surcharge} /></label>
+          <div class="space-y-3 self-end pb-3">
+            <label class="flex items-center gap-3 text-sm font-bold"><input name="cash_on_delivery_enabled" type="checkbox" checked={data.settings.cash_on_delivery_enabled} class="h-4 w-4 accent-[#F5C518]" /> Plaćanje pouzećem dostupno</label>
+            <label class="flex items-center gap-3 text-sm font-bold"><input name="personal_pickup_enabled" type="checkbox" checked={data.settings.personal_pickup_enabled} class="h-4 w-4 accent-[#F5C518]" /> Osobno preuzimanje dostupno</label>
+            <label class="flex items-center gap-3 text-sm"><input name="personal_pickup_allows_cod" type="checkbox" checked={data.settings.personal_pickup_allows_cod} class="h-4 w-4 accent-[#F5C518]" /> Pouzeće uz osobno preuzimanje</label>
+          </div>
+        </div>
+        <p class="mt-4 text-xs text-[#7a7f86]">Besplatna dostava koristi prag iz polja iznad. Osobno preuzimanje uvijek ima trošak 0 EUR.</p>
+      </fieldset>
       <label class="md:col-span-2">
         <span class="field-label">Tvrtka JSON</span>
         <textarea name="company_json" rows="7" class="field font-mono text-xs">{data.settings.company_json}</textarea>

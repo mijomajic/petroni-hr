@@ -10,6 +10,7 @@ export type CartItem = {
   images: string[];
   qty: number;
   stock?: number;
+  pickup_only?: boolean;
 };
 
 const initial: CartItem[] = browser
@@ -75,8 +76,8 @@ export async function syncCartStock(): Promise<{
   });
   if (!response.ok) throw new Error('Stock check failed');
   const payload = await response.json();
-  const levels = new Map<string, { stock: number; is_active: boolean }>(
-    (payload.products ?? []).map((product: { id: string; stock: number; is_active: boolean }) => [product.id, product])
+  const levels = new Map<string, { stock: number; is_active: boolean; pickup_only: boolean }>(
+    (payload.products ?? []).map((product: { id: string; stock: number; is_active: boolean; pickup_only: boolean }) => [product.id, product])
   );
   let adjusted = false;
   const unavailable: string[] = [];
@@ -87,7 +88,7 @@ export async function syncCartStock(): Promise<{
     if (stock <= 0) unavailable.push(item.name_hr);
     const qty = stock > 0 ? Math.min(item.qty, stock) : item.qty;
     if (qty !== item.qty || stock !== item.stock) adjusted = adjusted || qty !== item.qty;
-    return { ...item, qty, stock };
+    return { ...item, qty, stock, pickup_only: Boolean(level?.pickup_only) };
   }));
 
   return { adjusted, unavailable };

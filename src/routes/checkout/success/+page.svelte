@@ -8,6 +8,24 @@
   const paymentResult = $derived(page.url.searchParams.get('payment'));
   const cancelled = $derived(paymentResult === 'cancel');
 
+  function deliveryLabel(method: string) {
+    const labels: Record<string, [string, string]> = {
+      overseas: ['Overseas dostava', 'Overseas delivery'],
+      boxnow: ['BoxNow paketomat', 'BoxNow locker'],
+      personal_pickup: ['Osobno preuzimanje', 'Personal pickup']
+    };
+    return labels[method]?.[$locale === 'hr' ? 0 : 1] ?? method;
+  }
+
+  function paymentLabel(method: string) {
+    const labels: Record<string, [string, string]> = {
+      bank_transfer: ['Bankovna uplata', 'Bank transfer'],
+      corvuspay: ['Kartično plaćanje', 'Card payment'],
+      cash_on_delivery: ['Plaćanje pouzećem', 'Cash on delivery']
+    };
+    return labels[method]?.[$locale === 'hr' ? 0 : 1] ?? method;
+  }
+
   onMount(() => {
     const raw = sessionStorage.getItem('petroni_order_result');
     if (raw) result = JSON.parse(raw);
@@ -43,6 +61,12 @@
         <p class="text-xs font-bold uppercase tracking-[0.14em] text-[#9a7600]">{$locale === 'hr' ? 'Broj narudžbe' : 'Order number'}</p>
         <p class="mt-2 text-xl font-black text-[#2b2b2b]">#{result.order.confirmation_number}</p>
         <p class="mt-2 text-sm text-[#60656b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}: <b>{Number(result.order.total).toFixed(2)} EUR</b></p>
+        <dl class="mt-5 grid gap-3 border-t border-[#ededf0] pt-5 text-sm sm:grid-cols-2">
+          <div><dt class="text-xs uppercase tracking-wide text-[#92979d]">{$locale === 'hr' ? 'Dostava' : 'Delivery'}</dt><dd class="mt-1 font-semibold text-[#2b2b2b]">{deliveryLabel(result.order.delivery_method)} · {Number(result.order.shipping_cost).toFixed(2)} EUR</dd></div>
+          <div><dt class="text-xs uppercase tracking-wide text-[#92979d]">{$locale === 'hr' ? 'Plaćanje' : 'Payment'}</dt><dd class="mt-1 font-semibold text-[#2b2b2b]">{paymentLabel(result.order.payment_method)}</dd></div>
+          {#if Number(result.order.payment_surcharge) > 0}<div><dt class="text-xs uppercase tracking-wide text-[#92979d]">{$locale === 'hr' ? 'Naknada za pouzeće' : 'Cash-on-delivery fee'}</dt><dd class="mt-1 font-semibold text-[#2b2b2b]">{Number(result.order.payment_surcharge).toFixed(2)} EUR</dd></div>{/if}
+        </dl>
+        {#if result.order.payment_method === 'cash_on_delivery'}<p class="mt-5 rounded-lg bg-[#fffaf0] p-4 text-sm text-[#6f5600]">{$locale === 'hr' ? 'Ukupan iznos platit ćete dostavljaču prilikom preuzimanja pošiljke.' : 'Pay the total amount to the courier when receiving the shipment.'}</p>{/if}
       </section>
 
       {#if result.bankTransfers?.length}

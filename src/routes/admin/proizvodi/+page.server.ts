@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { integerField, optionalTextField, slugField, textField } from '$lib/admin-cms.server';
 import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
 import { supabaseAdmin } from '$lib/supabase.server';
+import { uniqueProductBrands } from '$lib/product-brands';
 import type { Actions, PageServerLoad } from './$types';
 
 const PAGE_SIZE = 50;
@@ -10,31 +11,36 @@ export const load: PageServerLoad = async ({ url }) => {
   const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
   const query = (url.searchParams.get('q') ?? '').trim();
   const category = url.searchParams.get('category') ?? '';
+  const brand = url.searchParams.get('brand') ?? '';
   const status = url.searchParams.get('status') ?? '';
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
   let productsQuery = supabaseAdmin
     .from('products')
-    .select('id,slug,name_hr,price,category_id,images,stock,sku,is_active,created_at,product_categories(name_hr)', { count: 'exact' });
+    .select('id,slug,name_hr,price,category_id,brand,images,stock,sku,is_active,created_at,product_categories(name_hr)', { count: 'exact' });
   if (query) productsQuery = productsQuery.or(`name_hr.ilike.%${query.replace(/[%_,]/g, ' ')}%,sku.ilike.%${query.replace(/[%_,]/g, ' ')}%`);
   if (category) productsQuery = productsQuery.eq('category_id', category);
+  if (brand) productsQuery = productsQuery.ilike('brand', brand);
   if (status === 'active') productsQuery = productsQuery.eq('is_active', true);
   if (status === 'inactive') productsQuery = productsQuery.eq('is_active', false);
 
-  const [products, categories] = await Promise.all([
+  const [products, categories, productBrands] = await Promise.all([
     productsQuery.order('created_at', { ascending: false }).range(from, to),
-    supabaseAdmin.from('product_categories').select('*').order('sort_order', { ascending: true }).order('name_hr', { ascending: true })
+    supabaseAdmin.from('product_categories').select('*').order('sort_order', { ascending: true }).order('name_hr', { ascending: true }),
+    supabaseAdmin.from('products').select('brand').not('brand', 'is', null).range(0, 5000)
   ]);
   if (products.error) throw new Error(products.error.message);
   if (categories.error) throw new Error(categories.error.message);
+  if (productBrands.error) throw new Error(productBrands.error.message);
   return {
     products: products.data ?? [],
     total: products.count ?? 0,
     page,
     pageSize: PAGE_SIZE,
-    filters: { query, category, status },
-    categories: categories.data ?? []
+    filters: { query, category, brand, status },
+    categories: categories.data ?? [],
+    brands: uniqueProductBrands(productBrands.data ?? [])
   };
 };
 
@@ -70,11 +76,22 @@ export const actions: Actions = {
     const id = optionalTextField(form, 'id');
     const name = textField(form, 'name_hr');
     if (!name) return fail(400, { message: 'Kategorija mora imati naziv.' });
+    const parentId = optionalTextField(form, 'parent_id');
+    if (parentId === id) return fail(400, { message: 'Kategorija ne može biti vlastita nadkategorija.' });
+    if (parentId) {
+      const { data: parent } = await supabaseAdmin.from('product_categories').select('id,parent_id').eq('id', parentId).single();
+      if (!parent) return fail(400, { message: 'Odabrana nadkategorija ne postoji.' });
+      if (parent.parent_id) return fail(400, { message: 'Nadkategorija mora biti glavna kategorija, ne podkategorija.' });
+      if (id) {
+        const { count: childCount } = await supabaseAdmin.from('product_categories').select('id', { count: 'exact', head: true }).eq('parent_id', id);
+        if ((childCount ?? 0) > 0) return fail(400, { message: 'Kategorija s podkategorijama ne može postati podkategorija.' });
+      }
+    }
     const payload = {
       name_hr: name,
       name_en: optionalTextField(form, 'name_en'),
       slug: slugField(form, 'slug', name),
-      parent_id: optionalTextField(form, 'parent_id'),
+      parent_id: parentId,
       sort_order: integerField(form, 'sort_order') ?? 0
     };
 

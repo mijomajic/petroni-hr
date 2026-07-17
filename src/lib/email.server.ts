@@ -81,7 +81,11 @@ function paymentSummary(booking: Record<string, any>, ibans: Array<{ label?: str
 function orderSummary(order: Record<string, any>) {
   const items = Array.isArray(order.items) ? order.items : [];
   const itemRows = items.map((item: Record<string, any>) => `<tr><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;font-size:14px">${escapeHtml(item.name_hr ?? item.name ?? item.slug ?? 'Proizvod')} × ${escapeHtml(item.qty ?? item.quantity ?? 1)}</td><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;text-align:right;font-size:14px;font-weight:700">${euro(Number(item.price ?? item.total ?? 0) * Number(item.qty ?? item.quantity ?? 1))}</td></tr>`).join('');
-  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-collapse:collapse">${itemRows}<tr><td style="padding:14px 0;font-size:16px;font-weight:700">Ukupno</td><td style="padding:14px 0;text-align:right;font-size:16px;font-weight:700">${euro(order.total)}</td></tr></table>`;
+  const deliveryLabels: Record<string, string> = { overseas: 'Overseas dostava', boxnow: 'BoxNow paketomat', personal_pickup: 'Osobno preuzimanje' };
+  const paymentLabels: Record<string, string> = { bank_transfer: 'Bankovna uplata', corvuspay: 'Kartično plaćanje', cash_on_delivery: 'Plaćanje pouzećem' };
+  const surcharge = Number(order.payment_surcharge ?? 0);
+  const breakdown = `<tr><td style="padding:10px 0;font-size:14px">Dostava: ${escapeHtml(deliveryLabels[order.shipping_method] ?? order.shipping_method ?? '-')}</td><td style="padding:10px 0;text-align:right;font-size:14px">${euro(order.shipping_cost)}</td></tr>${surcharge > 0 ? `<tr><td style="padding:6px 0;font-size:14px">Naknada za pouzeće</td><td style="padding:6px 0;text-align:right;font-size:14px">${euro(surcharge)}</td></tr>` : ''}<tr><td style="padding:6px 0;font-size:14px">Plaćanje: ${escapeHtml(paymentLabels[order.payment_method] ?? order.payment_method ?? '-')}</td><td></td></tr>`;
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-collapse:collapse">${itemRows}${breakdown}<tr><td style="padding:14px 0;font-size:16px;font-weight:700">Ukupno</td><td style="padding:14px 0;text-align:right;font-size:16px;font-weight:700">${euro(order.total)}</td></tr></table>`;
 }
 
 async function recordEmailAttempt(
@@ -216,7 +220,11 @@ export async function sendSecondPaymentReceived(booking: Record<string, any>) {
 export async function sendOrderReceived(order: Record<string, any>) {
   const config = await emailConfig();
   const summary = orderSummary(order);
-  const payment = order.payment_method === 'bank_transfer' ? 'Odabrali ste bankovnu uplatu. Podaci za uplatu prikazani su nakon narudžbe.' : 'Odabrali ste kartično plaćanje.';
+  const payment = order.payment_method === 'bank_transfer'
+    ? 'Odabrali ste bankovnu uplatu. Podaci za uplatu prikazani su nakon narudžbe.'
+    : order.payment_method === 'cash_on_delivery'
+      ? 'Odabrali ste plaćanje pouzećem.'
+      : 'Odabrali ste kartično plaćanje.';
   return Promise.all([
     send(
       { from: config.from, replyTo: config.admin, to: order.customer_email, subject: `Zaprimili smo narudžbu ${order.confirmation_number}`, html: emailLayout('Hvala na narudžbi', `<p style="font-size:16px;line-height:1.6">Narudžba <strong>${escapeHtml(order.confirmation_number)}</strong> je zaprimljena. ${payment}</p>${summary}<p style="font-size:14px;line-height:1.6">Obavijestit ćemo vas kada narudžba bude plaćena i poslana. Nakon slanja dobit ćete PDF potvrdu narudžbe i plaćanja.</p>`) },
@@ -280,6 +288,11 @@ export async function sendOrderConfirmation(
     ibans: config.ibans,
     items: Array.isArray(order.items) ? order.items : [],
     total: Number(order.total),
+    subtotal: Number(order.subtotal),
+    shippingCost: Number(order.shipping_cost),
+    paymentSurcharge: Number(order.payment_surcharge),
+    deliveryMethod: order.shipping_method,
+    paymentMethod: order.payment_method,
     paymentStatus: order.payment_status
   });
   return send(

@@ -3,21 +3,25 @@ import { checkboxField, integerField, linesField, numberField, optionalTextField
 import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
 import { supabaseAdmin } from '$lib/supabase.server';
 import { getActiveReservedQuantity } from '$lib/shop-stock.server';
+import { uniqueProductBrands } from '$lib/product-brands';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
-  const [product, categories] = await Promise.all([
+  const [product, categories, productBrands] = await Promise.all([
     supabaseAdmin.from('products').select('*').eq('id', params.id).single(),
-    supabaseAdmin.from('product_categories').select('*').order('sort_order')
+    supabaseAdmin.from('product_categories').select('*').order('sort_order'),
+    supabaseAdmin.from('products').select('brand').not('brand', 'is', null).range(0, 5000)
   ]);
   if (product.error || !product.data) throw error(404, 'Proizvod nije pronađen.');
   if (categories.error) throw new Error(categories.error.message);
+  if (productBrands.error) throw new Error(productBrands.error.message);
   return {
     product: {
       ...product.data,
       images_text: (product.data.images ?? []).join('\n')
     },
-    categories: categories.data ?? []
+    categories: categories.data ?? [],
+    brands: uniqueProductBrands(productBrands.data ?? [])
   };
 };
 
@@ -32,9 +36,11 @@ function productPayload(form: FormData) {
     description_en: optionalTextField(form, 'description_en'),
     price: numberField(form, 'price') ?? 0,
     category_id: optionalTextField(form, 'category_id'),
+    brand: optionalTextField(form, 'brand'),
     images: linesField(form, 'images'),
     stock: integerField(form, 'stock') ?? 0,
     sku: optionalTextField(form, 'sku'),
+    pickup_only: checkboxField(form, 'pickup_only'),
     is_active: checkboxField(form, 'is_active')
   };
 }
