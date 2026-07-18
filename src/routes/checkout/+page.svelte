@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { env } from '$env/dynamic/public';
   import { cart, clearCart, syncCartStock } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
   import { calculateShopOrderTotals, deliverySupportsCashOnDelivery, type ShopDeliveryMethod, type ShopPaymentMethod } from '$lib/shop-checkout';
@@ -13,7 +14,11 @@
   let city = $state('');
   let zip = $state('');
   let country = $state('Hrvatska');
-  let boxnowLocker = $state('');
+  let boxnowLockerId = $state('');
+  let boxnowLockerAddress = $state('');
+  let boxnowLockerPostalCode = $state('');
+  let boxnowWidgetReady = $state(false);
+  let boxnowWidgetError = $state(false);
   let loading = $state(false);
   let submitError = $state('');
   let fieldErrors = $state<Record<string, string>>({});
@@ -36,6 +41,7 @@
     }
   });
   const total = $derived(totals.total);
+  const boxnowLockerLabel = $derived([boxnowLockerAddress, boxnowLockerPostalCode].filter(Boolean).join(', '));
 
   $effect(() => {
     const nextDelivery = enabledDeliveryMethods[0]?.id;
@@ -64,6 +70,49 @@
     }
   });
 
+  onMount(() => {
+    const partnerId = env.PUBLIC_BOXNOW_PARTNER_ID?.trim();
+    window._bn_map_widget_config = {
+      ...(partnerId ? { partnerId: Number.isNaN(Number(partnerId)) ? partnerId : Number(partnerId) } : {}),
+      parentElement: '#boxnowmap',
+      buttonSelector: '#boxnow-locker-button',
+      type: 'popup',
+      gps: false,
+      autoclose: true,
+      afterSelect(selected) {
+        boxnowLockerId = String(selected.boxnowLockerId ?? '').trim();
+        boxnowLockerAddress = String(selected.boxnowLockerAddressLine1 ?? '').trim();
+        boxnowLockerPostalCode = String(selected.boxnowLockerPostalCode ?? '').trim();
+        if (boxnowLockerId && boxnowLockerAddress) {
+          clearFieldError('boxnowLocker');
+          boxnowWidgetError = false;
+        }
+      }
+    };
+
+    document.querySelector<HTMLScriptElement>('script[data-boxnow-widget="v5"]')?.remove();
+
+    const script = document.createElement('script');
+    script.src = 'https://widget-cdn.boxnow.hr/map-widget/client/v5.js';
+    script.async = true;
+    script.defer = true;
+    script.dataset.boxnowWidget = 'v5';
+    script.onload = () => {
+      boxnowWidgetReady = true;
+      boxnowWidgetError = false;
+    };
+    script.onerror = () => {
+      boxnowWidgetReady = false;
+      boxnowWidgetError = true;
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      script.remove();
+      delete window._bn_map_widget_config;
+    };
+  });
+
   function clearFieldError(key: string) {
     if (!fieldErrors[key]) return;
     fieldErrors = Object.fromEntries(Object.entries(fieldErrors).filter(([field]) => field !== key));
@@ -82,7 +131,9 @@
       if (!zip.trim()) errors.zip = required;
       if (!country.trim()) errors.country = required;
     }
-    if (deliveryMethod === 'boxnow' && !boxnowLocker.trim()) errors.boxnowLocker = required;
+    if (deliveryMethod === 'boxnow' && (!boxnowLockerId || !boxnowLockerAddress)) {
+      errors.boxnowLocker = $locale === 'hr' ? 'Odaberite paketomat na BoxNow karti.' : 'Select a locker on the BoxNow map.';
+    }
     fieldErrors = errors;
     if (Object.keys(errors).length) {
       submitError = $locale === 'hr' ? 'Provjerite označena polja prije naručivanja.' : 'Check the highlighted fields before placing the order.';
@@ -124,7 +175,19 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: $cart,
-          customer: { name, email, phone, address, city, zip, country, boxnow_locker: boxnowLocker },
+          customer: {
+            name,
+            email,
+            phone,
+            address,
+            city,
+            zip,
+            country,
+            boxnow_locker: boxnowLockerLabel,
+            boxnow_locker_id: boxnowLockerId,
+            boxnow_locker_address: boxnowLockerAddress,
+            boxnow_locker_postal_code: boxnowLockerPostalCode
+          },
           payment_method: paymentMethod,
           delivery_method: deliveryMethod
         }),
@@ -179,15 +242,30 @@
             <div class="md:col-span-2"><label for="checkout_name" class="field-label">{$locale === 'hr' ? 'Ime i prezime' : 'Full name'} *</label><input id="checkout_name" autocomplete="name" class="field" aria-invalid={Boolean(fieldErrors.name)} oninput={() => clearFieldError('name')} bind:value={name} />{#if fieldErrors.name}<p class="checkout-field-error">{fieldErrors.name}</p>{/if}</div>
             <div><label for="checkout_email" class="field-label">Email *</label><input id="checkout_email" type="email" autocomplete="email" class="field" aria-invalid={Boolean(fieldErrors.email)} oninput={() => clearFieldError('email')} bind:value={email} />{#if fieldErrors.email}<p class="checkout-field-error">{fieldErrors.email}</p>{/if}</div>
             <div><label for="checkout_phone" class="field-label">{$locale === 'hr' ? 'Telefon' : 'Phone'} *</label><input id="checkout_phone" type="tel" autocomplete="tel" class="field" aria-invalid={Boolean(fieldErrors.phone)} oninput={() => clearFieldError('phone')} bind:value={phone} />{#if fieldErrors.phone}<p class="checkout-field-error">{fieldErrors.phone}</p>{/if}</div>
-            {#if deliveryMethod !== 'personal_pickup'}
-              {#if deliveryMethod === 'boxnow'}
-                <div class="md:col-span-2 rounded-lg border border-[#eed68a] bg-[#fffaf0] p-4">
-                  <label for="checkout_boxnow_locker" class="field-label">{$locale === 'hr' ? 'Željeni BoxNow paketomat' : 'Preferred BoxNow locker'} *</label>
-                  <input id="checkout_boxnow_locker" class="field bg-white" placeholder={$locale === 'hr' ? 'Naziv ili puna lokacija paketomata' : 'Locker name or full location'} aria-invalid={Boolean(fieldErrors.boxnowLocker)} oninput={() => clearFieldError('boxnowLocker')} bind:value={boxnowLocker} />
+            <div class:hidden={deliveryMethod !== 'boxnow'} class="md:col-span-2 rounded-lg border border-[#eed68a] bg-[#fffaf0] p-4">
+                  <span class="field-label">{$locale === 'hr' ? 'BoxNow paketomat' : 'BoxNow locker'} *</span>
+                  {#if boxnowLockerId && boxnowLockerAddress}
+                    <div class="mb-3 rounded-md border border-[#d7c267] bg-white p-3" aria-live="polite">
+                      <p class="text-sm font-bold text-[#2b2b2b]">{boxnowLockerAddress}</p>
+                      <p class="mt-1 text-xs text-[#6f5600]">{boxnowLockerPostalCode ? `${boxnowLockerPostalCode} · ` : ''}BoxNow ID: {boxnowLockerId}</p>
+                    </div>
+                  {/if}
+                  <button id="boxnow-locker-button" type="button" disabled={!boxnowWidgetReady} class="btn btn-dark w-full disabled:cursor-wait disabled:opacity-60">
+                    {boxnowLockerId
+                      ? ($locale === 'hr' ? 'Promijeni paketomat' : 'Change locker')
+                      : boxnowWidgetReady
+                        ? ($locale === 'hr' ? 'Odaberi paketomat na karti' : 'Select locker on map')
+                        : ($locale === 'hr' ? 'Učitavam BoxNow kartu…' : 'Loading BoxNow map…')}
+                  </button>
                   {#if fieldErrors.boxnowLocker}<p class="checkout-field-error">{fieldErrors.boxnowLocker}</p>{/if}
-                  <p class="mt-2 text-xs leading-relaxed text-[#6f5600]">{$locale === 'hr' ? 'Upišite točan paketomat na koji želite dostavu. Bit će zapisan uz narudžbu i vidljiv Petroniju.' : 'Enter the exact locker where you want delivery. It will be saved with the order and visible to Petroni.'}</p>
-                </div>
-              {/if}
+                  {#if boxnowWidgetError}
+                    <p class="mt-2 text-xs leading-relaxed text-[#9f1f18]">{$locale === 'hr' ? 'BoxNow karta se nije učitala. Osvježite stranicu ili odaberite drugi način dostave.' : 'The BoxNow map did not load. Refresh the page or select another delivery method.'}</p>
+                  {:else}
+                    <p class="mt-2 text-xs leading-relaxed text-[#6f5600]">{$locale === 'hr' ? 'Otvorite službenu BoxNow kartu i odaberite paketomat za dostavu.' : 'Open the official BoxNow map and select your delivery locker.'}</p>
+                  {/if}
+                  <div id="boxnowmap"></div>
+            </div>
+            {#if deliveryMethod !== 'personal_pickup'}
               <div class="md:col-span-2"><label for="checkout_address" class="field-label">{$locale === 'hr' ? 'Adresa dostave' : 'Delivery address'} *</label><input id="checkout_address" autocomplete="street-address" class="field" aria-invalid={Boolean(fieldErrors.address)} oninput={() => clearFieldError('address')} bind:value={address} />{#if fieldErrors.address}<p class="checkout-field-error">{fieldErrors.address}</p>{/if}</div>
               <div><label for="checkout_city" class="field-label">{$locale === 'hr' ? 'Grad' : 'City'} *</label><input id="checkout_city" autocomplete="address-level2" class="field" aria-invalid={Boolean(fieldErrors.city)} oninput={() => clearFieldError('city')} bind:value={city} />{#if fieldErrors.city}<p class="checkout-field-error">{fieldErrors.city}</p>{/if}</div>
               <div><label for="checkout_zip" class="field-label">{$locale === 'hr' ? 'Poštanski broj' : 'ZIP'} *</label><input id="checkout_zip" autocomplete="postal-code" class="field" aria-invalid={Boolean(fieldErrors.zip)} oninput={() => clearFieldError('zip')} bind:value={zip} />{#if fieldErrors.zip}<p class="checkout-field-error">{fieldErrors.zip}</p>{/if}</div>
@@ -206,7 +284,7 @@
           <div class="grid grid-cols-1 gap-3">
             {#each enabledDeliveryMethods as method}
               <button type="button" onclick={() => deliveryMethod = method.id} class="flex items-center justify-between rounded-md p-4 text-left" style="border:2px solid {deliveryMethod === method.id ? '#f5c518' : '#e2e4e8'}">
-                <span><b class="text-sm text-[#2b2b2b]">{$locale === 'hr' ? method.label_hr : method.label_en}</b>{#if method.id === 'boxnow'}<small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? 'Željeni paketomat unosite u podatke kupca.' : 'Enter your preferred locker in the customer details.'}</small>{/if}</span>
+                <span><b class="text-sm text-[#2b2b2b]">{$locale === 'hr' ? method.label_hr : method.label_en}</b>{#if method.id === 'boxnow'}<small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? 'Paketomat birate na službenoj BoxNow karti.' : 'Choose a locker on the official BoxNow map.'}</small>{/if}</span>
                 <span class="font-bold text-[#b5890a]">{method.price === 0 || (data.checkoutConfig.freeShippingThreshold > 0 && subtotal >= data.checkoutConfig.freeShippingThreshold) ? '0.00 €' : `${method.price.toFixed(2)} €`}</span>
               </button>
             {/each}

@@ -59,7 +59,7 @@
           <h2 class="mb-4 text-sm font-black uppercase tracking-widest text-[#2b2b2b]">Dostava</h2>
           <p class="mb-3 text-sm font-bold text-[#2b2b2b]">{deliveryLabels[order.shipping_method] ?? order.shipping_method ?? 'Nije odabrano'} · {Number(order.shipping_cost).toFixed(2)} EUR</p>
           {#if order.shipping_method === 'boxnow'}
-            <div class="mb-3 rounded-lg border border-[#eed68a] bg-[#fffaf0] p-3"><span class="field-label">Odabrani paketomat</span><p class="font-bold text-[#6f5600]">{order.shipping_address?.boxnow_locker ?? 'Nije naveden'}</p></div>
+            <div class="mb-3 rounded-lg border border-[#eed68a] bg-[#fffaf0] p-3"><span class="field-label">Odabrani paketomat</span><p class="font-bold text-[#6f5600]">{order.shipping_address?.boxnow_locker_address ?? order.shipping_address?.boxnow_locker ?? 'Nije naveden'}</p>{#if order.shipping_address?.boxnow_locker_id}<p class="mt-1 text-xs text-[#8b6b00]">BoxNow ID: {order.shipping_address.boxnow_locker_id}</p>{/if}</div>
           {/if}
           <pre class="overflow-auto whitespace-pre-wrap rounded-xl bg-[#f6f7f9] p-4 text-xs text-[#5b6168]">{json(order.shipping_address)}</pre>
         </div>

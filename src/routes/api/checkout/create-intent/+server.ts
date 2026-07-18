@@ -39,19 +39,25 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     city: String(customer.city ?? '').trim(),
     zip: String(customer.zip ?? '').trim(),
     country: String(customer.country ?? '').trim(),
-    boxnow_locker: String(customer.boxnow_locker ?? '').trim()
+    boxnow_locker: String(customer.boxnow_locker ?? '').trim(),
+    boxnow_locker_id: String(customer.boxnow_locker_id ?? '').trim(),
+    boxnow_locker_address: String(customer.boxnow_locker_address ?? '').trim(),
+    boxnow_locker_postal_code: String(customer.boxnow_locker_postal_code ?? '').trim()
   };
 
   const requiredCustomerValues = deliveryMethod === 'personal_pickup'
     ? [customerRecord.name, customerRecord.email, customerRecord.phone]
     : deliveryMethod === 'boxnow'
-      ? Object.values(customerRecord)
+      ? [customerRecord.name, customerRecord.email, customerRecord.phone, customerRecord.address, customerRecord.city, customerRecord.zip, customerRecord.country, customerRecord.boxnow_locker, customerRecord.boxnow_locker_id, customerRecord.boxnow_locker_address]
       : [customerRecord.name, customerRecord.email, customerRecord.phone, customerRecord.address, customerRecord.city, customerRecord.zip, customerRecord.country];
   if (requiredCustomerValues.some((value) => !value) || !/^\S+@\S+\.\S+$/.test(customerRecord.email)) {
     return json({ success: false, error: 'Ispunite sve podatke kupca i unesite valjanu email adresu.' }, { status: 400 });
   }
   if (Object.values(customerRecord).some((value) => value.length > 240)) {
     return json({ success: false, error: 'Jedno ili više polja kupca je predugačko.' }, { status: 400 });
+  }
+  if (deliveryMethod === 'boxnow' && !/^[A-Za-z0-9_-]{1,80}$/.test(customerRecord.boxnow_locker_id)) {
+    return json({ success: false, error: 'Odaberite valjan BoxNow paketomat putem karte.' }, { status: 400 });
   }
 
   if (!['bank_transfer', 'corvuspay', 'cash_on_delivery'].includes(paymentMethod)) {
