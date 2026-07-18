@@ -2,7 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { integerField, optionalTextField, slugField, textField } from '$lib/admin-cms.server';
 import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
 import { supabaseAdmin } from '$lib/supabase.server';
-import { uniqueProductBrands } from '$lib/product-brands';
+import { getAdminProductBrands } from '$lib/product-brands.server';
 import type { Actions, PageServerLoad } from './$types';
 
 const PAGE_SIZE = 50;
@@ -25,14 +25,13 @@ export const load: PageServerLoad = async ({ url }) => {
   if (status === 'active') productsQuery = productsQuery.eq('is_active', true);
   if (status === 'inactive') productsQuery = productsQuery.eq('is_active', false);
 
-  const [products, categories, productBrands] = await Promise.all([
+  const [products, categories, brands] = await Promise.all([
     productsQuery.order('created_at', { ascending: false }).range(from, to),
     supabaseAdmin.from('product_categories').select('*').order('sort_order', { ascending: true }).order('name_hr', { ascending: true }),
-    supabaseAdmin.from('products').select('brand').not('brand', 'is', null).range(0, 5000)
+    getAdminProductBrands()
   ]);
   if (products.error) throw new Error(products.error.message);
   if (categories.error) throw new Error(categories.error.message);
-  if (productBrands.error) throw new Error(productBrands.error.message);
   return {
     products: products.data ?? [],
     total: products.count ?? 0,
@@ -40,7 +39,7 @@ export const load: PageServerLoad = async ({ url }) => {
     pageSize: PAGE_SIZE,
     filters: { query, category, brand, status },
     categories: categories.data ?? [],
-    brands: uniqueProductBrands(productBrands.data ?? [])
+    brands
   };
 };
 

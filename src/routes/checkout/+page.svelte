@@ -13,6 +13,7 @@
   let city = $state('');
   let zip = $state('');
   let country = $state('Hrvatska');
+  let boxnowLocker = $state('');
   let loading = $state(false);
   let submitError = $state('');
   let fieldErrors = $state<Record<string, string>>({});
@@ -81,6 +82,7 @@
       if (!zip.trim()) errors.zip = required;
       if (!country.trim()) errors.country = required;
     }
+    if (deliveryMethod === 'boxnow' && !boxnowLocker.trim()) errors.boxnowLocker = required;
     fieldErrors = errors;
     if (Object.keys(errors).length) {
       submitError = $locale === 'hr' ? 'Provjerite označena polja prije naručivanja.' : 'Check the highlighted fields before placing the order.';
@@ -122,7 +124,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: $cart,
-          customer: { name, email, phone, address, city, zip, country },
+          customer: { name, email, phone, address, city, zip, country, boxnow_locker: boxnowLocker },
           payment_method: paymentMethod,
           delivery_method: deliveryMethod
         }),
@@ -178,6 +180,14 @@
             <div><label for="checkout_email" class="field-label">Email *</label><input id="checkout_email" type="email" autocomplete="email" class="field" aria-invalid={Boolean(fieldErrors.email)} oninput={() => clearFieldError('email')} bind:value={email} />{#if fieldErrors.email}<p class="checkout-field-error">{fieldErrors.email}</p>{/if}</div>
             <div><label for="checkout_phone" class="field-label">{$locale === 'hr' ? 'Telefon' : 'Phone'} *</label><input id="checkout_phone" type="tel" autocomplete="tel" class="field" aria-invalid={Boolean(fieldErrors.phone)} oninput={() => clearFieldError('phone')} bind:value={phone} />{#if fieldErrors.phone}<p class="checkout-field-error">{fieldErrors.phone}</p>{/if}</div>
             {#if deliveryMethod !== 'personal_pickup'}
+              {#if deliveryMethod === 'boxnow'}
+                <div class="md:col-span-2 rounded-lg border border-[#eed68a] bg-[#fffaf0] p-4">
+                  <label for="checkout_boxnow_locker" class="field-label">{$locale === 'hr' ? 'Željeni BoxNow paketomat' : 'Preferred BoxNow locker'} *</label>
+                  <input id="checkout_boxnow_locker" class="field bg-white" placeholder={$locale === 'hr' ? 'Naziv ili puna lokacija paketomata' : 'Locker name or full location'} aria-invalid={Boolean(fieldErrors.boxnowLocker)} oninput={() => clearFieldError('boxnowLocker')} bind:value={boxnowLocker} />
+                  {#if fieldErrors.boxnowLocker}<p class="checkout-field-error">{fieldErrors.boxnowLocker}</p>{/if}
+                  <p class="mt-2 text-xs leading-relaxed text-[#6f5600]">{$locale === 'hr' ? 'Upišite točan paketomat na koji želite dostavu. Bit će zapisan uz narudžbu i vidljiv Petroniju.' : 'Enter the exact locker where you want delivery. It will be saved with the order and visible to Petroni.'}</p>
+                </div>
+              {/if}
               <div class="md:col-span-2"><label for="checkout_address" class="field-label">{$locale === 'hr' ? 'Adresa dostave' : 'Delivery address'} *</label><input id="checkout_address" autocomplete="street-address" class="field" aria-invalid={Boolean(fieldErrors.address)} oninput={() => clearFieldError('address')} bind:value={address} />{#if fieldErrors.address}<p class="checkout-field-error">{fieldErrors.address}</p>{/if}</div>
               <div><label for="checkout_city" class="field-label">{$locale === 'hr' ? 'Grad' : 'City'} *</label><input id="checkout_city" autocomplete="address-level2" class="field" aria-invalid={Boolean(fieldErrors.city)} oninput={() => clearFieldError('city')} bind:value={city} />{#if fieldErrors.city}<p class="checkout-field-error">{fieldErrors.city}</p>{/if}</div>
               <div><label for="checkout_zip" class="field-label">{$locale === 'hr' ? 'Poštanski broj' : 'ZIP'} *</label><input id="checkout_zip" autocomplete="postal-code" class="field" aria-invalid={Boolean(fieldErrors.zip)} oninput={() => clearFieldError('zip')} bind:value={zip} />{#if fieldErrors.zip}<p class="checkout-field-error">{fieldErrors.zip}</p>{/if}</div>
@@ -196,7 +206,7 @@
           <div class="grid grid-cols-1 gap-3">
             {#each enabledDeliveryMethods as method}
               <button type="button" onclick={() => deliveryMethod = method.id} class="flex items-center justify-between rounded-md p-4 text-left" style="border:2px solid {deliveryMethod === method.id ? '#f5c518' : '#e2e4e8'}">
-                <span><b class="text-sm text-[#2b2b2b]">{$locale === 'hr' ? method.label_hr : method.label_en}</b>{#if method.id === 'boxnow'}<small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? 'Paketomat ćemo potvrditi nakon narudžbe.' : 'We will confirm the locker after the order.'}</small>{/if}</span>
+                <span><b class="text-sm text-[#2b2b2b]">{$locale === 'hr' ? method.label_hr : method.label_en}</b>{#if method.id === 'boxnow'}<small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? 'Željeni paketomat unosite u podatke kupca.' : 'Enter your preferred locker in the customer details.'}</small>{/if}</span>
                 <span class="font-bold text-[#b5890a]">{method.price === 0 || (data.checkoutConfig.freeShippingThreshold > 0 && subtotal >= data.checkoutConfig.freeShippingThreshold) ? '0.00 €' : `${method.price.toFixed(2)} €`}</span>
               </button>
             {/each}

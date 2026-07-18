@@ -6,6 +6,7 @@
   import CategoryNavigation from '$lib/components/shop/CategoryNavigation.svelte';
   import { locale } from '$lib/stores/locale';
   import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd } from '$lib/seo';
+  import { publicCategoryLabel } from '$lib/category-labels';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -54,7 +55,7 @@
     goto($page.url.pathname, { keepFocus: true, noScroll: true, replaceState: true });
   }
 
-  const title = $derived($locale === 'hr' ? category.name_hr : (category.name_en || category.name_hr));
+  const title = $derived(publicCategoryLabel($locale === 'hr' ? category.name_hr : (category.name_en || category.name_hr), $locale));
   const description = $derived(`${title} u Petroni shopu: kamping oprema, dijelovi i proizvodi za kampere i karavane.`);
   const categorySchema = $derived(graphSchema([
     breadcrumbSchema([
@@ -206,7 +207,7 @@
             <input type="number" min="0" placeholder={$locale === 'hr' ? 'Max' : 'Max'} bind:value={maxPrice} onchange={() => applyFilters(1)}
               class="field text-[13px]" />
           </div>
-          <button onclick={resetFilters} class="text-[12px] underline" style="color:#b5890a">{$locale === 'hr' ? 'Resetiraj filtere' : 'Reset filters'}</button>
+          <button onclick={resetFilters} class="w-full rounded-md border border-[#e2e4e8] px-3 py-2 text-[12px] font-bold text-[#6b7178] transition-colors hover:border-[#F5C518] hover:text-[#806300]">{$locale === 'hr' ? 'Očisti filtere' : 'Clear filters'}</button>
         </div>
 
       </aside>

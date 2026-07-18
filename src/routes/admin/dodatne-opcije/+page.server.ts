@@ -21,6 +21,7 @@ function extraPayload(form: FormData) {
     name_hr: name,
     name_en: optionalTextField(form, 'name_en'),
     description_hr: optionalTextField(form, 'description_hr'),
+    description_en: optionalTextField(form, 'description_en'),
     price: numberField(form, 'price') ?? 0,
     price_type: textField(form, 'price_type') || 'per_rental',
     category: optionalTextField(form, 'category'),

@@ -2,19 +2,18 @@ import { redirect } from '@sveltejs/kit';
 import { checkboxField, integerField, linesField, numberField, optionalTextField, slugField, textField } from '$lib/admin-cms.server';
 import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
 import { supabaseAdmin } from '$lib/supabase.server';
-import { uniqueProductBrands } from '$lib/product-brands';
+import { getAdminProductBrands } from '$lib/product-brands.server';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  const [categories, productBrands] = await Promise.all([
+  const [categories, brands] = await Promise.all([
     supabaseAdmin.from('product_categories').select('*').order('sort_order'),
-    supabaseAdmin.from('products').select('brand').not('brand', 'is', null).range(0, 5000)
+    getAdminProductBrands()
   ]);
   if (categories.error) throw new Error(categories.error.message);
-  if (productBrands.error) throw new Error(productBrands.error.message);
   return {
     categories: categories.data ?? [],
-    brands: uniqueProductBrands(productBrands.data ?? [])
+    brands
   };
 };
 

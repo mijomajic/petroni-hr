@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '$lib/supabase.server';
 import { withAvailableStock, type AvailableProduct } from '$lib/shop-stock.server';
-import { uniqueProductBrands } from '$lib/product-brands';
+import { getPublicProductBrands, getUsedPublicCategoryIds } from '$lib/product-brands.server';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -70,24 +70,12 @@ export const load: PageServerLoad = async ({ params, url }) => {
     productsQuery = productsQuery.order('created_at', { ascending: false });
   }
 
-  const [{ data: products, error: productsError, count }, { data: productCategories }, productBrands] = await Promise.all([
+  const [{ data: products, error: productsError, count }, usedCategoryIds, brands] = await Promise.all([
     productsQuery.range(from, to),
-    supabaseAdmin
-      .from('shop_products_available')
-      .select('category_id')
-      .eq('is_active', true)
-      .not('category_id', 'is', null)
-      .range(0, 5000),
-    supabaseAdmin
-      .from('shop_products_available')
-      .select('brand')
-      .eq('is_active', true)
-      .in('category_id', categoryIds)
-      .not('brand', 'is', null)
-      .range(0, 5000)
+    getUsedPublicCategoryIds(),
+    getPublicProductBrands(categoryIds)
   ]);
 
-  const usedCategoryIds = new Set((productCategories ?? []).map((product) => product.category_id));
   const visibleCategoryIds = new Set(usedCategoryIds);
   for (const item of allCategories) {
     if (usedCategoryIds.has(item.id) && item.parent_id) visibleCategoryIds.add(item.parent_id);
@@ -96,7 +84,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
   return {
     category,
     categories: allCategories.filter((item) => visibleCategoryIds.has(item.id)),
-    brands: uniqueProductBrands(productBrands.data ?? []),
+    brands,
     products: (products ?? []).map((product) => withAvailableStock(product as AvailableProduct)),
     total: count ?? 0,
     page,
@@ -106,6 +94,6 @@ export const load: PageServerLoad = async ({ params, url }) => {
     brand,
     minPrice: url.searchParams.get('min') ?? '',
     maxPrice: url.searchParams.get('max') ?? '',
-    loadError: productsError?.message ?? productBrands.error?.message ?? null
+    loadError: productsError?.message ?? null
   };
 };

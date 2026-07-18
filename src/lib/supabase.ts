@@ -83,6 +83,7 @@ export type BookingExtra = {
   name_hr: string;
   name_en: string | null;
   description_hr: string | null;
+  description_en?: string | null;
   price: number;
   price_type: 'per_rental' | 'per_day' | 'refundable';
   category: 'oprema' | 'ciscenje' | 'depozit' | 'ostalo' | string | null;

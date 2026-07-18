@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '$lib/supabase.server';
 import { withAvailableStock, type AvailableProduct } from '$lib/shop-stock.server';
-import { uniqueProductBrands } from '$lib/product-brands';
+import { getPublicProductBrands, getUsedPublicCategoryIds } from '$lib/product-brands.server';
 import type { PageServerLoad } from './$types';
 
 const PAGE_SIZE = 24;
@@ -43,25 +43,14 @@ export const load: PageServerLoad = async ({ url }) => {
     productsQuery = productsQuery.order('created_at', { ascending: false });
   }
 
-  const [products, categories, productCategories, productBrands] = await Promise.all([
+  const [products, categories, usedCategoryIds, brands] = await Promise.all([
     productsQuery.range(from, to),
     supabaseAdmin.from('product_categories').select('*').order('sort_order'),
-    supabaseAdmin
-      .from('shop_products_available')
-      .select('category_id')
-      .eq('is_active', true)
-      .not('category_id', 'is', null)
-      .range(0, 5000),
-    supabaseAdmin
-      .from('shop_products_available')
-      .select('brand')
-      .eq('is_active', true)
-      .not('brand', 'is', null)
-      .range(0, 5000)
+    getUsedPublicCategoryIds(),
+    getPublicProductBrands()
   ]);
 
   const allCategories = categories.data ?? [];
-  const usedCategoryIds = new Set((productCategories.data ?? []).map((product) => product.category_id));
   const visibleCategoryIds = new Set(usedCategoryIds);
   for (const category of allCategories) {
     if (usedCategoryIds.has(category.id) && category.parent_id) visibleCategoryIds.add(category.parent_id);
@@ -71,7 +60,7 @@ export const load: PageServerLoad = async ({ url }) => {
   return {
     products: (products.data ?? []).map((product) => withAvailableStock(product as AvailableProduct)),
     categories: visibleCategories,
-    brands: uniqueProductBrands(productBrands.data ?? []),
+    brands,
     total: products.count ?? 0,
     page,
     pageSize: PAGE_SIZE,
@@ -80,6 +69,6 @@ export const load: PageServerLoad = async ({ url }) => {
     brand,
     minPrice: url.searchParams.get('min') ?? '',
     maxPrice: url.searchParams.get('max') ?? '',
-    loadError: products.error?.message ?? categories.error?.message ?? productBrands.error?.message ?? null
+    loadError: products.error?.message ?? categories.error?.message ?? null
   };
 };

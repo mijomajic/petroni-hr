@@ -904,7 +904,7 @@
                                 type="button"
                                 class="w-5 h-5 flex-shrink-0 rounded-full text-[12px] font-bold cursor-help"
                                 style="background:#f3f4f6;color:#6b7178"
-                                title={extra.description_hr ?? ''}
+                                title={($locale === 'hr' ? extra.description_hr : (extra.description_en || extra.description_hr)) ?? ''}
                                 aria-label={$locale === 'hr' ? `Informacije: ${extra.name_hr}` : `Information: ${extra.name_en || extra.name_hr}`}
                                 aria-expanded={openExtraInfo === extra.id}
                                 onclick={() => openExtraInfo = openExtraInfo === extra.id ? null : extra.id}
@@ -916,7 +916,7 @@
                               {/if}
                             </div>
                             {#if openExtraInfo === extra.id}
-                              <p class="text-xs leading-relaxed text-[#7a7f86] p-3 rounded-md" style="background:#f6f7f9">{extra.description_hr}</p>
+                              <p class="text-xs leading-relaxed text-[#7a7f86] p-3 rounded-md" style="background:#f6f7f9">{$locale === 'hr' ? extra.description_hr : (extra.description_en || extra.description_hr)}</p>
                             {/if}
                             <div class="flex items-center justify-between">
                               <span class="text-[13px] text-[#7a7f86]">

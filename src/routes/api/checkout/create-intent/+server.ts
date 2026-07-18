@@ -38,12 +38,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     address: String(customer.address ?? '').trim(),
     city: String(customer.city ?? '').trim(),
     zip: String(customer.zip ?? '').trim(),
-    country: String(customer.country ?? '').trim()
+    country: String(customer.country ?? '').trim(),
+    boxnow_locker: String(customer.boxnow_locker ?? '').trim()
   };
 
   const requiredCustomerValues = deliveryMethod === 'personal_pickup'
     ? [customerRecord.name, customerRecord.email, customerRecord.phone]
-    : Object.values(customerRecord);
+    : deliveryMethod === 'boxnow'
+      ? Object.values(customerRecord)
+      : [customerRecord.name, customerRecord.email, customerRecord.phone, customerRecord.address, customerRecord.city, customerRecord.zip, customerRecord.country];
   if (requiredCustomerValues.some((value) => !value) || !/^\S+@\S+\.\S+$/.test(customerRecord.email)) {
     return json({ success: false, error: 'Ispunite sve podatke kupca i unesite valjanu email adresu.' }, { status: 400 });
   }

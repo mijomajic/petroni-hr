@@ -2,6 +2,7 @@
   import type { ProductCategory } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
   import { page } from '$app/stores';
+  import { publicCategoryLabel } from '$lib/category-labels';
 
   let {
     categories,
@@ -18,7 +19,8 @@
   }
 
   function label(category: ProductCategory) {
-    return $locale === 'hr' ? category.name_hr : (category.name_en || category.name_hr);
+    const value = $locale === 'hr' ? category.name_hr : (category.name_en || category.name_hr);
+    return publicCategoryLabel(value, $locale);
   }
 
   function branchIsCurrent(category: ProductCategory) {
@@ -31,9 +33,21 @@
     const query = params.toString();
     return `/shop/${slug}${query ? `?${query}` : ''}`;
   }
+
+  function clearCategoryHref() {
+    const params = new URLSearchParams($page.url.searchParams);
+    params.delete('page');
+    const query = params.toString();
+    return `/shop${query ? `?${query}` : ''}`;
+  }
 </script>
 
 <nav aria-label={$locale === 'hr' ? 'Kategorije proizvoda' : 'Product categories'}>
+  {#if currentSlug}
+    <a href={clearCategoryHref()} class="mb-3 flex items-center justify-center rounded-md border border-[#e2e4e8] px-3 py-2 text-[12px] font-bold text-[#6b7178] transition-colors hover:border-[#F5C518] hover:text-[#806300]">
+      {$locale === 'hr' ? 'Očisti kategoriju' : 'Clear category'}
+    </a>
+  {/if}
   <ul class="space-y-1">
     {#each roots as category}
       {@const children = childrenOf(category.id)}
