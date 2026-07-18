@@ -11,10 +11,11 @@ declare global {
 		_bn_map_widget_config?: {
 			partnerId?: string | number;
 			parentElement: string;
-			buttonSelector: string;
-			type: 'popup';
+			buttonSelector?: string;
+			type: 'popup' | 'iframe';
 			gps: boolean;
 			autoclose: boolean;
+			autoshow?: boolean;
 			afterSelect: (selected: BoxNowLockerSelection) => void;
 		};
 	}

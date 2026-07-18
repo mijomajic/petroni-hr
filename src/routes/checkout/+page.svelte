@@ -19,6 +19,7 @@
   let boxnowLockerPostalCode = $state('');
   let boxnowWidgetReady = $state(false);
   let boxnowWidgetError = $state(false);
+  let boxnowMapOpen = $state(false);
   let loading = $state(false);
   let submitError = $state('');
   let fieldErrors = $state<Record<string, string>>({});
@@ -49,6 +50,15 @@
     if (!codAvailable && paymentMethod === 'cash_on_delivery') paymentMethod = 'bank_transfer';
   });
 
+  $effect(() => {
+    if (!boxnowMapOpen || typeof document === 'undefined') return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  });
+
   onMount(async () => {
     try {
       const result = await syncCartStock();
@@ -75,14 +85,15 @@
     window._bn_map_widget_config = {
       ...(partnerId ? { partnerId: Number.isNaN(Number(partnerId)) ? partnerId : Number(partnerId) } : {}),
       parentElement: '#boxnowmap',
-      buttonSelector: '#boxnow-locker-button',
-      type: 'popup',
+      type: 'iframe',
       gps: false,
-      autoclose: true,
+      autoclose: false,
+      autoshow: true,
       afterSelect(selected) {
         boxnowLockerId = String(selected.boxnowLockerId ?? '').trim();
         boxnowLockerAddress = String(selected.boxnowLockerAddressLine1 ?? '').trim();
         boxnowLockerPostalCode = String(selected.boxnowLockerPostalCode ?? '').trim();
+        boxnowMapOpen = false;
         if (boxnowLockerId && boxnowLockerAddress) {
           clearFieldError('boxnowLocker');
           boxnowWidgetError = false;
@@ -250,7 +261,7 @@
                       <p class="mt-1 text-xs text-[#6f5600]">{boxnowLockerPostalCode ? `${boxnowLockerPostalCode} · ` : ''}BoxNow ID: {boxnowLockerId}</p>
                     </div>
                   {/if}
-                  <button id="boxnow-locker-button" type="button" disabled={!boxnowWidgetReady} class="btn btn-dark w-full disabled:cursor-wait disabled:opacity-60">
+                  <button id="boxnow-locker-button" type="button" disabled={!boxnowWidgetReady} onclick={() => boxnowMapOpen = true} class="btn btn-dark w-full disabled:cursor-wait disabled:opacity-60">
                     {boxnowLockerId
                       ? ($locale === 'hr' ? 'Promijeni paketomat' : 'Change locker')
                       : boxnowWidgetReady
@@ -263,7 +274,6 @@
                   {:else}
                     <p class="mt-2 text-xs leading-relaxed text-[#6f5600]">{$locale === 'hr' ? 'Otvorite službenu BoxNow kartu i odaberite paketomat za dostavu.' : 'Open the official BoxNow map and select your delivery locker.'}</p>
                   {/if}
-                  <div id="boxnowmap"></div>
             </div>
             {#if deliveryMethod !== 'personal_pickup'}
               <div class="md:col-span-2"><label for="checkout_address" class="field-label">{$locale === 'hr' ? 'Adresa dostave' : 'Delivery address'} *</label><input id="checkout_address" autocomplete="street-address" class="field" aria-invalid={Boolean(fieldErrors.address)} oninput={() => clearFieldError('address')} bind:value={address} />{#if fieldErrors.address}<p class="checkout-field-error">{fieldErrors.address}</p>{/if}</div>
@@ -343,6 +353,30 @@
   </div>
 </div>
 
+<div
+  class="fixed inset-0 z-[70] flex items-center justify-center bg-[#17181a]/65 p-3 transition-opacity duration-200 md:p-8"
+  class:visible={boxnowMapOpen}
+  class:pointer-events-auto={boxnowMapOpen}
+  class:opacity-100={boxnowMapOpen}
+  class:invisible={!boxnowMapOpen}
+  class:pointer-events-none={!boxnowMapOpen}
+  class:opacity-0={!boxnowMapOpen}
+  aria-hidden={!boxnowMapOpen}
+>
+  <div class="relative h-[min(82dvh,900px)] w-[min(94vw,1800px)] overflow-hidden rounded-[10px] bg-white shadow-[0_24px_70px_rgba(20,22,26,0.28)]">
+    <div id="boxnowmap" class="absolute inset-0"></div>
+    <button
+      type="button"
+      onclick={() => boxnowMapOpen = false}
+      class="absolute right-3 top-3 z-[1] rounded-md border border-[#d9dce1] bg-white px-3 py-2 text-xs font-bold uppercase tracking-wide text-[#2b2b2b] shadow-sm transition hover:bg-[#f5f5f5] active:translate-y-px"
+    >
+      {$locale === 'hr' ? 'Zatvori' : 'Close'}
+    </button>
+  </div>
+</div>
+
+<svelte:window onkeydown={(event) => event.key === 'Escape' && (boxnowMapOpen = false)} />
+
 <style>
   :global(#checkout-customer .field[aria-invalid='true']) {
     border-color: #d92d20;
@@ -350,4 +384,13 @@
     box-shadow: 0 0 0 1px rgba(217, 45, 32, 0.1);
   }
   .checkout-field-error { margin-top: .35rem; color: #b42318; font-size: .74rem; line-height: 1.4; }
+  :global(#boxnowmap iframe[id^='boxnow_map_widget']) {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+  }
 </style>
