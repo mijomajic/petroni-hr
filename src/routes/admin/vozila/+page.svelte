@@ -11,7 +11,7 @@
   <div class="mb-8 flex items-start justify-between gap-4">
     <div>
       <h1 class="text-3xl font-black uppercase tracking-tight text-[#2b2b2b]">Vozila</h1>
-      <p class="mt-2 max-w-2xl text-sm text-[#7a7f86]">Uredite najam, prodajna i filmska vozila. Blokirani termini ovdje izravno utječu na dostupnost u rezervacijama.</p>
+      <p class="mt-2 max-w-2xl text-sm text-[#7a7f86]">Uredite najam, prodajna i filmska vozila. Javni status određuje prikaz vozila na webu; blokirani termini zasebno određuju dostupnost po datumima.</p>
     </div>
     <a href="/admin/vozila/novo" class="btn btn-primary text-black">Dodaj vozilo</a>
   </div>
@@ -25,7 +25,7 @@
       <table class="w-full text-sm">
         <thead class="border-b border-[#e7e8eb]">
           <tr>
-            {#each ['Vozilo', 'Tip', 'Kategorija', 'Kapacitet', 'Cijena', 'Status', 'Akcije'] as h}
+            {#each ['Vozilo', 'Tip', 'Kategorija', 'Kapacitet', 'Cijena', 'Javni status', 'Prodaja', 'Akcije'] as h}
               <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-[#7a7f86]">{h}</th>
             {/each}
           </tr>
@@ -55,9 +55,14 @@
                   <input type="hidden" name="id" value={vehicle.id} />
                   <input type="hidden" name="next" value={String(!vehicle.is_available)} />
                   <button class="rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-widest {vehicle.is_available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}">
-                    {vehicle.is_available ? 'Dostupno' : 'Nedostupno'}
+                    {vehicle.is_available ? 'Javno aktivno' : 'Skriveno'}
                   </button>
                 </form>
+              </td>
+              <td class="px-4 py-3">
+                <span class="rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-widest {vehicle.type === 'sale' || vehicle.is_for_sale ? 'bg-[#fff7d6] text-[#806300]' : 'bg-[#f1f2f4] text-[#7a7f86]'}">
+                  {vehicle.type === 'sale' || vehicle.is_for_sale ? 'Na prodaju' : 'Nije u prodaji'}
+                </span>
               </td>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-2">

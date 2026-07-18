@@ -7,7 +7,7 @@ export const load: PageServerLoad = async () => {
   const [vehicles, blockedDates] = await Promise.all([
     supabaseAdmin
       .from('vehicles')
-      .select('id,slug,name,type,category,seats,beds,bags,base_price_per_day,sale_price,images,is_available,sort_order,created_at')
+      .select('id,slug,name,type,category,seats,beds,bags,base_price_per_day,sale_price,images,is_available,is_for_sale,sort_order,created_at')
       .order('type', { ascending: true })
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false }),
