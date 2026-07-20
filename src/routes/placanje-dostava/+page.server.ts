@@ -1,4 +1,3 @@
-import { corvuspayAvailable } from '$lib/payments.server';
 import { normalizeCheckoutConfig } from '$lib/shop-checkout';
 import { supabaseAdmin } from '$lib/supabase.server';
 import type { PageServerLoad } from './$types';
@@ -12,8 +11,5 @@ export const load: PageServerLoad = async () => {
     'cash_on_delivery_surcharge'
   ]);
   const settings = Object.fromEntries((data ?? []).map((row) => [row.key, row.value]));
-  return {
-    corvuspayAvailable: corvuspayAvailable(),
-    checkoutConfig: normalizeCheckoutConfig(settings)
-  };
+  return { checkoutConfig: normalizeCheckoutConfig(settings) };
 };

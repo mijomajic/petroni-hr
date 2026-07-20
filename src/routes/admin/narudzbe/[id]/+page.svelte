@@ -58,6 +58,9 @@
         <div class="rounded-2xl border border-[#e7e8eb] bg-white p-6">
           <h2 class="mb-4 text-sm font-black uppercase tracking-widest text-[#2b2b2b]">Dostava</h2>
           <p class="mb-3 text-sm font-bold text-[#2b2b2b]">{deliveryLabels[order.shipping_method] ?? order.shipping_method ?? 'Nije odabrano'} · {Number(order.shipping_cost).toFixed(2)} EUR</p>
+          {#if order.shipping_method === 'overseas' && order.shipping_address?.overseas_zone_label}
+            <div class="mb-3 rounded-lg border border-[#eed68a] bg-[#fffaf0] p-3"><span class="field-label">Overseas zona</span><p class="font-bold text-[#6f5600]">{order.shipping_address.overseas_zone_label} · {order.shipping_address.zip}</p></div>
+          {/if}
           {#if order.shipping_method === 'boxnow'}
             <div class="mb-3 rounded-lg border border-[#eed68a] bg-[#fffaf0] p-3"><span class="field-label">Odabrani paketomat</span><p class="font-bold text-[#6f5600]">{order.shipping_address?.boxnow_locker_address ?? order.shipping_address?.boxnow_locker ?? 'Nije naveden'}</p>{#if order.shipping_address?.boxnow_locker_id}<p class="mt-1 text-xs text-[#8b6b00]">BoxNow ID: {order.shipping_address.boxnow_locker_id}</p>{/if}</div>
           {/if}

@@ -14,6 +14,7 @@ import { getAvailableProducts, reserveOrderStock } from '$lib/shop-stock.server'
 import {
   calculateShopOrderTotals,
   normalizeCheckoutConfig,
+  overseasZoneForPostalCode,
   pickupOnlyRequiresPersonalPickup,
   type ShopDeliveryMethod,
   type ShopPaymentMethod
@@ -88,6 +89,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       'ibans',
       'company',
       'shop_shipping_methods',
+      'shop_overseas_zones',
       'free_shipping_threshold',
       'cash_on_delivery_enabled',
       'cash_on_delivery_surcharge'
@@ -104,6 +106,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   }
   const settings = Object.fromEntries((paymentSettings ?? []).map((row) => [row.key, row.value]));
   const checkoutConfig = normalizeCheckoutConfig(settings);
+  const overseasZone = deliveryMethod === 'overseas'
+    ? overseasZoneForPostalCode(customerRecord.zip, checkoutConfig)
+    : null;
+  const shippingAddress = {
+    ...customerRecord,
+    ...(overseasZone ? {
+      overseas_zone: overseasZone.id,
+      overseas_zone_label: overseasZone.label_hr
+    } : {})
+  };
   const hasPickupOnlyItems = products.some((product) => Boolean(product.pickup_only));
   if (pickupOnlyRequiresPersonalPickup(hasPickupOnlyItems, deliveryMethod)) {
     return json({ success: false, error: 'Košarica sadrži proizvod dostupan samo za osobno preuzimanje.' }, { status: 400 });
@@ -125,7 +137,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const subtotal = Math.round(orderItems.reduce((sum, item) => sum + item.price * item.qty, 0) * 100) / 100;
   let totals;
   try {
-    totals = calculateShopOrderTotals(subtotal, deliveryMethod, paymentMethod, checkoutConfig);
+    totals = calculateShopOrderTotals(subtotal, deliveryMethod, paymentMethod, checkoutConfig, customerRecord.zip);
   } catch (pricingError) {
     return json({ success: false, error: pricingError instanceof Error ? pricingError.message : 'Odabrana kombinacija dostave i plaćanja nije dostupna.' }, { status: 400 });
   }
@@ -137,7 +149,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     customer_name: customerRecord.name,
     customer_email: customerRecord.email,
     customer_phone: customerRecord.phone,
-    shipping_address: customerRecord,
+    shipping_address: shippingAddress,
     billing_address: customerRecord,
     items: orderItems,
     subtotal: totals.subtotal,
@@ -171,6 +183,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       confirmation_number: order.confirmation_number,
       payment_method: order.payment_method,
       delivery_method: order.shipping_method,
+      delivery_zone: overseasZone?.id ?? null,
       shipping_cost: order.shipping_cost,
       payment_surcharge: order.payment_surcharge,
       total: order.total

@@ -3,7 +3,7 @@
   import { env } from '$env/dynamic/public';
   import { cart, clearCart, syncCartStock } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
-  import { calculateShopOrderTotals, deliverySupportsCashOnDelivery, type ShopDeliveryMethod, type ShopPaymentMethod } from '$lib/shop-checkout';
+  import { calculateShopOrderTotals, deliverySupportsCashOnDelivery, overseasZoneForPostalCode, type ShopDeliveryMethod, type ShopPaymentMethod } from '$lib/shop-checkout';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -36,13 +36,22 @@
   const totals = $derived.by(() => {
     if (!selectedDeliveryAvailable) return { subtotal, shippingCost: 0, paymentSurcharge: 0, total: subtotal };
     try {
-      return calculateShopOrderTotals(subtotal, deliveryMethod, paymentMethod, data.checkoutConfig);
+      return calculateShopOrderTotals(subtotal, deliveryMethod, paymentMethod, data.checkoutConfig, zip);
     } catch {
       return { subtotal, shippingCost: 0, paymentSurcharge: 0, total: subtotal };
     }
   });
   const total = $derived(totals.total);
+  const activeOverseasZone = $derived(overseasZoneForPostalCode(zip, data.checkoutConfig));
   const boxnowLockerLabel = $derived([boxnowLockerAddress, boxnowLockerPostalCode].filter(Boolean).join(', '));
+
+  function deliveryPrice(method: ShopDeliveryMethod) {
+    try {
+      return calculateShopOrderTotals(subtotal, method, 'bank_transfer', data.checkoutConfig, zip).shippingCost;
+    } catch {
+      return 0;
+    }
+  }
 
   $effect(() => {
     const nextDelivery = enabledDeliveryMethods[0]?.id;
@@ -294,8 +303,15 @@
           <div class="grid grid-cols-1 gap-3">
             {#each enabledDeliveryMethods as method}
               <button type="button" onclick={() => deliveryMethod = method.id} class="flex items-center justify-between rounded-md p-4 text-left" style="border:2px solid {deliveryMethod === method.id ? '#f5c518' : '#e2e4e8'}">
-                <span><b class="text-sm text-[#2b2b2b]">{$locale === 'hr' ? method.label_hr : method.label_en}</b>{#if method.id === 'boxnow'}<small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? 'Paketomat birate na službenoj BoxNow karti.' : 'Choose a locker on the official BoxNow map.'}</small>{/if}</span>
-                <span class="font-bold text-[#b5890a]">{method.price === 0 || (data.checkoutConfig.freeShippingThreshold > 0 && subtotal >= data.checkoutConfig.freeShippingThreshold) ? '0.00 €' : `${method.price.toFixed(2)} €`}</span>
+                <span>
+                  <b class="text-sm text-[#2b2b2b]">{$locale === 'hr' ? method.label_hr : method.label_en}</b>
+                  {#if method.id === 'overseas'}
+                    <small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? activeOverseasZone?.label_hr : activeOverseasZone?.label_en}{#if data.checkoutConfig.freeShippingThreshold > 0} · {$locale === 'hr' ? 'besplatno od' : 'free from'} {data.checkoutConfig.freeShippingThreshold.toFixed(2)} €{/if}</small>
+                  {:else if method.id === 'boxnow'}
+                    <small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? 'Paketomat birate na službenoj BoxNow karti.' : 'Choose a locker on the official BoxNow map.'}</small>
+                  {/if}
+                </span>
+                <span class="font-bold text-[#b5890a]">{deliveryPrice(method.id).toFixed(2)} €</span>
               </button>
             {/each}
           </div>

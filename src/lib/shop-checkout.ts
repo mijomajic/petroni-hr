@@ -10,12 +10,34 @@ export type ShopDeliveryOption = {
   allows_cod: boolean;
 };
 
+export type OverseasPriceTier = {
+  min: number;
+  max: number | null;
+  price: number;
+};
+
+export type OverseasShippingZone = {
+  id: 'zone_1' | 'zone_2';
+  label_hr: string;
+  label_en: string;
+  postalCodes: string[];
+  tiers: OverseasPriceTier[];
+};
+
 export type ShopCheckoutConfig = {
   deliveryMethods: ShopDeliveryOption[];
+  overseasZones: OverseasShippingZone[];
   freeShippingThreshold: number;
   cashOnDeliveryEnabled: boolean;
   cashOnDeliverySurcharge: number;
 };
+
+export const OVERSEAS_TIER_RANGES = [
+  { min: 0, max: 100 },
+  { min: 100, max: 250 },
+  { min: 250, max: 500 },
+  { min: 500, max: 1000 }
+] as const;
 
 const DEFAULT_DELIVERY_METHODS: ShopDeliveryOption[] = [
   { id: 'overseas', label_hr: 'Overseas dostava', label_en: 'Overseas delivery', price: 11, enabled: true, allows_cod: true },
@@ -30,6 +52,64 @@ function money(value: unknown, fallback = 0) {
 
 function boolean(value: unknown, fallback: boolean) {
   return typeof value === 'boolean' ? value : fallback;
+}
+
+function record(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+}
+
+export function normalizePostalCode(value: unknown) {
+  const raw = String(value ?? '').trim();
+  const digits = raw.replace(/\D/g, '');
+  return digits.length === 5 ? digits : raw.toUpperCase().replace(/\s+/g, '');
+}
+
+export function normalizePostalCodes(value: unknown): string[] {
+  const items = Array.isArray(value) ? value : String(value ?? '').split(/[\s,;]+/);
+  return [...new Set(items.map(normalizePostalCode).filter((code) => /^\d{5}$/.test(code)))].sort();
+}
+
+function flatFallbackTiers(price: number): OverseasPriceTier[] {
+  return OVERSEAS_TIER_RANGES.map((range) => ({ ...range, price }));
+}
+
+function normalizeTiers(value: unknown, fallbackPrice: number): OverseasPriceTier[] {
+  if (!Array.isArray(value)) return flatFallbackTiers(fallbackPrice);
+  const tiers = value
+    .map((item) => record(item))
+    .map((item) => ({
+      min: money(item.min, -1),
+      max: item.max === null ? null : money(item.max, -1),
+      price: money(item.price, fallbackPrice)
+    }))
+    .filter((tier) => tier.min >= 0 && (tier.max === null || tier.max > tier.min))
+    .sort((a, b) => a.min - b.min);
+  return tiers.length ? tiers : flatFallbackTiers(fallbackPrice);
+}
+
+function normalizeOverseasZones(value: unknown, fallbackPrice: number): OverseasShippingZone[] {
+  const zones = record(value);
+  const zoneOne = record(zones.zone_1);
+  const zoneTwo = record(zones.zone_2);
+  const first: OverseasShippingZone = {
+    id: 'zone_1',
+    label_hr: String(zoneOne.label_hr ?? 'Zona I'),
+    label_en: String(zoneOne.label_en ?? 'Zone I'),
+    postalCodes: [],
+    tiers: normalizeTiers(zoneOne.tiers, fallbackPrice)
+  };
+  return [
+    first,
+    {
+      id: 'zone_2',
+      label_hr: String(zoneTwo.label_hr ?? 'Zona II'),
+      label_en: String(zoneTwo.label_en ?? 'Zone II'),
+      postalCodes: normalizePostalCodes(zoneTwo.postal_codes),
+      tiers: normalizeTiers(zoneTwo.tiers, fallbackPrice)
+    }
+  ];
 }
 
 export function normalizeCheckoutConfig(settings: Record<string, unknown>): ShopCheckoutConfig {
@@ -49,20 +129,38 @@ export function normalizeCheckoutConfig(settings: Record<string, unknown>): Shop
       allows_cod: boolean(option.allows_cod, fallback.allows_cod)
     };
   });
+  const overseasPrice = deliveryMethods.find((method) => method.id === 'overseas')?.price ?? 11;
 
   return {
     deliveryMethods,
+    overseasZones: normalizeOverseasZones(settings.shop_overseas_zones, overseasPrice),
     freeShippingThreshold: money(settings.free_shipping_threshold),
     cashOnDeliveryEnabled: boolean(settings.cash_on_delivery_enabled, true),
     cashOnDeliverySurcharge: money(settings.cash_on_delivery_surcharge, 1)
   };
 }
 
+export function overseasZoneForPostalCode(postalCode: unknown, config: ShopCheckoutConfig) {
+  const normalized = normalizePostalCode(postalCode);
+  const zoneTwo = config.overseasZones.find((zone) => zone.id === 'zone_2');
+  if (zoneTwo?.postalCodes.includes(normalized)) return zoneTwo;
+  return config.overseasZones.find((zone) => zone.id === 'zone_1') ?? config.overseasZones[0];
+}
+
+export function overseasPriceForSubtotal(subtotalInput: number, postalCode: unknown, config: ShopCheckoutConfig) {
+  const subtotal = money(subtotalInput);
+  const fallbackPrice = config.deliveryMethods.find((method) => method.id === 'overseas')?.price ?? 0;
+  const zone = overseasZoneForPostalCode(postalCode, config);
+  const tier = zone?.tiers.find((candidate) => subtotal >= candidate.min && (candidate.max === null || subtotal < candidate.max));
+  return money(tier?.price, fallbackPrice);
+}
+
 export function calculateShopOrderTotals(
   subtotalInput: number,
   deliveryMethod: ShopDeliveryMethod,
   paymentMethod: ShopPaymentMethod,
-  config: ShopCheckoutConfig
+  config: ShopCheckoutConfig,
+  postalCode = ''
 ) {
   const subtotal = money(subtotalInput);
   const delivery = config.deliveryMethods.find((option) => option.id === deliveryMethod);
@@ -74,10 +172,13 @@ export function calculateShopOrderTotals(
     throw new Error('Plaćanje pouzećem nije dostupno za odabrani način dostave.');
   }
 
-  const qualifiesForFreeShipping = deliveryMethod !== 'personal_pickup'
+  const qualifiesForFreeShipping = deliveryMethod === 'overseas'
     && config.freeShippingThreshold > 0
     && subtotal >= config.freeShippingThreshold;
-  const shippingCost = deliveryMethod === 'personal_pickup' || qualifiesForFreeShipping ? 0 : money(delivery.price);
+  const configuredShippingCost = deliveryMethod === 'overseas'
+    ? overseasPriceForSubtotal(subtotal, postalCode, config)
+    : money(delivery.price);
+  const shippingCost = deliveryMethod === 'personal_pickup' || qualifiesForFreeShipping ? 0 : configuredShippingCost;
   const paymentSurcharge = paymentMethod === 'cash_on_delivery' ? money(config.cashOnDeliverySurcharge) : 0;
   const total = money(subtotal + shippingCost + paymentSurcharge);
 

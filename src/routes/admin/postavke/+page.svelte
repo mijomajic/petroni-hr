@@ -21,15 +21,40 @@
     <div class="grid gap-5 md:grid-cols-2">
       <label><span class="field-label">Admin email</span><input name="admin_email" type="email" class="field" value={data.settings.admin_email} /></label>
       <label><span class="field-label">Email pošiljatelj</span><input name="email_from" class="field" value={data.settings.email_from} /></label>
-      <label><span class="field-label">Besplatna dostava od EUR</span><input name="free_shipping_threshold" type="number" step="0.01" class="field" value={data.settings.free_shipping_threshold} /></label>
+      <label><span class="field-label">Besplatna Overseas dostava od EUR (0 = isključeno)</span><input name="free_shipping_threshold" type="number" min="0" step="0.01" class="field" value={data.settings.free_shipping_threshold} /></label>
       <label><span class="field-label">Minimalna dob vozača</span><input name="min_driver_age" type="number" class="field" value={data.settings.min_driver_age} /></label>
       <label><span class="field-label">Uključeni km po danu</span><input name="km_per_day_included" type="number" class="field" value={data.settings.km_per_day_included} /></label>
       <label><span class="field-label">Druga rata, dana prije preuzimanja</span><input name="split_payment_due_days" type="number" class="field" value={data.settings.split_payment_due_days} /></label>
       <fieldset class="md:col-span-2 rounded-xl border border-[#e7e8eb] p-5">
         <legend class="px-2 text-sm font-black uppercase tracking-wide text-[#2b2b2b]">Shop dostava i pouzeće</legend>
+        <div class="mb-6 rounded-xl border border-[#eadfba] bg-[#fffdf5] p-5">
+          <div class="mb-4 flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 class="font-bold text-[#2b2b2b]">Overseas zone i cjenovni razredi</h2>
+              <p class="mt-1 text-xs leading-relaxed text-[#7a7f86]">Zona I vrijedi za sve poštanske brojeve koji nisu navedeni u Zoni II. Besplatna Overseas dostava koristi prag iz polja iznad.</p>
+            </div>
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 text-sm font-bold"><input name="overseas_enabled" type="checkbox" checked={data.settings.overseas_enabled} class="h-4 w-4 accent-[#F5C518]" /> Overseas dostupan</label>
+              <label class="flex items-center gap-3 text-sm"><input name="overseas_allows_cod" type="checkbox" checked={data.settings.overseas_allows_cod} class="h-4 w-4 accent-[#F5C518]" /> Dopušta pouzeće</label>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[560px] text-left text-sm">
+              <thead><tr class="border-b border-[#e5dcc0] text-xs uppercase tracking-wide text-[#7a6a3c]"><th class="px-3 py-2">Vrijednost košarice</th><th class="px-3 py-2">Zona I EUR</th><th class="px-3 py-2">Zona II EUR</th></tr></thead>
+              <tbody>
+                {#each data.settings.overseas_tiers as tier, index}
+                  <tr class="border-b border-[#eee8d7] last:border-0">
+                    <td class="px-3 py-3 font-semibold text-[#4d5055]">{tier.label}</td>
+                    <td class="px-3 py-3"><input aria-label="Zona I {tier.label}" name="overseas_zone_1_price_{index}" type="number" min="0" step="0.01" class="field" value={tier.zone_1_price} /></td>
+                    <td class="px-3 py-3"><input aria-label="Zona II {tier.label}" name="overseas_zone_2_price_{index}" type="number" min="0" step="0.01" class="field" value={tier.zone_2_price} /></td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
+          <label class="mt-5 block"><span class="field-label">Poštanski brojevi Zone II — jedan u retku</span><textarea name="overseas_zone_2_postal_codes" rows="8" class="field font-mono text-xs">{data.settings.overseas_zone_2_postal_codes}</textarea></label>
+        </div>
         <div class="grid gap-5 md:grid-cols-2">
-          <label><span class="field-label">Overseas cijena EUR</span><input name="overseas_price" type="number" min="0" step="0.01" class="field" value={data.settings.overseas_price} /></label>
-          <div class="space-y-2 self-end pb-3"><label class="flex items-center gap-3 text-sm font-bold"><input name="overseas_enabled" type="checkbox" checked={data.settings.overseas_enabled} class="h-4 w-4 accent-[#F5C518]" /> Overseas dostupan</label><label class="flex items-center gap-3 text-sm"><input name="overseas_allows_cod" type="checkbox" checked={data.settings.overseas_allows_cod} class="h-4 w-4 accent-[#F5C518]" /> Dopušta pouzeće</label></div>
           <label><span class="field-label">BoxNow cijena EUR</span><input name="boxnow_price" type="number" min="0" step="0.01" class="field" value={data.settings.boxnow_price} /></label>
           <div class="space-y-2 self-end pb-3"><label class="flex items-center gap-3 text-sm font-bold"><input name="boxnow_enabled" type="checkbox" checked={data.settings.boxnow_enabled} class="h-4 w-4 accent-[#F5C518]" /> BoxNow dostupan</label><label class="flex items-center gap-3 text-sm"><input name="boxnow_allows_cod" type="checkbox" checked={data.settings.boxnow_allows_cod} class="h-4 w-4 accent-[#F5C518]" /> Dopušta pouzeće</label></div>
           <label><span class="field-label">Naknada za pouzeće EUR</span><input name="cash_on_delivery_surcharge" type="number" min="0" step="0.01" class="field" value={data.settings.cash_on_delivery_surcharge} /></label>
@@ -39,7 +64,7 @@
             <label class="flex items-center gap-3 text-sm"><input name="personal_pickup_allows_cod" type="checkbox" checked={data.settings.personal_pickup_allows_cod} class="h-4 w-4 accent-[#F5C518]" /> Pouzeće uz osobno preuzimanje</label>
           </div>
         </div>
-        <p class="mt-4 text-xs text-[#7a7f86]">Besplatna dostava koristi prag iz polja iznad. Osobno preuzimanje uvijek ima trošak 0 EUR.</p>
+        <p class="mt-4 text-xs text-[#7a7f86]">BoxNow ostaje zasebna fiksna cijena. Osobno preuzimanje uvijek ima trošak 0 EUR.</p>
       </fieldset>
       <label class="md:col-span-2">
         <span class="field-label">Tvrtka JSON</span>
