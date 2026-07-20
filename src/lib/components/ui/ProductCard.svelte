@@ -2,6 +2,7 @@
   import type { Product } from '$lib/supabase';
   import { locale } from '$lib/stores/locale';
   import { addToCart } from '$lib/stores/cart';
+  import StockNotificationForm from '$lib/components/shop/StockNotificationForm.svelte';
 
   type Props = { product: Product };
   let { product }: Props = $props();
@@ -9,8 +10,6 @@
   const name = $derived($locale === 'hr' ? product.name_hr : (product.name_en || product.name_hr));
   const img = $derived(product.images?.[0] || '');
   const addLabel = $derived($locale === 'hr' ? 'Dodaj u košaricu' : 'Add to cart');
-  const inquiryHref = $derived(`/kontakt?topic=Shop&product=${encodeURIComponent(name)}&path=${encodeURIComponent(`/product/${product.slug}`)}`);
-
   let added = $state(false);
   let limitReached = $state(false);
 
@@ -55,10 +54,10 @@
       <p class="mb-3 rounded-md bg-[#fff7e0] px-2 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#7a5d00]">{$locale === 'hr' ? 'Samo osobno preuzimanje' : 'Pickup only'}</p>
     {/if}
     {#if product.stock === 0}
-      <a href={inquiryHref} class="btn mt-auto w-full border border-[#d9dce1] bg-white py-2.5 text-[11px] text-[#2b2b2b] hover:border-[#2b2b2b]">{$locale === 'hr' ? 'Pošalji upit' : 'Send inquiry'}</a>
+      <StockNotificationForm productId={product.id} compact />
     {:else}
       <button onclick={handleAdd} class="btn w-full mt-auto text-[11px] py-2.5" style="background:{added ? '#16a34a' : '#f5c518'};color:#fff">
-        {added ? ($locale === 'hr' ? 'Dodano ✓' : 'Added ✓') : limitReached ? ($locale === 'hr' ? 'Maksimalna količina' : 'Maximum quantity') : addLabel}
+        {added ? ($locale === 'hr' ? 'Dodano' : 'Added') : limitReached ? ($locale === 'hr' ? 'Maksimalna količina' : 'Maximum quantity') : addLabel}
       </button>
     {/if}
   </div>

@@ -1,13 +1,23 @@
 <script lang="ts">
+  import { locale } from '$lib/stores/locale';
+
   const year = new Date().getFullYear();
 
-  const links = [
-    { href: '/privatnost', label: 'Privatnost & Uvjeti poslovanja' },
-    { href: '/placanje-dostava', label: 'Plaćanje & Dostava' },
-    { href: '/reklamacije-povrat', label: 'Reklamacije & Povrat' },
-    { href: '/faq', label: 'FAQ' },
-    { href: '/kontakt', label: 'Kontakt' },
-  ];
+  const links = $derived($locale === 'hr'
+    ? [
+        { href: '/privatnost', label: 'Privatnost & Uvjeti poslovanja' },
+        { href: '/placanje-dostava', label: 'Plaćanje & Dostava' },
+        { href: '/reklamacije-povrat', label: 'Reklamacije & Povrat' },
+        { href: '/faq', label: 'FAQ' },
+        { href: '/kontakt', label: 'Kontakt' }
+      ]
+    : [
+        { href: '/privatnost', label: 'Privacy & Terms of Business' },
+        { href: '/placanje-dostava', label: 'Payment & Shipping' },
+        { href: '/reklamacije-povrat', label: 'Complaints & Returns' },
+        { href: '/faq', label: 'FAQ' },
+        { href: '/kontakt', label: 'Contact' }
+      ]);
 </script>
 
 <footer style="background:#2b2b2b">
@@ -35,6 +45,6 @@
     </div>
 
     <!-- Copyright -->
-    <p class="text-[12px]" style="color:#9b9ea2">Petroni d.o.o. © {year} – All rights reserved</p>
+    <p class="text-[12px]" style="color:#9b9ea2">Petroni d.o.o. © {year} – {$locale === 'hr' ? 'Sva prava pridržana' : 'All rights reserved'}</p>
   </div>
 </footer>

@@ -4,6 +4,7 @@
   import { locale } from '$lib/stores/locale';
   import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd, truncateText } from '$lib/seo';
   import ProductCard from '$lib/components/ui/ProductCard.svelte';
+  import StockNotificationForm from '$lib/components/shop/StockNotificationForm.svelte';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -20,7 +21,6 @@
   const metaDescription = $derived(truncateText(desc || `${name} u Petroni shopu za kamping opremu i dijelove.`, 155));
   const productUrl = $derived(absoluteUrl(`/product/${product.slug}`));
   const productImage = $derived(product.images?.[0] || undefined);
-  const inquiryHref = $derived(`/kontakt?topic=Shop&product=${encodeURIComponent(name)}&path=${encodeURIComponent(`/product/${product.slug}`)}`);
   const productSchema = $derived(graphSchema([
     breadcrumbSchema([
       { name: 'Petroni', path: '/' },
@@ -59,9 +59,9 @@
 </script>
 
 <svelte:head>
-  <title>{name || 'Proizvod'} — Shop — Petroni</title>
+  <title>{name || ($locale === 'hr' ? 'Proizvod' : 'Product')} — Shop — Petroni</title>
   <meta name="description" content={metaDescription} />
-  <meta property="og:title" content={`${name || 'Proizvod'} — Shop — Petroni`} />
+  <meta property="og:title" content={`${name || ($locale === 'hr' ? 'Proizvod' : 'Product')} — Shop — Petroni`} />
   <meta property="og:description" content={metaDescription} />
   <meta property="og:type" content="product" />
   {#if productImage}<meta property="og:image" content={productImage} />{/if}
@@ -113,20 +113,22 @@
             </div>
           {/if}
 
-          <div class="flex items-center gap-4 mb-6">
-            <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
-              <button onclick={() => qty = Math.max(1, qty - 1)} class="px-4 py-3 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9]">−</button>
-              <span class="px-4 font-semibold text-[#2b2b2b] w-12 text-center">{qty}</span>
-              <button onclick={() => qty = Math.min(product.stock, qty + 1)} disabled={qty >= product.stock} class="px-4 py-3 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-35">+</button>
+          {#if product.stock === 0}
+            <div id="availability-alert" class="mb-6 scroll-mt-24">
+              <StockNotificationForm productId={product.id} expanded />
             </div>
-            {#if product.stock === 0}
-              <a href={inquiryHref} class="btn flex-1 border border-[#2b2b2b] bg-white py-3.5 text-center text-[#2b2b2b] hover:bg-[#2b2b2b] hover:text-white">{$locale === 'hr' ? 'Pošalji upit' : 'Send inquiry'}</a>
-            {:else}
+          {:else}
+            <div class="flex items-center gap-4 mb-6">
+              <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
+                <button onclick={() => qty = Math.max(1, qty - 1)} class="px-4 py-3 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9]">−</button>
+                <span class="px-4 font-semibold text-[#2b2b2b] w-12 text-center">{qty}</span>
+                <button onclick={() => qty = Math.min(product.stock, qty + 1)} disabled={qty >= product.stock} class="px-4 py-3 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-35">+</button>
+              </div>
               <button onclick={handleAdd} class="btn flex-1 py-3.5" style="background:{added ? '#16a34a' : '#f5c518'};color:#fff">
-                {added ? ($locale === 'hr' ? 'Dodano u košaricu ✓' : 'Added ✓') : ($locale === 'hr' ? 'Dodaj u košaricu' : 'Add to cart')}
+                {added ? ($locale === 'hr' ? 'Dodano u košaricu' : 'Added to cart') : ($locale === 'hr' ? 'Dodaj u košaricu' : 'Add to cart')}
               </button>
-            {/if}
-          </div>
+            </div>
+          {/if}
           {#if stockNotice}<p class="-mt-3 mb-5 text-sm text-[#9f1f18]">{stockNotice}</p>{/if}
 
           <div class="text-[13px] text-[#7a7f86] space-y-1 mb-6">

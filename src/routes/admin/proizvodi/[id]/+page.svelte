@@ -25,6 +25,13 @@
     <div class="mb-6 rounded-xl bg-[#fff7e0] p-4 text-sm text-[#6f5600]">{form.message}</div>
   {/if}
 
+  {#if data.pendingNotificationCount > 0}
+    <div class="mb-6 flex items-center justify-between gap-5 rounded-xl border border-[#eadfba] bg-[#fffaf0] p-4 text-sm text-[#6f5600]">
+      <p><b>{data.pendingNotificationCount} prijava za dostupnost.</b> Kada zalihu spremite iznad nule, obavijesti će se automatski poslati.</p>
+      <a href="/admin/obavijesti" class="shrink-0 font-bold underline underline-offset-4">Pregled prijava</a>
+    </div>
+  {/if}
+
   <form method="POST" action="?/save" class="rounded-2xl border border-[#e7e8eb] bg-white p-6">
     <div class="grid gap-5 md:grid-cols-2">
       <label><span class="field-label">Naziv HR</span><input name="name_hr" class="field" value={product.name_hr} required /></label>

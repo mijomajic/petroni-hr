@@ -193,6 +193,19 @@ export type ProductCategory = {
   sort_order: number;
 };
 
+export type ProductStockNotification = {
+  id: string;
+  product_id: string;
+  email: string;
+  locale: 'hr' | 'en';
+  status: 'pending' | 'sent' | 'cancelled';
+  requested_at: string;
+  notified_at: string | null;
+  last_attempt_at: string | null;
+  attempt_count: number;
+  last_error: string | null;
+};
+
 export type Order = {
   id: string;
   confirmation_number: string | null;

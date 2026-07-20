@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '$lib/supabase.server';
 import { withAvailableStock, type AvailableProduct } from '$lib/shop-stock.server';
-import { getPublicProductBrands, getUsedPublicCategoryIds } from '$lib/product-brands.server';
+import { getFeaturedPublicProductBrands, getPublicProductBrands, getUsedPublicCategoryIds } from '$lib/product-brands.server';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -70,10 +70,11 @@ export const load: PageServerLoad = async ({ params, url }) => {
     productsQuery = productsQuery.order('created_at', { ascending: false });
   }
 
-  const [{ data: products, error: productsError, count }, usedCategoryIds, brands] = await Promise.all([
+  const [{ data: products, error: productsError, count }, usedCategoryIds, brands, featuredBrands] = await Promise.all([
     productsQuery.range(from, to),
     getUsedPublicCategoryIds(),
-    getPublicProductBrands(categoryIds)
+    getPublicProductBrands(categoryIds),
+    getFeaturedPublicProductBrands(categoryIds)
   ]);
 
   const visibleCategoryIds = new Set(usedCategoryIds);
@@ -85,6 +86,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
     category,
     categories: allCategories.filter((item) => visibleCategoryIds.has(item.id)),
     brands,
+    featuredBrands,
     products: (products ?? []).map((product) => withAvailableStock(product as AvailableProduct)),
     total: count ?? 0,
     page,

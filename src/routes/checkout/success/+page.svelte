@@ -34,7 +34,7 @@
 </script>
 
 <svelte:head>
-  <title>{cancelled ? 'Plaćanje otkazano' : 'Narudžba zaprimljena'} — Petroni</title>
+  <title>{cancelled ? ($locale === 'hr' ? 'Plaćanje otkazano' : 'Payment cancelled') : ($locale === 'hr' ? 'Narudžba zaprimljena' : 'Order received')} — Petroni</title>
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 

@@ -4,13 +4,19 @@ import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
 import { supabaseAdmin } from '$lib/supabase.server';
 import { getActiveReservedQuantity } from '$lib/shop-stock.server';
 import { getAdminProductBrands } from '$lib/product-brands.server';
+import { notifyProductStockSubscribers } from '$lib/stock-notifications.server';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
-  const [product, categories, brands] = await Promise.all([
+  const [product, categories, brands, notifications] = await Promise.all([
     supabaseAdmin.from('products').select('*').eq('id', params.id).single(),
     supabaseAdmin.from('product_categories').select('*').order('sort_order'),
-    getAdminProductBrands()
+    getAdminProductBrands(),
+    supabaseAdmin
+      .from('product_stock_notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('product_id', params.id)
+      .eq('status', 'pending')
   ]);
   if (product.error || !product.data) throw error(404, 'Proizvod nije pronađen.');
   if (categories.error) throw new Error(categories.error.message);
@@ -20,7 +26,8 @@ export const load: PageServerLoad = async ({ params }) => {
       images_text: (product.data.images ?? []).join('\n')
     },
     categories: categories.data ?? [],
-    brands
+    brands,
+    pendingNotificationCount: notifications.count ?? 0
   };
 };
 
@@ -65,6 +72,22 @@ export const actions: Actions = {
     const { data: after, error } = await supabaseAdmin.from('products').update(payload).eq('id', params.id).select().single();
     if (error) return { message: error.message };
     await recordAdminEvent({ administrator, entityType: 'product', entityId: params.id, action: 'product_updated', beforeState: before, afterState: after });
+    if (Number(after.stock) > 0) {
+      try {
+        const delivery = await notifyProductStockSubscribers(params.id, administrator.user.id);
+        if (delivery.pending > 0) {
+          return {
+            message: delivery.failed > 0
+              ? `Proizvod je spremljen. Poslano: ${delivery.sent}; neuspjelo: ${delivery.failed}. Neuspjele prijave ostaju spremne za ponovni pokušaj.`
+              : `Proizvod je spremljen i poslano je ${delivery.sent} obavijesti o dostupnosti.`
+          };
+        }
+      } catch (notificationError) {
+        return {
+          message: `Proizvod je spremljen, ali obavijesti nije moguće poslati: ${notificationError instanceof Error ? notificationError.message : 'nepoznata greška'}`
+        };
+      }
+    }
     return { message: 'Proizvod je spremljen.' };
   }
 };

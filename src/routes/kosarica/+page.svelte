@@ -39,7 +39,7 @@
 </script>
 
 <svelte:head>
-  <title>Košarica — Petroni</title>
+  <title>{$locale === 'hr' ? 'Košarica' : 'Cart'} — Petroni</title>
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 

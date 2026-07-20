@@ -246,7 +246,7 @@
 </script>
 
 <svelte:head>
-  <title>Narudžba — Petroni</title>
+  <title>{$locale === 'hr' ? 'Narudžba' : 'Checkout'} — Petroni</title>
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 

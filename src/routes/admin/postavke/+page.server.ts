@@ -17,6 +17,7 @@ const managedKeys = [
   'booking_time_selection_start',
   'booking_time_selection_end',
   'email_from',
+  'shop_featured_brands',
   'shop_shipping_methods',
   'shop_overseas_zones',
   'cash_on_delivery_enabled',
@@ -60,6 +61,9 @@ export const load: PageServerLoad = async () => {
       split_payment_min_advance_days: Number(settings.split_payment_min_advance_days ?? 45),
       booking_time_selection_start: String(settings.booking_time_selection_start ?? '09:00'),
       booking_time_selection_end: String(settings.booking_time_selection_end ?? '18:00'),
+      shop_featured_brands: Array.isArray(settings.shop_featured_brands)
+        ? settings.shop_featured_brands.map(String).join('\n')
+        : '',
       overseas_enabled: delivery.overseas.enabled,
       overseas_allows_cod: delivery.overseas.allows_cod,
       overseas_tiers: OVERSEAS_TIER_RANGES.map((_, index) => ({
@@ -116,6 +120,15 @@ export const actions: Actions = {
       zoneTwoPrice: Math.max(0, numberField(form, `overseas_zone_2_price_${index}`) ?? priceForTier(currentZoneTwo, index, 20))
     }));
     const zoneTwoPostalCodes = normalizePostalCodes(textField(form, 'overseas_zone_2_postal_codes'));
+    const featuredBrands = [
+      ...new Map(
+        textField(form, 'shop_featured_brands')
+          .split(/\r?\n|,/)
+          .map((brand) => brand.trim())
+          .filter(Boolean)
+          .map((brand) => [brand.toLocaleLowerCase('hr'), brand])
+      ).values()
+    ];
 
     const updates: Record<string, unknown> = {
       admin_email: textField(form, 'admin_email') || 'info@petroni.hr',
@@ -129,6 +142,7 @@ export const actions: Actions = {
       split_payment_min_advance_days: Math.max(1, Math.trunc(numberField(form, 'split_payment_min_advance_days') ?? 45)),
       booking_time_selection_start: bookingTimeStart,
       booking_time_selection_end: bookingTimeEnd,
+      shop_featured_brands: featuredBrands,
       shop_shipping_methods: {
         overseas: { enabled: checkboxField(form, 'overseas_enabled'), price: overseasTiers[0].zoneOnePrice, allows_cod: checkboxField(form, 'overseas_allows_cod'), label_hr: 'Overseas dostava', label_en: 'Overseas delivery' },
         boxnow: { enabled: checkboxField(form, 'boxnow_enabled'), price: numberField(form, 'boxnow_price') ?? 9, allows_cod: checkboxField(form, 'boxnow_allows_cod'), label_hr: 'BoxNow paketomat', label_en: 'BoxNow locker' },

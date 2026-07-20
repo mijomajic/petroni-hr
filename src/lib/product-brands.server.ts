@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '$lib/supabase.server';
-import { uniqueProductBrands } from '$lib/product-brands';
+import { orderedFeaturedBrands, uniqueProductBrands } from '$lib/product-brands';
 
 const BATCH_SIZE = 1000;
 
@@ -34,6 +34,15 @@ export function getPublicProductBrands(categoryIds?: string[]) {
 
 export function getAdminProductBrands() {
   return collectBrands('products');
+}
+
+export async function getFeaturedPublicProductBrands(categoryIds?: string[]) {
+  const [available, setting] = await Promise.all([
+    getPublicProductBrands(categoryIds),
+    supabaseAdmin.from('settings').select('value').eq('key', 'shop_featured_brands').maybeSingle()
+  ]);
+  if (setting.error) return [];
+  return orderedFeaturedBrands(available, setting.data?.value);
 }
 
 export async function getUsedPublicCategoryIds() {

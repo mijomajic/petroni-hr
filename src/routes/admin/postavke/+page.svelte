@@ -28,6 +28,11 @@
       <label><span class="field-label">Minimalno dana unaprijed za 50/50</span><input name="split_payment_min_advance_days" type="number" min="1" class="field" value={data.settings.split_payment_min_advance_days} /></label>
       <label><span class="field-label">Najraniji termin rezervacije</span><input name="booking_time_selection_start" type="time" step="900" class="field" value={data.settings.booking_time_selection_start} /></label>
       <label><span class="field-label">Najkasniji termin rezervacije</span><input name="booking_time_selection_end" type="time" step="900" class="field" value={data.settings.booking_time_selection_end} /></label>
+      <label class="md:col-span-2">
+        <span class="field-label">Istaknuti shop brendovi — jedan po retku</span>
+        <textarea name="shop_featured_brands" rows="6" class="field">{data.settings.shop_featured_brands}</textarea>
+        <span class="mt-2 block text-xs leading-relaxed text-[#7a7f86]">Redoslijed ovdje određuje redoslijed izbornika u shopu. Brend se prikazuje tek kada je dodijeljen barem jednom aktivnom proizvodu.</span>
+      </label>
       <fieldset class="md:col-span-2 rounded-xl border border-[#e7e8eb] p-5">
         <legend class="px-2 text-sm font-black uppercase tracking-wide text-[#2b2b2b]">Shop dostava i pouzeće</legend>
         <div class="mb-6 rounded-xl border border-[#eadfba] bg-[#fffdf5] p-5">

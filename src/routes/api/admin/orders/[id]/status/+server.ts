@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
   if (status === 'completed') patch.shipped_at = new Date().toISOString();
   let data: Record<string, any>;
   if (status === 'cancelled') {
-    const cancelled = await cancelOrderAndReleaseStock(params.id);
+    const cancelled = await cancelOrderAndReleaseStock(params.id, administrator.user.id);
     if (cancelled.error || !cancelled.data) {
       return json({ error: cancelled.error?.message ?? 'Order could not be cancelled.' }, { status: 400 });
     }

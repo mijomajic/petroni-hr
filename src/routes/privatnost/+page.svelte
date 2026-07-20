@@ -7,8 +7,8 @@
     items?: string[];
   };
 
-  const updatedHr = '9. srpnja 2026.';
-  const updatedEn = '9 July 2026';
+  const updatedHr = '20. srpnja 2026.';
+  const updatedEn = '20 July 2026';
 
   const hrSections: PrivacySection[] = [
     {
@@ -25,6 +25,7 @@
         'Rezervacije najma: odabrano vozilo, lokacije, datumi, vremena, broj putnika, planirana kilometraža, destinacija, dodatna oprema, napomene o cijeni, način plaćanja i status rezervacije.',
         'Podaci vozača za rezervaciju: ime, prezime, email, telefon, datum rođenja, broj vozačke dozvole, država izdavanja vozačke dozvole, adresa, grad, poštanski broj i država.',
         'Shop narudžbe: ime i prezime kupca, email, telefon, adresa dostave/računa, država, naručeni proizvodi, količine, cijene, način plaćanja i status narudžbe.',
+        'Obavijesti o dostupnosti proizvoda: email adresa, odabrani proizvod, jezik poruke, vrijeme prijave i evidencija pokušaja slanja.',
         'Plaćanja i računi: iznosi, pozivi na broj, status plaćanja, bankovne upute, podaci potrebni za izdavanje računa i evidenciju pokušaja plaćanja.',
         'E-suglasnost za uvjete najma: datum i vrijeme prihvata, IP adresa, verzija prihvaćenih uvjeta i povezana rezervacija. To je evidencija prihvata, a ne jamstvo pravne provedivosti svakog pojedinog uvjeta.',
         'Tehnički podaci: sesijski kolačići, sigurnosni zapisnici, IP adresa u server zapisnicima, podaci o pogreškama i podaci pohranjeni lokalno u pregledniku za košaricu, jezik i nacrt rezervacije.',
@@ -36,6 +37,7 @@
       items: [
         'Izrada i vođenje korisničkog računa: izvršenje ugovora ili radnje prije sklapanja ugovora.',
         'Obrada rezervacija, shop narudžbi, dostave, korisničke podrške i komunikacije: izvršenje ugovora ili radnje na zahtjev korisnika.',
+        'Jednokratna obavijest kada odabrani rasprodani proizvod ponovno bude na zalihi: radnja na zahtjev korisnika. Prijava se ne koristi za opći marketing.',
         'Provjera uvjeta najma, dobi vozača, dostupnosti vozila, obračun cijene i zaštita od zlouporabe: ugovor, legitimni interes i, gdje je primjenjivo, pravna obveza.',
         'Izdavanje računa, knjigovodstvena i porezna evidencija, reklamacije i potrošačka prava: pravna obveza.',
         'Sigurnost sustava, administrativni zapisnici, sprječavanje prijevara i zaštita pravnih zahtjeva: legitimni interes.',
@@ -71,6 +73,7 @@
         'Rezervacije, narudžbe, računi, plaćanja i reklamacije čuvaju se koliko je potrebno za izvršenje usluge, računovodstvene i porezne obveze, potrošačke zahtjeve te moguće pravne zahtjeve.',
         'Evidencija prihvata uvjeta najma čuva se zajedno s rezervacijom na koju se odnosi.',
         'Email i korisnička komunikacija čuva se koliko je potrebno za rješavanje upita, podršku, dokazivanje dogovora i zaštitu prava.',
+        'Prijava za dostupnost čuva se do slanja obavijesti ili povlačenja zahtjeva; evidencija slanja može se ograničeno čuvati radi dokazivanja isporuke i zaštite od zlouporabe.',
         'Tehnički i sigurnosni zapisnici čuvaju se ograničeno vrijeme, osim ako je dulje čuvanje potrebno zbog sigurnosnog incidenta, zlouporabe ili pravnog zahtjeva.',
         'Podaci u lokalnoj pohrani preglednika, poput košarice, jezika i nacrta rezervacije, ostaju na uređaju korisnika dok ih korisnik ili preglednik ne izbriše.'
       ]
@@ -138,6 +141,7 @@
         'Rental bookings: selected vehicle, locations, dates, times, passengers, planned kilometres, destination, extras, pricing notes, payment method and booking status.',
         'Booking driver details: first name, last name, email, phone, date of birth, driving licence number, licence issuing country, address, city, postcode and country.',
         'Shop orders: customer name, email, phone, shipping/billing address, country, ordered products, quantities, prices, payment method and order status.',
+        'Back-in-stock alerts: email address, selected product, message language, request time and delivery-attempt records.',
         'Payments and invoices: amounts, payment references, payment status, bank-transfer instructions, data needed for invoices and payment-attempt records.',
         'Rental-term e-consent: acceptance date and time, IP address, accepted terms version and linked booking. This is an acceptance audit trail, not a guarantee that every individual term is legally enforceable.',
         'Technical data: session cookies, security logs, IP address in server logs, error data and browser local storage for cart, language and booking draft.',
@@ -149,6 +153,7 @@
       items: [
         'Creating and managing user accounts: contract performance or steps before entering a contract.',
         'Processing bookings, shop orders, deliveries, support and communication: contract performance or steps requested by the user.',
+        'Sending a one-time alert when a selected out-of-stock product becomes available again: a step requested by the user. The request is not used for general marketing.',
         'Checking rental conditions, driver age, vehicle availability, pricing and abuse prevention: contract, legitimate interest and, where applicable, legal obligation.',
         'Invoices, accounting and tax records, complaints and consumer rights: legal obligation.',
         'System security, administrative logs, fraud prevention and legal claims: legitimate interest.',
@@ -184,6 +189,7 @@
         'Bookings, orders, invoices, payments and complaints are kept as long as needed to provide the service, meet accounting/tax obligations, handle consumer claims and protect legal rights.',
         'Rental-term acceptance records are kept together with the booking to which they relate.',
         'Email and customer communication are kept as long as needed to handle enquiries, provide support, evidence arrangements and protect rights.',
+        'A back-in-stock request is kept until the alert is sent or the request is withdrawn; delivery records may be retained for a limited period to evidence delivery and prevent abuse.',
         'Technical and security logs are kept for a limited period, unless longer retention is needed for a security incident, abuse or legal claim.',
         'Browser local-storage data, such as cart, language and booking draft, remains on the user device until the user or browser deletes it.'
       ]
@@ -240,10 +246,10 @@
 </script>
 
 <svelte:head>
-  <title>Privatnost & Uvjeti poslovanja — Petroni</title>
-  <meta name="description" content="Petroni politika privatnosti: obrada osobnih podataka, pravne osnove, rokovi čuvanja, korisnička prava, kolačići i uvjeti poslovanja." />
-  <meta property="og:title" content="Privatnost & Uvjeti poslovanja — Petroni" />
-  <meta property="og:description" content="Petroni politika privatnosti: obrada osobnih podataka, pravne osnove, rokovi čuvanja, korisnička prava, kolačići i uvjeti poslovanja." />
+  <title>{$locale === 'hr' ? 'Privatnost & Uvjeti poslovanja' : 'Privacy & Terms of Business'} — Petroni</title>
+  <meta name="description" content={$locale === 'hr' ? 'Petroni politika privatnosti: obrada osobnih podataka, pravne osnove, rokovi čuvanja, korisnička prava, kolačići i uvjeti poslovanja.' : 'Petroni privacy policy: personal data processing, legal bases, retention, user rights, cookies and terms of business.'} />
+  <meta property="og:title" content={`${$locale === 'hr' ? 'Privatnost & Uvjeti poslovanja' : 'Privacy & Terms of Business'} — Petroni`} />
+  <meta property="og:description" content={$locale === 'hr' ? 'Petroni politika privatnosti: obrada osobnih podataka, pravne osnove, rokovi čuvanja, korisnička prava, kolačići i uvjeti poslovanja.' : 'Petroni privacy policy: personal data processing, legal bases, retention, user rights, cookies and terms of business.'} />
 </svelte:head>
 
 <div class="section">

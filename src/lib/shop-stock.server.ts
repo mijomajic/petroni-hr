@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '$lib/supabase.server';
+import { notifyProductStockSubscribers } from '$lib/stock-notifications.server';
 
 export type AvailableProduct = Record<string, unknown> & {
   id: string;
@@ -24,8 +25,19 @@ export async function commitOrderStock(orderId: string, orderStatus?: string) {
   });
 }
 
-export async function cancelOrderAndReleaseStock(orderId: string) {
-  return supabaseAdmin.rpc('cancel_shop_order_and_release_stock', { p_order_id: orderId });
+export async function cancelOrderAndReleaseStock(orderId: string, attemptedBy?: string) {
+  const { data: reservations } = await supabaseAdmin
+    .from('shop_stock_reservations')
+    .select('product_id')
+    .eq('order_id', orderId)
+    .eq('status', 'active');
+
+  const result = await supabaseAdmin.rpc('cancel_shop_order_and_release_stock', { p_order_id: orderId });
+  if (!result.error) {
+    const productIds = [...new Set((reservations ?? []).map((reservation) => reservation.product_id))];
+    await Promise.allSettled(productIds.map((productId) => notifyProductStockSubscribers(productId, attemptedBy)));
+  }
+  return result;
 }
 
 export async function getAvailableProducts(ids: string[]) {

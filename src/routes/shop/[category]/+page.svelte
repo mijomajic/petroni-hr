@@ -4,6 +4,7 @@
   import type { Product, ProductCategory } from '$lib/supabase';
   import ProductCard from '$lib/components/ui/ProductCard.svelte';
   import CategoryNavigation from '$lib/components/shop/CategoryNavigation.svelte';
+  import FeaturedBrands from '$lib/components/shop/FeaturedBrands.svelte';
   import { locale } from '$lib/stores/locale';
   import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd } from '$lib/seo';
   import { publicCategoryLabel } from '$lib/category-labels';
@@ -14,6 +15,7 @@
   const category: ProductCategory = $derived(data.category as ProductCategory);
   const products: Product[] = $derived(data.products as Product[]);
   const brands: string[] = $derived(data.brands as string[]);
+  const featuredBrands: string[] = $derived(data.featuredBrands as string[]);
   const loading = false;
   const total = $derived(data.total as number);
   const pageNumber = $derived(data.page as number);
@@ -56,7 +58,9 @@
   }
 
   const title = $derived(publicCategoryLabel($locale === 'hr' ? category.name_hr : (category.name_en || category.name_hr), $locale));
-  const description = $derived(`${title} u Petroni shopu: kamping oprema, dijelovi i proizvodi za kampere i karavane.`);
+  const description = $derived($locale === 'hr'
+    ? `${title} u Petroni shopu: kamping oprema, dijelovi i proizvodi za kampere i karavane.`
+    : `${title} at Petroni Shop: camping equipment, parts and products for campers and caravans.`);
   const categorySchema = $derived(graphSchema([
     breadcrumbSchema([
       { name: 'Petroni', path: '/' },
@@ -116,14 +120,16 @@
       </p>
     {/if}
 
+    <FeaturedBrands brands={featuredBrands} activeBrand={brand} />
+
     <!-- Main layout: products + sidebar -->
     <div class="flex flex-col lg:flex-row gap-10">
 
       <!-- Products -->
       <div class="flex-1">
         {#if loading}
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
-            {#each Array(9) as _}<div class="rounded-lg aspect-square animate-pulse bg-[#f1f2f4]"></div>{/each}
+          <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {#each Array(12) as _}<div class="rounded-lg aspect-square animate-pulse bg-[#f1f2f4]"></div>{/each}
           </div>
         {:else if products.length === 0}
           <div class="py-20 text-center card">
@@ -133,7 +139,7 @@
             <a href="/shop" class="btn btn-primary px-6 py-3">{$locale === 'hr' ? 'Sve kategorije' : 'All categories'}</a>
           </div>
         {:else}
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div data-testid="shop-product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {#each products as product}<ProductCard {product} />{/each}
           </div>
 

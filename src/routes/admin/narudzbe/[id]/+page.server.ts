@@ -45,7 +45,7 @@ export const actions: Actions = {
     if (status === 'completed') patch.shipped_at = new Date().toISOString();
     let after: Record<string, any>;
     if (status === 'cancelled') {
-      const cancelled = await cancelOrderAndReleaseStock(params.id);
+      const cancelled = await cancelOrderAndReleaseStock(params.id, administrator.user.id);
       if (cancelled.error || !cancelled.data) {
         return fail(400, { message: cancelled.error?.message ?? 'Narudžbu nije moguće otkazati.' });
       }

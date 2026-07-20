@@ -21,6 +21,7 @@
     { href: '/admin/naknade', label: 'Naknade', icon: 'M12 3v18M17 7H9.5a3.5 3.5 0 0 0 0 7H15a3 3 0 0 1 0 6H6' },
     { href: '/admin/dodatne-opcije', label: 'Dodatne opcije', icon: 'M12 5v14M5 12h14M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h6v6h-6v-6Z' },
     { href: '/admin/proizvodi', label: 'Proizvodi', icon: 'm4 7 8-4 8 4-8 4-8-4Zm0 0v10l8 4 8-4V7M12 11v10' },
+    { href: '/admin/obavijesti', label: 'Obavijesti zalihe', icon: 'M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Zm-8 12h4' },
     { href: '/admin/narudzbe', label: 'Narudžbe', icon: 'M3 4h2l2 11h10l3-8H6m2 12h.01M17 19h.01' },
     { href: '/admin/objave', label: 'Objave', icon: 'M5 4h14v16H5V4Zm3 4h8m-8 4h8m-8 4h5' },
     { href: '/admin/uvjeti-najma', label: 'Uvjeti najma', icon: 'M6 3h9l3 3v15H6V3Zm9 0v4h4M9 11h6m-6 4h6m-6 4h4' },

@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { supabaseAdmin } from '$lib/supabase.server';
 import { createOrderConfirmationPdf } from '$lib/invoice.server';
 import { renderTermsMarkup } from '$lib/terms-markup';
+import { absoluteUrl } from '$lib/seo';
 
 async function emailConfig() {
   const { data } = await supabaseAdmin
@@ -37,6 +38,7 @@ function escapeHtml(value: unknown): string {
 type EmailContext = {
   bookingId?: string;
   orderId?: string;
+  stockNotificationId?: string;
   messageType: string;
   recipient: string;
   attemptedBy?: string;
@@ -45,8 +47,12 @@ type EmailContext = {
 const euro = (value: unknown) => `${Number(value ?? 0).toFixed(2)} EUR`;
 const date = (value: unknown) => String(value ?? '').split('-').reverse().join('.');
 
-function emailLayout(title: string, content: string) {
-  return `<div style="margin:0;padding:32px 16px;background:#f5f5f3;font-family:Arial,sans-serif;color:#252525"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:0 auto;background:#ffffff"><tr><td style="padding:28px 32px;background:#252525;color:#ffffff"><div style="font-size:12px;letter-spacing:2px;font-weight:700">PETRONI</div><div style="margin-top:6px;font-size:14px;color:#d7d7d7">Najam kampera i oprema za putovanja</div></td></tr><tr><td style="padding:32px"><h1 style="margin:0 0 18px;font-size:26px;line-height:1.2;color:#252525">${title}</h1>${content}</td></tr><tr><td style="padding:20px 32px;background:#f5f5f3;font-size:12px;line-height:1.5;color:#666">Za pitanja nam odgovorite na ovaj email ili nam se javite na info@petroni.hr.</td></tr></table></div>`;
+function emailLayout(title: string, content: string, locale: 'hr' | 'en' = 'hr') {
+  const tagline = locale === 'hr' ? 'Najam kampera i oprema za putovanja' : 'Camper rental and travel equipment';
+  const footer = locale === 'hr'
+    ? 'Za pitanja nam odgovorite na ovaj email ili nam se javite na info@petroni.hr.'
+    : 'Reply to this email if you have a question, or contact us at info@petroni.hr.';
+  return `<div style="margin:0;padding:32px 16px;background:#f5f5f3;font-family:Arial,sans-serif;color:#252525"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:0 auto;background:#ffffff"><tr><td style="padding:28px 32px;background:#252525;color:#ffffff"><div style="font-size:12px;letter-spacing:2px;font-weight:700">PETRONI</div><div style="margin-top:6px;font-size:14px;color:#d7d7d7">${tagline}</div></td></tr><tr><td style="padding:32px"><h1 style="margin:0 0 18px;font-size:26px;line-height:1.2;color:#252525">${title}</h1>${content}</td></tr><tr><td style="padding:20px 32px;background:#f5f5f3;font-size:12px;line-height:1.5;color:#666">${footer}</td></tr></table></div>`;
 }
 
 function detailRows(rows: Array<[string, unknown]>) {
@@ -101,6 +107,7 @@ async function recordEmailAttempt(
   const { error } = await supabaseAdmin.from('email_attempts').insert({
     booking_id: context.bookingId ?? null,
     order_id: context.orderId ?? null,
+    product_stock_notification_id: context.stockNotificationId ?? null,
     message_type: context.messageType,
     recipient: context.recipient,
     status: result.status,
@@ -109,6 +116,48 @@ async function recordEmailAttempt(
     attempted_by: context.attemptedBy ?? null
   });
   if (error) console.error('Email attempt audit failed', error.message);
+}
+
+export async function sendProductAvailabilityNotification(input: {
+  notificationId: string;
+  email: string;
+  locale: 'hr' | 'en';
+  product: { slug: string; name_hr: string; name_en?: string | null };
+  attemptedBy?: string;
+}) {
+  const config = await emailConfig();
+  const name = input.locale === 'en'
+    ? (input.product.name_en || input.product.name_hr)
+    : input.product.name_hr;
+  const productUrl = absoluteUrl(`/product/${input.product.slug}`);
+  const title = input.locale === 'hr' ? 'Proizvod je ponovno dostupan' : 'The product is back in stock';
+  const intro = input.locale === 'hr'
+    ? `Proizvod <strong>${escapeHtml(name)}</strong> koji ste pratili ponovno je dostupan.`
+    : `The product <strong>${escapeHtml(name)}</strong> you were watching is available again.`;
+  const button = input.locale === 'hr' ? 'Pogledaj proizvod' : 'View product';
+  const note = input.locale === 'hr'
+    ? 'Ova poruka ne rezervira proizvod. Dostupnost se može promijeniti do završetka narudžbe.'
+    : 'This message does not reserve the product. Availability may change before checkout is completed.';
+
+  return send(
+    {
+      from: config.from,
+      replyTo: config.admin,
+      to: input.email,
+      subject: input.locale === 'hr' ? `${name} je ponovno dostupan` : `${name} is back in stock`,
+      html: emailLayout(
+        title,
+        `<p style="font-size:16px;line-height:1.6">${intro}</p><p style="margin:24px 0"><a href="${escapeHtml(productUrl)}" style="display:inline-block;padding:13px 18px;background:#252525;color:#ffffff;text-decoration:none;font-weight:700">${button}</a></p><p style="font-size:13px;line-height:1.6;color:#666">${note}</p>`,
+        input.locale
+      )
+    },
+    {
+      stockNotificationId: input.notificationId,
+      messageType: 'product_back_in_stock_customer',
+      recipient: input.email,
+      attemptedBy: input.attemptedBy
+    }
+  );
 }
 
 async function send(

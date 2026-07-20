@@ -4,6 +4,7 @@
   import type { Product, ProductCategory } from '$lib/supabase';
   import ProductCard from '$lib/components/ui/ProductCard.svelte';
   import CategoryNavigation from '$lib/components/shop/CategoryNavigation.svelte';
+  import FeaturedBrands from '$lib/components/shop/FeaturedBrands.svelte';
   import { locale } from '$lib/stores/locale';
   import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd } from '$lib/seo';
   import type { PageProps } from './$types';
@@ -12,6 +13,7 @@
   const allCategories: ProductCategory[] = $derived(data.categories as ProductCategory[]);
   const products: Product[] = $derived(data.products as Product[]);
   const brands: string[] = $derived(data.brands as string[]);
+  const featuredBrands: string[] = $derived(data.featuredBrands as string[]);
   const loading = false;
   const total = $derived(data.total as number);
   const pageNumber = $derived(data.page as number);
@@ -51,7 +53,9 @@
     brand = '';
     goto($page.url.pathname, { keepFocus: true, noScroll: true, replaceState: true });
   }
-  const description = 'Petroni shop za kamping opremu, dijelove za kampere i karavane, dodatnu opremu i proizvode za putovanja.';
+  const description = $derived($locale === 'hr'
+    ? 'Petroni shop za kamping opremu, dijelove za kampere i karavane, dodatnu opremu i proizvode za putovanja.'
+    : 'Petroni shop for camping equipment, camper and caravan parts, travel accessories and outdoor products.');
   const shopSchema = $derived(graphSchema([
     breadcrumbSchema([
       { name: 'Petroni', path: '/' },
@@ -77,9 +81,9 @@
 </script>
 
 <svelte:head>
-  <title>Kamping oprema i dijelovi za kamper | Petroni Shop</title>
+  <title>{$locale === 'hr' ? 'Kamping oprema i dijelovi za kamper' : 'Camping equipment and camper parts'} | Petroni Shop</title>
   <meta name="description" content={description} />
-  <meta property="og:title" content="Kamping oprema i dijelovi za kamper | Petroni Shop" />
+  <meta property="og:title" content={`${$locale === 'hr' ? 'Kamping oprema i dijelovi za kamper' : 'Camping equipment and camper parts'} | Petroni Shop`} />
   <meta property="og:description" content={description} />
   {@html `<script type="application/ld+json">${jsonLd(shopSchema)}</script>`}
 </svelte:head>
@@ -135,14 +139,16 @@
       </p>
     {/if}
 
+    <FeaturedBrands brands={featuredBrands} activeBrand={brand} />
+
     <!-- Main layout: products + sidebar -->
     <div class="flex flex-col lg:flex-row gap-10">
 
       <!-- Products -->
       <div class="flex-1">
         {#if loading}
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
-            {#each Array(9) as _}<div class="rounded-lg aspect-square animate-pulse bg-[#f1f2f4]"></div>{/each}
+          <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {#each Array(12) as _}<div class="rounded-lg aspect-square animate-pulse bg-[#f1f2f4]"></div>{/each}
           </div>
         {:else if products.length === 0}
           <div class="py-20 text-center card">
@@ -151,7 +157,7 @@
             <p class="text-[13px] text-[#9aa0a8] mb-6">{$locale === 'hr' ? 'Proizvodi se dodaju — provjerite uskoro.' : 'Products are being added — check back soon.'}</p>
           </div>
         {:else}
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div data-testid="shop-product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {#each products as product}<ProductCard {product} />{/each}
           </div>
 
