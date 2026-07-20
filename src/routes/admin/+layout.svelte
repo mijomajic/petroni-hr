@@ -24,6 +24,7 @@
     { href: '/admin/obavijesti', label: 'Obavijesti zalihe', icon: 'M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Zm-8 12h4' },
     { href: '/admin/narudzbe', label: 'Narudžbe', icon: 'M3 4h2l2 11h10l3-8H6m2 12h.01M17 19h.01' },
     { href: '/admin/objave', label: 'Objave', icon: 'M5 4h14v16H5V4Zm3 4h8m-8 4h8m-8 4h5' },
+    { href: '/admin/stranice', label: 'Javne stranice', icon: 'M4 4h16v16H4V4Zm4 4h8M8 12h8m-8 4h5' },
     { href: '/admin/uvjeti-najma', label: 'Uvjeti najma', icon: 'M6 3h9l3 3v15H6V3Zm9 0v4h4M9 11h6m-6 4h6m-6 4h4' },
     { href: '/admin/postavke', label: 'Postavke', icon: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .34 1.88l.04.05a2 2 0 1 1-2.83 2.83l-.05-.04A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.05A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.88.34l-.05.04a2 2 0 1 1-2.83-2.83l.04-.05A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.05A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.04-.05a2 2 0 1 1 2.83-2.83l.05.04A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.05A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.88-.34l.05-.04a2 2 0 1 1 2.83 2.83l-.04.05A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.05A1.7 1.7 0 0 0 19.4 15Z' },
   ];
@@ -40,7 +41,7 @@
         <p class="text-xs mt-2 text-[#8b9099]">Admin Panel</p>
       </div>
 
-      <nav class="flex-1 px-3 space-y-1 py-2">
+      <nav class="flex-1 overflow-y-auto px-3 space-y-1 py-2">
         {#each navItems as item}
           <a
             href={item.href}

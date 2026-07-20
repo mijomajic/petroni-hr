@@ -1,6 +1,20 @@
 <script lang="ts">
   import { page } from '$app/state';
+  import FaqSection from '$lib/components/content/FaqSection.svelte';
+  import { localizedText, type SitePageContent, type SitePageItem } from '$lib/site-page-content';
   import { locale } from '$lib/stores/locale';
+  import type { PageProps } from './$types';
+
+  let { data }: PageProps = $props();
+  const content = $derived(data.pageContent as SitePageContent);
+  const contactSection = $derived(content.sections.find((section) => section.type === 'contact' && section.visible));
+  const faqSection = $derived(content.sections.find((section) => section.type === 'faq' && section.visible));
+  const title = $derived(localizedText(content.title, $locale));
+  const description = $derived(localizedText(content.seoDescription, $locale));
+  const tx = (value: { hr: string; en: string } | undefined) => localizedText(value, $locale);
+  const detail = (id: string): SitePageItem | undefined => contactSection?.items?.find((item) => item.id === id);
+  const contactNote = $derived(detail('note'));
+  const contactMap = $derived(detail('map'));
 
   const product = page.url.searchParams.get('product')?.trim() ?? '';
   const productPath = page.url.searchParams.get('path')?.trim() ?? '';
@@ -31,130 +45,62 @@
       const result = await response.json();
       if (!response.ok || !result.success) throw new Error(result.error);
       sent = true;
-    } catch (error) {
-      submitError = error instanceof Error && error.message
-        ? error.message
+    } catch (submitFailure) {
+      submitError = submitFailure instanceof Error && submitFailure.message
+        ? submitFailure.message
         : ($locale === 'hr' ? 'Poruku trenutno nije moguće poslati.' : 'The message could not be sent.');
     } finally {
       loading = false;
     }
   }
-
-  let openFaq = $state<number | null>(0);
-  const faqs = $derived($locale === 'hr' ? [
-    { q: 'Kako mogu rezervirati kamper?', a: 'Rezervaciju možete obaviti online putem naše stranice za rezervacije u nekoliko koraka, ili nas kontaktirajte telefonom/e-mailom i rado ćemo Vam pomoći.' },
-    { q: 'Što je uključeno u cijenu najma?', a: 'U cijenu najma uključena je osnovna oprema vozila, kilometraža prema dogovoru te tehnička podrška tijekom putovanja. Detalje pronađite u uvjetima najma.' },
-    { q: 'Mogu li iznajmiti kamper na 2 dana?', a: 'Minimalno trajanje najma ovisi o sezoni. Za kraće najmove slobodno nas kontaktirajte za dostupnost i posebne uvjete.' },
-  ] : [
-    { q: 'How can I book a camper?', a: 'You can book online through our reservation page in a few steps, or contact us by phone/email and we will gladly help you.' },
-    { q: 'What is included in the rental price?', a: 'The rental price includes the basic vehicle equipment, agreed mileage and technical support during your trip. See the rental terms for details.' },
-    { q: 'Can I rent a camper for 2 days?', a: 'The minimum rental period depends on the season. For shorter rentals, contact us for availability and special terms.' },
-  ]);
 </script>
 
 <svelte:head>
-  <title>Kontakt za najam kampera, prodaju i shop | Petroni</title>
-  <meta name="description" content="Kontaktirajte Petroni za najam kampera, prodaju vozila, shop narudžbe i podršku. Adresa, telefon i email na jednom mjestu." />
-  <meta property="og:title" content="Kontakt za najam kampera, prodaju i shop | Petroni" />
-  <meta property="og:description" content="Kontaktirajte Petroni za najam kampera, prodaju vozila, shop narudžbe i podršku. Adresa, telefon i email na jednom mjestu." />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
 </svelte:head>
 
-<div class="section">
-  <div class="container-x">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
-      <!-- Form -->
-      <div>
-        <h1 class="text-[30px] font-bold text-[#2b2b2b] mb-3">{$locale === 'hr' ? 'Kontaktirajte nas' : 'Contact us'}</h1>
-        <p class="text-[14px] text-[#7a7f86] mb-8">{$locale === 'hr' ? 'Naš tim s veseljem stoji na raspolaganju za sva Vaša pitanja.' : 'Our team is happy to answer any of your questions.'}</p>
+{#if contactSection}
+  <section class="section">
+    <div class="container-x">
+      <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
+        <div>
+          <h1 class="mb-3 text-[30px] font-bold text-[#2b2b2b]">{tx(contactSection.title)}</h1>
+          <p class="mb-8 text-[14px] text-[#7a7f86]">{tx(contactSection.body)}</p>
 
-        {#if sent}
-          <div class="card p-8 text-center">
-            <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style="background:#fff7e0">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          {#if sent}
+            <div class="card p-8 text-center"><div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#fff7e0]"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h2 class="mb-1 text-lg font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Poruka je poslana' : 'Message sent'}</h2><p class="text-sm text-[#7a7f86]">{$locale === 'hr' ? 'Javit ćemo Vam se što je prije moguće.' : 'We will get back to you as soon as possible.'}</p></div>
+          {:else}
+            <div class="space-y-5">
+              {#if product}<div class="rounded-xl border border-[#eadfba] bg-[#fffaf0] p-4"><p class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9a7600]">{$locale === 'hr' ? 'Upit za proizvod' : 'Product inquiry'}</p><p class="mt-1 text-sm font-semibold text-[#2b2b2b]">{product}</p></div>{/if}
+              <div><label class="field-label" for="contact_name">{$locale === 'hr' ? 'Ime i prezime' : 'Full name'} *</label><input id="contact_name" class="field" required bind:value={name} /></div>
+              <div><label class="field-label" for="contact_email">Email *</label><input id="contact_email" type="email" class="field" required bind:value={email} /></div>
+              <div><label class="field-label" for="contact_phone">{$locale === 'hr' ? 'Broj telefona' : 'Phone number'}</label><input id="contact_phone" type="tel" class="field" bind:value={phone} /></div>
+              <div><label class="field-label" for="contact_topic">{$locale === 'hr' ? 'Tema' : 'Topic'} *</label><select id="contact_topic" class="field" bind:value={topic}><option>{$locale === 'hr' ? 'Prodaja' : 'Sales'}</option><option>{$locale === 'hr' ? 'Najam' : 'Rental'}</option><option>Shop</option><option>{$locale === 'hr' ? 'Ostalo' : 'Other'}</option></select></div>
+              <div><label class="field-label" for="contact_message">{$locale === 'hr' ? 'Poruka' : 'Message'} *</label><textarea id="contact_message" rows="5" class="field resize-none" required bind:value={message}></textarea></div>
+              <div class="hidden" aria-hidden="true"><label for="contact_website">Website</label><input id="contact_website" tabindex="-1" autocomplete="off" bind:value={website} /></div>
+              <label class="flex items-start gap-2 text-[13px] text-[#7a7f86]"><input type="checkbox" class="mt-1 accent-[#f5c518]" bind:checked={agree} /><span>{$locale === 'hr' ? 'Prihvaćam i slažem se s' : 'I accept and agree to the'} <a href="/privatnost" class="font-semibold text-[#b5890a]">{$locale === 'hr' ? 'uvjetima poslovanja & Politikom privatnosti' : 'terms of business & Privacy Policy'}</a></span></label>
+              {#if submitError}<p role="alert" class="rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-3 text-sm text-[#9f1f18]">{submitError}</p>{/if}
+              <button type="button" onclick={handleSubmit} disabled={loading} class="btn btn-primary px-8 py-3.5 disabled:opacity-50 active:-translate-y-px">{loading ? ($locale === 'hr' ? 'Šaljem…' : 'Sending…') : ($locale === 'hr' ? 'Pošalji' : 'Send')}</button>
             </div>
-            <h3 class="font-bold text-[#2b2b2b] text-lg mb-1">{$locale === 'hr' ? 'Poruka je poslana' : 'Message sent'}</h3>
-            <p class="text-sm text-[#7a7f86]">{$locale === 'hr' ? 'Javit ćemo Vam se što je prije moguće.' : 'We will get back to you as soon as possible.'}</p>
-          </div>
-        {:else}
-          <div class="space-y-5">
-            {#if product}
-              <div class="rounded-xl border border-[#eadfba] bg-[#fffaf0] p-4">
-                <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9a7600]">{$locale === 'hr' ? 'Upit za proizvod' : 'Product inquiry'}</p>
-                <p class="mt-1 text-sm font-semibold text-[#2b2b2b]">{product}</p>
-              </div>
-            {/if}
-            <div><label class="field-label" for="contact_name">{$locale === 'hr' ? 'Ime i prezime' : 'Full name'} *</label><input id="contact_name" class="field" required bind:value={name} /></div>
-            <div><label class="field-label" for="contact_email">{$locale === 'hr' ? 'E-mail' : 'Email'} *</label><input id="contact_email" type="email" class="field" required bind:value={email} /></div>
-            <div><label class="field-label" for="contact_phone">{$locale === 'hr' ? 'Broj telefona' : 'Phone number'}</label><input id="contact_phone" type="tel" class="field" bind:value={phone} /></div>
-            <div>
-              <label class="field-label" for="contact_topic">{$locale === 'hr' ? 'Tema' : 'Topic'} *</label>
-              <select id="contact_topic" class="field" bind:value={topic}>
-                <option>{$locale === 'hr' ? 'Prodaja' : 'Sales'}</option>
-                <option>{$locale === 'hr' ? 'Najam' : 'Rental'}</option>
-                <option>Shop</option>
-                <option>{$locale === 'hr' ? 'Ostalo' : 'Other'}</option>
-              </select>
-            </div>
-            <div><label class="field-label" for="contact_message">{$locale === 'hr' ? 'Poruka' : 'Message'} *</label><textarea id="contact_message" rows="5" class="field resize-none" required bind:value={message}></textarea></div>
-            <div class="hidden" aria-hidden="true"><label for="contact_website">Website</label><input id="contact_website" tabindex="-1" autocomplete="off" bind:value={website} /></div>
-            <label class="flex items-start gap-2 text-[13px] text-[#7a7f86]">
-              <input type="checkbox" class="mt-1 accent-[#f5c518]" bind:checked={agree} />
-              <span>{$locale === 'hr' ? 'Prihvaćam i slažem se s' : 'I accept and agree to the'} <a href="/privatnost" class="font-semibold" style="color:#f5c518">{$locale === 'hr' ? 'uvjetima poslovanja & Politikom privatnosti' : 'terms of business & Privacy Policy'}</a></span>
-            </label>
-            {#if submitError}<p role="alert" class="rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-3 text-sm text-[#9f1f18]">{submitError}</p>{/if}
-            <button onclick={handleSubmit} disabled={loading} class="btn btn-primary px-8 py-3.5 disabled:opacity-50">
-              {loading ? ($locale === 'hr' ? 'Šaljem…' : 'Sending…') : ($locale === 'hr' ? 'Pošalji' : 'Send')}
-            </button>
-          </div>
-        {/if}
-      </div>
-
-      <!-- Info + map -->
-      <div>
-        <div class="space-y-3 text-[14px] mb-6">
-          <p><span class="font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Adresa' : 'Address'}:</span> <span class="text-[#6b7178]">Slavka Tomerlina 9, 10380 Sesvete, Zagreb</span></p>
-          <p><span class="font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Telefon' : 'Phone'}:</span> <a href="tel:+385912427247" class="text-[#6b7178] hover:text-[#b5890a]">+385912427247</a></p>
-          <p><span class="font-bold text-[#2b2b2b]">Email:</span> <a href="mailto:info@petroni.hr" class="text-[#6b7178] hover:text-[#b5890a]">info@petroni.hr</a></p>
-          <p class="text-[13px] text-[#8b9099] leading-relaxed">
-            <span class="font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'NAPOMENA' : 'NOTE'}:</span>
-            {$locale === 'hr' ? 'Molimo Vas da nas za sve upite kontaktirate isključivo putem e-maila ili telefonskim pozivom. WhatsApp poruke nisu podržane kao službeni kanal komunikacije.' : 'Please contact us only by email or phone call. WhatsApp messages are not supported as an official channel.'}
-          </p>
+          {/if}
         </div>
-        <div class="card card-static p-6">
-          <p class="text-[12px] font-bold uppercase tracking-widest mb-3" style="color:#b5890a">
-            {$locale === 'hr' ? 'Lokacija' : 'Location'}
-          </p>
-          <p class="text-[15px] font-semibold text-[#2b2b2b] mb-2">Petroni d.o.o.</p>
-          <p class="text-[14px] leading-relaxed text-[#6b7178] mb-5">Slavka Tomerlina 9, 10380 Sesvete, Zagreb</p>
-          <a
-            href="https://www.google.com/maps/search/?api=1&query=Slavka%20Tomerlina%209%2C%2010380%20Sesvete%2C%20Zagreb"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-outline px-5 py-3"
-          >
-            {$locale === 'hr' ? 'Otvori u Google Maps' : 'Open in Google Maps'}
-          </a>
+
+        <div>
+          <div class="mb-6 space-y-3 text-[14px]">
+            {#each ['address', 'phone', 'email'] as id}
+              {@const item = detail(id)}
+              {#if item}<p><span class="font-bold text-[#2b2b2b]">{tx(item.title)}:</span> {#if item.href}<a href={item.href} class="text-[#6b7178] hover:text-[#b5890a]">{tx(item.body)}</a>{:else}<span class="text-[#6b7178]">{tx(item.body)}</span>{/if}</p>{/if}
+            {/each}
+            {#if contactNote}<p class="text-[13px] leading-relaxed text-[#8b9099]"><span class="font-bold uppercase text-[#2b2b2b]">{tx(contactNote.title)}:</span> {tx(contactNote.body)}</p>{/if}
+          </div>
+          {#if contactMap}<div class="card card-static p-6"><p class="mb-3 text-[12px] font-bold uppercase tracking-widest text-[#b5890a]">{tx(contactMap.title)}</p><p class="mb-5 whitespace-pre-line text-[14px] leading-relaxed text-[#6b7178]">{tx(contactMap.body)}</p>{#if contactMap.href}<a href={contactMap.href} target="_blank" rel="noopener noreferrer" class="btn btn-outline px-5 py-3">{$locale === 'hr' ? 'Otvori u Google Maps' : 'Open in Google Maps'}</a>{/if}</div>{/if}
         </div>
       </div>
     </div>
+  </section>
+{/if}
 
-    <!-- FAQ -->
-    <div class="max-w-3xl mx-auto text-center">
-      <span class="eyebrow mb-3">{$locale === 'hr' ? 'Odgovori na sva vaša pitanja' : 'Answers to all your questions'}</span>
-      <h2 class="section-title mb-8">{$locale === 'hr' ? 'Najčešće postavljena pitanja' : 'Frequently asked questions'}</h2>
-      <div class="text-left space-y-3">
-        {#each faqs as faq, i}
-          <div class="card overflow-hidden">
-            <button onclick={() => openFaq = openFaq === i ? null : i} class="w-full flex items-center justify-between gap-4 px-5 py-4 text-left">
-              <span class="font-medium text-[15px] text-[#2b2b2b]">{faq.q}</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b9099" stroke-width="2.5" class="flex-shrink-0 transition-transform" style="transform:rotate({openFaq === i ? 180 : 0}deg)"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            {#if openFaq === i}
-              <p class="px-5 pb-5 text-[14px] leading-relaxed text-[#6b7178]">{faq.a}</p>
-            {/if}
-          </div>
-        {/each}
-      </div>
-    </div>
-  </div>
-</div>
+{#if faqSection}<FaqSection section={faqSection} />{/if}
