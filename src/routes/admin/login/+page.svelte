@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { page } from '$app/state';
   import { supabase } from '$lib/supabase';
 
   let email = $state('');
   let password = $state('');
   let error = $state('');
   let loading = $state(false);
+  const passwordChanged = $derived(page.url.searchParams.get('password') === 'promijenjena');
 
   async function handleLogin() {
     loading = true;
@@ -28,9 +30,11 @@
     <div class="card p-8">
       <div class="space-y-5">
         <div><span class="field-label">Email</span><input type="email" class="field" bind:value={email} onkeydown={e => e.key === 'Enter' && handleLogin()} /></div>
-        <div><span class="field-label">Lozinka</span><input type="password" class="field" bind:value={password} onkeydown={e => e.key === 'Enter' && handleLogin()} /></div>
+        <div><div class="mb-1.5 flex items-center justify-between gap-4"><label class="field-label mb-0" for="admin_password">Lozinka</label><a href="/zaboravljena-lozinka?context=admin" class="text-xs font-semibold text-[#9a7600] hover:underline">Zaboravljena lozinka?</a></div><input id="admin_password" type="password" class="field" bind:value={password} onkeydown={e => e.key === 'Enter' && handleLogin()} /></div>
         {#if error}
           <p class="text-sm p-3 rounded-md" style="background:#fdecec;color:#e11d48">{error}</p>
+        {:else if passwordChanged}
+          <p class="rounded-md bg-[#ecfdf3] p-3 text-sm text-[#067647]">Lozinka je promijenjena. Prijavite se ponovno.</p>
         {/if}
         <button onclick={handleLogin} disabled={loading || !email || !password} class="btn btn-primary w-full disabled:opacity-50">{loading ? 'Prijava…' : 'Prijava'}</button>
       </div>

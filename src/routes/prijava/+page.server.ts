@@ -11,7 +11,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   if (user) redirect(303, safeNext(url.searchParams.get('next')));
   return {
     next: safeNext(url.searchParams.get('next')),
-    confirmationError: url.searchParams.get('error') === 'potvrda'
+    confirmationError: url.searchParams.get('error') === 'potvrda',
+    passwordChanged: url.searchParams.get('password') === 'promijenjena'
   };
 };
 

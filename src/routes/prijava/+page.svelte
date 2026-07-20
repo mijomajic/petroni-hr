@@ -26,7 +26,10 @@
             <input id="email" name="email" type="email" autocomplete="email" class="field" value={form?.email ?? ''} required />
           </div>
           <div>
-            <label class="field-label" for="password">Lozinka</label>
+            <div class="mb-1.5 flex items-center justify-between gap-4">
+              <label class="field-label mb-0" for="password">Lozinka</label>
+              <a href="/zaboravljena-lozinka?context=account" class="text-xs font-semibold text-[#9a7600] hover:underline">Zaboravili ste lozinku?</a>
+            </div>
             <input id="password" name="password" type="password" autocomplete="current-password" class="field" minlength="6" required />
           </div>
 
@@ -34,6 +37,8 @@
             <p class="rounded-md px-4 py-3 text-sm" style="background:#fdecec;color:#b42318">{form.error}</p>
           {:else if data.confirmationError}
             <p class="rounded-md px-4 py-3 text-sm" style="background:#fdecec;color:#b42318">Poveznica za potvrdu nije valjana ili je istekla. Pokušajte se registrirati ponovno.</p>
+          {:else if data.passwordChanged}
+            <p class="rounded-md bg-[#ecfdf3] px-4 py-3 text-sm text-[#067647]">Lozinka je promijenjena. Prijavite se novom lozinkom.</p>
           {/if}
 
           <button class="btn btn-primary w-full py-3.5" type="submit">Prijavi se</button>

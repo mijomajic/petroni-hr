@@ -58,6 +58,7 @@
 
       <div class="p-4 border-t border-[#eceef1]">
         <p class="text-xs truncate mb-3 text-[#8b9099]">{data.administrator.email}</p>
+        <a href="/promijeni-lozinku?context=admin" class="mb-2 block w-full rounded-md border border-[#e2e4e8] py-2 text-center text-xs font-bold uppercase tracking-wide text-[#5b6168] hover:bg-[#f6f7f9]">Promijeni lozinku</a>
         <button onclick={logout} class="w-full py-2 rounded-md text-xs font-bold uppercase tracking-wide text-[#5b6168] border border-[#e2e4e8] hover:bg-[#f6f7f9]">Odjava</button>
         <a href="/" class="block mt-2 text-center text-xs text-[#8b9099] hover:text-[#2b2b2b]">← Na stranicu</a>
       </div>

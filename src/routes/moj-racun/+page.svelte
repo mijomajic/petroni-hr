@@ -130,7 +130,10 @@
           <p class="rounded-md px-4 py-3 text-sm mt-5" style="background:#ecfdf3;color:#067647">Profil je spremljen.</p>
         {/if}
 
-        <button type="submit" class="btn btn-primary mt-7">Spremi promjene</button>
+        <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <button type="submit" class="btn btn-primary">Spremi promjene</button>
+          <a href="/promijeni-lozinku?context=account" class="btn btn-ghost">Promijeni lozinku</a>
+        </div>
       </form>
     {/if}
   </div>
