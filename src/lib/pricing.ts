@@ -58,6 +58,21 @@ export type PricingInput = {
   paymentSplit?: boolean;
 };
 
+export type BookingTimeEvent = 'pickup' | 'return';
+
+export type TimeSurcharge = {
+  kind:
+    | 'free'
+    | 'early_pickup'
+    | 'late_return'
+    | 'after_hours'
+    | 'agreement'
+    | 'overseas_possible';
+  amount: number;
+  hours: number;
+  possibleAmount: number;
+};
+
 export type PricingResult = {
   nights: number;
   billable_nights: number;
@@ -130,6 +145,94 @@ function isOutsideWindow(time: string, window: string | null): boolean {
   const [from, to] = window.split('-').map((value) => value.trim());
   if (!from || !to) return false;
   return time < from || time > to;
+}
+
+function timeToMinutes(time: string | null | undefined): number | null {
+  if (!time || !/^\d{2}:\d{2}$/.test(time)) return null;
+  const [hours, minutes] = time.split(':').map(Number);
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+  return hours * 60 + minutes;
+}
+
+function feeAmount(config: Fee[], key: string): number {
+  const fee = config.find((item) => item.key === key && item.is_active);
+  return fee ? Math.max(0, Number(fee.amount)) : 0;
+}
+
+export function calculateTimeSurcharge(
+  event: BookingTimeEvent,
+  time: string,
+  location: RentalLocation | null | undefined,
+  fees: Fee[]
+): TimeSurcharge {
+  if (!location) return { kind: 'free', amount: 0, hours: 0, possibleAmount: 0 };
+
+  const policy = location.time_policy;
+  if (policy === 'agreement_hr') {
+    return { kind: 'agreement', amount: 0, hours: 0, possibleAmount: 0 };
+  }
+  if (policy === 'agreement_overseas') {
+    const selected = timeToMinutes(time);
+    const cutoff = timeToMinutes(location.after_hours_start ?? '16:00');
+    const possibleAmount = feeAmount(fees, 'overseas_after_hours');
+    if (selected !== null && cutoff !== null && selected > cutoff && possibleAmount > 0) {
+      return { kind: 'overseas_possible', amount: 0, hours: 0, possibleAmount };
+    }
+    return { kind: 'agreement', amount: 0, hours: 0, possibleAmount: 0 };
+  }
+
+  // Backward compatibility while migration 0024 is pending.
+  if (policy !== 'zagreb_automatic') {
+    const window = event === 'pickup' ? location.pickup_window : location.return_window;
+    const amount = isOutsideWindow(time, window) ? feeAmount(fees, 'after_hours') : 0;
+    return {
+      kind: amount > 0 ? 'after_hours' : 'free',
+      amount: roundMoney(amount),
+      hours: 0,
+      possibleAmount: 0
+    };
+  }
+
+  const selected = timeToMinutes(time);
+  const window = event === 'pickup' ? location.pickup_window : location.return_window;
+  const [windowStartRaw, windowEndRaw] = String(window ?? '').split('-').map((value) => value.trim());
+  const windowStart = timeToMinutes(windowStartRaw);
+  const windowEnd = timeToMinutes(windowEndRaw);
+  const afterHoursStart = timeToMinutes(location.after_hours_start ?? '15:00');
+  if (selected === null || windowStart === null || windowEnd === null || afterHoursStart === null) {
+    return { kind: 'free', amount: 0, hours: 0, possibleAmount: 0 };
+  }
+
+  if (event === 'pickup' && selected < windowStart) {
+    const hours = (windowStart - selected) / 60;
+    return {
+      kind: 'early_pickup',
+      amount: roundMoney(hours * feeAmount(fees, 'early_pickup_hour')),
+      hours,
+      possibleAmount: 0
+    };
+  }
+
+  if (event === 'return' && selected > windowEnd && selected <= afterHoursStart) {
+    const hours = (selected - windowEnd) / 60;
+    return {
+      kind: 'late_return',
+      amount: roundMoney(hours * feeAmount(fees, 'late_return_hour')),
+      hours,
+      possibleAmount: 0
+    };
+  }
+
+  if (selected > afterHoursStart) {
+    return {
+      kind: 'after_hours',
+      amount: roundMoney(feeAmount(fees, 'after_hours')),
+      hours: 0,
+      possibleAmount: 0
+    };
+  }
+
+  return { kind: 'free', amount: 0, hours: 0, possibleAmount: 0 };
 }
 
 function emptyResult(): PricingResult {
@@ -242,25 +345,25 @@ export function calculatePricing(input: PricingInput, config: PricingConfig): Pr
     }
   }
 
-  const afterHoursFee = config.fees.find((fee) => fee.key === 'after_hours' && fee.is_active);
-  if (afterHoursFee) {
-    const eventAmount = Number(afterHoursFee.amount);
-    if (pickupLocation && isOutsideWindow(input.pickupTime, pickupLocation.pickup_window)) {
-      lineItems.push({
-        type: 'after_hours',
-        label: `${afterHoursFee.name_hr} — preuzimanje`,
-        amount: eventAmount
-      });
-      feesTotal += eventAmount;
+  const timeCharges = [
+    {
+      event: 'preuzimanje',
+      charge: calculateTimeSurcharge('pickup', input.pickupTime, pickupLocation, config.fees)
+    },
+    {
+      event: 'povrat',
+      charge: calculateTimeSurcharge('return', input.dropoffTime, dropoffLocation, config.fees)
     }
-    if (dropoffLocation && isOutsideWindow(input.dropoffTime, dropoffLocation.return_window)) {
-      lineItems.push({
-        type: 'after_hours',
-        label: `${afterHoursFee.name_hr} — povrat`,
-        amount: eventAmount
-      });
-      feesTotal += eventAmount;
-    }
+  ];
+  for (const { event, charge } of timeCharges) {
+    if (charge.amount <= 0) continue;
+    const label = charge.kind === 'early_pickup'
+      ? `Ranije preuzimanje (${charge.hours} h)`
+      : charge.kind === 'late_return'
+        ? `Kasniji povrat (${charge.hours} h)`
+        : `Naknada izvan radnog vremena — ${event}`;
+    lineItems.push({ type: 'after_hours', label, amount: charge.amount });
+    feesTotal += charge.amount;
   }
 
   let extrasTotal = 0;

@@ -6,7 +6,6 @@
     const raw = sessionStorage.getItem('petroni_booking_result');
     if (raw) result = JSON.parse(raw);
   });
-  const today = new Date().toISOString().slice(0, 10);
 </script>
 
 <svelte:head>
@@ -29,8 +28,8 @@
         {#if result.booking.payment_split}
           <p class="text-sm text-[#60656b] mt-2">
             {$locale === 'hr'
-              ? `Drugi dio: ${result.booking.second_payment_amount} EUR, ${result.booking.second_payment_due_date <= today ? `dospijeva odmah jer je preuzimanje unutar ${result.booking.second_payment_due_days} dana` : `dospijeće ${result.booking.second_payment_due_date}`}.`
-              : `Second payment: EUR ${result.booking.second_payment_amount}, ${result.booking.second_payment_due_date <= today ? `due immediately because pickup is within ${result.booking.second_payment_due_days} days` : `due ${result.booking.second_payment_due_date}`}.`}
+              ? `Drugi dio: ${result.booking.second_payment_amount} EUR, dospijeće ${result.booking.second_payment_due_date} (${result.booking.second_payment_due_days} dana prije preuzimanja).`
+              : `Second payment: EUR ${result.booking.second_payment_amount}, due ${result.booking.second_payment_due_date} (${result.booking.second_payment_due_days} days before pickup).`}
           </p>
         {/if}
       </div>

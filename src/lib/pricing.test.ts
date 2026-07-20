@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { getCroatianPublicHolidays } from './holidays';
-import { calculatePricing, type PricingConfig } from './pricing';
+import { secondPaymentDueDate, splitPaymentIsEligible, timeIsWithinBookingWindow } from './booking-rules';
+import { calculatePricing, calculateTimeSurcharge, type PricingConfig } from './pricing';
 import type { BookingExtra, RentalLocation, Season, Vehicle } from './supabase';
 
 const vehicle: Vehicle = {
@@ -245,4 +246,70 @@ test('declared border crossing and festival travel add their configured special 
     result.extra_selections.map((selection) => selection.extra_id),
     ['booking-fee', 'border-fee', 'festival-fee']
   );
+});
+
+test('Zagreb time policy prorates early pickup and late return by the selected quarter hour', () => {
+  const zagrebLocation: RentalLocation = {
+    ...location,
+    time_policy: 'zagreb_automatic',
+    after_hours_start: '15:00'
+  };
+  const fees = [
+    {
+      id: 'early', key: 'early_pickup_hour', name_hr: 'Ranije preuzimanje', description_hr: null,
+      amount: 30, fee_type: 'per_event' as const, is_active: true
+    },
+    {
+      id: 'late', key: 'late_return_hour', name_hr: 'Kasniji povrat', description_hr: null,
+      amount: 30, fee_type: 'per_event' as const, is_active: true
+    },
+    {
+      id: 'after', key: 'after_hours', name_hr: 'Izvan radnog vremena', description_hr: null,
+      amount: 85, fee_type: 'per_event' as const, is_active: true
+    }
+  ];
+
+  assert.deepEqual(
+    calculateTimeSurcharge('pickup', '12:30', zagrebLocation, fees),
+    { kind: 'early_pickup', amount: 15, hours: 0.5, possibleAmount: 0 }
+  );
+  assert.deepEqual(
+    calculateTimeSurcharge('return', '11:30', zagrebLocation, fees),
+    { kind: 'late_return', amount: 45, hours: 1.5, possibleAmount: 0 }
+  );
+  assert.equal(calculateTimeSurcharge('pickup', '14:00', zagrebLocation, fees).amount, 0);
+  assert.equal(calculateTimeSurcharge('return', '15:15', zagrebLocation, fees).amount, 85);
+});
+
+test('agreement locations never add an automatic time charge', () => {
+  const overseasLocation: RentalLocation = {
+    ...location,
+    name: 'Vienna Airport',
+    time_policy: 'agreement_overseas',
+    after_hours_start: '16:00'
+  };
+  const overseasFee = [{
+    id: 'overseas', key: 'overseas_after_hours', name_hr: 'Inozemna doplata', description_hr: null,
+    amount: 200, fee_type: 'per_event' as const, is_active: true
+  }];
+
+  assert.deepEqual(
+    calculateTimeSurcharge('pickup', '16:15', overseasLocation, overseasFee),
+    { kind: 'overseas_possible', amount: 0, hours: 0, possibleAmount: 200 }
+  );
+  assert.equal(calculateTimeSurcharge('return', '18:00', overseasLocation, overseasFee).amount, 0);
+});
+
+test('split payment requires more than 45 days and is due 45 days before pickup', () => {
+  const today = new Date('2026-07-20T12:00:00Z');
+  assert.equal(splitPaymentIsEligible('2026-09-03', 45, today), false);
+  assert.equal(splitPaymentIsEligible('2026-09-04', 45, today), true);
+  assert.equal(secondPaymentDueDate('2026-09-04', 45), '2026-07-21');
+});
+
+test('booking time window includes 09:00 and 18:00 but rejects outside values', () => {
+  assert.equal(timeIsWithinBookingWindow('09:00', '09:00', '18:00'), true);
+  assert.equal(timeIsWithinBookingWindow('18:00', '09:00', '18:00'), true);
+  assert.equal(timeIsWithinBookingWindow('08:45', '09:00', '18:00'), false);
+  assert.equal(timeIsWithinBookingWindow('18:15', '09:00', '18:00'), false);
 });

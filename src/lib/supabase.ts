@@ -75,6 +75,15 @@ export type RentalLocation = {
   location_fee: number;
   pickup_window: string | null;
   return_window: string | null;
+  time_policy?: 'zagreb_automatic' | 'agreement_hr' | 'agreement_overseas';
+  after_hours_start?: string | null;
+  sort_order: number;
+};
+
+export type BookingExtraCategory = {
+  key: string;
+  name_hr: string;
+  name_en: string;
   sort_order: number;
 };
 

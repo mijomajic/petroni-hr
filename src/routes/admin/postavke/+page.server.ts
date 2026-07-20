@@ -13,6 +13,9 @@ const managedKeys = [
   'min_driver_age',
   'km_per_day_included',
   'split_payment_due_days',
+  'split_payment_min_advance_days',
+  'booking_time_selection_start',
+  'booking_time_selection_end',
   'email_from',
   'shop_shipping_methods',
   'shop_overseas_zones',
@@ -53,7 +56,10 @@ export const load: PageServerLoad = async () => {
       free_shipping_threshold: Number(settings.free_shipping_threshold ?? 1000),
       min_driver_age: Number(settings.min_driver_age ?? 28),
       km_per_day_included: Number(settings.km_per_day_included ?? 300),
-      split_payment_due_days: Number(settings.split_payment_due_days ?? 3),
+      split_payment_due_days: Number(settings.split_payment_due_days ?? 45),
+      split_payment_min_advance_days: Number(settings.split_payment_min_advance_days ?? 45),
+      booking_time_selection_start: String(settings.booking_time_selection_start ?? '09:00'),
+      booking_time_selection_end: String(settings.booking_time_selection_end ?? '18:00'),
       overseas_enabled: delivery.overseas.enabled,
       overseas_allows_cod: delivery.overseas.allows_cod,
       overseas_tiers: OVERSEAS_TIER_RANGES.map((_, index) => ({
@@ -92,6 +98,11 @@ export const actions: Actions = {
       return fail(400, { message: 'Company ili IBAN JSON nije ispravan.' });
     }
     if (!Array.isArray(ibans)) return fail(400, { message: 'IBAN konfiguracija mora biti JSON lista.' });
+    const bookingTimeStart = textField(form, 'booking_time_selection_start') || '09:00';
+    const bookingTimeEnd = textField(form, 'booking_time_selection_end') || '18:00';
+    if (!/^\d{2}:\d{2}$/.test(bookingTimeStart) || !/^\d{2}:\d{2}$/.test(bookingTimeEnd) || bookingTimeStart >= bookingTimeEnd) {
+      return fail(400, { message: 'Raspon termina mora biti valjan, primjerice 09:00–18:00.' });
+    }
 
     const { data: before, error: settingsError } = await supabaseAdmin.from('settings').select('key,value').in('key', managedKeys);
     if (settingsError) return fail(400, { message: settingsError.message });
@@ -114,7 +125,10 @@ export const actions: Actions = {
       free_shipping_threshold: Math.max(0, numberField(form, 'free_shipping_threshold') ?? 1000),
       min_driver_age: numberField(form, 'min_driver_age') ?? 28,
       km_per_day_included: numberField(form, 'km_per_day_included') ?? 300,
-      split_payment_due_days: numberField(form, 'split_payment_due_days') ?? 3,
+      split_payment_due_days: Math.max(1, Math.trunc(numberField(form, 'split_payment_due_days') ?? 45)),
+      split_payment_min_advance_days: Math.max(1, Math.trunc(numberField(form, 'split_payment_min_advance_days') ?? 45)),
+      booking_time_selection_start: bookingTimeStart,
+      booking_time_selection_end: bookingTimeEnd,
       shop_shipping_methods: {
         overseas: { enabled: checkboxField(form, 'overseas_enabled'), price: overseasTiers[0].zoneOnePrice, allows_cod: checkboxField(form, 'overseas_allows_cod'), label_hr: 'Overseas dostava', label_en: 'Overseas delivery' },
         boxnow: { enabled: checkboxField(form, 'boxnow_enabled'), price: numberField(form, 'boxnow_price') ?? 9, allows_cod: checkboxField(form, 'boxnow_allows_cod'), label_hr: 'BoxNow paketomat', label_en: 'BoxNow locker' },

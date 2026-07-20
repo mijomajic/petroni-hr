@@ -13,6 +13,7 @@ import {
 } from '$lib/payments.server';
 import { corvuspayBookingOrderNumber } from '$lib/corvuspay.server';
 import { sendBookingReceived } from '$lib/email.server';
+import { secondPaymentDueDate, splitPaymentIsEligible, timeIsWithinBookingWindow } from '$lib/booking-rules';
 
 function ageOnDate(dateOfBirth: string, referenceDate: string): number {
   const birth = new Date(`${dateOfBirth}T00:00:00Z`);
@@ -98,7 +99,14 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
     supabaseAdmin.from('vehicles').select('*').eq('id', vehicleId).eq('type', 'rental').single(),
     loadPricingConfig(),
     supabaseAdmin.from('rental_terms').select('version,content_hr').eq('is_active', true).single(),
-    supabaseAdmin.from('settings').select('key,value').in('key', ['ibans', 'company', 'split_payment_due_days'])
+    supabaseAdmin.from('settings').select('key,value').in('key', [
+      'ibans',
+      'company',
+      'split_payment_due_days',
+      'split_payment_min_advance_days',
+      'booking_time_selection_start',
+      'booking_time_selection_end'
+    ])
   ]);
 
   if (vehicleError || !vehicle || !vehicle.is_available) {
@@ -106,6 +114,25 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
   }
   if (!terms) {
     return json({ success: false, error: 'Aktivni uvjeti najma nisu dostupni.' }, { status: 503 });
+  }
+  const settings = Object.fromEntries((paymentSettings ?? []).map((row) => [row.key, row.value]));
+  const timeSelectionStart = String(settings.booking_time_selection_start ?? '09:00');
+  const timeSelectionEnd = String(settings.booking_time_selection_end ?? '18:00');
+  if (
+    !timeIsWithinBookingWindow(body.pickupTime, timeSelectionStart, timeSelectionEnd) ||
+    !timeIsWithinBookingWindow(body.dropoffTime, timeSelectionStart, timeSelectionEnd)
+  ) {
+    return json(
+      { success: false, error: `Vrijeme preuzimanja i povrata mora biti između ${timeSelectionStart} i ${timeSelectionEnd}.` },
+      { status: 400 }
+    );
+  }
+  const splitPaymentMinAdvanceDays = Math.max(1, Number(settings.split_payment_min_advance_days ?? 45));
+  if (paymentSplit && !splitPaymentIsEligible(pickupDate, splitPaymentMinAdvanceDays)) {
+    return json(
+      { success: false, error: `Plaćanje 50/50 dostupno je samo kada je preuzimanje udaljeno više od ${splitPaymentMinAdvanceDays} dana.` },
+      { status: 400 }
+    );
   }
   const pickupLocation = pricingData.config.locations.find(
     (location) => location.name === body.pickupLocation
@@ -162,13 +189,8 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
   if (pricing.nights <= 0 || pricing.payable_total < 0) {
     return json({ success: false, error: 'Cijenu rezervacije nije moguće izračunati.' }, { status: 400 });
   }
-  const settings = Object.fromEntries((paymentSettings ?? []).map((row) => [row.key, row.value]));
-  const dueDays = Math.max(1, Number(settings.split_payment_due_days ?? 3));
-  const dueDate = new Date(`${pickupDate}T00:00:00Z`);
-  dueDate.setUTCDate(dueDate.getUTCDate() - dueDays);
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  if (dueDate < today) dueDate.setTime(today.getTime());
+  const dueDays = Math.max(1, Number(settings.split_payment_due_days ?? 45));
+  const dueDate = secondPaymentDueDate(pickupDate, dueDays);
   const firstAmount = paymentAmount(pricing.payable_total, paymentSplit, 1);
   const secondAmount = paymentSplit ? paymentAmount(pricing.payable_total, true, 2) : 0;
   const confirmationNumber = `PET-${Date.now().toString(36).toUpperCase()}`;
@@ -211,7 +233,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
     second_payment_amount: secondAmount,
     first_payment_status: 'unpaid',
     second_payment_status: paymentSplit ? 'unpaid' : 'not_applicable',
-    second_payment_due_date: paymentSplit ? dueDate.toISOString().slice(0, 10) : null,
+    second_payment_due_date: paymentSplit ? dueDate : null,
     payment_status: 'unpaid',
     status: 'pending',
     payment_method: paymentMethod,

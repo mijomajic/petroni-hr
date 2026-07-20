@@ -24,7 +24,10 @@
       <label><span class="field-label">Besplatna Overseas dostava od EUR (0 = isključeno)</span><input name="free_shipping_threshold" type="number" min="0" step="0.01" class="field" value={data.settings.free_shipping_threshold} /></label>
       <label><span class="field-label">Minimalna dob vozača</span><input name="min_driver_age" type="number" class="field" value={data.settings.min_driver_age} /></label>
       <label><span class="field-label">Uključeni km po danu</span><input name="km_per_day_included" type="number" class="field" value={data.settings.km_per_day_included} /></label>
-      <label><span class="field-label">Druga rata, dana prije preuzimanja</span><input name="split_payment_due_days" type="number" class="field" value={data.settings.split_payment_due_days} /></label>
+      <label><span class="field-label">Druga rata, dana prije preuzimanja</span><input name="split_payment_due_days" type="number" min="1" class="field" value={data.settings.split_payment_due_days} /></label>
+      <label><span class="field-label">Minimalno dana unaprijed za 50/50</span><input name="split_payment_min_advance_days" type="number" min="1" class="field" value={data.settings.split_payment_min_advance_days} /></label>
+      <label><span class="field-label">Najraniji termin rezervacije</span><input name="booking_time_selection_start" type="time" step="900" class="field" value={data.settings.booking_time_selection_start} /></label>
+      <label><span class="field-label">Najkasniji termin rezervacije</span><input name="booking_time_selection_end" type="time" step="900" class="field" value={data.settings.booking_time_selection_end} /></label>
       <fieldset class="md:col-span-2 rounded-xl border border-[#e7e8eb] p-5">
         <legend class="px-2 text-sm font-black uppercase tracking-wide text-[#2b2b2b]">Shop dostava i pouzeće</legend>
         <div class="mb-6 rounded-xl border border-[#eadfba] bg-[#fffdf5] p-5">

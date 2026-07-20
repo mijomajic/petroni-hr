@@ -43,9 +43,14 @@ export const actions: Actions = {
       location_fee: numberField(form, 'location_fee') ?? 0,
       pickup_window: optionalTextField(form, 'pickup_window'),
       return_window: optionalTextField(form, 'return_window'),
+      time_policy: textField(form, 'time_policy') || 'agreement_hr',
+      after_hours_start: optionalTextField(form, 'after_hours_start'),
       sort_order: integerField(form, 'sort_order') ?? 0
     };
     if (!payload.name) return fail(400, { message: 'Lokacija mora imati naziv.' });
+    if (!['zagreb_automatic', 'agreement_hr', 'agreement_overseas'].includes(payload.time_policy)) {
+      return fail(400, { message: 'Odabrano pravilo termina nije valjano.' });
+    }
 
     if (id) {
       const { data: before } = await supabaseAdmin.from('rental_locations').select('*').eq('id', id).single();

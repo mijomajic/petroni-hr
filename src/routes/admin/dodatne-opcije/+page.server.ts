@@ -5,13 +5,21 @@ import { supabaseAdmin } from '$lib/supabase.server';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  const { data, error } = await supabaseAdmin
-    .from('booking_extras')
-    .select('*')
-    .order('category', { ascending: true })
-    .order('sort_order', { ascending: true });
-  if (error) throw new Error(error.message);
-  return { extras: data ?? [] };
+  const [extras, categories] = await Promise.all([
+    supabaseAdmin.from('booking_extras').select('*').order('sort_order', { ascending: true }),
+    supabaseAdmin.from('booking_extra_categories').select('*').order('sort_order', { ascending: true })
+  ]);
+  if (extras.error) throw new Error(extras.error.message);
+  return {
+    extras: extras.data ?? [],
+    categories: categories.data ?? [
+      { key: 'ostalo', name_hr: 'Ostalo', name_en: 'Other', sort_order: 1 },
+      { key: 'oprema', name_hr: 'Dodatna oprema', name_en: 'Equipment', sort_order: 2 },
+      { key: 'posebne_naknade', name_hr: 'Posebne naknade', name_en: 'Special fees', sort_order: 3 },
+      { key: 'ciscenje', name_hr: 'Čišćenje', name_en: 'Cleaning', sort_order: 4 },
+      { key: 'depozit', name_hr: 'Povratni depoziti', name_en: 'Refundable deposits', sort_order: 5 }
+    ]
+  };
 };
 
 function extraPayload(form: FormData) {
@@ -33,6 +41,30 @@ function extraPayload(form: FormData) {
 }
 
 export const actions: Actions = {
+  saveCategory: async ({ request, locals }) => {
+    const administrator = await requireAdministrator(locals);
+    const form = await request.formData();
+    const key = textField(form, 'key');
+    const payload = {
+      name_hr: textField(form, 'name_hr'),
+      name_en: textField(form, 'name_en'),
+      sort_order: integerField(form, 'sort_order') ?? 0
+    };
+    if (!key || !payload.name_hr || !payload.name_en) {
+      return fail(400, { message: 'Kategorija mora imati HR i EN naziv.' });
+    }
+    const { data: before } = await supabaseAdmin.from('booking_extra_categories').select('*').eq('key', key).single();
+    const { data: after, error } = await supabaseAdmin
+      .from('booking_extra_categories')
+      .update(payload)
+      .eq('key', key)
+      .select()
+      .single();
+    if (error) return fail(400, { message: error.message });
+    await recordAdminEvent({ administrator, entityType: 'booking_extra_category', entityId: key, action: 'booking_extra_category_updated', beforeState: before, afterState: after });
+    return { message: 'Redoslijed kategorije je spremljen.' };
+  },
+
   saveExtra: async ({ request, locals }) => {
     const administrator = await requireAdministrator(locals);
     const form = await request.formData();
