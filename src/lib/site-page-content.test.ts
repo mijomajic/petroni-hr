@@ -60,6 +60,12 @@ test('English content falls back to Croatian only at render time', () => {
   assert.equal(localizedText({ hr: 'Hrvatski tekst', en: 'English text' }, 'en'), 'English text');
 });
 
+test('homepage hero keeps distinct Croatian and English CMS headlines', () => {
+  const hero = DEFAULT_SITE_PAGES.home.sections.find((section) => section.id === 'hero');
+  assert.match(localizedText(hero?.title, 'hr'), /^Putujte bez granica/);
+  assert.match(localizedText(hero?.title, 'en'), /^Travel without borders/);
+});
+
 test('only explicit CMS page keys are accepted', () => {
   assert.equal(isSitePageKey('home'), true);
   assert.equal(isSitePageKey('toString'), false);
