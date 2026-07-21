@@ -11,11 +11,11 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
-    const { user } = await locals.safeGetSession();
-    if (!user) return fail(401, { errorCode: 'session_expired' });
-
     const form = await request.formData();
     const context = passwordContext(form.get('context'));
+    const { user } = await locals.safeGetSession();
+    if (!user) return fail(401, { errorCode: 'session_expired', context });
+
     const currentPassword = String(form.get('current_password') ?? '');
     const password = String(form.get('password') ?? '');
     const passwordConfirm = String(form.get('password_confirm') ?? '');
@@ -34,6 +34,6 @@ export const actions: Actions = {
     if (error) return fail(400, { errorCode: 'auth_error', context });
 
     await locals.supabase.auth.signOut({ scope: 'global' });
-    return { success: true, context, loginPath: passwordLoginPath(context, true) };
+    redirect(303, passwordLoginPath(context, true));
   }
 };

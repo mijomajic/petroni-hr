@@ -41,25 +41,16 @@
         <p class="mt-3 text-sm leading-relaxed text-[#6b7178]">{$locale === 'hr' ? `Prijavljeni ste kao ${data.email}. Nakon promjene odjavit ćemo sve aktivne sesije.` : `You are signed in as ${data.email}. After the change, all active sessions will be signed out.`}</p>
       </div>
 
-      {#if form?.success}
-        <div class="rounded-xl border border-[#e5e7eb] bg-white p-7 shadow-[0_20px_50px_-30px_rgba(30,34,40,0.35)] md:p-9">
-          <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#fff7e0] text-[#9a7600]"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></div>
-          <h2 class="text-lg font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Lozinka je promijenjena' : 'Password changed'}</h2>
-          <p class="mt-2 text-sm leading-relaxed text-[#6b7178]">{$locale === 'hr' ? 'Sve sesije su odjavljene. Prijavite se novom lozinkom.' : 'All sessions have been signed out. Sign in with your new password.'}</p>
-          <a href={form.loginPath} class="btn btn-primary mt-6 w-full py-3.5">{$locale === 'hr' ? 'Prijavi se ponovno' : 'Sign in again'}</a>
+      <form method="POST" onsubmit={() => submitting = true} class="rounded-xl border border-[#e5e7eb] bg-white p-7 shadow-[0_20px_50px_-30px_rgba(30,34,40,0.35)] md:p-9">
+        <input type="hidden" name="context" value={context} />
+        <div class="space-y-5">
+          <div class="space-y-2"><label class="field-label" for="current_password">{$locale === 'hr' ? 'Trenutna lozinka' : 'Current password'}</label><input id="current_password" name="current_password" type="password" autocomplete="current-password" class="field" required /></div>
+          <div class="space-y-2"><label class="field-label" for="new_password">{$locale === 'hr' ? 'Nova lozinka' : 'New password'}</label><input id="new_password" name="password" type="password" autocomplete="new-password" class="field" minlength="8" required /><p class="text-xs text-[#8b9099]">{$locale === 'hr' ? 'Najmanje 8 znakova i drugačija od trenutne lozinke.' : 'At least 8 characters and different from your current password.'}</p></div>
+          <div class="space-y-2"><label class="field-label" for="new_password_confirm">{$locale === 'hr' ? 'Ponovite novu lozinku' : 'Confirm new password'}</label><input id="new_password_confirm" name="password_confirm" type="password" autocomplete="new-password" class="field" minlength="8" required /></div>
         </div>
-      {:else}
-        <form method="POST" onsubmit={() => submitting = true} class="rounded-xl border border-[#e5e7eb] bg-white p-7 shadow-[0_20px_50px_-30px_rgba(30,34,40,0.35)] md:p-9">
-          <input type="hidden" name="context" value={context} />
-          <div class="space-y-5">
-            <div class="space-y-2"><label class="field-label" for="current_password">{$locale === 'hr' ? 'Trenutna lozinka' : 'Current password'}</label><input id="current_password" name="current_password" type="password" autocomplete="current-password" class="field" required /></div>
-            <div class="space-y-2"><label class="field-label" for="new_password">{$locale === 'hr' ? 'Nova lozinka' : 'New password'}</label><input id="new_password" name="password" type="password" autocomplete="new-password" class="field" minlength="8" required /><p class="text-xs text-[#8b9099]">{$locale === 'hr' ? 'Najmanje 8 znakova i drugačija od trenutne lozinke.' : 'At least 8 characters and different from your current password.'}</p></div>
-            <div class="space-y-2"><label class="field-label" for="new_password_confirm">{$locale === 'hr' ? 'Ponovite novu lozinku' : 'Confirm new password'}</label><input id="new_password_confirm" name="password_confirm" type="password" autocomplete="new-password" class="field" minlength="8" required /></div>
-          </div>
-          {#if errorMessage}<p role="alert" class="mt-5 rounded-md bg-[#fdecec] px-4 py-3 text-sm text-[#b42318]">{errorMessage}</p>{/if}
-          <button class="btn btn-primary mt-6 w-full py-3.5 disabled:opacity-50 active:-translate-y-px" type="submit" disabled={submitting}>{submitting ? ($locale === 'hr' ? 'Spremam…' : 'Saving…') : ($locale === 'hr' ? 'Promijeni lozinku' : 'Change password')}</button>
-        </form>
-      {/if}
+        {#if errorMessage}<p role="alert" class="mt-5 rounded-md bg-[#fdecec] px-4 py-3 text-sm text-[#b42318]">{errorMessage}</p>{/if}
+        <button class="btn btn-primary mt-6 w-full py-3.5 disabled:opacity-50 active:-translate-y-px" type="submit" disabled={submitting}>{submitting ? ($locale === 'hr' ? 'Spremam…' : 'Saving…') : ($locale === 'hr' ? 'Promijeni lozinku' : 'Change password')}</button>
+      </form>
     </div>
   </div>
 </section>

@@ -35,6 +35,6 @@ export const actions: Actions = {
 
     cookies.delete(PASSWORD_RECOVERY_COOKIE, { path: '/' });
     await locals.supabase.auth.signOut({ scope: 'global' });
-    return { success: true, context, loginPath: passwordLoginPath(context, true) };
+    redirect(303, passwordLoginPath(context, true));
   }
 };
