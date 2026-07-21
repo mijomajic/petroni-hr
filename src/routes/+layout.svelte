@@ -1,6 +1,5 @@
 <script lang="ts">
   import './layout.css';
-  import { setupI18n } from '$lib/i18n';
   import Header from '$lib/components/layout/Header.svelte';
   import Footer from '$lib/components/layout/Footer.svelte';
   import { onMount, tick } from 'svelte';
@@ -13,10 +12,6 @@
   const canonicalUrl = $derived(absoluteUrl(canonicalPath($page.url.pathname)));
   const hasSearchParams = $derived($page.url.searchParams.toString().length > 0);
   const defaultDescription = 'Petroni nudi najam i prodaju kampera i karavana, kamping opremu, podršku za putovanja i lokacije diljem Hrvatske i Europe.';
-
-  // Initialise i18n synchronously — messages are bundled, so no need to gate
-  // rendering behind a loading screen (that was the main cause of slow loads).
-  setupI18n();
 
   let observer: IntersectionObserver | undefined;
 

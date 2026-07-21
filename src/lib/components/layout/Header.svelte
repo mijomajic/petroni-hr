@@ -2,7 +2,6 @@
   import { page } from '$app/stores';
   import { cart } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
-  import { _ } from 'svelte-i18n';
   import CartDrawer from '$lib/components/ui/CartDrawer.svelte';
 
   let mobileOpen = $state(false);
@@ -12,19 +11,36 @@
   const cartCount = $derived($cart.reduce((acc, i) => acc + i.qty, 0));
   const accountHref = $derived($page.data.user ? '/moj-racun' : '/prijava');
 
+  const navCopy = {
+    hr: {
+      home: 'Naslovnica', vehicles: 'Vozila', rental: 'Najam kampera', sale: 'Vozila za prodaju',
+      film: 'Vozila za filmske produkcije', shop: 'Shop', news: 'Novosti', about: 'O nama',
+      contact: 'Kontakt', book: 'Rezerviraj'
+    },
+    en: {
+      home: 'Home', vehicles: 'Vehicles', rental: 'Camper Rental', sale: 'Vehicles for Sale',
+      film: 'Film Production Vehicles', shop: 'Shop', news: 'News', about: 'About Us',
+      contact: 'Contact', book: 'Book Now'
+    }
+  } as const;
+
+  function navLabel(key: keyof typeof navCopy.hr) {
+    return navCopy[$locale][key];
+  }
+
   const navLinks = [
-    { href: '/', label: () => $_('nav.home') },
+    { href: '/', label: () => navLabel('home') },
     {
-      href: '/vozila', label: () => $_('nav.vehicles'), children: [
-        { href: '/vozila/najam-kampera', label: () => $_('nav.rental') },
-        { href: '/vozila/vozila-za-prodaju', label: () => $_('nav.sale') },
-        { href: '/vozila/vozila-za-filmske-produkcije', label: () => $_('nav.film') },
+      href: '/vozila', label: () => navLabel('vehicles'), children: [
+        { href: '/vozila/najam-kampera', label: () => navLabel('rental') },
+        { href: '/vozila/vozila-za-prodaju', label: () => navLabel('sale') },
+        { href: '/vozila/vozila-za-filmske-produkcije', label: () => navLabel('film') },
       ]
     },
-    { href: '/shop', label: () => $_('nav.shop') },
-    { href: '/novosti', label: () => $_('nav.news') },
-    { href: '/o-nama', label: () => $_('nav.about') },
-    { href: '/kontakt', label: () => $_('nav.contact') },
+    { href: '/shop', label: () => navLabel('shop') },
+    { href: '/novosti', label: () => navLabel('news') },
+    { href: '/o-nama', label: () => navLabel('about') },
+    { href: '/kontakt', label: () => navLabel('contact') },
   ];
 
   function isActive(href: string): boolean {
@@ -114,7 +130,7 @@
       <!-- Book CTA -->
       <div class="hidden lg:block">
         <a href="/rezerviraj" class="btn btn-primary px-5 py-2.5 text-[12px]">
-          {$_('nav.book')}
+          {navLabel('book')}
         </a>
       </div>
 
@@ -175,7 +191,7 @@
     </nav>
 
     <div class="mt-8 grid grid-cols-1 gap-3">
-      <a href="/rezerviraj" onclick={() => mobileOpen = false} class="btn btn-primary w-full py-4">{$_('nav.book')}</a>
+      <a href="/rezerviraj" onclick={() => mobileOpen = false} class="btn btn-primary w-full py-4">{navLabel('book')}</a>
       <a href={accountHref} onclick={() => mobileOpen = false} class="btn btn-ghost w-full">
         {$page.data.user ? 'Moj račun' : 'Prijava / Registracija'}
       </a>

@@ -1,23 +1,46 @@
-node_modules
+# Dependencies
+node_modules/
 
-# Output
-.output
-.vercel
-.netlify
-.wrangler
-/.svelte-kit
-/build
+# Build and hosting output
+/.svelte-kit/
+/build/
+/.output/
+/.vercel/
+/.netlify/
+/.wrangler/
+/dist/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Env
+# Environment files
 .env
 .env.*
 !.env.example
-!.env.test
 
-# Vite
+# Logs and runtime output
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+/tmp/
+/temp/
+
+# Test and tool caches
+/coverage/
+/.nyc_output/
+/.cache/
+/.vite/
+/playwright-report/
+/test-results/
+*.tsbuildinfo
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Editors
+/.vscode/
+/.idea/
+*.swp
+*.swo
+
+# OS metadata
+.DS_Store
+Thumbs.db
