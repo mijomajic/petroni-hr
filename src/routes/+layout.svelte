@@ -57,9 +57,9 @@
   });
 
   // Re-scan on client-side navigation so new pages animate too.
-  afterNavigate(async () => {
+  afterNavigate(async ({ from, to }) => {
     await tick();
-    window.scrollTo(0, 0);
+    if (!from || from.url.pathname !== to?.url.pathname) window.scrollTo(0, 0);
     scanReveals();
   });
 </script>
