@@ -2,6 +2,10 @@ import { supabaseAdmin } from '$lib/supabase.server';
 import { orderedFeaturedBrands, uniqueProductBrands } from '$lib/product-brands';
 
 const BATCH_SIZE = 1000;
+const PUBLIC_CATEGORY_CACHE_MS = 60_000;
+
+let publicCategoryCache: { ids: string[]; expiresAt: number } | null = null;
+let publicCategoryRequest: Promise<string[]> | null = null;
 
 async function collectBrands(
   source: 'products' | 'shop_products_available',
@@ -37,15 +41,32 @@ export function getAdminProductBrands() {
 }
 
 export async function getFeaturedPublicProductBrands(categoryIds?: string[]) {
-  const [available, setting] = await Promise.all([
-    getPublicProductBrands(categoryIds),
-    supabaseAdmin.from('settings').select('value').eq('key', 'shop_featured_brands').maybeSingle()
-  ]);
+  const setting = await supabaseAdmin
+    .from('settings')
+    .select('value')
+    .eq('key', 'shop_featured_brands')
+    .maybeSingle();
   if (setting.error) return [];
-  return orderedFeaturedBrands(available, setting.data?.value);
+
+  const configured = Array.isArray(setting.data?.value)
+    ? setting.data.value.map((value) => String(value ?? '').trim()).filter(Boolean)
+    : [];
+  if (configured.length === 0) return [];
+
+  let query = supabaseAdmin
+    .from('shop_products_available')
+    .select('brand')
+    .eq('is_active', true)
+    .in('brand', configured)
+    .limit(1000);
+  if (categoryIds?.length) query = query.in('category_id', categoryIds);
+
+  const available = await query;
+  if (available.error) return [];
+  return orderedFeaturedBrands(uniqueProductBrands(available.data ?? []), configured);
 }
 
-export async function getUsedPublicCategoryIds() {
+async function loadUsedPublicCategoryIds() {
   const ids = new Set<string>();
   for (let from = 0; ; from += BATCH_SIZE) {
     const { data, error } = await supabaseAdmin
@@ -60,5 +81,20 @@ export async function getUsedPublicCategoryIds() {
     for (const row of batch) if (row.category_id) ids.add(row.category_id);
     if (batch.length < BATCH_SIZE) break;
   }
-  return ids;
+  return [...ids];
+}
+
+export async function getUsedPublicCategoryIds() {
+  if (publicCategoryCache && publicCategoryCache.expiresAt > Date.now()) {
+    return new Set(publicCategoryCache.ids);
+  }
+
+  publicCategoryRequest ??= loadUsedPublicCategoryIds();
+  try {
+    const ids = await publicCategoryRequest;
+    publicCategoryCache = { ids, expiresAt: Date.now() + PUBLIC_CATEGORY_CACHE_MS };
+    return new Set(ids);
+  } finally {
+    publicCategoryRequest = null;
+  }
 }

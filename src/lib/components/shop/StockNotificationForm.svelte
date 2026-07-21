@@ -54,9 +54,11 @@
   <button
     type="button"
     onclick={() => open = true}
-    class="btn mt-auto w-full border border-[#2b2b2b] bg-white py-2.5 text-[11px] text-[#2b2b2b] transition hover:bg-[#2b2b2b] hover:text-white active:translate-y-px"
+    class="btn mt-auto min-h-11 w-full border border-[#2b2b2b] bg-white px-2 py-2.5 text-[10px] tracking-[0.025em] text-[#2b2b2b] transition hover:bg-[#2b2b2b] hover:text-white active:translate-y-px"
   >
-    {$locale === 'hr' ? 'Obavijesti me o dostupnosti' : 'Notify me when available'}
+    {compact
+      ? ($locale === 'hr' ? 'Obavijesti me' : 'Notify me')
+      : ($locale === 'hr' ? 'Obavijesti me o dostupnosti' : 'Notify me when available')}
   </button>
 {:else if success}
   <div class="rounded-md border border-[#bddcc8] bg-[#f1faf4] px-3 py-3 text-left text-xs leading-relaxed text-[#176b37]" aria-live="polite">

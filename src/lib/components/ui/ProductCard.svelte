@@ -34,7 +34,7 @@
   <a href="/product/{product.slug}" class="block group">
     <div class="aspect-square p-4 flex items-center justify-center bg-white overflow-hidden">
       {#if img}
-        <img src={img} alt={name} width="600" height="600" loading="lazy" class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105" />
+        <img src={img} alt={name} width="600" height="600" loading="lazy" decoding="async" fetchpriority="low" class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105" />
       {:else}
         <div class="w-full h-full flex items-center justify-center text-[#dfe1e5]">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
@@ -56,8 +56,8 @@
     {#if product.stock === 0}
       <StockNotificationForm productId={product.id} compact />
     {:else}
-      <button onclick={handleAdd} class="btn w-full mt-auto text-[11px] py-2.5" style="background:{added ? '#16a34a' : '#f5c518'};color:#fff">
-        {added ? ($locale === 'hr' ? 'Dodano' : 'Added') : limitReached ? ($locale === 'hr' ? 'Maksimalna količina' : 'Maximum quantity') : addLabel}
+      <button onclick={handleAdd} class="btn mt-auto min-h-11 w-full whitespace-nowrap px-2 py-2.5 text-[10px] tracking-[0.025em]" style="background:{added ? '#16a34a' : '#f5c518'};color:#fff">
+        {added ? ($locale === 'hr' ? 'Dodano' : 'Added') : limitReached ? ($locale === 'hr' ? 'Maks. količina' : 'Max. quantity') : addLabel}
       </button>
     {/if}
   </div>

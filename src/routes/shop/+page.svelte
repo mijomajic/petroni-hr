@@ -64,7 +64,7 @@
       '@type': 'CollectionPage',
       '@id': `${absoluteUrl('/shop')}#collection`,
       name: 'Petroni Shop',
-      description,
+      description: 'Petroni shop za kamping opremu, dijelove za kampere i karavane, dodatnu opremu i proizvode za putovanja.',
       mainEntity: {
         '@type': 'ItemList',
         itemListElement: products.slice(0, 24).map((product, index) => ({
@@ -89,7 +89,7 @@
 
 <!-- Hero banner -->
 <section class="relative h-[220px] md:h-[280px] flex items-center overflow-hidden">
-  <img src="/images/vehicles/knaus-boxdrive-680me/01-man-1.webp" alt="" width="1440" height="1080" class="absolute inset-0 w-full h-full object-cover" />
+  <img src="/images/vehicles/knaus-boxdrive-680me/01-man-1.webp" alt="" width="1440" height="1080" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover" />
   <div class="absolute inset-0" style="background:linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.18) 100%)"></div>
   <div class="container-x relative z-10">
     <span class="block text-[11px] font-bold uppercase tracking-[0.2em] mb-3" style="color:#f5c518">{$locale === 'hr' ? 'Kamping oprema' : 'Camping equipment'}</span>
@@ -118,7 +118,7 @@
   </div>
 </div>
 
-<div class="section">
+<div class="pb-[4.5rem] pt-8 md:pb-[5.5rem] md:pt-10">
   <div class="container-x">
     <!-- Results + sort row -->
     <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

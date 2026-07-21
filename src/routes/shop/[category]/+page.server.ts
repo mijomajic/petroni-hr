@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '$lib/supabase.server';
 import { withAvailableStock, type AvailableProduct } from '$lib/shop-stock.server';
-import { getFeaturedPublicProductBrands, getPublicProductBrands, getUsedPublicCategoryIds } from '$lib/product-brands.server';
+import { getFeaturedPublicProductBrands, getUsedPublicCategoryIds } from '$lib/product-brands.server';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -50,7 +50,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 
   let productsQuery = supabaseAdmin
     .from('shop_products_available')
-    .select('*', { count: 'exact' })
+    .select('id,slug,name_hr,name_en,price,images,stock,available_stock,pickup_only', { count: 'exact' })
     .in('category_id', categoryIds)
     .eq('is_active', true);
 
@@ -70,10 +70,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
     productsQuery = productsQuery.order('created_at', { ascending: false });
   }
 
-  const [{ data: products, error: productsError, count }, usedCategoryIds, brands, featuredBrands] = await Promise.all([
+  const [{ data: products, error: productsError, count }, usedCategoryIds, featuredBrands] = await Promise.all([
     productsQuery.range(from, to),
     getUsedPublicCategoryIds(),
-    getPublicProductBrands(categoryIds),
     getFeaturedPublicProductBrands(categoryIds)
   ]);
 
@@ -85,7 +84,6 @@ export const load: PageServerLoad = async ({ params, url }) => {
   return {
     category,
     categories: allCategories.filter((item) => visibleCategoryIds.has(item.id)),
-    brands,
     featuredBrands,
     products: (products ?? []).map((product) => withAvailableStock(product as AvailableProduct)),
     total: count ?? 0,

@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '$lib/supabase.server';
 import { withAvailableStock, type AvailableProduct } from '$lib/shop-stock.server';
-import { getFeaturedPublicProductBrands, getPublicProductBrands, getUsedPublicCategoryIds } from '$lib/product-brands.server';
+import { getFeaturedPublicProductBrands, getUsedPublicCategoryIds } from '$lib/product-brands.server';
 import type { PageServerLoad } from './$types';
 
 const PAGE_SIZE = 24;
@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
   let productsQuery = supabaseAdmin
     .from('shop_products_available')
-    .select('*', { count: 'exact' })
+    .select('id,slug,name_hr,name_en,price,images,stock,available_stock,pickup_only', { count: 'exact' })
     .eq('is_active', true);
 
   if (query) {
@@ -43,11 +43,10 @@ export const load: PageServerLoad = async ({ url }) => {
     productsQuery = productsQuery.order('created_at', { ascending: false });
   }
 
-  const [products, categories, usedCategoryIds, brands, featuredBrands] = await Promise.all([
+  const [products, categories, usedCategoryIds, featuredBrands] = await Promise.all([
     productsQuery.range(from, to),
     supabaseAdmin.from('product_categories').select('*').order('sort_order'),
     getUsedPublicCategoryIds(),
-    getPublicProductBrands(),
     getFeaturedPublicProductBrands()
   ]);
 
@@ -61,7 +60,6 @@ export const load: PageServerLoad = async ({ url }) => {
   return {
     products: (products.data ?? []).map((product) => withAvailableStock(product as AvailableProduct)),
     categories: visibleCategories,
-    brands,
     featuredBrands,
     total: products.count ?? 0,
     page,

@@ -64,13 +64,13 @@
     breadcrumbSchema([
       { name: 'Petroni', path: '/' },
       { name: 'Shop', path: '/shop' },
-      { name: title, path: `/shop/${category.slug}` }
+      { name: category.name_hr, path: `/shop/${category.slug}` }
     ]),
     {
       '@type': 'CollectionPage',
       '@id': `${absoluteUrl(`/shop/${category.slug}`)}#collection`,
-      name: title,
-      description,
+      name: category.name_hr,
+      description: `${category.name_hr} u Petroni shopu: kamping oprema, dijelovi i proizvodi za kampere i karavane.`,
       mainEntity: {
         '@type': 'ItemList',
         itemListElement: products.slice(0, 24).map((product, index) => ({
