@@ -12,7 +12,6 @@
   let { data }: PageProps = $props();
   const allCategories: ProductCategory[] = $derived(data.categories as ProductCategory[]);
   const products: Product[] = $derived(data.products as Product[]);
-  const brands: string[] = $derived(data.brands as string[]);
   const featuredBrands: string[] = $derived(data.featuredBrands as string[]);
   const loading = false;
   const total = $derived(data.total as number);
@@ -121,23 +120,21 @@
 
 <div class="section">
   <div class="container-x">
-    <!-- Title + sort row -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-      <h2 class="text-[26px] md:text-[32px] font-bold text-[#2b2b2b] uppercase">Shop</h2>
+    <!-- Results + sort row -->
+    <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      {#if !loading}
+        <p class="text-[12px] uppercase tracking-wide text-[#9aa0a8]">
+          {$locale === 'hr'
+            ? `Prikazujemo ${products.length} od ${total} ${total === 1 ? 'rezultata' : 'rezultata'}`
+            : `Showing ${products.length} of ${total} ${total === 1 ? 'result' : 'results'}`}
+        </p>
+      {/if}
       <select class="field max-w-[220px]" bind:value={sort} onchange={() => applyFilters(1)}>
         <option value="newest">{$locale === 'hr' ? 'Zadano sortiranje' : 'Default sorting'}</option>
         <option value="price_asc">{$locale === 'hr' ? 'Cijena: niža → viša' : 'Price: low → high'}</option>
         <option value="price_desc">{$locale === 'hr' ? 'Cijena: viša → niža' : 'Price: high → low'}</option>
       </select>
     </div>
-
-    {#if !loading}
-      <p class="text-[12px] text-[#9aa0a8] mb-8 uppercase tracking-wide">
-        {$locale === 'hr'
-          ? `Prikazujemo ${products.length} od ${total} ${total === 1 ? 'rezultata' : 'rezultata'}`
-          : `Showing ${products.length} of ${total} ${total === 1 ? 'result' : 'results'}`}
-      </p>
-    {/if}
 
     <FeaturedBrands brands={featuredBrands} activeBrand={brand} />
 
@@ -205,20 +202,6 @@
         <div class="card p-5">
           <p class="text-[11px] font-bold uppercase tracking-widest text-[#b5890a] mb-3">{$locale === 'hr' ? 'Kategorije' : 'Categories'}</p>
           <CategoryNavigation categories={allCategories} />
-        </div>
-
-        <!-- Brand -->
-        <div class="card p-5">
-          <label for="shop-brand" class="mb-3 block text-[11px] font-bold uppercase tracking-widest text-[#b5890a]">{$locale === 'hr' ? 'Brend' : 'Brand'}</label>
-          <select id="shop-brand" class="field text-[13px]" bind:value={brand} onchange={() => applyFilters(1)}>
-            <option value="">{$locale === 'hr' ? 'Svi brendovi' : 'All brands'}</option>
-            {#each brands as productBrand}
-              <option value={productBrand}>{productBrand}</option>
-            {/each}
-          </select>
-          {#if brands.length === 0}
-            <p class="mt-2 text-[11px] leading-relaxed text-[#9aa0a8]">{$locale === 'hr' ? 'Brendovi će se pojaviti nakon dodjele proizvodima.' : 'Brands will appear after they are assigned to products.'}</p>
-          {/if}
         </div>
 
         <!-- Price range -->

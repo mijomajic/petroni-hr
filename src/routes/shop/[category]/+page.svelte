@@ -14,7 +14,6 @@
   const allCategories: ProductCategory[] = $derived(data.categories as ProductCategory[]);
   const category: ProductCategory = $derived(data.category as ProductCategory);
   const products: Product[] = $derived(data.products as Product[]);
-  const brands: string[] = $derived(data.brands as string[]);
   const featuredBrands: string[] = $derived(data.featuredBrands as string[]);
   const loading = false;
   const total = $derived(data.total as number);
@@ -187,20 +186,6 @@
         <div class="card p-5">
           <p class="text-[11px] font-bold uppercase tracking-widest text-[#b5890a] mb-3">{$locale === 'hr' ? 'Kategorije' : 'Categories'}</p>
           <CategoryNavigation categories={allCategories} currentSlug={slug} />
-        </div>
-
-        <!-- Brand -->
-        <div class="card p-5">
-          <label for="category-brand" class="mb-3 block text-[11px] font-bold uppercase tracking-widest text-[#b5890a]">{$locale === 'hr' ? 'Brend' : 'Brand'}</label>
-          <select id="category-brand" class="field text-[13px]" bind:value={brand} onchange={() => applyFilters(1)}>
-            <option value="">{$locale === 'hr' ? 'Svi brendovi' : 'All brands'}</option>
-            {#each brands as productBrand}
-              <option value={productBrand}>{productBrand}</option>
-            {/each}
-          </select>
-          {#if brands.length === 0}
-            <p class="mt-2 text-[11px] leading-relaxed text-[#9aa0a8]">{$locale === 'hr' ? 'Brendovi će se pojaviti nakon dodjele proizvodima.' : 'Brands will appear after they are assigned to products.'}</p>
-          {/if}
         </div>
 
         <!-- Price range -->
