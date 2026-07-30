@@ -15,7 +15,7 @@
       title: 'Voditelj obrade i kontakt',
       body: [
         'Voditelj obrade osobnih podataka je Petroni d.o.o. Za pitanja o privatnosti, pristup podacima, ispravak, brisanje ili druge zahtjeve možete nas kontaktirati na info@petroni.hr.',
-        'Kontakt podaci: Petroni d.o.o., Slavka Tomerlina 9, 10380 Sesvete, Zagreb, Hrvatska; telefon +385 91 242 7247.'
+        'Kontakt podaci: Petroni d.o.o., Ul. Slavka Tomerlina 8, 10360 Sesvete, Hrvatska; telefon +385 91 242 7247.'
       ]
     },
     {
@@ -131,7 +131,7 @@
       title: 'Controller and contact',
       body: [
         'The controller of personal data is Petroni d.o.o. For privacy questions, access requests, corrections, deletion or other requests, contact us at info@petroni.hr.',
-        'Contact details: Petroni d.o.o., Slavka Tomerlina 9, 10380 Sesvete, Zagreb, Croatia; phone +385 91 242 7247.'
+        'Contact details: Petroni d.o.o., Ul. Slavka Tomerlina 8, 10360 Sesvete, Croatia; phone +385 91 242 7247.'
       ]
     },
     {

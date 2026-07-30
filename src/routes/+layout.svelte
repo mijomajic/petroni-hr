@@ -3,9 +3,10 @@
   import Header from '$lib/components/layout/Header.svelte';
   import Footer from '$lib/components/layout/Footer.svelte';
   import { onMount, tick } from 'svelte';
-  import { afterNavigate } from '$app/navigation';
+  import { afterNavigate, beforeNavigate } from '$app/navigation';
   import { page } from '$app/stores';
   import { absoluteUrl, canonicalPath, DEFAULT_IMAGE, SITE_NAME } from '$lib/seo';
+  import ShopNavigationSkeleton from '$lib/components/shop/ShopNavigationSkeleton.svelte';
 
   let { children } = $props();
   const isAdmin = $derived($page.url.pathname.startsWith('/admin'));
@@ -14,6 +15,9 @@
   const defaultDescription = 'Petroni nudi najam i prodaju kampera i karavana, kamping opremu, podršku za putovanja i lokacije diljem Hrvatske i Europe.';
 
   let observer: IntersectionObserver | undefined;
+  let navigationTimer: ReturnType<typeof setTimeout> | undefined;
+  let showNavigationFeedback = $state(false);
+  let showShopSkeleton = $state(false);
 
   function scanReveals() {
     if (!observer) return;
@@ -53,9 +57,22 @@
 
   // Re-scan on client-side navigation so new pages animate too.
   afterNavigate(async ({ from, to }) => {
+    clearTimeout(navigationTimer);
+    showNavigationFeedback = false;
+    showShopSkeleton = false;
     await tick();
     if (!from || from.url.pathname !== to?.url.pathname) window.scrollTo(0, 0);
     scanReveals();
+  });
+
+  beforeNavigate(({ to, willUnload }) => {
+    if (!to?.url || willUnload) return;
+    const isShopDestination = to.url.pathname === '/shop' || to.url.pathname.startsWith('/shop/') || to.url.pathname.startsWith('/product/');
+    clearTimeout(navigationTimer);
+    navigationTimer = setTimeout(() => {
+      showNavigationFeedback = true;
+      showShopSkeleton = isShopDestination;
+    }, 180);
   });
 </script>
 
@@ -80,9 +97,16 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col">
+  {#if showNavigationFeedback}<div class="route-progress" aria-hidden="true"></div>{/if}
+  {#if showShopSkeleton}<ShopNavigationSkeleton />{/if}
   {#if !isAdmin}<Header />{/if}
   <main class="flex-1">
     {@render children()}
   </main>
   {#if !isAdmin}<Footer />{/if}
 </div>
+
+<style>
+  .route-progress { position: fixed; z-index: 60; top: 0; left: 0; height: 3px; width: 38%; background: #e2a80a; box-shadow: 0 1px 8px rgba(226,168,10,.38); animation: route-progress 1.2s cubic-bezier(.16,1,.3,1) infinite; }
+  @keyframes route-progress { 0% { transform: translateX(-110%); } 100% { transform: translateX(370%); } }
+</style>

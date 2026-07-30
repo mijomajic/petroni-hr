@@ -142,11 +142,11 @@
               {/if}
               {#if vehicle.images.length > 1}
                 <button onclick={() => activeImage = (activeImage - 1 + vehicle!.images.length) % vehicle!.images.length}
-                  class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white" aria-label="Prev">
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 cursor-pointer rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white" aria-label="Prev">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2b2b2b" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
                 <button onclick={() => activeImage = (activeImage + 1) % vehicle!.images.length}
-                  class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white" aria-label="Next">
+                  class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 cursor-pointer rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white" aria-label="Next">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2b2b2b" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
               {/if}
@@ -154,7 +154,7 @@
             {#if vehicle.images.length > 1}
               <div class="flex gap-3 mb-6 overflow-x-auto pb-2">
                 {#each vehicle.images as img, i}
-                  <button onclick={() => activeImage = i} class="h-16 w-20 flex-none overflow-hidden rounded-md border-2 transition-colors" style="border-color:{activeImage === i ? '#f5c518' : '#ededf0'}" aria-label={`${$locale === 'hr' ? 'Prikaži fotografiju' : 'Show photo'} ${i + 1}`}>
+                  <button onclick={() => activeImage = i} class="h-16 w-20 flex-none cursor-pointer overflow-hidden rounded-md border-2 transition-colors" style="border-color:{activeImage === i ? '#f5c518' : '#ededf0'}" aria-label={`${$locale === 'hr' ? 'Prikaži fotografiju' : 'Show photo'} ${i + 1}`}>
                     <img src={vehicleThumbnail(img)} alt="" width="480" height="360" loading="lazy" class="w-full h-full object-cover" />
                   </button>
                 {/each}
@@ -210,11 +210,11 @@
               {/if}
               {#if vehicle.images.length > 1}
                 <button onclick={() => activeImage = (activeImage - 1 + vehicle!.images.length) % vehicle!.images.length}
-                  class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white" aria-label="Prev">
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 cursor-pointer rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white" aria-label="Prev">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2b2b2b" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
                 <button onclick={() => activeImage = (activeImage + 1) % vehicle!.images.length}
-                  class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white" aria-label="Next">
+                  class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 cursor-pointer rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white" aria-label="Next">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2b2b2b" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
               {/if}
@@ -222,7 +222,7 @@
             {#if vehicle.images.length > 1}
               <div class="flex gap-3 mb-8 overflow-x-auto pb-2">
                 {#each vehicle.images as img, i}
-                  <button onclick={() => activeImage = i} class="h-16 w-20 flex-none overflow-hidden rounded-md border-2 transition-colors" style="border-color:{activeImage === i ? '#f5c518' : '#ededf0'}" aria-label={`${$locale === 'hr' ? 'Prikaži fotografiju' : 'Show photo'} ${i + 1}`}>
+                  <button onclick={() => activeImage = i} class="h-16 w-20 flex-none cursor-pointer overflow-hidden rounded-md border-2 transition-colors" style="border-color:{activeImage === i ? '#f5c518' : '#ededf0'}" aria-label={`${$locale === 'hr' ? 'Prikaži fotografiju' : 'Show photo'} ${i + 1}`}>
                     <img src={vehicleThumbnail(img)} alt="" width="480" height="360" loading="lazy" class="w-full h-full object-cover" />
                   </button>
                 {/each}

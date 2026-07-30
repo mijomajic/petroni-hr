@@ -177,11 +177,11 @@ export const DEFAULT_SITE_PAGES: Record<SitePageKey, SitePageContent> = {
     seoDescription: t('Kontaktirajte Petroni za najam kampera, prodaju vozila, shop narudžbe i podršku. Adresa, telefon i email na jednom mjestu.', 'Contact Petroni for camper rental, vehicle sales, shop orders and support. Address, phone and email in one place.'),
     sections: [
       { id: 'contact', type: 'contact', label: 'Kontakt i obrazac', visible: true, title: t('Kontaktirajte nas', 'Contact us'), body: t('Naš tim s veseljem stoji na raspolaganju za sva Vaša pitanja.', 'Our team is happy to answer any of your questions.'), items: [
-        { id: 'address', title: t('Adresa', 'Address'), body: t('Slavka Tomerlina 9, 10380 Sesvete, Zagreb', 'Slavka Tomerlina 9, 10380 Sesvete, Zagreb') },
+        { id: 'address', title: t('Adresa', 'Address'), body: t('Ul. Slavka Tomerlina 8, 10360 Sesvete', 'Ul. Slavka Tomerlina 8, 10360 Sesvete') },
         { id: 'phone', title: t('Telefon', 'Phone'), body: t('+385912427247', '+385912427247'), href: 'tel:+385912427247' },
         { id: 'email', title: t('Email', 'Email'), body: t('info@petroni.hr', 'info@petroni.hr'), href: 'mailto:info@petroni.hr' },
         { id: 'note', title: t('Napomena', 'Note'), body: t('Molimo Vas da nas za sve upite kontaktirate isključivo putem e-maila ili telefonskim pozivom. WhatsApp poruke nisu podržane kao službeni kanal komunikacije.', 'Please contact us only by email or phone call. WhatsApp messages are not supported as an official channel.') },
-        { id: 'map', title: t('Lokacija', 'Location'), body: t('Petroni d.o.o.\nSlavka Tomerlina 9, 10380 Sesvete, Zagreb', 'Petroni d.o.o.\nSlavka Tomerlina 9, 10380 Sesvete, Zagreb'), href: 'https://www.google.com/maps/search/?api=1&query=Slavka%20Tomerlina%209%2C%2010380%20Sesvete%2C%20Zagreb' }
+        { id: 'map', title: t('Lokacija', 'Location'), body: t('Petroni d.o.o.\nUl. Slavka Tomerlina 8, 10360 Sesvete', 'Petroni d.o.o.\nUl. Slavka Tomerlina 8, 10360 Sesvete'), href: 'https://www.google.com/maps/search/?api=1&query=Ul.%20Slavka%20Tomerlina%208%2C%2010360%20Sesvete' }
       ] }
     ]
   },

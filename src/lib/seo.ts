@@ -42,10 +42,10 @@ export function organizationSchema() {
     telephone: '+385912427247',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Slavka Tomerlina 9',
+      streetAddress: 'Ul. Slavka Tomerlina 8',
       addressLocality: 'Sesvete',
       addressRegion: 'Zagreb',
-      postalCode: '10380',
+      postalCode: '10360',
       addressCountry: 'HR'
     },
     sameAs: ['https://www.facebook.com/petroni.hr', 'https://www.instagram.com/petroni.hr']

@@ -94,7 +94,7 @@
           {#if product.images?.length > 1}
             <div class="flex gap-3">
               {#each product.images as img, i}
-                <button onclick={() => activeImg = i} class="w-16 h-16 rounded-md overflow-hidden border-2 bg-white p-1" style="border-color:{activeImg === i ? '#f5c518' : '#ededf0'}">
+                <button onclick={() => activeImg = i} class="w-16 h-16 cursor-pointer rounded-md overflow-hidden border-2 bg-white p-1" style="border-color:{activeImg === i ? '#f5c518' : '#ededf0'}">
                   <img src={img} alt="" class="w-full h-full object-contain" />
                 </button>
               {/each}
