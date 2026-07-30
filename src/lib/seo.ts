@@ -3,7 +3,7 @@ import { env } from '$env/dynamic/public';
 export const SITE_URL = normalizeSiteUrl(env.PUBLIC_SITE_URL ?? 'https://petroni-hr.vercel.app');
 export const SITE_NAME = 'Petroni';
 export const DEFAULT_IMAGE =
-  'https://www.petroni.hr/wp-content/uploads/2025/02/hero-image-petroni-camping-and-caravaning-rental10-1.jpg';
+  absoluteUrl('/images/vehicles/rimor-evo-sound/01-rimor-evo-1.webp');
 
 function normalizeSiteUrl(url: string) {
   return url.replace(/\/+$/, '');
@@ -36,7 +36,7 @@ export function organizationSchema() {
     '@id': absoluteUrl('/#organization'),
     name: 'Petroni',
     url: SITE_URL,
-    logo: 'https://www.petroni.hr/wp-content/uploads/2024/03/Logo-Petroni-Yellow-New.png',
+    logo: absoluteUrl('/brand/petroni-logo.svg'),
     image: DEFAULT_IMAGE,
     email: 'info@petroni.hr',
     telephone: '+385912427247',

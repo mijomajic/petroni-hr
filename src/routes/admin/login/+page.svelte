@@ -23,7 +23,7 @@
 <div class="min-h-[80vh] flex items-center justify-center px-4 py-16" style="background:#fafbfc">
   <div class="w-full max-w-md">
     <div class="text-center mb-8">
-      <img src="https://www.petroni.hr/wp-content/uploads/2024/03/Logo-Petroni-Yellow-New.png" alt="Petroni" class="h-9 w-auto mx-auto mb-5" />
+      <img src="/brand/petroni-logo.svg" alt="Petroni" class="h-9 w-auto mx-auto mb-5" />
       <h1 class="text-xl font-bold uppercase tracking-wide text-[#2b2b2b]">Admin Panel</h1>
     </div>
 

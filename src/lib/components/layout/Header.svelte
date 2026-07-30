@@ -55,12 +55,11 @@
     <!-- Logo -->
     <a href="/" class="flex-shrink-0" aria-label="Petroni">
       <img
-        src="https://www.petroni.hr/wp-content/uploads/2024/03/Logo-Petroni-Yellow-New.png"
+        src="/brand/petroni-logo.svg"
         alt="Petroni"
         width="220"
         height="58"
         class="h-9 w-auto"
-        onerror={(e) => { const el = e.currentTarget as HTMLImageElement; el.replaceWith(Object.assign(document.createElement('span'), { textContent: 'PETRONI', className: 'text-2xl font-extrabold tracking-tight', style: 'color:#f5c518' })); }}
       />
     </a>
 

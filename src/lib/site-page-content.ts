@@ -73,7 +73,7 @@ export const DEFAULT_SITE_PAGES: Record<SitePageKey, SitePageContent> = {
         id: 'hero', type: 'hero', label: 'Glavni banner', visible: true, variant: 'home',
         title: t('Putujte bez granica,\nživite bez ograničenja.', 'Travel without borders,\nlive without limits.'),
         body: t('Otkrijte slobodu ceste s vrhunskim kamperima i karavanima. Vaša avantura počinje ovdje.', 'Discover the freedom of the road with premium campers and caravans. Your adventure starts here.'),
-        image: 'https://www.petroni.hr/wp-content/uploads/2025/02/hero-image-petroni-camping-and-caravaning-rental10-1.jpg',
+        image: '/images/vehicles/rimor-evo-sound/01-rimor-evo-1.webp',
         imageAlt: t('Petroni kamper na putovanju', 'Petroni camper on the road'),
         ctaLabel: t('Rezerviraj', 'Book now'), ctaHref: '/rezerviraj'
       },

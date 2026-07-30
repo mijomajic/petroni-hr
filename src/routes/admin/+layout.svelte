@@ -37,7 +37,7 @@
     <!-- Sidebar -->
     <aside class="w-64 flex-shrink-0 fixed left-0 top-0 bottom-0 flex flex-col bg-white border-r border-[#eceef1]">
       <div class="p-6 mb-2 border-b border-[#eceef1]">
-        <img src="https://www.petroni.hr/wp-content/uploads/2024/03/Logo-Petroni-Yellow-New.png" alt="Petroni" class="h-8 w-auto" />
+        <img src="/brand/petroni-logo.svg" alt="Petroni" class="h-8 w-auto" />
         <p class="text-xs mt-2 text-[#8b9099]">Admin Panel</p>
       </div>
 

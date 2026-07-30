@@ -10,6 +10,7 @@
   let counts = $state<Record<string, number>>({});
   let statsStarted = $state(false);
   const visibleSections = $derived(content.sections.filter((section) => section.visible));
+  const heroFallbackImage = '/images/vehicles/rimor-evo-sound/01-rimor-evo-1.webp';
 
   const tx = (value: { hr: string; en: string } | undefined) => localizedText(value, $locale);
 
@@ -24,6 +25,11 @@
       counts = Object.fromEntries(targets.map((item) => [item.id, Math.floor(eased * Number(item.value ?? 0))]));
       if (step >= steps) clearInterval(timer);
     }, duration / steps);
+  }
+
+  function useHeroFallback(event: Event) {
+    const image = event.currentTarget as HTMLImageElement;
+    if (image.getAttribute('src') !== heroFallbackImage) image.src = heroFallbackImage;
   }
 
   onMount(() => {
@@ -46,7 +52,7 @@
   {#if section.type === 'hero'}
     <section class="relative flex min-h-[68vh] max-h-[760px] items-center overflow-hidden md:min-h-[78vh]">
       <div class="absolute inset-0">
-        {#if section.image}<img src={section.image} alt={tx(section.imageAlt)} class="h-full w-full object-cover" fetchpriority="high" />{/if}
+        {#if section.image}<img src={section.image} alt={tx(section.imageAlt)} class="h-full w-full object-cover" fetchpriority="high" onerror={useHeroFallback} />{/if}
         <div class="absolute inset-0" style="background:linear-gradient(to left, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.38) 36%, rgba(0,0,0,0.08) 76%, rgba(0,0,0,0.02) 100%)"></div>
         <div class="absolute inset-0 bg-[rgba(39,42,47,0.08)]"></div>
       </div>

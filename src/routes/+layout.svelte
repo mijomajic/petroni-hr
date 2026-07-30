@@ -60,8 +60,8 @@
 </script>
 
 <svelte:head>
-  <link rel="icon" href="https://www.petroni.hr/wp-content/uploads/2024/03/cropped-Group-3-270x270.jpg" />
-  <link rel="apple-touch-icon" href="https://www.petroni.hr/wp-content/uploads/2024/03/cropped-Group-3-270x270.jpg" />
+  <link rel="icon" href="/brand/petroni-logo.svg" />
+  <link rel="apple-touch-icon" href="/brand/petroni-logo.svg" />
   <link rel="manifest" href="/site.webmanifest" />
   <link rel="canonical" href={canonicalUrl} />
   <meta name="theme-color" content="#ffffff" />
