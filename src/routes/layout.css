@@ -94,10 +94,6 @@ a {
 .home-rentals-section {
   padding-top: 3rem;
 }
-.js .home-rentals-section .home-rentals-intro {
-  transform: translateY(12px);
-  transition-duration: 0.38s;
-}
 @media (min-width: 768px) {
   .home-rentals-section { padding-top: 4rem; }
 }

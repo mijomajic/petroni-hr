@@ -70,7 +70,7 @@
     {@const vehicles = section.variant === 'sale' ? saleVehicles : rentalVehicles}
     <section class="section home-rentals-section">
       <div class="container-x">
-        <div class="home-rentals-intro mb-12 text-center reveal">{#if tx(section.eyebrow)}<span class="eyebrow mb-3">{tx(section.eyebrow)}</span>{/if}<h2 class="section-title">{tx(section.title)}</h2></div>
+        <div class="home-rentals-intro mb-12 text-center">{#if tx(section.eyebrow)}<span class="eyebrow mb-3">{tx(section.eyebrow)}</span>{/if}<h2 class="section-title">{tx(section.title)}</h2></div>
         <div class="grid grid-cols-1 gap-7 md:grid-cols-3 reveal">{#each vehicles.slice(0, 3) as vehicle}<VehicleCard {vehicle} />{/each}</div>
         {#if section.ctaHref && tx(section.ctaLabel)}<p class="mt-10 text-center text-[14px] text-[#7a7f86] reveal">{tx(section.body)} <a href={section.ctaHref} class="font-semibold text-[#b5890a] hover:underline">{tx(section.ctaLabel)}</a></p>{/if}
       </div>
