@@ -970,9 +970,12 @@
               {:else}
                 <div class="space-y-4">
                   {#each extraGroups as group}
-                    <section>
-                      <h3 class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b9099] mb-2">{$locale === 'hr' ? group.hr : group.en}</h3>
-                      <div class="divide-y divide-[#ededf0]">
+                    <details class="group overflow-hidden rounded-lg border border-[#e5e7eb] bg-white">
+                      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3.5 text-[12px] font-bold uppercase tracking-[0.12em] text-[#59616a] marker:content-none hover:bg-[#fafbfc]">
+                        <span>{$locale === 'hr' ? group.hr : group.en}</span>
+                        <svg class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                      </summary>
+                      <div class="divide-y divide-[#ededf0] border-t border-[#ededf0] px-4">
                         {#each group.extras as extra}
                           {@const autoApplied =
                             (extra.auto_apply_rule === 'border_crossing' && $booking.crossesBorder) ||
@@ -1023,7 +1026,7 @@
                           </div>
                         {/each}
                       </div>
-                    </section>
+                    </details>
                   {/each}
                 </div>
               {/if}
