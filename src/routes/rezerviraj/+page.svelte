@@ -971,20 +971,22 @@
           </div>
 
           <!-- Extras + summary: right column -->
-          <div class="grid gap-6 lg:sticky lg:top-24 h-fit">
+          <div class="grid h-fit gap-6 self-start">
             <div class="card p-6">
               <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Dodatna oprema' : 'Extras'}</h2>
               {#if !$booking.selectedVehicle}
                 <p class="text-sm text-[#9aa0a8]">{$locale === 'hr' ? 'Odaberite vozilo za prikaz dodatne opreme.' : 'Select a vehicle to view extras.'}</p>
               {:else}
-                <div class="space-y-4">
+                <div class="space-y-2">
                   {#each extraGroups as group}
                     <details class="group" open={group.key === 'ostalo'}>
-                      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-3 text-[12px] font-bold uppercase tracking-[0.12em] text-[#8b9099] marker:content-none hover:text-[#59616a]">
+                      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 rounded-lg border border-[#e2e4e8] bg-[#fafbfc] px-4 py-3 text-[12px] font-bold uppercase tracking-[0.12em] text-[#66707a] marker:content-none transition-colors hover:border-[#cfd4da] hover:bg-white hover:text-[#2b2b2b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f5c518]">
                         <span>{extraGroupLabel(group)}</span>
-                        <svg class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#fff4d6] text-[#a97800]">
+                          <svg class="h-4 w-4 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                        </span>
                       </summary>
-                      <div class="divide-y divide-[#ededf0]">
+                      <div class="mx-2 divide-y divide-[#ededf0]">
                         {#each group.extras as extra}
                           {@const autoApplied =
                             (extra.auto_apply_rule === 'border_crossing' && $booking.crossesBorder) ||
