@@ -89,6 +89,19 @@ a {
   .section { padding-block: 5.5rem; }
 }
 
+/* The first content section follows a large landing hero, so it should enter
+   promptly and sit closer to the fold on both desktop and mobile. */
+.home-rentals-section {
+  padding-top: 3rem;
+}
+.js .home-rentals-section .home-rentals-intro {
+  transform: translateY(12px);
+  transition-duration: 0.38s;
+}
+@media (min-width: 768px) {
+  .home-rentals-section { padding-top: 4rem; }
+}
+
 /* Yellow uppercase caption that sits above section titles */
 .eyebrow {
   display: block;
