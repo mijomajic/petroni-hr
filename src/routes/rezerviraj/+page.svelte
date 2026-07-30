@@ -795,7 +795,7 @@
           {/if}
           {#if searchError}
             <div id="booking-step-one-error" role="alert" class="mb-7 flex items-start gap-3 rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-4 text-sm text-[#9f1f18]">
-              <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg>
+              <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.8 2.5 17.2A2 2 0 0 0 4.2 20h15.6a2 2 0 0 0 1.7-2.8L13.7 3.8a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
               <div><p class="font-bold">{$locale === 'hr' ? 'Provjerite podatke' : 'Check your details'}</p><p class="mt-1 leading-relaxed">{searchError}</p></div>
             </div>
           {/if}
