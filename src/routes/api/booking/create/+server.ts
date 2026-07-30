@@ -98,7 +98,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
   const [{ data: vehicle, error: vehicleError }, pricingData, { data: terms }, { data: paymentSettings }] = await Promise.all([
     supabaseAdmin.from('vehicles').select('*').eq('id', vehicleId).eq('type', 'rental').single(),
     loadPricingConfig(),
-    supabaseAdmin.from('rental_terms').select('version,content_hr').eq('is_active', true).single(),
+    supabaseAdmin.from('rental_terms').select('version,content_hr,content_en').eq('is_active', true).single(),
     supabaseAdmin.from('settings').select('key,value').in('key', [
       'ibans',
       'company',
@@ -239,7 +239,8 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
     payment_method: paymentMethod,
     terms_accepted_at: new Date().toISOString(),
     terms_accepted_ip: getClientAddress(),
-    terms_version: terms.version
+    terms_version: terms.version,
+    locale: body.locale === 'en' ? 'en' : 'hr'
   }).select('*,vehicles(name)').single();
 
   if (error) {

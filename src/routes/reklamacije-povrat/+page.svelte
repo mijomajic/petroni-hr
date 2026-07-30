@@ -1,44 +1,70 @@
 <script lang="ts">
   import { locale } from '$lib/stores/locale';
 
-  const sections = $derived($locale === 'hr' ? [
-    { title: 'Pravo na povrat', body: 'Sukladno Zakonu o zaštiti potrošača, imate pravo na jednostrani raskid ugovora u roku od 14 dana od dana preuzimanja proizvoda, bez navođenja razloga.' },
-    { title: 'Postupak povrata', body: 'Za povrat proizvoda potrebno je ispuniti obrazac za jednostrani raskid ugovora ili nas obavijestiti putem e-maila na info@petroni.hr, te vratiti proizvod u originalnom pakiranju, neoštećen i neupotrijebljen.' },
-    { title: 'Povrat novca', body: 'Nakon zaprimanja i provjere vraćenog proizvoda, povrat novca izvršava se u roku od 14 dana istim načinom plaćanja koji je korišten prilikom kupnje.' },
-    { title: 'Troškovi povrata', body: 'Troškove povrata proizvoda snosi kupac, osim u slučaju kada je proizvod neispravan ili ne odgovara narudžbi.' },
-    { title: 'Reklamacije', body: 'Pisani prigovor možete podnijeti putem e-maila na info@petroni.hr ili poštom na adresu tvrtke. Na reklamaciju odgovaramo u zakonskom roku od 15 dana.' },
-  ] : [
-    { title: 'Right of return', body: 'In accordance with consumer protection law, you have the right to withdraw from the contract within 14 days of receiving the product, without giving any reason.' },
-    { title: 'Return process', body: 'To return a product, please fill out the withdrawal form or notify us by email at info@petroni.hr, and return the product in its original packaging, undamaged and unused.' },
-    { title: 'Refunds', body: 'After receiving and inspecting the returned product, the refund is issued within 14 days using the same payment method used for the purchase.' },
-    { title: 'Return costs', body: 'The cost of returning the product is borne by the customer, except when the product is defective or does not match the order.' },
-    { title: 'Complaints', body: 'You can submit a written complaint by email to info@petroni.hr or by post to our company address. We respond to complaints within the statutory period of 15 days.' },
-  ]);
+  const hrSections = [
+    {
+      title: 'Povrat proizvoda',
+      paragraphs: [
+        'Ako niste potpuno zadovoljni kupljenim proizvodom, imate pravo na povrat u roku od 14 dana od primitka proizvoda. Imate pravo na povrat punog plaćenog iznosa, ne uključujući trošak dostave ako je naplaćen. Svi proizvodi koji se vraćaju moraju biti nekorišteni i neotvoreni u originalnom pakiranju.',
+        'Molimo vas da nas kontaktirate putem info@petroni.hr kako biste zatražili povrat i dobili daljnje upute. U predmet e-maila potrebno je napisati „POVRAT PROIZVODA”. Po primitku i pregledu proizvoda izvršit ćemo povrat sredstava istom metodom plaćanja koja je korištena prilikom kupnje.'
+      ]
+    },
+    {
+      title: 'Napomene',
+      items: [
+        'Povrati i zamjene moraju biti unaprijed dogovoreni.',
+        'Uz robu koja udovoljava uvjetima povrata obavezno priložite kopiju računa i broj računa (IBAN) za povrat sredstava.',
+        'Povrat sredstava izvršava se u zakonskom roku od 14 dana, nakon što proizvod zaprimimo u skladištu.',
+        'Kupac mora prikladno zaštititi proizvod u kartonskoj kutiji. Povrat ili zamjena neće biti uvaženi ako je do oštećenja došlo zbog neprimjerenog pakiranja.',
+        'Robu je potrebno vratiti bez odgađanja, najkasnije 14 dana od jednostranog raskida ugovora.'
+      ],
+      paragraphs: ['Ako zamjena artikla nije moguća, zadržavamo pravo ponuditi zamjenski artikl iste ili veće vrijednosti ili, ako zamjena nije moguća, vratiti novac.']
+    },
+    {
+      title: 'Oštećeni ili neispravni proizvodi',
+      paragraphs: [
+        'Ako ste primili oštećen ili neispravan proizvod, obavijestite nas što je prije moguće, po mogućnosti u roku od dva radna dana od primitka pošiljke, putem e-maila na info@petroni.hr.',
+        'Radi brže i točne obrade reklamacije u e-mail priložite fotografije proizvoda, ambalaže, transportne kutije i vidljivog oštećenja te u predmet navedite „REKLAMACIJA”. Proizvod i originalnu ambalažu nemojte bacati dok se postupak reklamacije ne završi.',
+        'Reklamacije se obrađuju nakon pregleda dostavljene dokumentacije i/ili vraćenog proizvoda. Ako se utvrdi da je oštećenje nastalo nakon isporuke, nepravilnim rukovanjem, korištenjem ili drugim postupanjem kupca, reklamacija se može odbiti.',
+        'Rok od dva radna dana služi lakšem utvrđivanju mogućeg oštećenja u transportu i bržoj obradi zahtjeva te ne ograničava zakonska prava kupca.'
+      ]
+    }
+  ];
+
+  const enSections = [
+    { title: 'Product returns', paragraphs: ['If you are not fully satisfied with a purchased product, you may return it within 14 days of receiving it. Returned products must be unused, unopened and in their original packaging.', 'Contact us at info@petroni.hr with the subject “PRODUCT RETURN” to request return instructions. After receiving and inspecting the product, we will refund the payment using the original payment method.'] },
+    { title: 'Important notes', items: ['Returns and exchanges must be agreed in advance.', 'Include a copy of the invoice and an IBAN for a refund where applicable.', 'Refunds are issued within the statutory 14-day period after the product reaches our warehouse.', 'Pack the product suitably in a cardboard box to prevent transport damage.', 'Return the goods without delay and no later than 14 days after withdrawal.'] },
+    { title: 'Damaged or defective products', paragraphs: ['Notify us at info@petroni.hr as soon as possible, preferably within two business days of delivery. Include photos of the product, packaging, shipping box and visible damage, with “COMPLAINT” as the email subject.', 'Do not discard the product or original packaging until the complaint process has concluded. The two-business-day period helps identify transit damage and does not limit statutory consumer rights.'] }
+  ];
+
+  const sections = $derived($locale === 'hr' ? hrSections : enSections);
 </script>
 
 <svelte:head>
-  <title>Reklamacije i povrat kamping opreme | Petroni Shop</title>
-  <meta name="description" content="Informacije o Petroni reklamacijama, povratu proizvoda, roku od 14 dana, povratu novca i pisanom prigovoru." />
-  <meta property="og:title" content="Reklamacije i povrat kamping opreme | Petroni Shop" />
-  <meta property="og:description" content="Informacije o Petroni reklamacijama, povratu proizvoda, roku od 14 dana, povratu novca i pisanom prigovoru." />
+  <title>Reklamacije i povrat | Petroni webshop</title>
+  <meta name="description" content="Informacije o reklamacijama, povratu proizvoda i postupku zamjene za narudžbe iz Petroni webshopa." />
+  <meta property="og:title" content="Reklamacije i povrat | Petroni webshop" />
+  <meta property="og:description" content="Informacije o reklamacijama, povratu proizvoda i postupku zamjene za narudžbe iz Petroni webshopa." />
 </svelte:head>
 
 <div class="section">
-  <div class="container-x max-w-3xl mx-auto">
+  <div class="container-x mx-auto max-w-3xl">
     <span class="eyebrow mb-3">Shop</span>
-    <h1 class="section-title mb-10">{$locale === 'hr' ? 'Reklamacije & Povrat' : 'Complaints & Returns'}</h1>
-
-    <div class="card p-5 mb-8" style="background:#fffaf0">
-      <p class="text-[13px] font-semibold" style="color:#b5890a">{$locale === 'hr' ? '14 dana za povrat proizvoda bez objašnjenja razloga.' : '14 days to return a product without giving a reason.'}</p>
-    </div>
+    <h1 class="section-title mb-4">{$locale === 'hr' ? 'Reklamacije i povrat' : 'Complaints & returns'}</h1>
+    <p class="mb-10 text-[14px] leading-relaxed text-[#6b7178]">{$locale === 'hr' ? 'Dobrodošli na Petroni webshop. Molimo vas da pažljivo pročitate uvjete povrata i reklamacija prije kupnje.' : 'Please read these return and complaint terms carefully before purchasing from the Petroni webshop.'}</p>
 
     <div class="space-y-8">
-      {#each sections as s}
-        <div>
-          <h2 class="text-[18px] font-bold text-[#2b2b2b] mb-2">{s.title}</h2>
-          <p class="text-[14px] leading-relaxed text-[#6b7178]">{s.body}</p>
-        </div>
+      {#each sections as section}
+        <section>
+          <h2 class="mb-3 text-[19px] font-bold text-[#2b2b2b]">{section.title}</h2>
+          {#each section.paragraphs ?? [] as paragraph}<p class="mb-4 text-[14px] leading-relaxed text-[#6b7178]">{paragraph}</p>{/each}
+          {#if section.items}
+            <ul class="list-disc space-y-2 pl-5 text-[14px] leading-relaxed text-[#6b7178]">{#each section.items as item}<li>{item}</li>{/each}</ul>
+          {/if}
+        </section>
       {/each}
     </div>
+
+    <a class="btn btn-primary mt-10 px-6 py-3" href="https://www.petroni.hr/wp-content/uploads/2024/02/POVRAT-ROBE-PETRONI.pdf" target="_blank" rel="noreferrer">{$locale === 'hr' ? 'Preuzmite obrazac za povrat robe' : 'Download the return form'}</a>
   </div>
 </div>

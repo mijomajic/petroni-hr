@@ -1,8 +1,7 @@
 import { env } from '$env/dynamic/private';
 import { Resend } from 'resend';
 import { supabaseAdmin } from '$lib/supabase.server';
-import { createOrderConfirmationPdf } from '$lib/invoice.server';
-import { renderTermsMarkup } from '$lib/terms-markup';
+import { createOrderConfirmationPdf, createRentalTermsPdf } from '$lib/invoice.server';
 import { absoluteUrl } from '$lib/seo';
 
 async function emailConfig() {
@@ -196,16 +195,32 @@ async function send(
 
 export async function sendBookingReceived(
   booking: Record<string, any>,
-  terms?: { version?: string | null; content_hr?: string | null }
+  terms?: { version?: string | null; content_hr?: string | null; content_en?: string | null }
 ) {
   const config = await emailConfig();
   const details = bookingSummary(booking);
-  const termsBlock = terms?.content_hr
-    ? `<hr style="border:0;border-top:1px solid #e6e6e6;margin:28px 0"><p style="font-size:14px"><strong>Uvjeti najma — verzija ${escapeHtml(terms.version)}</strong></p><div style="font-size:13px;line-height:1.55;color:#333">${renderTermsMarkup(terms.content_hr)}</div>`
+  const locale: 'hr' | 'en' = booking.locale === 'en' ? 'en' : 'hr';
+  const termsContent = locale === 'en' ? (terms?.content_en || terms?.content_hr) : terms?.content_hr;
+  const termsPdf = termsContent
+    ? await createRentalTermsPdf({ version: terms?.version ?? '', content: termsContent, locale })
+    : null;
+  const termsNote = termsPdf
+    ? `<p style="font-size:14px;line-height:1.6">${locale === 'hr' ? 'Uvjeti najma koje ste prihvatili (verzija' : 'The rental terms you accepted (version'} ${escapeHtml(terms?.version)}${locale === 'hr' ? ') nalaze se u PDF privitku.' : ') are attached as a PDF.'}</p>`
     : '';
   const results = await Promise.all([
     send(
-      { from: config.from, replyTo: config.admin, to: booking.driver_email, subject: `Zaprimili smo zahtjev za rezervaciju ${booking.confirmation_number}`, html: emailLayout('Zahtjev za rezervaciju je zaprimljen', `<p style="font-size:16px;line-height:1.6">Hvala, ${escapeHtml(booking.driver_name)}. Provjerit ćemo dostupnost i javiti vam se s potvrdom i daljnjim uputama.</p>${details}${paymentSummary(booking, config.ibans)}${termsBlock}`) },
+      {
+        from: config.from,
+        replyTo: config.admin,
+        to: booking.driver_email,
+        subject: locale === 'hr' ? `Zaprimili smo zahtjev za rezervaciju ${booking.confirmation_number}` : `We received your booking request ${booking.confirmation_number}`,
+        html: emailLayout(
+          locale === 'hr' ? 'Zahtjev za rezervaciju je zaprimljen' : 'Your booking request has been received',
+          `<p style="font-size:16px;line-height:1.6">${locale === 'hr' ? `Hvala, ${escapeHtml(booking.driver_name)}. Provjerit ćemo dostupnost i javiti vam se s potvrdom i daljnjim uputama.` : `Thank you, ${escapeHtml(booking.driver_name)}. We will check availability and contact you with confirmation and next steps.`}</p>${details}${paymentSummary(booking, config.ibans)}${termsNote}`,
+          locale
+        ),
+        attachments: termsPdf ? [{ filename: locale === 'hr' ? `uvjeti-najma-${booking.confirmation_number}.pdf` : `rental-terms-${booking.confirmation_number}.pdf`, content: Buffer.from(termsPdf) }] : undefined
+      },
       { bookingId: booking.id, messageType: 'booking_received_customer', recipient: booking.driver_email }
     ),
     send(

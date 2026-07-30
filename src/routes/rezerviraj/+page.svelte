@@ -551,7 +551,8 @@
           total_price: totalPrice,
           payment_method: paymentMethod,
           payment_split: paymentSplit,
-          terms_accepted: termsAccepted
+          terms_accepted: termsAccepted,
+          locale: $locale
         }),
       });
       const data = await res.json();
@@ -879,14 +880,22 @@
                 <input id="destination" type="text" class="field" aria-invalid={Boolean(stepOneErrors.destination)} placeholder={$locale === 'hr' ? 'npr. Istra i Kvarner' : 'e.g. Istria and Kvarner'} oninput={() => clearStepOneError('destination')} bind:value={$booking.destination} />
                 {#if stepOneErrors.destination}<p class="field-error-text">{stepOneErrors.destination}</p>{/if}
               </div>
-              <label class="flex items-start gap-3 rounded-md border border-[#e2e4e8] p-3 text-sm text-[#4c5157]">
-                <input type="checkbox" class="mt-1 h-4 w-4 accent-[#f5c518]" bind:checked={$booking.crossesBorder} />
-                <span><b class="text-[#2b2b2b]">{$locale === 'hr' ? 'Planiram prelazak granice' : 'I plan to cross a border'}</b><br />{$locale === 'hr' ? 'Naknada za prelazak granice automatski se dodaje u obračun.' : 'The border-crossing fee is automatically added to the quote.'}</span>
-              </label>
-              <label class="flex items-start gap-3 rounded-md border border-[#e2e4e8] p-3 text-sm text-[#4c5157]">
-                <input type="checkbox" class="mt-1 h-4 w-4 accent-[#f5c518]" bind:checked={$booking.attendsFestival} />
-                <span><b class="text-[#2b2b2b]">{$locale === 'hr' ? 'Putujem na festival' : 'I am travelling to a festival'}</b><br />{$locale === 'hr' ? 'Naknada za festival automatski se dodaje u obračun.' : 'The festival fee is automatically added to the quote.'}</span>
-              </label>
+              <fieldset class="rounded-md border border-[#e2e4e8] p-3 text-sm text-[#4c5157]">
+                <legend class="px-1"><b class="text-[#2b2b2b]">{$locale === 'hr' ? 'Planiram prelazak granice' : 'I plan to cross a border'}</b></legend>
+                <p class="mb-3">{$locale === 'hr' ? 'Naknada za prelazak granice automatski se dodaje u obračun.' : 'The border-crossing fee is automatically added to the quote.'}</p>
+                <div class="flex gap-2" role="radiogroup" aria-label={$locale === 'hr' ? 'Planiram prelazak granice' : 'I plan to cross a border'}>
+                  <button type="button" class:btn-primary={$booking.crossesBorder} class:btn-outline={!$booking.crossesBorder} class="btn min-w-20 px-4 py-2" onclick={() => $booking.crossesBorder = true}>{$locale === 'hr' ? 'Da' : 'Yes'}</button>
+                  <button type="button" class:btn-primary={!$booking.crossesBorder} class:btn-outline={$booking.crossesBorder} class="btn min-w-20 px-4 py-2" onclick={() => $booking.crossesBorder = false}>{$locale === 'hr' ? 'Ne' : 'No'}</button>
+                </div>
+              </fieldset>
+              <fieldset class="rounded-md border border-[#e2e4e8] p-3 text-sm text-[#4c5157]">
+                <legend class="px-1"><b class="text-[#2b2b2b]">{$locale === 'hr' ? 'Putujem na festival' : 'I am travelling to a festival'}</b></legend>
+                <p class="mb-3">{$locale === 'hr' ? 'Naknada za festival automatski se dodaje u obračun.' : 'The festival fee is automatically added to the quote.'}</p>
+                <div class="flex gap-2" role="radiogroup" aria-label={$locale === 'hr' ? 'Putujem na festival' : 'I am travelling to a festival'}>
+                  <button type="button" class:btn-primary={$booking.attendsFestival} class:btn-outline={!$booking.attendsFestival} class="btn min-w-20 px-4 py-2" onclick={() => $booking.attendsFestival = true}>{$locale === 'hr' ? 'Da' : 'Yes'}</button>
+                  <button type="button" class:btn-primary={!$booking.attendsFestival} class:btn-outline={$booking.attendsFestival} class="btn min-w-20 px-4 py-2" onclick={() => $booking.attendsFestival = false}>{$locale === 'hr' ? 'Ne' : 'No'}</button>
+                </div>
+              </fieldset>
             </div>
           </div>
 

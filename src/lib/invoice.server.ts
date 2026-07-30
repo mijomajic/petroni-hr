@@ -1,5 +1,112 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
+const PDF_PAGE: [number, number] = [595.28, 841.89];
+
+function pdfSafeText(value: unknown): string {
+  return String(value ?? '')
+    .replace(/[čć]/g, 'c')
+    .replace(/[ČĆ]/g, 'C')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .replace(/[š]/g, 's')
+    .replace(/[Š]/g, 'S')
+    .replace(/[ž]/g, 'z')
+    .replace(/[Ž]/g, 'Z')
+    .replace(/[“”]/g, '"')
+    .replace(/[’]/g, "'")
+    .replace(/[–—]/g, '-')
+    .replace(/[^\x20-\x7E]/g, '');
+}
+
+function splitPdfLines(value: string, font: Awaited<ReturnType<PDFDocument['embedFont']>>, size: number, width: number): string[] {
+  const lines: string[] = [];
+  for (const rawLine of pdfSafeText(value).replace(/\r\n/g, '\n').split('\n')) {
+    const words = rawLine.trim().split(/\s+/).filter(Boolean);
+    if (!words.length) {
+      lines.push('');
+      continue;
+    }
+    let line = '';
+    for (const word of words) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (line && font.widthOfTextAtSize(candidate, size) > width) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = candidate;
+      }
+    }
+    if (line) lines.push(line);
+  }
+  return lines;
+}
+
+/** A static copy of the version accepted at booking time, intended for email attachment. */
+export async function createRentalTermsPdf(input: {
+  version: string;
+  content: string;
+  locale: 'hr' | 'en';
+}): Promise<Uint8Array> {
+  const pdf = await PDFDocument.create();
+  const regular = await pdf.embedFont(StandardFonts.Helvetica);
+  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const yellow = rgb(0.96, 0.77, 0.09);
+  const dark = rgb(0.12, 0.12, 0.12);
+  const textColor = rgb(0.18, 0.18, 0.18);
+  const margin = 52;
+  const contentWidth = PDF_PAGE[0] - margin * 2;
+  const title = input.locale === 'hr' ? 'UVJETI NAJMA' : 'RENTAL TERMS';
+  const subtitle = input.locale === 'hr'
+    ? `Verzija uvjeta: ${input.version}`
+    : `Terms version: ${input.version}`;
+  let pageNumber = 0;
+  let page: ReturnType<PDFDocument['addPage']> | undefined;
+  let y = 0;
+
+  const addPage = () => {
+    pageNumber += 1;
+    page = pdf.addPage(PDF_PAGE);
+    const { height } = page.getSize();
+    page.drawRectangle({ x: 0, y: height - 92, width: PDF_PAGE[0], height: 92, color: dark });
+    page.drawText('PETRONI', { x: margin, y: height - 52, size: 24, font: bold, color: yellow });
+    page.drawText(title, { x: margin, y: height - 74, size: 9, font: bold, color: rgb(1, 1, 1) });
+    page.drawText(subtitle, { x: margin, y: height - 106, size: 8.5, font: regular, color: rgb(0.36, 0.36, 0.36) });
+    y = height - 130;
+  };
+
+  const footer = () => {
+    if (!page) return;
+    page.drawLine({ start: { x: margin, y: 42 }, end: { x: PDF_PAGE[0] - margin, y: 42 }, thickness: 0.5, color: rgb(0.82, 0.82, 0.82) });
+    page.drawText(`Petroni - ${title} - ${pageNumber}`, { x: margin, y: 27, size: 7.5, font: regular, color: rgb(0.42, 0.42, 0.42) });
+  };
+
+  addPage();
+  for (const rawLine of String(input.content ?? '').replace(/\r\n/g, '\n').split('\n')) {
+    const trimmed = rawLine.trim();
+    const isHeading = /^#{1,3}\s+/.test(trimmed) || /^✓?\s*\d+\.\s*\S/.test(trimmed) || /^[A-ZČĆŽŠĐ0-9\s,.&'()/-]{12,}$/.test(trimmed);
+    const lineText = trimmed.replace(/^#{1,3}\s+/, '');
+    const font = isHeading ? bold : regular;
+    const size = isHeading ? 10.5 : 9.2;
+    const lineHeight = isHeading ? 15 : 13;
+    const lines = splitPdfLines(lineText, font, size, contentWidth);
+    if (!trimmed) {
+      y -= 7;
+      continue;
+    }
+    for (const line of lines) {
+      if (y < 60) {
+        footer();
+        addPage();
+      }
+      page?.drawText(line, { x: margin, y, size, font, color: textColor });
+      y -= lineHeight;
+    }
+    y -= isHeading ? 4 : 2;
+  }
+  footer();
+  return pdf.save();
+}
+
 export async function createOrderConfirmationPdf(input: {
   number: string;
   customerName: string;
