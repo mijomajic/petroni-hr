@@ -65,6 +65,6 @@
       {/each}
     </div>
 
-    <a class="btn btn-primary mt-10 px-6 py-3" href="https://xcdwougdkczypzkcsobg.supabase.co/storage/v1/object/public/petroni-legacy-assets-staging/legacy-wp-2026-07/wp-content/uploads/2024/02/POVRAT-ROBE-PETRONI.pdf" target="_blank" rel="noreferrer">{$locale === 'hr' ? 'Preuzmite obrazac za povrat robe' : 'Download the return form'}</a>
+    <a class="btn btn-primary mt-10 px-6 py-3" href="https://xcdwougdkczypzkcsobg.supabase.co/storage/v1/object/public/petroni-assets/documents/2024/02/POVRAT-ROBE-PETRONI.pdf" target="_blank" rel="noreferrer">{$locale === 'hr' ? 'Preuzmite obrazac za povrat robe' : 'Download the return form'}</a>
   </div>
 </div>

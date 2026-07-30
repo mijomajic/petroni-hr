@@ -1,0 +1,23 @@
+import { createHash } from 'node:crypto';
+import { readFile, rename, writeFile } from 'node:fs/promises';
+
+const base = process.env.PUBLIC_SUPABASE_URL, key = process.env.SUPABASE_SERVICE_KEY;
+if (!base || !key) throw new Error('PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY are required.');
+const sourceBucket = 'petroni-legacy-assets-staging', destinationBucket = 'petroni-assets';
+const manifest = JSON.parse(await readFile('migration/asset-manifest.json', 'utf8'));
+const output = 'migration/restructured-asset-manifest.json';
+const headers = { apikey: key, authorization: `Bearer ${key}` };
+const sha = body => createHash('sha256').update(body).digest('hex');
+const safe = value => [...value].map(c => /[A-Za-z0-9._/-]/.test(c) ? c : `__u${c.codePointAt(0).toString(16).padStart(4,'0')}__`).join('');
+const endpoint = (bucket, objectKey) => `${base}/storage/v1/object/${encodeURIComponent(bucket)}/${objectKey.split('/').map(encodeURIComponent).join('/')}`;
+const publicUrl = objectKey => `${base}/storage/v1/object/public/${destinationBucket}/${objectKey.split('/').map(encodeURIComponent).join('/')}`;
+const get = async (bucket, objectKey) => { const r = await fetch(endpoint(bucket, objectKey), { headers }); if (r.status === 400) { const e = await r.json().catch(() => null); if (e?.code === 'NoSuchKey') return null; } if (!r.ok) throw new Error(`GET ${objectKey}: ${r.status}`); return Buffer.from(await r.arrayBuffer()); };
+const put = async (objectKey, body, contentType) => { const r = await fetch(endpoint(destinationBucket, objectKey), { method: 'POST', headers: { ...headers, 'content-type': contentType, 'x-upsert': 'false' }, body }); if (!r.ok) throw new Error(`PUT ${objectKey}: ${r.status} ${await r.text()}`); };
+const bucketResponse = await fetch(`${base}/storage/v1/bucket`, { method: 'POST', headers: { ...headers, 'content-type': 'application/json' }, body: JSON.stringify({ id: destinationBucket, name: destinationBucket, public: true }) });
+if (!bucketResponse.ok && bucketResponse.status !== 409) throw new Error(`bucket: ${bucketResponse.status}`);
+const assets = Object.values(manifest.assets).filter(asset => asset.upload_result?.status === 'uploaded');
+const report = { generated_at: new Date().toISOString(), source_bucket: sourceBucket, destination_bucket: destinationBucket, assets: {}, failures: [] };
+let next = 0, done = 0;
+await Promise.all(Array.from({ length: 8 }, async () => { while (next < assets.length) { const asset = assets[next++]; try { const source = await get(sourceBucket, asset.object_key); if (!source) throw new Error('source missing'); const match = asset.original_url.match(/\/wp-content\/uploads\/(\d{4})\/(\d{2})\/(.+)$/); if (!match) throw new Error('unexpected source path'); const document = /\.pdf$/i.test(match[3]); const objectKey = `${document ? 'documents' : 'images'}/${match[1]}/${match[2]}/${safe(match[3])}`; const existing = await get(destinationBucket, objectKey); if (existing) { if (sha(existing) !== asset.sha256) throw new Error('destination checksum conflict'); } else await put(objectKey, source, asset.content_type); const verified = await get(destinationBucket, objectKey); if (!verified || sha(verified) !== asset.sha256) throw new Error('destination checksum verification failed'); report.assets[asset.original_url] = { object_key: objectKey, public_url: publicUrl(objectKey), sha256: asset.sha256, byte_size: asset.byte_size, content_type: asset.content_type }; } catch (error) { report.failures.push({ original_url: asset.original_url, error: error.message }); } finally { done += 1; if (done % 100 === 0 || done === assets.length) console.log(`Copied ${done}/${assets.length}`); } } }));
+const temp = `${output}.tmp`; await writeFile(temp, `${JSON.stringify(report, null, 2)}\n`); await rename(temp, output);
+console.log(JSON.stringify({ copied: Object.keys(report.assets).length, failures: report.failures.length, output }, null, 2));

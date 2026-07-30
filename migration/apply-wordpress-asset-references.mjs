@@ -4,9 +4,10 @@ import { join } from 'node:path';
 const root = process.cwd();
 const directory = join(root, 'migration');
 const manifestPath = join(directory, 'asset-manifest.json');
-const backupPath = join(directory, 'production-reference-backup.json');
+const restructure = process.argv.includes('--restructure');
+const backupPath = join(directory, restructure ? 'production-restructure-reference-backup.json' : 'production-reference-backup.json');
 const reportPath = join(directory, 'production-reference-update-report.json');
-const bucket = process.env.PETRONI_ASSET_BUCKET || 'petroni-legacy-assets-staging';
+const bucket = process.env.PETRONI_ASSET_BUCKET || (restructure ? 'petroni-assets' : 'petroni-legacy-assets-staging');
 const apply = process.argv.includes('--apply');
 const baseUrl = process.env.PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_KEY;
@@ -42,9 +43,11 @@ function replaceValue(value, map) {
 }
 
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-const map = new Map(Object.values(manifest.assets)
-  .filter(asset => asset.upload_result?.status === 'uploaded')
-  .map(asset => [asset.original_url, publicUrl(asset.object_key)]));
+const restructured = restructure ? JSON.parse(await readFile(join(directory, 'restructured-asset-manifest.json'), 'utf8')) : null;
+const oldPublicUrl = asset => `${baseUrl}/storage/v1/object/public/petroni-legacy-assets-staging/${asset.object_key.split('/').map(encodeURIComponent).join('/')}`;
+const map = restructure
+  ? new Map(Object.values(manifest.assets).map(asset => [oldPublicUrl(asset), restructured.assets[asset.original_url]?.public_url]).filter(([, url]) => url))
+  : new Map(Object.values(manifest.assets).filter(asset => asset.upload_result?.status === 'uploaded').map(asset => [asset.original_url, publicUrl(asset.object_key)]));
 if (map.size !== 3213) throw new Error(`Expected 3213 uploaded manifest assets; found ${map.size}.`);
 
 const bucketResponse = await fetch(`${baseUrl}/storage/v1/bucket/${encodeURIComponent(bucket)}`, { method: 'PUT', headers: { ...headers, 'content-type': 'application/json' }, body: JSON.stringify({ public: true }) });
