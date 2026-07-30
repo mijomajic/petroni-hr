@@ -133,6 +133,15 @@
       }))
       .filter((group) => group.extras.length > 0)
   );
+  const extraGroupLabel = (group: { key: string; hr: string; en: string }) => {
+    const labels: Record<string, { hr: string; en: string }> = {
+      oprema: { hr: 'Za ugodnije putovanje', en: 'For a more comfortable trip' },
+      posebne_naknade: { hr: 'Posebne usluge', en: 'Special services' },
+      ciscenje: { hr: 'Priprema i povrat vozila', en: 'Vehicle preparation and return' },
+      depozit: { hr: 'Polog i zaštita', en: 'Deposit and protection' }
+    };
+    return ($locale === 'hr' ? labels[group.key]?.hr : labels[group.key]?.en) ?? ($locale === 'hr' ? group.hr : group.en);
+  };
 
   const splitPaymentEligible = $derived(
     splitPaymentIsEligible($booking.pickupDate, Number(data.splitPaymentMinAdvanceDays))
@@ -970,12 +979,12 @@
               {:else}
                 <div class="space-y-4">
                   {#each extraGroups as group}
-                    <details class="group overflow-hidden rounded-lg border border-[#e5e7eb] bg-white">
-                      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3.5 text-[12px] font-bold uppercase tracking-[0.12em] text-[#59616a] marker:content-none hover:bg-[#fafbfc]">
-                        <span>{$locale === 'hr' ? group.hr : group.en}</span>
+                    <details class="group" open={group.key === 'ostalo'}>
+                      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-3 text-[12px] font-bold uppercase tracking-[0.12em] text-[#8b9099] marker:content-none hover:text-[#59616a]">
+                        <span>{extraGroupLabel(group)}</span>
                         <svg class="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
                       </summary>
-                      <div class="divide-y divide-[#ededf0] border-t border-[#ededf0] px-4">
+                      <div class="divide-y divide-[#ededf0]">
                         {#each group.extras as extra}
                           {@const autoApplied =
                             (extra.auto_apply_rule === 'border_crossing' && $booking.crossesBorder) ||
