@@ -89,7 +89,7 @@ export const DEFAULT_SITE_PAGES: Record<SitePageKey, SitePageContent> = {
         items: [
           { id: 'udruga-kampista', title: t('Udruga Kampista Hrvatske', 'Croatian Campers Association'), image: '/partners/logos/udruga-kampista.png', href: 'https://udrugakampista.hr/' },
           { id: 'polidor', title: t('Polidor Camping Resort', 'Polidor Camping Resort'), image: '/partners/logos/polidor.png', href: 'https://www.campingpolidor.com/' },
-          { id: 'jadranka', title: t('Jadranka Camping — Cres & Lošinj', 'Jadranka Camping — Cres & Lošinj'), image: 'https://www.camps-cres-losinj.com/assets/images/interface/logo.svg', href: 'https://www.camps-cres-losinj.com/' },
+          { id: 'valamar-camping', title: t('Valamar Camping', 'Valamar Camping'), image: '/partners/logos/valamar.svg', href: 'https://www.valamarcamping.com/' },
           { id: 'plitvice', title: t('Camping Plitvice', 'Camping Plitvice'), image: 'https://campingplitvice.hr/wp-content/uploads/2019/08/campingplitvice_logo.png', href: 'https://campingplitvice.hr/' },
           { id: 'amadria', title: t('Amadria Park Camping Šibenik', 'Amadria Park Camping Šibenik'), image: 'https://www.amcham.hr/storage/upload/gen_blog/amadria_park_logo-500x400_9557.jpg', href: 'https://www.amadriapark.com/hr/sibenik/camping/' },
           { id: 'camping-hr', title: t('Kamping udruženje Hrvatske', 'Croatian Camping Union'), image: '/partners/logos/kamping-udruzenje.jpg', href: 'https://www.camping.hr/hr' }
