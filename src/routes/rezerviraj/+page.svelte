@@ -880,22 +880,24 @@
                 <input id="destination" type="text" class="field" aria-invalid={Boolean(stepOneErrors.destination)} placeholder={$locale === 'hr' ? 'npr. Istra i Kvarner' : 'e.g. Istria and Kvarner'} oninput={() => clearStepOneError('destination')} bind:value={$booking.destination} />
                 {#if stepOneErrors.destination}<p class="field-error-text">{stepOneErrors.destination}</p>{/if}
               </div>
-              <fieldset class="rounded-md border border-[#e2e4e8] p-3 text-sm text-[#4c5157]">
-                <legend class="px-1"><b class="text-[#2b2b2b]">{$locale === 'hr' ? 'Planiram prelazak granice' : 'I plan to cross a border'}</b></legend>
-                <p class="mb-3">{$locale === 'hr' ? 'Naknada za prelazak granice automatski se dodaje u obračun.' : 'The border-crossing fee is automatically added to the quote.'}</p>
-                <div class="flex gap-2" role="radiogroup" aria-label={$locale === 'hr' ? 'Planiram prelazak granice' : 'I plan to cross a border'}>
-                  <button type="button" class:btn-primary={$booking.crossesBorder} class:btn-outline={!$booking.crossesBorder} class="btn min-w-20 px-4 py-2" onclick={() => $booking.crossesBorder = true}>{$locale === 'hr' ? 'Da' : 'Yes'}</button>
-                  <button type="button" class:btn-primary={!$booking.crossesBorder} class:btn-outline={$booking.crossesBorder} class="btn min-w-20 px-4 py-2" onclick={() => $booking.crossesBorder = false}>{$locale === 'hr' ? 'Ne' : 'No'}</button>
+              <div class="rounded-md border border-[#e2e4e8] p-4">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div><h3 class="text-[15px] font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Planiram prelazak granice' : 'I plan to cross a border'}</h3><p class="mt-1 text-[13px] leading-relaxed text-[#6b7178]">{$locale === 'hr' ? 'Naknada se automatski dodaje u obračun.' : 'The fee is automatically added to the quote.'}</p></div>
+                  <div class="flex shrink-0 rounded-lg bg-[#f3f4f6] p-1" role="group" aria-label={$locale === 'hr' ? 'Planiram prelazak granice' : 'I plan to cross a border'}>
+                    <button type="button" aria-pressed={$booking.crossesBorder} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${$booking.crossesBorder ? 'bg-[#f5c518] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.crossesBorder = true}>{$locale === 'hr' ? 'Da' : 'Yes'}</button>
+                    <button type="button" aria-pressed={!$booking.crossesBorder} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${!$booking.crossesBorder ? 'bg-[#f5c518] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.crossesBorder = false}>{$locale === 'hr' ? 'Ne' : 'No'}</button>
+                  </div>
                 </div>
-              </fieldset>
-              <fieldset class="rounded-md border border-[#e2e4e8] p-3 text-sm text-[#4c5157]">
-                <legend class="px-1"><b class="text-[#2b2b2b]">{$locale === 'hr' ? 'Putujem na festival' : 'I am travelling to a festival'}</b></legend>
-                <p class="mb-3">{$locale === 'hr' ? 'Naknada za festival automatski se dodaje u obračun.' : 'The festival fee is automatically added to the quote.'}</p>
-                <div class="flex gap-2" role="radiogroup" aria-label={$locale === 'hr' ? 'Putujem na festival' : 'I am travelling to a festival'}>
-                  <button type="button" class:btn-primary={$booking.attendsFestival} class:btn-outline={!$booking.attendsFestival} class="btn min-w-20 px-4 py-2" onclick={() => $booking.attendsFestival = true}>{$locale === 'hr' ? 'Da' : 'Yes'}</button>
-                  <button type="button" class:btn-primary={!$booking.attendsFestival} class:btn-outline={$booking.attendsFestival} class="btn min-w-20 px-4 py-2" onclick={() => $booking.attendsFestival = false}>{$locale === 'hr' ? 'Ne' : 'No'}</button>
+              </div>
+              <div class="rounded-md border border-[#e2e4e8] p-4">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div><h3 class="text-[15px] font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Putujem na festival' : 'I am travelling to a festival'}</h3><p class="mt-1 text-[13px] leading-relaxed text-[#6b7178]">{$locale === 'hr' ? 'Naknada se automatski dodaje u obračun.' : 'The fee is automatically added to the quote.'}</p></div>
+                  <div class="flex shrink-0 rounded-lg bg-[#f3f4f6] p-1" role="group" aria-label={$locale === 'hr' ? 'Putujem na festival' : 'I am travelling to a festival'}>
+                    <button type="button" aria-pressed={$booking.attendsFestival} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${$booking.attendsFestival ? 'bg-[#f5c518] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.attendsFestival = true}>{$locale === 'hr' ? 'Da' : 'Yes'}</button>
+                    <button type="button" aria-pressed={!$booking.attendsFestival} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${!$booking.attendsFestival ? 'bg-[#f5c518] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.attendsFestival = false}>{$locale === 'hr' ? 'Ne' : 'No'}</button>
+                  </div>
                 </div>
-              </fieldset>
+              </div>
             </div>
           </div>
 

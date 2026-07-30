@@ -170,11 +170,6 @@ export const DEFAULT_SITE_PAGES: Record<SitePageKey, SitePageContent> = {
         { id: 'email', title: t('Email', 'Email'), body: t('info@petroni.hr', 'info@petroni.hr'), href: 'mailto:info@petroni.hr' },
         { id: 'note', title: t('Napomena', 'Note'), body: t('Molimo Vas da nas za sve upite kontaktirate isključivo putem e-maila ili telefonskim pozivom. WhatsApp poruke nisu podržane kao službeni kanal komunikacije.', 'Please contact us only by email or phone call. WhatsApp messages are not supported as an official channel.') },
         { id: 'map', title: t('Lokacija', 'Location'), body: t('Petroni d.o.o.\nSlavka Tomerlina 9, 10380 Sesvete, Zagreb', 'Petroni d.o.o.\nSlavka Tomerlina 9, 10380 Sesvete, Zagreb'), href: 'https://www.google.com/maps/search/?api=1&query=Slavka%20Tomerlina%209%2C%2010380%20Sesvete%2C%20Zagreb' }
-      ] },
-      { id: 'faq', type: 'faq', label: 'Česta pitanja na kontaktu', visible: true, eyebrow: t('Odgovori na sva vaša pitanja', 'Answers to all your questions'), title: t('Najčešće postavljena pitanja', 'Frequently asked questions'), items: [
-        { id: 'booking', title: t('Kako mogu rezervirati kamper?', 'How can I book a camper?'), body: t('Rezervaciju možete obaviti online putem naše stranice za rezervacije u nekoliko koraka, ili nas kontaktirajte telefonom/e-mailom i rado ćemo Vam pomoći.', 'You can book online through our reservation page in a few steps, or contact us by phone/email and we will gladly help you.') },
-        { id: 'included', title: t('Što je uključeno u cijenu najma?', 'What is included in the rental price?'), body: t('U cijenu najma uključena je osnovna oprema vozila, kilometraža prema dogovoru te tehnička podrška tijekom putovanja. Detalje pronađite u uvjetima najma.', 'The rental price includes the basic vehicle equipment, agreed mileage and technical support during your trip. See the rental terms for details.') },
-        { id: 'short-rental', title: t('Mogu li iznajmiti kamper na 2 dana?', 'Can I rent a camper for 2 days?'), body: t('Minimalno trajanje najma ovisi o sezoni. Za kraće najmove slobodno nas kontaktirajte za dostupnost i posebne uvjete.', 'The minimum rental period depends on the season. For shorter rentals, contact us for availability and special terms.') }
       ] }
     ]
   },

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import FaqSection from '$lib/components/content/FaqSection.svelte';
   import { localizedText, type SitePageContent, type SitePageItem } from '$lib/site-page-content';
   import { locale } from '$lib/stores/locale';
   import type { PageProps } from './$types';
@@ -8,7 +7,6 @@
   let { data }: PageProps = $props();
   const content = $derived(data.pageContent as SitePageContent);
   const contactSection = $derived(content.sections.find((section) => section.type === 'contact' && section.visible));
-  const faqSection = $derived(content.sections.find((section) => section.type === 'faq' && section.visible));
   const title = $derived(localizedText(content.title, $locale));
   const description = $derived(localizedText(content.seoDescription, $locale));
   const tx = (value: { hr: string; en: string } | undefined) => localizedText(value, $locale);
@@ -102,5 +100,3 @@
     </div>
   </section>
 {/if}
-
-{#if faqSection}<FaqSection section={faqSection} />{/if}
