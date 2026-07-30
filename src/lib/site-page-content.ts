@@ -133,14 +133,14 @@ export const DEFAULT_SITE_PAGES: Record<SitePageKey, SitePageContent> = {
       {
         id: 'brands', type: 'logo_marquee', label: 'Brendovi vozila i opreme', visible: true,
         items: [
-          { id: 'rimor', title: t('RIMOR', 'RIMOR'), image: '/partners/logos/rimor.svg', href: 'https://www.rimor.it/it/en' },
-          { id: 'caravans-international', title: t('CARAVANS INT.', 'CARAVANS INT.'), image: '/partners/logos/caravans-international.svg', href: 'https://www.caravansinternational.it/fr/' },
+          { id: 'rimor', title: t('RIMOR', 'RIMOR'), image: '/partners/logos/rimor.jpg', href: 'https://www.rimor.it/it/en' },
+          { id: 'caravans-international', title: t('CARAVANS INT.', 'CARAVANS INT.'), image: '/partners/logos/caravans-international.jpg', href: 'https://www.caravansinternational.it/fr/' },
           { id: 'mega-mobil', title: t('MEGA MOBIL', 'MEGA MOBIL'), image: '/partners/logos/mega-mobil.png', href: 'https://megamobil.si/en/' },
           { id: 'thetford', title: t('THETFORD', 'THETFORD'), image: '/partners/logos/thetford.png', href: 'https://www.thetford.com/' },
           { id: 'knaus', title: t('KNAUS', 'KNAUS'), image: '/partners/logos/knaus.png', href: 'https://www.knaus.com/en-int/' },
           { id: 'roller-team', title: t('ROLLER TEAM', 'ROLLER TEAM'), image: '/partners/logos/roller-team.svg', href: 'https://www.rollerteam.it/' },
-          { id: 'truma', title: t('TRUMA', 'TRUMA'), image: '/partners/logos/truma.svg', href: 'https://www.truma.com/', filter: 'invert(1)' },
-          { id: 'weinsberg', title: t('WEINSBERG', 'WEINSBERG'), image: '/partners/logos/weinsberg.png', href: 'https://weinsberg.com/en-int/' }
+          { id: 'truma', title: t('TRUMA', 'TRUMA'), image: '/partners/logos/truma.jpg', href: 'https://www.truma.com/' },
+          { id: 'weinsberg', title: t('WEINSBERG', 'WEINSBERG'), image: '/partners/logos/weinsberg.jpg', href: 'https://weinsberg.com/en-int/' }
         ]
       }
     ]
