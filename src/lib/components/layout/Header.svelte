@@ -55,7 +55,7 @@
     <!-- Logo -->
     <a href="/" class="flex-shrink-0" aria-label="Petroni">
       <img
-        src="/brand/petroni-logo.svg"
+        src="/brand/petroni-logo.png"
         alt="Petroni"
         width="220"
         height="58"

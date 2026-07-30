@@ -60,8 +60,8 @@
 </script>
 
 <svelte:head>
-  <link rel="icon" href="/brand/petroni-logo.svg" />
-  <link rel="apple-touch-icon" href="/brand/petroni-logo.svg" />
+  <link rel="icon" href="/brand/petroni-logo.png" />
+  <link rel="apple-touch-icon" href="/brand/petroni-logo.png" />
   <link rel="manifest" href="/site.webmanifest" />
   <link rel="canonical" href={canonicalUrl} />
   <meta name="theme-color" content="#ffffff" />

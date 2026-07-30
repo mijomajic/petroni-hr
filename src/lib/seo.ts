@@ -36,7 +36,7 @@ export function organizationSchema() {
     '@id': absoluteUrl('/#organization'),
     name: 'Petroni',
     url: SITE_URL,
-    logo: absoluteUrl('/brand/petroni-logo.svg'),
+    logo: absoluteUrl('/brand/petroni-logo.png'),
     image: DEFAULT_IMAGE,
     email: 'info@petroni.hr',
     telephone: '+385912427247',
