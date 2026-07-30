@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-07-30T16:46:15.545Z",
+  "mode": "apply",
+  "bucket": "petroni-legacy-assets-staging",
+  "public_base_url": "https://xcdwougdkczypzkcsobg.supabase.co/storage/v1/object/public/petroni-legacy-assets-staging/",
+  "totals": {
+    "products": {
+      "records": 2178,
+      "replacements": 3431
+    },
+    "posts": {
+      "records": 6,
+      "replacements": 6
+    },
+    "site_pages": {
+      "records": 1,
+      "replacements": 1
+    }
+  },
+  "total_replacements": 3438
+}
