@@ -151,7 +151,7 @@ export const DEFAULT_SITE_PAGES: Record<SitePageKey, SitePageContent> = {
           { id: 'thetford', title: t('THETFORD', 'THETFORD'), image: '/partners/logos/thetford.png', href: 'https://www.thetford.com/' },
           { id: 'knaus', title: t('KNAUS', 'KNAUS'), image: '/partners/logos/knaus-dark.png', href: 'https://www.knaus.com/en-int/' },
           { id: 'roller-team', title: t('ROLLER TEAM', 'ROLLER TEAM'), image: '/partners/logos/roller-team.svg', href: 'https://www.rollerteam.it/' },
-          { id: 'truma', title: t('TRUMA', 'TRUMA'), image: '/partners/logos/truma.jpg', href: 'https://www.truma.com/' },
+          { id: 'truma', title: t('TRUMA', 'TRUMA'), image: '/partners/logos/truma-cropped.webp', href: 'https://www.truma.com/' },
           { id: 'weinsberg', title: t('WEINSBERG', 'WEINSBERG'), image: '/partners/logos/weinsberg.png', href: 'https://weinsberg.com/en-int/' }
         ]
       }
