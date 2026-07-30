@@ -977,14 +977,12 @@
               {#if !$booking.selectedVehicle}
                 <p class="text-sm text-[#9aa0a8]">{$locale === 'hr' ? 'Odaberite vozilo za prikaz dodatne opreme.' : 'Select a vehicle to view extras.'}</p>
               {:else}
-                <div class="space-y-2">
+                <div>
                   {#each extraGroups as group}
                     <details class="group" open={group.key === 'ostalo'}>
-                      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 rounded-lg border border-[#e2e4e8] bg-[#fafbfc] px-4 py-3 text-[12px] font-bold uppercase tracking-[0.12em] text-[#66707a] marker:content-none transition-colors hover:border-[#cfd4da] hover:bg-white hover:text-[#2b2b2b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f5c518]">
+                      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 border-b border-[#e7e8eb] px-1 py-4 text-[12px] font-bold uppercase tracking-[0.12em] text-[#68717b] marker:content-none transition-colors hover:text-[#2b2b2b] focus-visible:text-[#2b2b2b] focus-visible:underline focus-visible:decoration-[#f5c518] focus-visible:decoration-2 focus-visible:underline-offset-4">
                         <span>{extraGroupLabel(group)}</span>
-                        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#fff4d6] text-[#a97800]">
-                          <svg class="h-4 w-4 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-                        </span>
+                        <svg class="h-5 w-5 shrink-0 text-[#b5890a] transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
                       </summary>
                       <div class="mx-2 divide-y divide-[#ededf0]">
                         {#each group.extras as extra}
