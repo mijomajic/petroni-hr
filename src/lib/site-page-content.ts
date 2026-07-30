@@ -114,12 +114,24 @@ export const DEFAULT_SITE_PAGES: Record<SitePageKey, SitePageContent> = {
       {
         id: 'gallery', type: 'image_strip', label: 'Galerija', visible: true,
         items: [
-          { id: 'gallery-1', image: 'https://www.petroni.hr/wp-content/uploads/2025/02/hero-image-petroni-camping-and-caravaning-rental10-1.jpg', alt: t('Petroni putovanje', 'Petroni journey') },
-          { id: 'gallery-2', image: '/images/vehicles/ci-horon-79m/01-horon-79-1.webp', alt: t('CI Horon kamper', 'CI Horon camper') },
-          { id: 'gallery-3', image: '/images/vehicles/roller-team-kronos-277m/01-izvana.webp', alt: t('Roller Team Kronos kamper', 'Roller Team Kronos camper') },
-          { id: 'gallery-4', image: '/images/vehicles/rimor-evo-sound/01-rimor-evo-1.webp', alt: t('Rimor EVO Sound kamper', 'Rimor EVO Sound camper') },
-          { id: 'gallery-5', image: 'https://www.petroni.hr/wp-content/uploads/2025/02/DSC_1792.jpg', alt: t('Kamping iskustvo', 'Camping experience') },
-          { id: 'gallery-6', image: 'https://www.petroni.hr/wp-content/uploads/2025/02/DSC_1684.jpg', alt: t('Putovanje kamperom', 'Camper journey') }
+          { id: 'gallery-1', image: '/images/home-gallery/01-krevet-u-kombiju.webp', alt: t('Krevet u Petroni kombi kamperu', 'Bed in a Petroni camper van') },
+          { id: 'gallery-2', image: '/images/home-gallery/02-kuhinja-u-kombiju.webp', alt: t('Kuhinja u Petroni kombi kamperu', 'Kitchen in a Petroni camper van') },
+          { id: 'gallery-3', image: '/images/home-gallery/03-prostrani-krevet.webp', alt: t('Prostrani krevet u kamperu', 'Spacious camper bed') },
+          { id: 'gallery-4', image: '/images/home-gallery/04-detalj-interijera.webp', alt: t('Detalj interijera kampera', 'Camper interior detail') },
+          { id: 'gallery-5', image: '/images/home-gallery/05-kupaonica.webp', alt: t('Kupaonica u kamperu', 'Camper bathroom') },
+          { id: 'gallery-6', image: '/images/home-gallery/06-hladnjak.webp', alt: t('Hladnjak u kamperu', 'Camper refrigerator') },
+          { id: 'gallery-7', image: '/images/home-gallery/07-kamper-interijer.webp', alt: t('Interijer Petroni kampera', 'Petroni camper interior') },
+          { id: 'gallery-8', image: '/images/home-gallery/08-prostor-za-blagovanje.webp', alt: t('Prostor za blagovanje u kamperu', 'Camper dining area') },
+          { id: 'gallery-9', image: '/images/home-gallery/09-kamper-dnevni-prostor.webp', alt: t('Dnevni prostor kampera', 'Camper lounge') },
+          { id: 'gallery-10', image: '/images/home-gallery/10-kampiranje-uz-kamper.webp', alt: t('Kampiranje uz Petroni kamper', 'Camping beside a Petroni camper') },
+          { id: 'gallery-11', image: '/images/home-gallery/11-tenda-kampera.webp', alt: t('Tenda Petroni kampera', 'Petroni camper awning') },
+          { id: 'gallery-12', image: '/images/home-gallery/12-detalj-prednjeg-svjetla.webp', alt: t('Detalj Petroni kampera', 'Petroni camper detail') },
+          { id: 'gallery-13', image: '/images/home-gallery/13-sjedeca-garnitura.webp', alt: t('Sjedeća garnitura u kamperu', 'Camper seating area') },
+          { id: 'gallery-14', image: '/images/home-gallery/14-spavaca-soba.webp', alt: t('Spavaća soba u kamperu', 'Camper bedroom') },
+          { id: 'gallery-15', image: '/images/home-gallery/15-druzenje-uz-kamper.webp', alt: t('Druženje uz Petroni kamper', 'Enjoying time beside a Petroni camper') },
+          { id: 'gallery-16', image: '/images/home-gallery/16-radni-prostor-u-kombiju.webp', alt: t('Radni prostor u kombi kamperu', 'Workspace in a camper van') },
+          { id: 'gallery-17', image: '/images/home-gallery/17-pranje-posuda.webp', alt: t('Kuhinja u upotrebi', 'Camper kitchen in use') },
+          { id: 'gallery-18', image: '/images/home-gallery/18-kuhinjski-pretinac.webp', alt: t('Kuhinjski pretinac kampera', 'Camper kitchen drawer') }
         ]
       },
       {
