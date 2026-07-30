@@ -112,7 +112,7 @@
     <section class="overflow-hidden bg-[#fafbfc] py-12"><div class="marquee"><div class="marquee-track gap-4">
       {#each [...(section.items ?? []), ...(section.items ?? [])] as item}
         <a href={item.href || '#'} target="_blank" rel="noreferrer" class="flex h-[110px] w-[200px] flex-shrink-0 flex-col items-center justify-center gap-2 rounded-lg border border-[#ededf0] bg-white px-6 text-center transition hover:border-[#f5c518]" aria-label={tx(item.title)}>
-          {#if item.image}<img src={item.image} alt={tx(item.title)} loading="lazy" class="max-h-14 max-w-full object-contain" />{/if}<span class="text-[10px] font-bold uppercase text-[#8b9099]">{tx(item.title)}</span>
+          {#if item.image}<img src={item.image} alt={tx(item.title)} class="max-h-14 max-w-full object-contain" />{/if}<span class="text-[10px] font-bold uppercase text-[#8b9099]">{tx(item.title)}</span>
         </a>
       {/each}
     </div></div></section>
