@@ -7,6 +7,7 @@
   import { page } from '$app/stores';
   import { absoluteUrl, canonicalPath, DEFAULT_IMAGE, SITE_NAME } from '$lib/seo';
   import ShopNavigationSkeleton from '$lib/components/shop/ShopNavigationSkeleton.svelte';
+  import NewsNavigationSkeleton from '$lib/components/content/NewsNavigationSkeleton.svelte';
 
   let { children } = $props();
   const isAdmin = $derived($page.url.pathname.startsWith('/admin'));
@@ -18,6 +19,7 @@
   let navigationTimer: ReturnType<typeof setTimeout> | undefined;
   let showNavigationFeedback = $state(false);
   let showShopSkeleton = $state(false);
+  let showNewsSkeleton = $state(false);
 
   function scanReveals() {
     if (!observer) return;
@@ -60,6 +62,7 @@
     clearTimeout(navigationTimer);
     showNavigationFeedback = false;
     showShopSkeleton = false;
+    showNewsSkeleton = false;
     await tick();
     if (!from || from.url.pathname !== to?.url.pathname) window.scrollTo(0, 0);
     scanReveals();
@@ -68,10 +71,12 @@
   beforeNavigate(({ to, willUnload }) => {
     if (!to?.url || willUnload) return;
     const isShopDestination = to.url.pathname === '/shop' || to.url.pathname.startsWith('/shop/') || to.url.pathname.startsWith('/product/');
+    const isNewsDestination = to.url.pathname === '/novosti';
     clearTimeout(navigationTimer);
     navigationTimer = setTimeout(() => {
       showNavigationFeedback = true;
       showShopSkeleton = isShopDestination;
+      showNewsSkeleton = isNewsDestination;
     }, 180);
   });
 </script>
@@ -99,6 +104,7 @@
 <div class="min-h-screen flex flex-col">
   {#if showNavigationFeedback}<div class="route-progress" aria-hidden="true"></div>{/if}
   {#if showShopSkeleton}<ShopNavigationSkeleton />{/if}
+  {#if showNewsSkeleton}<NewsNavigationSkeleton />{/if}
   {#if !isAdmin}<Header />{/if}
   <main class="flex-1">
     {@render children()}
