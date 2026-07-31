@@ -62,7 +62,9 @@ Business configuration such as seasons, prices, fees, delivery rules, featured b
 
 The production application is deployed by Vercel from the `main` branch. Configure all required environment variables for the Production environment before promoting a deployment. CorvusPay production credentials and callback URLs must match the final canonical domain.
 
-Current pre-domain production URL: `https://petroni-hr.vercel.app`.
+Candidate deployment URL: `https://petroni-hr.vercel.app`.
+
+As of 31 July 2026, `petroni.hr` and `www.petroni.hr` are configured as Vercel aliases but public DNS still serves the existing WordPress site. Do not change DNS ad hoc. Follow the ownership gates, DNS steps and rollback procedure in [`docs/go-live/`](docs/go-live/).
 
 ## Maintenance
 
@@ -71,3 +73,4 @@ Current pre-domain production URL: `https://petroni-hr.vercel.app`.
 - `supabase/migrations/` is the authoritative database change history.
 - `scripts/optimize-vehicle-images.mjs` and `scripts/vehicle-image-manifest.json` maintain the vehicle image library.
 - Automated `*.test.ts` files are retained as regression coverage and should run before release.
+- `docs/go-live/` is the authoritative operations set for ownership, hosting, release, DNS cutover, rollback and go-live approval. It intentionally contains no secret values.

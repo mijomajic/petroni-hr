@@ -31,9 +31,10 @@ test('admin section order and visibility are preserved while unknown sections ar
 });
 
 test('unsafe links are replaced and new FAQ items keep validated bilingual text', () => {
-  const source = cloneSitePageContent(DEFAULT_SITE_PAGES.contact);
-  const contact = source.sections.find((section) => section.id === 'contact');
-  const faq = source.sections.find((section) => section.id === 'faq');
+  const contactSource = cloneSitePageContent(DEFAULT_SITE_PAGES.contact);
+  const faqSource = cloneSitePageContent(DEFAULT_SITE_PAGES.faq);
+  const contact = contactSource.sections.find((section) => section.id === 'contact');
+  const faq = faqSource.sections.find((section) => section.id === 'faq');
   assert.ok(contact?.items && faq?.items);
   contact.items[1].href = 'javascript:alert(1)';
   faq.items.push({
@@ -46,9 +47,12 @@ test('unsafe links are replaced and new FAQ items keep validated bilingual text'
     title: { hr: 'Drugo pitanje', en: 'Second question' },
     body: { hr: 'Drugi odgovor', en: 'Second answer' }
   });
-  const sanitized = sanitizeSitePageContent('contact', source);
-  const sanitizedContact = sanitized.sections.find((section) => section.id === 'contact');
-  const sanitizedFaq = sanitized.sections.find((section) => section.id === 'faq');
+  const sanitizedContact = sanitizeSitePageContent('contact', contactSource).sections.find(
+    (section) => section.id === 'contact'
+  );
+  const sanitizedFaq = sanitizeSitePageContent('faq', faqSource).sections.find(
+    (section) => section.id === 'faq'
+  );
   assert.equal(sanitizedContact?.items?.[1].href, 'tel:+385912427247');
   assert.equal(sanitizedFaq?.items?.at(-2)?.id, 'custom-question');
   assert.equal(sanitizedFaq?.items?.at(-2)?.title?.en, 'New question');
