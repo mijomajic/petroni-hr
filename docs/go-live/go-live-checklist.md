@@ -33,18 +33,21 @@ Oznake: `[x]` tehnički potvrđeno, `[ ]` otvoreno, `N/A` izričito nije primjen
 - [x] BoxNow se učitava tek nakon odabira metode i klika za otvaranje službene karte.
 - [x] Browser storage/cookie inventar odgovara kodu i ugrađenoj početnoj politici; nema analitike ni marketing piksela.
 - [x] Za svih pet pravnih dokumenata implementirani su zaštićeni HR/EN nacrti, datum primjene, povijest, zasebna objava i restore bez gubitka povijesti.
-- [ ] Migracija `0038_phase6h_legal_documents.sql` primijenjena je na produkcijski Supabase i admin/browser ponašanje ručno je potvrđeno.
+- [x] Migracija `0038_phase6h_legal_documents.sql` primijenjena je na produkcijski Supabase; 5 dokumenata/5 objavljenih verzija, RLS i service-role ovlasti tehnički su provjereni.
+- [ ] Authenticated admin ručno je potvrdio draft, publish i restore kroz browser bez objave neodobrenog teksta.
 - [ ] Politika privatnosti, kolačići, uvjeti kupnje, plaćanje/dostava i reklamacije imaju konačne odobrene HR/EN verzije.
 - [ ] Petroni/pravni savjetnik odobrio je tekstove; tehnički tim nije prikazan kao pravni jamac.
 
 ## Gate D — backup i restore (6H-D)
 
-- [ ] Potvrđen je Supabase backup retention/PITR status i odgovorna osoba.
-- [ ] Automatiziran je šifrirani logički backup baze izvan aktivnog Supabase projekta.
-- [ ] Automatiziran je zaseban backup Supabase Storage objekata i metapodataka.
-- [ ] Dokumentirano je sigurno čuvanje/recovery environment varijabli bez commita tajni.
-- [ ] Testni restore baze i Storagea uspješno je proveden u odvojenom okruženju.
-- [ ] Evidentirani su trajanje restorea, rezultat i kvartalni raspored ponavljanja.
+- [x] Tehnički potvrđeno: Supabase WALG je uključen, PITR isključen, a CLI ne prikazuje dostupnu fizičku backup točku.
+- [x] Automatiziran je AES-256-GCM šifrirani logički backup baze/Autha izvan aktivnog Supabase projekta.
+- [x] Automatiziran je zaseban backup Supabase Storage objekata i metapodataka s hash manifestom.
+- [x] Dokumentirano je sigurno čuvanje/recovery environment varijabli bez commita tajni.
+- [x] Testni restore baze i Storagea uspješno je proveden u odvojenom lokalnom PostgreSQL okruženju.
+- [x] Evidentirani su SHA-256, 55 tablica/5.814 redaka, 3.280 objekata, trajanje 4,7 s i kvartalni raspored.
+- [ ] Petroni je imenovao primarnog i rezervnog backup ownera, potvrdio native retention/plan i odabrao off-site Petroni-owned lokaciju.
+- [ ] Dnevni scheduler i retention (14 dnevnih, 8 tjednih, 12 mjesečnih) aktivirani su na potvrđenoj Petroni-owned lokaciji.
 
 ## Gate E — CorvusPay (6H-E)
 

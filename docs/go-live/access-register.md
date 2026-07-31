@@ -26,6 +26,7 @@ Klasifikacija: interni operativni dokument bez tajni
 | Google mail/DNS | MX zapisi za Petroni domenu vode na Google | Dva Petroni Google administratora i dokumentiran recovery | **Zaštititi:** web cutover ne smije mijenjati MX/SPF/DKIM/DMARC |
 | Admin aplikacije | Aktivni admini: `info@petroni.hr` i `zoezedone@gmail.com` | Najmanje dva imenovana poslovna admina; osobni recovery admin ukloniti tek nakon provjerenog Petroni pristupa | **Djelomično:** oba računa su aktivna; Petroni treba potvrditi tko ostaje nakon handovera |
 | Domenski poslovni e-mail | Operativni kontakt aplikacije je `info@petroni.hr` | Petroni-owned inbox s najmanje dvije odgovorne osobe ili delegiranim pristupom | **Za potvrdu:** provjeriti primitak booking, order, kontakt i security poruka |
+| Backup arhiva i ključ | Prvi encrypted artifact i odvojeni ključ postoje lokalno; restore dokaz je prošao | Petroni-owned off-site spremište, primarni i rezervni owner, ključ u Petroni password manageru, aktivan scheduler | **Otvoreno:** imenovati ownere i konačnu lokaciju; lokalna developerska kopija nije dovoljna za poslovni gate |
 
 ## Podaci koje Petroni mora upisati izvan javnog repozitorija
 

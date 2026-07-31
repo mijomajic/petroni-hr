@@ -33,6 +33,9 @@ Open `http://localhost:5173`. Populate `.env` with local or development credenti
 | `CORVUSPAY_ENV` | `test` or `production` |
 | `RESEND_API_KEY` | Server-only Resend API key |
 | `RESEND_FROM_EMAIL` | Verified sender address used for transactional mail |
+| `PETRONI_SUPABASE_PROJECT_REF` | Approved project ref used only by backup tooling |
+| `PETRONI_BACKUP_DIR` | Private backup directory outside this repository |
+| `PETRONI_BACKUP_PASSPHRASE_FILE` | Mode-600 passphrase file outside this repository |
 
 Keep server-only values in local `.env` and encrypted Vercel environment variables. `.env.example` contains names and safe placeholders only.
 
@@ -53,6 +56,8 @@ npm run build
 `npm test` runs the complete regression suite. `npm run check` performs Svelte and TypeScript diagnostics. The project does not maintain a separate ESLint configuration.
 
 `npm run audit:legacy` regenerates a dated WordPress sitemap/product-SKU audit from the still-live legacy site and local Supabase credentials. `npm run audit:legacy:decisions` writes the complete per-URL decision CSV. After cutover, pipe Vercel JSON logs into `npm run report:404` for the daily 404 summary described in `docs/go-live/legacy-url-audit.md`.
+
+`npm run backup:production` creates the encrypted database/Auth/Storage backup described in `docs/go-live/backup-restore-runbook.md`. `npm run backup:restore-test -- /absolute/backup.tar.gz.enc` restores it into an isolated temporary PostgreSQL instance and writes non-sensitive evidence. Neither command may use a backup directory or passphrase file inside the repository.
 
 ## Database
 
