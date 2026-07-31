@@ -140,6 +140,46 @@
         </form>
         <p class="mt-4 text-xs text-[#8b9099]">PDF potvrda narudžbe i plaćanja automatski se šalje kada je narudžba plaćena i označena kao završena/poslana. Ne predstavlja službeni fiskalizirani račun.</p>
       </section>
+
+      {#if order.payment_method === 'corvuspay'}
+        <section class="rounded-2xl border border-[#e7e8eb] bg-white p-6">
+          <h2 class="mb-2 text-sm font-black uppercase tracking-widest text-[#2b2b2b]">CorvusPay kontrola</h2>
+          <p class="mb-4 text-xs leading-relaxed text-[#7a7f86]">Provjera ne mijenja status plaćanja automatski.</p>
+          <div class="space-y-3">
+            {#each data.corvuspayReferences as providerReference}
+              <form method="POST" action="?/reconcileCorvuspay" class="space-y-2 rounded-xl bg-[#fafafa] p-3">
+                <input type="hidden" name="provider_reference" value={providerReference} />
+                <code class="block break-all text-[10px] text-[#5b6168]">{providerReference}</code>
+                <button class="btn btn-dark w-full">Provjeri na CorvusPayu</button>
+              </form>
+            {:else}
+              <p class="text-sm text-[#7a7f86]">Još nema CorvusPay pokušaja.</p>
+            {/each}
+          </div>
+          {#if data.reconciliationIncidents.length}
+            <div class="mt-4 space-y-2 border-t border-[#ededf0] pt-4">
+              {#each data.reconciliationIncidents as incident}
+                <div class="rounded-xl p-3 text-xs {incident.state === 'open' ? 'bg-[#fff0ed] text-[#8b2f21]' : 'bg-[#f1f7f2] text-[#32633a]'}">
+                  <b>{incident.state === 'open' ? 'Otvoreno' : 'Riješeno'} · {incident.severity}</b>
+                  <p class="mt-1">CorvusPay: {incident.provider_status} · Petroni: {incident.local_status}</p>
+                  <p class="mt-1">{Number(incident.expected_amount).toFixed(2)} EUR</p>
+                </div>
+              {/each}
+            </div>
+          {/if}
+          {#if data.corvuspayReferences.length}
+            <form method="POST" action="?/recordCorvuspayOperation" class="mt-4 space-y-3 border-t border-[#ededf0] pt-4">
+              <div><h3 class="text-sm font-bold">Ručna operacija</h3><p class="mt-1 text-xs text-[#8b5a00]">Samo audit zapis; povrat/storno prvo izvršite u Merchant Portalu.</p></div>
+              <label><span class="field-label">Referenca</span><select name="provider_reference" class="field">{#each data.corvuspayReferences as providerReference}<option value={providerReference}>{providerReference}</option>{/each}</select></label>
+              <label><span class="field-label">Operacija</span><select name="operation" class="field"><option value="refund">Povrat</option><option value="cancellation">Storno predautorizacije</option><option value="manual_match">Ručno povezivanje</option></select></label>
+              <label><span class="field-label">Rezultat</span><select name="operation_status" class="field"><option value="completed">Izvršeno</option><option value="requested">Zatraženo</option><option value="failed">Neuspjelo</option></select></label>
+              <label><span class="field-label">Iznos (EUR)</span><input name="amount" type="number" min="0.01" max={Number(order.total)} step="0.01" required class="field" /></label>
+              <label><span class="field-label">Bilješka / potvrda</span><textarea name="note" minlength="3" maxlength="500" required class="field min-h-24"></textarea></label>
+              <button class="btn btn-dark w-full">Spremi audit zapis</button>
+            </form>
+          {/if}
+        </section>
+      {/if}
     </aside>
   </div>
 </div>

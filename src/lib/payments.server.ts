@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/private';
 import bwipjs from 'bwip-js';
+import { request as httpsRequest } from 'node:https';
 import {
   corvuspayCheckoutFields,
   corvuspayStatusHash,
@@ -50,6 +51,10 @@ export function corvuspayAvailable(): boolean {
   );
 }
 
+export function corvuspayStatusApiAvailable(): boolean {
+  return corvuspayAvailable() && Boolean(env.CORVUSPAY_API_CERT_PEM && env.CORVUSPAY_API_KEY_PEM);
+}
+
 function corvuspayTimestamp(date = new Date()): string {
   return [
     date.getUTCFullYear(),
@@ -70,11 +75,49 @@ export type CorvuspayTransactionStatus = {
   orderNumber: string;
   status: string;
   approvalCode: string | null;
+  responseCode: string | null;
 };
 
-/** Checks CorvusPay server-to-server when a hosted-page redirect contains no signed result fields. */
+function pem(value: string): string {
+  return value.replaceAll('\\n', '\n');
+}
+
+async function corvuspayStatusRequest(endpoint: URL, body: URLSearchParams): Promise<{
+  statusCode: number;
+  body: string;
+}> {
+  return new Promise((resolve, reject) => {
+    const request = httpsRequest(
+      endpoint,
+      {
+        method: 'POST',
+        cert: pem(env.CORVUSPAY_API_CERT_PEM!),
+        key: pem(env.CORVUSPAY_API_KEY_PEM!),
+        passphrase: env.CORVUSPAY_API_KEY_PASSPHRASE || undefined,
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          'content-length': Buffer.byteLength(body.toString())
+        },
+        timeout: 10_000
+      },
+      (response) => {
+        const chunks: Buffer[] = [];
+        response.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        response.on('end', () => resolve({
+          statusCode: response.statusCode ?? 0,
+          body: Buffer.concat(chunks).toString('utf8')
+        }));
+      }
+    );
+    request.on('timeout', () => request.destroy(new Error('CorvusPay status API timeout.')));
+    request.on('error', reject);
+    request.end(body.toString());
+  });
+}
+
+/** Checks CorvusPay server-to-server using the merchant mTLS API certificate. */
 export async function corvuspayTransactionStatus(orderNumber: string): Promise<CorvuspayTransactionStatus | null> {
-  if (!corvuspayAvailable()) return null;
+  if (!corvuspayStatusApiAvailable()) return null;
   const environment = env.CORVUSPAY_ENV!.toLowerCase();
   const timestamp = corvuspayTimestamp();
   const storeId = env.CORVUSPAY_STORE_ID!;
@@ -91,21 +134,16 @@ export async function corvuspayTransactionStatus(orderNumber: string): Promise<C
       timestamp
     })
   });
-  const endpoint = environment === 'production'
+  const endpoint = new URL(environment === 'production'
     ? 'https://cps.corvus.hr/status'
-    : 'https://testcps.corvus.hr/status';
+    : 'https://testcps.corvus.hr/status');
 
   try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      body,
-      signal: AbortSignal.timeout(10_000)
-    });
-    const xml = await response.text();
-    if (!response.ok) {
+    const response = await corvuspayStatusRequest(endpoint, body);
+    const xml = response.body;
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       console.warn('CorvusPay status API rejected lookup', {
-        httpStatus: response.status,
+        httpStatus: response.statusCode,
         responseShape: xml.startsWith('<?xml') ? 'xml' : 'non_xml'
       });
       return null;
@@ -122,7 +160,12 @@ export async function corvuspayTransactionStatus(orderNumber: string): Promise<C
       });
       return null;
     }
-    return { orderNumber: resolvedOrderNumber, status, approvalCode: xmlValue(xml, 'approval-code') };
+    return {
+      orderNumber: resolvedOrderNumber,
+      status,
+      approvalCode: xmlValue(xml, 'approval-code'),
+      responseCode: xmlValue(xml, 'response-code')
+    };
   } catch (caught) {
     console.warn('CorvusPay status API lookup failed before receiving a response', {
       errorName: caught instanceof Error ? caught.name : 'unknown_error',

@@ -52,10 +52,12 @@ Oznake: `[x]` tehnički potvrđeno, `[ ]` otvoreno, `N/A` izričito nije primjen
 ## Gate E — CorvusPay (6H-E)
 
 - [ ] Merchant dokumentacija i produkcijski callback URL-ovi potvrđeni su s CorvusPayem.
-- [ ] Request/callback potpisi i server-to-server provjera prolaze kontrolirane testove.
-- [ ] Postoji periodična provjera/reconciliation i alarm za naplaćeno, a neažurirano plaćanje.
+- [x] Request/callback potpisivanje i negativni sigurnosni testovi pokriveni su regresijskim testovima; nevaljan success potpis ne mijenja plaćanje.
+- [ ] Merchant mTLS certifikat je dostavljen i server-to-server status lookup prolazi protiv CorvusPay produkcije.
+- [x] Implementirani su zaštićeni dnevni reconciliation, trajni incidenti, admin provjera i deduplicirani email alarm.
+- [ ] Reconciliation je potvrđen na deploymentu s produkcijskim merchant vjerodajnicama i mTLS certifikatom.
 - [ ] Jedna odobrena stvarna transakcija uspoređena je u CorvusPayu, Supabaseu, adminu i e-mailu.
-- [ ] Dokumentirani su refund/cancel i ručni recovery postupci; kartični podaci nisu u Petroni sustavu.
+- [x] Dokumentirani su refund/cancel, ručno povezivanje i incidenti; admin sprema audit zapis, a kartični podaci nisu u Petroni sustavu.
 
 ## Gate F — sadržaj i mediji (6H-F)
 

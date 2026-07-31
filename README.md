@@ -31,6 +31,10 @@ Open `http://localhost:5173`. Populate `.env` with local or development credenti
 | `CORVUSPAY_STORE_ID` | Server-only CorvusPay store identifier |
 | `CORVUSPAY_SECRET_KEY` | Server-only CorvusPay signing key |
 | `CORVUSPAY_ENV` | `test` or `production` |
+| `CORVUSPAY_API_CERT_PEM` | Server-only merchant mTLS certificate for transaction operations |
+| `CORVUSPAY_API_KEY_PEM` | Server-only private key for the merchant API certificate |
+| `CORVUSPAY_API_KEY_PASSPHRASE` | Optional private-key passphrase |
+| `CRON_SECRET` | Server-only bearer secret for scheduled reconciliation |
 | `RESEND_API_KEY` | Server-only Resend API key |
 | `RESEND_FROM_EMAIL` | Verified sender address used for transactional mail |
 | `PETRONI_SUPABASE_PROJECT_REF` | Approved project ref used only by backup tooling |
@@ -68,6 +72,8 @@ Business configuration such as seasons, prices, fees, delivery rules, featured b
 ## Deployment
 
 The production application is deployed by Vercel from the `main` branch. Configure all required environment variables for the Production environment before promoting a deployment. CorvusPay production credentials and callback URLs must match the final canonical domain.
+
+CorvusPay callbacks, daily reconciliation, refunds/cancellations and the controlled production test are documented in [`docs/go-live/corvuspay-operations-runbook.md`](docs/go-live/corvuspay-operations-runbook.md). The current production payment variables are intentionally empty until the merchant owner supplies and approves the real credentials and mTLS API certificate.
 
 Candidate deployment URL: `https://petroni-hr.vercel.app`.
 

@@ -193,6 +193,45 @@ async function send(
   }
 }
 
+export async function sendPaymentReconciliationAlert(input: {
+  bookingId?: string;
+  orderId?: string;
+  providerReference: string;
+  expectedAmount: number;
+  providerStatus: string;
+  localStatus: string;
+  severity: 'warning' | 'critical';
+  adminPath: string;
+}) {
+  const config = await emailConfig();
+  const title = input.severity === 'critical'
+    ? 'Kritično nepodudaranje CorvusPay plaćanja'
+    : 'CorvusPay status nije moguće automatski provjeriti';
+  return send(
+    {
+      from: config.from,
+      replyTo: config.admin,
+      to: config.admin,
+      subject: `[${input.severity === 'critical' ? 'KRITIČNO' : 'UPOZORENJE'}] CorvusPay ${input.providerReference}`,
+      html: emailLayout(
+        title,
+        `<p style="font-size:15px;line-height:1.6">Automatska kontrola plaćanja zahtijeva administratorski pregled.</p>${detailRows([
+          ['CorvusPay referenca', input.providerReference],
+          ['Očekivani iznos', euro(input.expectedAmount)],
+          ['Status na CorvusPayu', input.providerStatus],
+          ['Status u Petroniju', input.localStatus]
+        ])}<p style="margin:24px 0"><a href="${escapeHtml(absoluteUrl(input.adminPath))}" style="display:inline-block;padding:13px 18px;background:#252525;color:#ffffff;text-decoration:none;font-weight:700">Otvori zapis u administraciji</a></p><p style="font-size:13px;line-height:1.6;color:#666">Ne mijenjajte lokalni status niti radite povrat prije provjere reference, iznosa i statusa u CorvusPay Merchant Portalu.</p>`
+      )
+    },
+    {
+      bookingId: input.bookingId,
+      orderId: input.orderId,
+      messageType: 'corvuspay_reconciliation_alert_admin',
+      recipient: config.admin
+    }
+  );
+}
+
 export async function sendBookingReceived(
   booking: Record<string, any>,
   terms?: { version?: string | null; content_hr?: string | null; content_en?: string | null }

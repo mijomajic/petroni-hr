@@ -60,8 +60,10 @@ DNS se ne mijenja dok [go-live-checklist.md](go-live-checklist.md) nema odobrenj
 - privacy/legal zahvati i odobreni tekstovi su aktivni;
 - baza i Storage imaju provjeren backup/restore;
 - CorvusPay kontrolirani test i reconciliation postupak su završeni;
-- finalni `PUBLIC_SITE_URL` je `https://www.petroni.hr` ili druga izričito dogovorena kanonska varijanta, a svi CorvusPay/Auth callbackovi odgovaraju toj odluci;
+- finalni `PUBLIC_SITE_URL` je potvrđeni `https://petroni.hr`, a svi CorvusPay/Auth callbackovi odgovaraju toj odluci;
 - WordPress ostaje dostupan najmanje 30 dana kao rollback.
+
+Detaljni callbackovi, mTLS status API, dnevna kontrola, incidenti i refund postupak nalaze se u [corvuspay-operations-runbook.md](corvuspay-operations-runbook.md).
 
 ## 4. DNS cutover
 

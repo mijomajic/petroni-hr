@@ -4,6 +4,8 @@ import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
 import { sendOrderCancelled, sendOrderConfirmation, sendOrderPaymentReceived, sendOrderProcessing } from '$lib/email.server';
 import { supabaseAdmin } from '$lib/supabase.server';
 import { cancelOrderAndReleaseStock, commitOrderStock } from '$lib/shop-stock.server';
+import { parseCorvuspayOrderNumber } from '$lib/corvuspay.server';
+import { reconcileCorvuspayReference } from '$lib/corvuspay-reconciliation.server';
 import type { Actions, PageServerLoad } from './$types';
 
 const orderStatuses = new Set(['pending', 'processing', 'completed', 'cancelled']);
@@ -14,18 +16,23 @@ async function getOrder(id: string) {
 }
 
 export const load: PageServerLoad = async ({ params }) => {
-  const [order, events, emails, payments] = await Promise.all([
+  const [order, events, emails, payments, reconciliationIncidents] = await Promise.all([
     getOrder(params.id),
     supabaseAdmin.from('admin_events').select('*').eq('entity_type', 'order').eq('entity_id', params.id).order('created_at', { ascending: false }),
     supabaseAdmin.from('email_attempts').select('*').eq('order_id', params.id).order('created_at', { ascending: false }),
-    supabaseAdmin.from('payment_attempts').select('*').eq('order_id', params.id).order('created_at', { ascending: false })
+    supabaseAdmin.from('payment_attempts').select('*').eq('order_id', params.id).order('created_at', { ascending: false }),
+    supabaseAdmin.from('payment_reconciliation_incidents').select('*').eq('order_id', params.id).order('last_checked_at', { ascending: false })
   ]);
   if (order.error || !order.data) throw error(404, 'Narudžba nije pronađena.');
   return {
     order: order.data,
     events: events.data ?? [],
     emailAttempts: emails.data ?? [],
-    paymentAttempts: payments.data ?? []
+    paymentAttempts: payments.data ?? [],
+    reconciliationIncidents: reconciliationIncidents.data ?? [],
+    corvuspayReferences: [...new Set((payments.data ?? [])
+      .filter((attempt) => attempt.provider === 'corvuspay' && attempt.provider_reference)
+      .map((attempt) => String(attempt.provider_reference)))]
   };
 };
 
@@ -177,5 +184,89 @@ export const actions: Actions = {
       metadata: { sent }
     });
     return { message: sent ? 'Potvrda je poslana.' : 'Potvrda nije poslana. Provjerite email pokušaje.' };
+  },
+
+  reconcileCorvuspay: async ({ request, params, locals }) => {
+    const administrator = await requireAdministrator(locals);
+    const providerReference = String((await request.formData()).get('provider_reference') ?? '');
+    const reference = parseCorvuspayOrderNumber(providerReference);
+    if (reference?.kind !== 'order' || reference.orderId !== params.id) {
+      return fail(400, { message: 'CorvusPay referenca ne pripada ovoj narudžbi.' });
+    }
+    try {
+      const result = await reconcileCorvuspayReference(providerReference, { trigger: 'admin', sendAlert: false });
+      await recordAdminEvent({
+        administrator,
+        entityType: 'order',
+        entityId: params.id,
+        action: 'corvuspay_status_checked',
+        metadata: {
+          provider_reference: providerReference,
+          result: result.kind,
+          provider_status: result.providerStatus,
+          local_status: result.localStatus,
+          expected_amount: result.expectedAmount
+        }
+      });
+      if (result.kind === 'lookup_failed') {
+        return fail(503, { message: 'Automatska provjera nije dostupna. Provjerite transakciju u CorvusPay Merchant Portalu i API certifikat.' });
+      }
+      if (result.incidentId) {
+        return fail(409, { message: `Statusi se ne podudaraju: CorvusPay ${result.providerStatus}, Petroni ${result.localStatus}. Ne mijenjajte ništa bez ručne provjere reference i iznosa.` });
+      }
+      return { message: `CorvusPay i Petroni su usklađeni (${result.providerStatus}/${result.localStatus}).` };
+    } catch (caught) {
+      return fail(500, { message: caught instanceof Error ? caught.message : 'CorvusPay provjera nije uspjela.' });
+    }
+  },
+
+  recordCorvuspayOperation: async ({ request, params, locals }) => {
+    const administrator = await requireAdministrator(locals);
+    const form = await request.formData();
+    const providerReference = String(form.get('provider_reference') ?? '');
+    const operation = String(form.get('operation') ?? '');
+    const operationStatus = String(form.get('operation_status') ?? '');
+    const note = String(form.get('note') ?? '').trim();
+    const amount = Number(form.get('amount'));
+    const reference = parseCorvuspayOrderNumber(providerReference);
+    if (reference?.kind !== 'order' || reference.orderId !== params.id) {
+      return fail(400, { message: 'CorvusPay referenca ne pripada ovoj narudžbi.' });
+    }
+    if (!['refund', 'cancellation', 'manual_match'].includes(operation) || !['requested', 'completed', 'failed'].includes(operationStatus)) {
+      return fail(400, { message: 'Vrsta ili rezultat CorvusPay operacije nije valjan.' });
+    }
+    const [{ data: order }, { data: paymentAttempt }] = await Promise.all([
+      getOrder(params.id),
+      supabaseAdmin.from('payment_attempts')
+        .select('id')
+        .eq('order_id', params.id)
+        .eq('provider', 'corvuspay')
+        .eq('action', 'redirect_created')
+        .eq('provider_reference', providerReference)
+        .limit(1)
+        .maybeSingle()
+    ]);
+    const maximum = Number(order?.total);
+    if (!order || !paymentAttempt || !Number.isFinite(amount) || amount <= 0 || amount > maximum || note.length < 3 || note.length > 500) {
+      return fail(400, { message: 'Unesite valjan iznos i bilješku (3–500 znakova). Iznos ne smije biti veći od narudžbe.' });
+    }
+    const action = `manual_${operation}_recorded`;
+    const { error: insertError } = await supabaseAdmin.from('payment_attempts').insert({
+      order_id: params.id,
+      provider: 'corvuspay',
+      action,
+      status: operationStatus,
+      provider_reference: providerReference,
+      metadata: { amount, currency: 'EUR', note, actor_email: administrator.email, record_only: true }
+    });
+    if (insertError) return fail(500, { message: insertError.message });
+    await recordAdminEvent({
+      administrator,
+      entityType: 'order',
+      entityId: params.id,
+      action,
+      metadata: { provider_reference: providerReference, amount, currency: 'EUR', operation_status: operationStatus, note }
+    });
+    return { message: 'CorvusPay operacija je zapisana. Ovaj zapis sam ne izvršava povrat ili storno.' };
   }
 };

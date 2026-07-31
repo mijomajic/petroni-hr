@@ -1,8 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { parseCorvuspayOrderNumber } from '$lib/corvuspay.server';
 import { supabaseAdmin } from '$lib/supabase.server';
-import { sendOrderCancelled } from '$lib/email.server';
-import { cancelOrderAndReleaseStock } from '$lib/shop-stock.server';
 import type { RequestHandler } from './$types';
 
 const handleCancel: RequestHandler = async ({ request, url }) => {
@@ -37,33 +35,24 @@ async function recordCancelledAttempt(
   if (existing.data) return;
 
   if (reference.kind === 'order') {
-    const { data: order } = await supabaseAdmin
-      .from('orders')
-      .select('*')
-      .eq('id', reference.orderId)
-      .eq('payment_method', 'corvuspay')
-      .eq('corvuspay_order_id', orderNumber)
+    const { data: attempt } = await supabaseAdmin
+      .from('payment_attempts')
+      .select('order_id')
+      .eq('order_id', reference.orderId)
+      .eq('provider', 'corvuspay')
+      .eq('action', 'redirect_created')
+      .eq('provider_reference', orderNumber)
+      .limit(1)
       .maybeSingle();
-    if (!order) return;
-    if (order.payment_status === 'paid') return;
-    const cancelled = await cancelOrderAndReleaseStock(order.id);
-    if (cancelled.error || !cancelled.data) {
-      console.error('Cancelled order stock release failed', cancelled.error?.message);
-      return;
-    }
-    const cancelledOrder = cancelled.data as Record<string, any>;
+    if (!attempt) return;
     await supabaseAdmin.from('payment_attempts').insert({
-      order_id: order.id,
+      order_id: reference.orderId,
       provider: 'corvuspay',
       action: 'cancel_redirect_received',
       status: 'cancelled',
-      provider_reference: orderNumber
+      provider_reference: orderNumber,
+      metadata: { business_record_unchanged: true }
     });
-    try {
-      await sendOrderCancelled(cancelledOrder);
-    } catch (mailError) {
-      console.error('Cancelled order email failed', mailError);
-    }
     return;
   }
 
@@ -84,6 +73,7 @@ async function recordCancelledAttempt(
     provider: 'corvuspay',
     action: 'cancel_redirect_received',
     status: 'cancelled',
-    provider_reference: orderNumber
+    provider_reference: orderNumber,
+    metadata: { business_record_unchanged: true }
   });
 }

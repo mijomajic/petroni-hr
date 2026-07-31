@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import {
   corvuspayBookingOrderNumber,
@@ -102,4 +103,10 @@ test('creates short reversible CorvusPay order references', () => {
   const orderReference = corvuspayShopOrderNumber(id);
   assert.equal(orderReference.length, 33);
   assert.deepEqual(parseCorvuspayOrderNumber(orderReference), { kind: 'order', orderId: id });
+});
+
+test('keeps the unauthenticated cancel return audit-only', () => {
+  const source = readFileSync(new URL('../routes/api/corvuspay/cancel/+server.ts', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /cancelOrderAndReleaseStock|sendOrderCancelled/);
+  assert.match(source, /business_record_unchanged:\s*true/);
 });

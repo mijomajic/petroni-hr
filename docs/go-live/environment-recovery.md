@@ -23,6 +23,10 @@ Ovaj dokument sadrži samo nazive i postupak. Vrijednosti produkcijskih tajni ne
 - `CORVUSPAY_STORE_ID`
 - `CORVUSPAY_SECRET_KEY`
 - `CORVUSPAY_ENV`
+- `CORVUSPAY_API_CERT_PEM`
+- `CORVUSPAY_API_KEY_PEM`
+- `CORVUSPAY_API_KEY_PASSPHRASE` kada je potreban
+- `CRON_SECRET`
 - `RESEND_API_KEY`
 - `RESEND_FROM_EMAIL`
 
