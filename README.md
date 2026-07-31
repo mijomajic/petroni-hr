@@ -52,6 +52,8 @@ npm run build
 
 `npm test` runs the complete regression suite. `npm run check` performs Svelte and TypeScript diagnostics. The project does not maintain a separate ESLint configuration.
 
+`npm run audit:legacy` regenerates a dated WordPress sitemap/product-SKU audit from the still-live legacy site and local Supabase credentials. `npm run audit:legacy:decisions` writes the complete per-URL decision CSV. After cutover, pipe Vercel JSON logs into `npm run report:404` for the daily 404 summary described in `docs/go-live/legacy-url-audit.md`.
+
 ## Database
 
 Supabase migrations are stored in `supabase/migrations/` and must be applied in numeric order. Never edit an already-applied production migration; add a new idempotent migration instead.

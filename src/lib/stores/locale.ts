@@ -3,9 +3,9 @@ import { browser } from '$app/environment';
 
 export type Locale = 'hr' | 'en';
 
-const initial: Locale = browser
-  ? (localStorage.getItem('petroni_locale') as Locale) || 'hr'
-  : 'hr';
+const savedLocale = browser ? localStorage.getItem('petroni_locale') : null;
+const migratedLocale = browser ? new URLSearchParams(window.location.search).get('lang') : null;
+const initial: Locale = migratedLocale === 'en' || savedLocale === 'en' ? 'en' : 'hr';
 
 export const locale = writable<Locale>(initial);
 

@@ -13,6 +13,9 @@
 		"test:corvuspay": "tsx --test src/lib/corvuspay.test.ts",
 		"test:seo": "tsx --test src/lib/legacy-redirects.test.ts",
 		"test:checkout": "tsx --test src/lib/shop-checkout.test.ts",
+		"audit:legacy": "node scripts/generate-legacy-url-audit.mjs",
+		"audit:legacy:decisions": "tsx scripts/generate-legacy-decision-report.ts",
+		"report:404": "node scripts/summarize-404-log.mjs",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},

@@ -19,12 +19,13 @@ Oznake: `[x]` tehnički potvrđeno, `[ ]` otvoreno, `N/A` izričito nije primjen
 
 ## Gate B — legacy URL-ovi i SEO (6H-B)
 
-- [ ] Zamrznuti su svi stari Yoast/WooCommerce sitemapovi i Search Console top URL-ovi.
-- [ ] Svaki stari URL ima novi 308 cilj, 410 odluku ili dokumentirano izuzeće.
-- [ ] Posebno su pokriveni `/en/*`, stari članci, proizvodi i kategorije.
-- [ ] Automatski test potvrđuje da nema loopova, lanaca i redirecta na 404.
-- [ ] Definiran je dnevni 404 pregled najmanje 30 dana nakon cutovera.
-- [ ] Finalni sitemap/canonical/Search Console postupak je potvrđen.
+- [x] Zamrznuto je svih 14 starih Yoast/WooCommerce sitemapova: 3.638 zapisa i 3.636 jedinstvenih URL-ova.
+- [ ] Iz starog Search Console propertyja izvezeni su top landing, linked i postojeći 404 URL-ovi te uspoređeni s auditom.
+- [x] Svaki sitemap URL ima postojeći canonical, jedan 308 cilj ili eksplicitnu 410 odluku.
+- [x] Posebno su pokriveni `/en/*`, stari članci, proizvodi, kategorije, vozila, autori i taxonomy query URL-ovi.
+- [x] Automatski test potvrđuje da nema nepokrivenih URL-ova, loopova i redirect lanaca.
+- [x] Implementiran je strukturirani javni 404 zapis, CSV sažetak i dnevni 30-dnevni postupak.
+- [x] Dokumentiran je finalni sitemap/canonical/Search Console postupak nakon DNS cutovera.
 
 ## Gate C — privatnost i pravni sadržaj (6H-C)
 

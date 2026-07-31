@@ -6,6 +6,7 @@
   import { afterNavigate, beforeNavigate } from '$app/navigation';
   import { page } from '$app/stores';
   import { absoluteUrl, canonicalPath, DEFAULT_IMAGE, SITE_NAME } from '$lib/seo';
+  import { locale } from '$lib/stores/locale';
   import ShopNavigationSkeleton from '$lib/components/shop/ShopNavigationSkeleton.svelte';
   import NewsNavigationSkeleton from '$lib/components/content/NewsNavigationSkeleton.svelte';
 
@@ -28,6 +29,14 @@
 
   onMount(() => {
     document.documentElement.classList.add('js');
+
+    const legacyLocale = new URL(window.location.href).searchParams.get('lang');
+    if (legacyLocale === 'en') {
+      locale.set('en');
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('lang');
+      window.history.replaceState(window.history.state, '', `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
+    }
 
     observer = new IntersectionObserver(
       (entries) => {
