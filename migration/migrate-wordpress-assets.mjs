@@ -27,6 +27,10 @@ function parseArgs(argv) {
     else if (arg === '--concurrency') options.concurrency = Number(argv[++index]);
     else if (arg === '--retries') options.retries = Number(argv[++index]);
     else if (arg === '--backoff-ms') options.backoffMs = Number(argv[++index]);
+    else if (arg === '--input') options.input = argv[++index];
+    else if (arg === '--manifest') options.manifest = argv[++index];
+    else if (arg === '--failures') options.failures = argv[++index];
+    else if (arg === '--summary') options.summary = argv[++index];
     else if (arg === '--bucket') options.bucket = argv[++index];
     else if (arg === '--prefix') options.prefix = argv[++index].replace(/^\/+|\/+$/g, '');
     else if (arg === '--help') {
@@ -46,6 +50,10 @@ Safety options:
   --concurrency <n>      Parallel downloads (default: 8).
   --retries <n>          Retries after the first attempt (default: 4).
   --backoff-ms <n>       Initial exponential backoff in ms (default: 500).
+  --input <path>         Newline-separated WordPress asset URLs.
+  --manifest <path>      Manifest output path.
+  --failures <path>      Failure-report output path.
+  --summary <path>       Summary output path.
 `);
       process.exit(0);
     } else throw new Error(`Unknown argument: ${arg}`);

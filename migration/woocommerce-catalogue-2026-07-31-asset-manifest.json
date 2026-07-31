@@ -1,0 +1,883 @@
+{
+  "version": 1,
+  "generated_at": "2026-07-31T10:52:25.346Z",
+  "assets": {
+    "https://www.petroni.hr/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75175.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75175.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75175.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 28390,
+      "sha256": "dfd076504401a36f4fcbbf1e9e640a99e2ebeeba10bb7e543cda922aedb6bfee",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75175.jpg",
+      "downloaded_at": "2026-07-31T10:57:09.982Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75207.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75207.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75207.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 19735,
+      "sha256": "2840ec3c9bbc35a765fd7c42a064ddb4a497c78665aa43b46b91d964733bbbf5",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75207.jpg",
+      "downloaded_at": "2026-07-31T10:57:09.971Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Brava-ulaznih-vrata-FAP-SRT1090B-3.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Brava-ulaznih-vrata-FAP-SRT1090B-3.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Brava-ulaznih-vrata-FAP-SRT1090B-3.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 26067,
+      "sha256": "7c165201ea0bca0b14e066a0f0e3178d2a98e5d8b6da99f3cb72b2d991f20255",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Brava-ulaznih-vrata-FAP-SRT1090B-3.jpg",
+      "downloaded_at": "2026-07-31T10:57:09.985Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75139.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75139.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75139.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 28409,
+      "sha256": "2806826567141134cce04b5131e5fdf32eaf5c2ee206eb20b8f84dde406f3c5d",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/CRIJEVO-ZA-PLIN-75139.jpg",
+      "downloaded_at": "2026-07-31T10:57:09.987Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Brava-ulaznih-vrata-FAP-SRT1090B-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Brava-ulaznih-vrata-FAP-SRT1090B-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Brava-ulaznih-vrata-FAP-SRT1090B-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 20934,
+      "sha256": "d1664efe2b35e372abf76a1096e5ce0a31110d8a3a81fb04172154c3100eff50",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Brava-ulaznih-vrata-FAP-SRT1090B-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:09.928Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2022/09/podizac-stakla-322601-2.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2022/09/podizac-stakla-322601-2.jpg",
+      "object_key": "images/wp-content/uploads/2022/09/podizac-stakla-322601-2.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22428,
+      "sha256": "ff1b9362eee8e6dc94b83ae1cc9b8f3303ea7e2cf4c85e88c9f01f44ed58d796",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2022/09/podizac-stakla-322601-2.jpg",
+      "downloaded_at": "2026-07-31T10:57:10.029Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Ispodpultna-mjesalica-vode-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Ispodpultna-mjesalica-vode-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Ispodpultna-mjesalica-vode-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 26384,
+      "sha256": "f62546ee20b40eca056f9cff8c3b329c9439ded48da34c630ecf8a563ba867da",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Ispodpultna-mjesalica-vode-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:10.735Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Ispodpultna-mjesalica-vode.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Ispodpultna-mjesalica-vode.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Ispodpultna-mjesalica-vode.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 14001,
+      "sha256": "cdf21c26160b962359cfa7b0b465a2413644117213364e1471e2df0fae9d4eae",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Ispodpultna-mjesalica-vode.jpg",
+      "downloaded_at": "2026-07-31T10:57:10.748Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Butyl-traka-siva.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Butyl-traka-siva.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Butyl-traka-siva.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 25399,
+      "sha256": "0d083a36095d063da68135fc70990427e00eb122ff5c8a3e9522dd1da4d16e35",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Butyl-traka-siva.jpg",
+      "downloaded_at": "2026-07-31T10:57:10.171Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Mjesalica-za-hladnu-vodu-COMET-1-630037.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Mjesalica-za-hladnu-vodu-COMET-1-630037.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Mjesalica-za-hladnu-vodu-COMET-1-630037.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 26062,
+      "sha256": "baca207a91297e3eeea22dd68b87228d1ff5dad490456f23475cae9c6b1181eb",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Mjesalica-za-hladnu-vodu-COMET-1-630037.jpg",
+      "downloaded_at": "2026-07-31T10:57:10.824Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Mjesalica-za-hladnu-vodu-COMET-2-630037.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Mjesalica-za-hladnu-vodu-COMET-2-630037.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Mjesalica-za-hladnu-vodu-COMET-2-630037.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22927,
+      "sha256": "7096aff19f081faaedc1f7f88abb290966816fe4e9ff375828a8d6a306bf5279",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Mjesalica-za-hladnu-vodu-COMET-2-630037.jpg",
+      "downloaded_at": "2026-07-31T10:57:10.784Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2022/09/podizac-stakla-322601-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2022/09/podizac-stakla-322601-1.jpg",
+      "object_key": "images/wp-content/uploads/2022/09/podizac-stakla-322601-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 26353,
+      "sha256": "e5c587498c9c8cb23ae8f66265587a3c1f84e55c6e5528b942babf0fd6966dba",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2022/09/podizac-stakla-322601-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:10.175Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 23878,
+      "sha256": "603b7beae6ccdac91c8736b71b26a35c4a2fa8e10e7eadc28bc078cfe103bf8e",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:10.815Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/HSC-kljuc-i-cilindar-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/HSC-kljuc-i-cilindar-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/HSC-kljuc-i-cilindar-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 20882,
+      "sha256": "1af7df4414aadcb28b8a83739bc708840596159aecc22c3c275b525b7a420cc6",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/HSC-kljuc-i-cilindar-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:10.570Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-2.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-2.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-2.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 25971,
+      "sha256": "ae6c1011937b1d30b458e5e5a045e031c8e71dd6fe779fad6b086e773cfc7e0a",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-2.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.051Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Mehanizam-za-preklopni-stol-2.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Mehanizam-za-preklopni-stol-2.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Mehanizam-za-preklopni-stol-2.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22176,
+      "sha256": "515c6979f0ad7a9c13f5040d60527b959d2aca0a17041381fb921728173c3b0c",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Mehanizam-za-preklopni-stol-2.jpg",
+      "downloaded_at": "2026-07-31T10:57:10.786Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-3.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-3.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-3.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 17966,
+      "sha256": "650c540d4747b02749062dad29261999f93506416f5af17f93a1ab1b466142b7",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-3.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.033Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-4.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-4.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-4.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 20905,
+      "sha256": "e0c5486fc6bb3ea564d212147c56d79ece17be8737ca2110db37f2399ef317f0",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-4.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.247Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-2.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-2.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-2.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 20350,
+      "sha256": "fa73d8909051e3fe4ead296650eed3ba7574f6cf6b858d078f9dc4317fb9e591",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-2.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.367Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-3.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-3.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-3.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22429,
+      "sha256": "157575f2607981963c7fd284d2c8105fdd914c88e2eefbb3ffe013dbd6411d96",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-3.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.388Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-4.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-4.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-4.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 23073,
+      "sha256": "3dbd1c2b445d593cc87f65566a1e6752ee0916826ff571e3607bad5071be52a5",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-4.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.459Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22429,
+      "sha256": "87de7afb905f39a6f480511f2b8bf745f8d209398cae621b9a8b924bf04afb46",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.371Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-5.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-5.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-5.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 21063,
+      "sha256": "f03f4b5c97ff5e49447737b916987d2d9d408717fde893f04e386f2442fce4bb",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Prekrivac-za-kamp-prikolicu-premium-5.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.478Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-1.jpeg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-1.jpeg",
+      "object_key": "images/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-1.jpeg",
+      "content_type": "image/jpeg",
+      "byte_size": 22699,
+      "sha256": "432217272a5d0dbefdeb36850585609143afa11c6c17a184f8ec2d090fc109c7",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-1.jpeg",
+      "downloaded_at": "2026-07-31T10:57:11.574Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 17789,
+      "sha256": "969b3d62e3a2b35eb959dd487e30e4607327ac08b52df73a871bf0a8571dc6e3",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.796Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-2.jpeg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-2.jpeg",
+      "object_key": "images/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-2.jpeg",
+      "content_type": "image/jpeg",
+      "byte_size": 17970,
+      "sha256": "115102b77a74c01abe16d264ea627b87cba9e62aa41aa9ca5ad24d919c83a8de",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-2.jpeg",
+      "downloaded_at": "2026-07-31T10:57:11.573Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-1-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-1-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-1-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 29417,
+      "sha256": "ce368ea40dd903ce0b8b224ac9847a0d3256b7893e8c1fe23f68a8e26d0b927f",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-1-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:12.290Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-3.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-3.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-3.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 21655,
+      "sha256": "042f64267d6a2c89c36205d619831d71a628c3d69bf619f4117847e47ebb7cd4",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-3.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.865Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-2.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-2.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-2.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 21688,
+      "sha256": "0d2ea15c463474486b538a7b9f4ba42eb6a18eac59ff29dd138eb8d7a76a07cf",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-2.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.849Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-3.jpeg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-3.jpeg",
+      "object_key": "images/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-3.jpeg",
+      "content_type": "image/jpeg",
+      "byte_size": 19223,
+      "sha256": "67623856f83355285d31819ddf648a74f00f5c1f2da84820f230b9281ce3148e",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/RELEY-relay-5-pins-12-v-40-a-3.jpeg",
+      "downloaded_at": "2026-07-31T10:57:11.837Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-4.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-4.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-4.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22786,
+      "sha256": "e83546c22bd2eb2696db65e22445e7b4358ad4b6e3468237eddcf3a53979c68f",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Rafter-za-Thule-tendu-4.jpg",
+      "downloaded_at": "2026-07-31T10:57:11.866Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-3-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-3-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-3-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 27654,
+      "sha256": "bc0f505e272419c0ccddf9e1e0ad8fe430e4bbc8341c41627efadfea01f1516d",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-3-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:12.485Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-2-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-2-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-2-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 26775,
+      "sha256": "00168cee26ce0b3fc4e4599302fe80a1e6d9d5c1b995fbce9abc65475857e1c7",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Renogy-punjac-baterija-AC-DC-12v-35A-2-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:12.502Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 23103,
+      "sha256": "019a0c4739f7c14ccd90bcdc2881231c9c78cde5f6acceb78f3c17400ce69c80",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:12.571Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-3.jpeg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-3.jpeg",
+      "object_key": "images/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-3.jpeg",
+      "content_type": "image/jpeg",
+      "byte_size": 22359,
+      "sha256": "ed3d05a1c6c99ff3c74227fdc2e763df3920e113920608491e52fa39eb72de69",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-3.jpeg",
+      "downloaded_at": "2026-07-31T10:57:13.409Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/STEPENICE-ZA-KREVET-43070.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/STEPENICE-ZA-KREVET-43070.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/STEPENICE-ZA-KREVET-43070.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 26199,
+      "sha256": "c53d4abb23fbdd8328fadc1e9c53d22336f284bc8826832d4f6e6e1b362b5804",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/STEPENICE-ZA-KREVET-43070.jpg",
+      "downloaded_at": "2026-07-31T10:57:13.202Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/SPREMNIK-ZA-VODU-82-LIT-2.jpeg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/SPREMNIK-ZA-VODU-82-LIT-2.jpeg",
+      "object_key": "images/wp-content/uploads/2026/07/SPREMNIK-ZA-VODU-82-LIT-2.jpeg",
+      "content_type": "image/jpeg",
+      "byte_size": 12206,
+      "sha256": "7dc5e4c656e8b1fec00ad32240aedb32d39f74b95ddc0ca921adfaf3223f405e",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/SPREMNIK-ZA-VODU-82-LIT-2.jpeg",
+      "downloaded_at": "2026-07-31T10:57:12.533Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/SPREMNIK-ZA-VODU-82-LIT-1.jpeg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/SPREMNIK-ZA-VODU-82-LIT-1.jpeg",
+      "object_key": "images/wp-content/uploads/2026/07/SPREMNIK-ZA-VODU-82-LIT-1.jpeg",
+      "content_type": "image/jpeg",
+      "byte_size": 15344,
+      "sha256": "b7fc274e2cd378d18d5890d310b2205d6eec5eec29f8e3eabdc129141a451688",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/SPREMNIK-ZA-VODU-82-LIT-1.jpeg",
+      "downloaded_at": "2026-07-31T10:57:12.602Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-2.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-2.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-2.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 26555,
+      "sha256": "cc07581acc8637a3dcb8d0db384b1f60be7593edd5a86b4d31fce12cf8d1e7a4",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Solar-panel-set-120w-MPPT-Victron-2.jpg",
+      "downloaded_at": "2026-07-31T10:57:12.578Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 26289,
+      "sha256": "a9171168f393153e9c0b14c354cea1dab9e1a631097afb6fff6b74d8af68aa31",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:13.408Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-4.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-4.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-4.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 21461,
+      "sha256": "9dce769e9bc58bba456e9f8622705fc931a16ce9b7435ad24920e7b347eaa720",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-4.jpg",
+      "downloaded_at": "2026-07-31T10:57:13.316Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-2.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-2.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-2.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 25025,
+      "sha256": "545ba70b3da52e183c702202f7ca4c4f2ac335a106e1c93adc4beaa5b060e1cf",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-2.jpg",
+      "downloaded_at": "2026-07-31T10:57:13.317Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-3.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-3.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-3.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 36840,
+      "sha256": "9c8ac090c405425e88c35743571bf73f41d92d1537e4ae618129bfe9c2cdfa90",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-3.jpg",
+      "downloaded_at": "2026-07-31T10:57:13.397Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Thule-ulazne-stepenice-301841-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Thule-ulazne-stepenice-301841-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Thule-ulazne-stepenice-301841-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 26406,
+      "sha256": "af6eb6835d97c52bc66def00632102040d71410e948e727590b158f2e0d1d0c4",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Thule-ulazne-stepenice-301841-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:13.976Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-5.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-5.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-5.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 24489,
+      "sha256": "28ad1e8aa594e6e3206e4d76d4ac26bd9d65b4ba3dd7ab339878120ba8c60fb1",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Sunblocker-zastitno-platno-od-sunca-5.jpg",
+      "downloaded_at": "2026-07-31T10:57:13.404Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/felga-za-prikolicu-14.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/felga-za-prikolicu-14.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/felga-za-prikolicu-14.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22286,
+      "sha256": "da768e9dbb4792537692aaa09f89da84723cf2a523b016c423d8ffcf3fed9096",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/felga-za-prikolicu-14.jpg",
+      "downloaded_at": "2026-07-31T10:57:14.139Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/okvir-sa-zavjesama-za-prozor-Remi-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/okvir-sa-zavjesama-za-prozor-Remi-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/okvir-sa-zavjesama-za-prozor-Remi-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 28044,
+      "sha256": "ee967faedeb5225564d2b8310adb94da631ff5752aa06a38d4f87d1aa8feaaeb",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/okvir-sa-zavjesama-za-prozor-Remi-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:14.403Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/crijvo-za-plin-3m-751120.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/crijvo-za-plin-3m-751120.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/crijvo-za-plin-3m-751120.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22585,
+      "sha256": "46f4036cab49f2734861a5f5f4265344c6ad7e774a5bf6695d116e5384b01b83",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/crijvo-za-plin-3m-751120.jpg",
+      "downloaded_at": "2026-07-31T10:57:14.100Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/adapter-za-krovni-prozor-700x500-za-Fiat-Ducato.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/adapter-za-krovni-prozor-700x500-za-Fiat-Ducato.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/adapter-za-krovni-prozor-700x500-za-Fiat-Ducato.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 15720,
+      "sha256": "62a56d10c1bfd19cbd0f27aa18874c594b81370b74c7e639c2c646783a132930",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/adapter-za-krovni-prozor-700x500-za-Fiat-Ducato.jpg",
+      "downloaded_at": "2026-07-31T10:57:13.882Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Svjetlo-registarske-plocice-LED-Adria.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Svjetlo-registarske-plocice-LED-Adria.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Svjetlo-registarske-plocice-LED-Adria.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22055,
+      "sha256": "22bc1df6bb7c45fe81f866d5f1bca855dda4032b536098d11b447b285ae4d48b",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Svjetlo-registarske-plocice-LED-Adria.jpg",
+      "downloaded_at": "2026-07-31T10:57:13.622Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/Termozastita-nutarnja-za-Ford-Transit-2014-.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Termozastita-nutarnja-za-Ford-Transit-2014-.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/Termozastita-nutarnja-za-Ford-Transit-2014-.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 25850,
+      "sha256": "fed1947f3fe45604fc37732dd51d429241240b8a0d2ea900e5c8ec15c037f09e",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/Termozastita-nutarnja-za-Ford-Transit-2014-.jpg",
+      "downloaded_at": "2026-07-31T10:57:14.018Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/resetka-ventilacijska-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/resetka-ventilacijska-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/resetka-ventilacijska-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 23066,
+      "sha256": "7f9e239999c491bf779cc0505dab8332d9571777ac312d80d950e31afedda770",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/resetka-ventilacijska-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:15.124Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22735,
+      "sha256": "e15479a3948d9ddaa853990d3cf49453d643d059c89404623f80d4e1fd371f69",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:15.265Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-2.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-2.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-2.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 23314,
+      "sha256": "b9efd50ff7a78e019677ec6f39097d15f879327e5f2fcaea9933e78660631ffc",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-2.jpg",
+      "downloaded_at": "2026-07-31T10:57:15.274Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-5.jpeg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-5.jpeg",
+      "object_key": "images/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-5.jpeg",
+      "content_type": "image/jpeg",
+      "byte_size": 17452,
+      "sha256": "5f225b8c4e5eb56b3a0c875f2e29e600f26889d4515336b4710917f8d8f47aef",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-5.jpeg",
+      "downloaded_at": "2026-07-31T10:57:15.035Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/okvir-sa-zavjesama-za-prozor-Remi-2.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/okvir-sa-zavjesama-za-prozor-Remi-2.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/okvir-sa-zavjesama-za-prozor-Remi-2.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 27815,
+      "sha256": "f8425187f93d1fcf2f5dc254f4fe3442ed66e9019add7c99e648716f161c18dc",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/okvir-sa-zavjesama-za-prozor-Remi-2.jpg",
+      "downloaded_at": "2026-07-31T10:57:14.152Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/solarna-ploca-130w-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/solarna-ploca-130w-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/solarna-ploca-130w-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 17508,
+      "sha256": "01f3595ae79b963fda9934dc4fd684c59b302d17d742c48c310b4b1fc2a47979",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/solarna-ploca-130w-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:15.072Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-3.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-3.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-3.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 23621,
+      "sha256": "d5a8509a08914a1690627164ef28c53f86fefe477178395d968e894136619891",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-3.jpg",
+      "downloaded_at": "2026-07-31T10:57:14.890Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-4.jpeg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-4.jpeg",
+      "object_key": "images/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-4.jpeg",
+      "content_type": "image/jpeg",
+      "byte_size": 19745,
+      "sha256": "b25b2d2be4f81544a8344695ef70a8d27cd98511c955c0a3ccc5a9940ef731f9",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/podizac-stakla-Weinsberg-kuhinja-4.jpeg",
+      "downloaded_at": "2026-07-31T10:57:14.642Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-gabaritno-Aspock-Trigano-2.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-gabaritno-Aspock-Trigano-2.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/svjetlo-gabaritno-Aspock-Trigano-2.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 21975,
+      "sha256": "c57b02d8d78bc92803cbb3b7e481f51ea1cc4720bb660de61efba3d4a40f972c",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-gabaritno-Aspock-Trigano-2.jpg",
+      "downloaded_at": "2026-07-31T10:57:15.816Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/sunblocker-Thule-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/sunblocker-Thule-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/sunblocker-Thule-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 22983,
+      "sha256": "32cf624c587cad375b495875958929038a08ca116449c183694b2084050b14f1",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/sunblocker-Thule-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:16.003Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-gabaritno-Aspock-Trigano-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-gabaritno-Aspock-Trigano-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/svjetlo-gabaritno-Aspock-Trigano-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 25397,
+      "sha256": "dc6d9d25fd10bea8f519f1d00cf025c4e738a2cc1497c790a0c1f2111f16d282",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-gabaritno-Aspock-Trigano-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:15.779Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-za-registarsku-plocicu-hella-adria-2-rotated.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-za-registarsku-plocicu-hella-adria-2-rotated.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/svjetlo-za-registarsku-plocicu-hella-adria-2-rotated.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 20140,
+      "sha256": "f9e72adb1fe2550ac2cb921e8b3070725b5ae04d34d3ad8193676bccdb333bfd",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-za-registarsku-plocicu-hella-adria-2-rotated.jpg",
+      "downloaded_at": "2026-07-31T10:57:15.782Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/spremnik-za-vodu-32-lit-15464.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/spremnik-za-vodu-32-lit-15464.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/spremnik-za-vodu-32-lit-15464.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 20625,
+      "sha256": "1662120b1bb96f7add4ea0d8e6625518d44e4c671ea69627bb1645310ecf82d4",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/spremnik-za-vodu-32-lit-15464.jpg",
+      "downloaded_at": "2026-07-31T10:57:15.751Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/solarna-ploca-150w-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/solarna-ploca-150w-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/solarna-ploca-150w-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 18116,
+      "sha256": "668761bc0b064c1654881fab9380e16b3a062151cfd1a9480b17b2d92702f6ee",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/solarna-ploca-150w-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:15.416Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-za-registarsku-plocicu-hella-adria-1.jpeg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-za-registarsku-plocicu-hella-adria-1.jpeg",
+      "object_key": "images/wp-content/uploads/2026/07/svjetlo-za-registarsku-plocicu-hella-adria-1.jpeg",
+      "content_type": "image/jpeg",
+      "byte_size": 25890,
+      "sha256": "42b0b1a4d7fcfae0234a3e33a26fc264c86921d5a46019638ebc93eb6b198a47",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/svjetlo-za-registarsku-plocicu-hella-adria-1.jpeg",
+      "downloaded_at": "2026-07-31T10:57:15.983Z",
+      "upload_result": {
+        "status": "already_present_checksum_match"
+      }
+    },
+    "https://www.petroni.hr/wp-content/uploads/2026/07/punjac-ALKO-CBE-1.jpg": {
+      "original_url": "https://www.petroni.hr/wp-content/uploads/2026/07/punjac-ALKO-CBE-1.jpg",
+      "object_key": "images/wp-content/uploads/2026/07/punjac-ALKO-CBE-1.jpg",
+      "content_type": "image/jpeg",
+      "byte_size": 26593,
+      "sha256": "1ba926e10cd962c5b1d570a31e48c9c50337121af12478108e135e00cae8d843",
+      "http_status": 200,
+      "final_redirected_url": "https://www.petroni.hr/wp-content/uploads/2026/07/punjac-ALKO-CBE-1.jpg",
+      "downloaded_at": "2026-07-31T10:57:14.916Z",
+      "upload_result": {
+        "status": "uploaded"
+      }
+    }
+  },
+  "updated_at": "2026-07-31T10:57:09.025Z",
+  "configuration": {
+    "bucket": "petroni-assets",
+    "prefix": "images",
+    "source_count": 67
+  }
+}
