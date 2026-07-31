@@ -117,12 +117,12 @@
         <button onclick={() => locale.set('hr')} aria-label="Hrvatski"
           class="w-6 h-[18px] rounded-sm overflow-hidden transition-all duration-200"
           style="opacity:{$locale === 'hr' ? '1' : '0.4'}; outline:{$locale === 'hr' ? '2px solid #f5c518' : 'none'}; outline-offset:1px">
-          <img src="https://flagcdn.com/h40/hr.png" alt="" width="30" height="20" class="w-full h-full object-cover" />
+          <img src="/flags/hr.svg" alt="" width="30" height="20" class="w-full h-full object-cover" />
         </button>
         <button onclick={() => locale.set('en')} aria-label="English"
           class="w-6 h-[18px] rounded-sm overflow-hidden transition-all duration-200"
           style="opacity:{$locale === 'en' ? '1' : '0.4'}; outline:{$locale === 'en' ? '2px solid #f5c518' : 'none'}; outline-offset:1px">
-          <img src="https://flagcdn.com/h40/gb.png" alt="" width="30" height="20" class="w-full h-full object-cover" />
+          <img src="/flags/gb.svg" alt="" width="30" height="20" class="w-full h-full object-cover" />
         </button>
       </div>
 
@@ -202,10 +202,10 @@
     <div class="mt-6 flex items-center justify-center gap-3">
       <div class="flex items-center gap-2">
         <button onclick={() => locale.set('hr')} aria-label="Hrvatski" class="w-7 h-5 rounded-sm overflow-hidden" style="opacity:{$locale === 'hr' ? '1' : '0.4'}">
-          <img src="https://flagcdn.com/h40/hr.png" alt="" width="30" height="20" class="w-full h-full object-cover" />
+          <img src="/flags/hr.svg" alt="" width="30" height="20" class="w-full h-full object-cover" />
         </button>
         <button onclick={() => locale.set('en')} aria-label="English" class="w-7 h-5 rounded-sm overflow-hidden" style="opacity:{$locale === 'en' ? '1' : '0.4'}">
-          <img src="https://flagcdn.com/h40/gb.png" alt="" width="30" height="20" class="w-full h-full object-cover" />
+          <img src="/flags/gb.svg" alt="" width="30" height="20" class="w-full h-full object-cover" />
         </button>
       </div>
     </div>

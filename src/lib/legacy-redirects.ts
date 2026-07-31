@@ -15,7 +15,7 @@ export type LegacyRedirectDecision = {
 
 export const CURRENT_PUBLIC_PATHS = new Set([
   '/', '/faq', '/kontakt', '/moj-racun', '/novosti', '/o-nama', '/placanje-dostava',
-  '/privatnost', '/reklamacije-povrat', '/rezerviraj', '/shop', '/uvjeti-najma', '/vozila',
+  '/privatnost', '/kolacici', '/uvjeti-poslovanja', '/reklamacije-povrat', '/rezerviraj', '/shop', '/uvjeti-najma', '/vozila',
   '/vozila/najam-kampera', '/vozila/vozila-za-filmske-produkcije', '/vozila/vozila-za-prodaju'
 ]);
 

@@ -4,4 +4,4 @@
   let { data }: PageProps = $props();
 </script>
 
-<LegalDocumentPage document={data.document} eyebrow="Petroni" />
+<LegalDocumentPage document={data.document} eyebrow="Shop" />

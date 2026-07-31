@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { env } from '$env/dynamic/public';
   import { cart, clearCart, syncCartStock } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
@@ -18,8 +18,10 @@
   let boxnowLockerAddress = $state('');
   let boxnowLockerPostalCode = $state('');
   let boxnowWidgetReady = $state(false);
+  let boxnowWidgetLoading = $state(false);
   let boxnowWidgetError = $state(false);
   let boxnowMapOpen = $state(false);
+  let boxnowScript: HTMLScriptElement | null = null;
   let loading = $state(false);
   let submitError = $state('');
   let fieldErrors = $state<Record<string, string>>({});
@@ -89,7 +91,12 @@
     }
   });
 
-  onMount(() => {
+  function openBoxNowMap() {
+    boxnowMapOpen = true;
+    if (boxnowWidgetReady || boxnowWidgetLoading || typeof document === 'undefined') return;
+
+    boxnowWidgetLoading = true;
+    boxnowWidgetError = false;
     const partnerId = env.PUBLIC_BOXNOW_PARTNER_ID?.trim();
     window._bn_map_widget_config = {
       ...(partnerId ? { partnerId: Number.isNaN(Number(partnerId)) ? partnerId : Number(partnerId) } : {}),
@@ -119,18 +126,21 @@
     script.dataset.boxnowWidget = 'v5';
     script.onload = () => {
       boxnowWidgetReady = true;
+      boxnowWidgetLoading = false;
       boxnowWidgetError = false;
     };
     script.onerror = () => {
       boxnowWidgetReady = false;
+      boxnowWidgetLoading = false;
       boxnowWidgetError = true;
     };
     document.head.appendChild(script);
+    boxnowScript = script;
+  }
 
-    return () => {
-      script.remove();
-      delete window._bn_map_widget_config;
-    };
+  onDestroy(() => {
+    boxnowScript?.remove();
+    if (typeof window !== 'undefined') delete window._bn_map_widget_config;
   });
 
   function clearFieldError(key: string) {
@@ -270,18 +280,18 @@
                       <p class="mt-1 text-xs text-[#6f5600]">{boxnowLockerPostalCode ? `${boxnowLockerPostalCode} · ` : ''}BoxNow ID: {boxnowLockerId}</p>
                     </div>
                   {/if}
-                  <button id="boxnow-locker-button" type="button" disabled={!boxnowWidgetReady} onclick={() => boxnowMapOpen = true} class="btn btn-dark w-full disabled:cursor-wait disabled:opacity-60">
+                  <button id="boxnow-locker-button" type="button" onclick={openBoxNowMap} class="btn btn-dark w-full disabled:cursor-wait disabled:opacity-60">
                     {boxnowLockerId
                       ? ($locale === 'hr' ? 'Promijeni paketomat' : 'Change locker')
-                      : boxnowWidgetReady
-                        ? ($locale === 'hr' ? 'Odaberi paketomat na karti' : 'Select locker on map')
-                        : ($locale === 'hr' ? 'Učitavam BoxNow kartu…' : 'Loading BoxNow map…')}
+                      : boxnowWidgetLoading
+                        ? ($locale === 'hr' ? 'Učitavam BoxNow kartu…' : 'Loading BoxNow map…')
+                        : ($locale === 'hr' ? 'Odaberi paketomat na karti' : 'Select locker on map')}
                   </button>
                   {#if fieldErrors.boxnowLocker}<p class="checkout-field-error">{fieldErrors.boxnowLocker}</p>{/if}
                   {#if boxnowWidgetError}
                     <p class="mt-2 text-xs leading-relaxed text-[#9f1f18]">{$locale === 'hr' ? 'BoxNow karta se nije učitala. Osvježite stranicu ili odaberite drugi način dostave.' : 'The BoxNow map did not load. Refresh the page or select another delivery method.'}</p>
                   {:else}
-                    <p class="mt-2 text-xs leading-relaxed text-[#6f5600]">{$locale === 'hr' ? 'Otvorite službenu BoxNow kartu i odaberite paketomat za dostavu.' : 'Open the official BoxNow map and select your delivery locker.'}</p>
+                    <p class="mt-2 text-xs leading-relaxed text-[#6f5600]">{$locale === 'hr' ? 'BoxNow se učitava tek kada otvorite kartu. Time se vaš preglednik povezuje sa službenom BoxNow uslugom.' : 'BoxNow loads only when you open the map. This connects your browser to the official BoxNow service.'}</p>
                   {/if}
             </div>
             {#if deliveryMethod !== 'personal_pickup'}
@@ -363,6 +373,12 @@
           <button onclick={handleCheckout} disabled={loading || checkingStock || hasUnavailableItems || !selectedDeliveryAvailable || $cart.length === 0} class="btn btn-primary w-full disabled:opacity-50">
             {checkingStock ? ($locale === 'hr' ? 'Provjeravam zalihu…' : 'Checking stock…') : loading ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…') : `${$locale === 'hr' ? 'Naruči' : 'Place order'} ${total.toFixed(2)} €`}
           </button>
+          <p class="mt-3 text-center text-[11px] leading-5 text-[#8b9099]">
+            {$locale === 'hr' ? 'Slanjem narudžbe prihvaćate' : 'By placing the order you accept the'}
+            <a href="/uvjeti-poslovanja" target="_blank" class="font-semibold text-[#8b6b00] underline">{$locale === 'hr' ? 'Uvjete poslovanja' : 'Terms of Business'}</a>
+            {$locale === 'hr' ? ' i potvrđujete da ste pročitali ' : ' and confirm that you have read the '}
+            <a href="/privatnost" target="_blank" class="font-semibold text-[#8b6b00] underline">{$locale === 'hr' ? 'Politiku privatnosti' : 'Privacy Policy'}</a>.
+          </p>
         </div>
       </div>
     </div>

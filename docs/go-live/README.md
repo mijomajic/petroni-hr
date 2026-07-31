@@ -16,6 +16,7 @@ Ova mapa je operativni izvor istine za puštanje nove Petroni aplikacije u rad. 
 3. [operations-runbook.md](operations-runbook.md) — release, DNS cutover, smoke test, rollback i incidenti.
 4. [go-live-checklist.md](go-live-checklist.md) — jedinstveni gateovi i potpisi prije promjene DNS-a.
 5. [legacy-url-audit.md](legacy-url-audit.md) — potpuni redirect/410 audit i dnevni 404 postupak.
+6. [privacy-external-resources-audit.md](privacy-external-resources-audit.md) — stvarni cookie/storage inventar, vanjski zahtjevi i pravni CMS postupak.
 
 ## Pravilo održavanja
 

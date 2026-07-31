@@ -5,14 +5,18 @@
 
   const links = $derived($locale === 'hr'
     ? [
-        { href: '/privatnost', label: 'Privatnost & Uvjeti poslovanja' },
+        { href: '/privatnost', label: 'Privatnost' },
+        { href: '/kolacici', label: 'Kolačići' },
+        { href: '/uvjeti-poslovanja', label: 'Uvjeti poslovanja' },
         { href: '/placanje-dostava', label: 'Plaćanje & Dostava' },
         { href: '/reklamacije-povrat', label: 'Reklamacije & Povrat' },
         { href: '/faq', label: 'FAQ' },
         { href: '/kontakt', label: 'Kontakt' }
       ]
     : [
-        { href: '/privatnost', label: 'Privacy & Terms of Business' },
+        { href: '/privatnost', label: 'Privacy' },
+        { href: '/kolacici', label: 'Cookies' },
+        { href: '/uvjeti-poslovanja', label: 'Terms of Business' },
         { href: '/placanje-dostava', label: 'Payment & Shipping' },
         { href: '/reklamacije-povrat', label: 'Complaints & Returns' },
         { href: '/faq', label: 'FAQ' },

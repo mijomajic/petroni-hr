@@ -24,7 +24,9 @@ const staticEntries: SitemapEntry[] = [
   { path: '/uvjeti-najma', changefreq: 'monthly', priority: '0.5' },
   { path: '/placanje-dostava', changefreq: 'monthly', priority: '0.5' },
   { path: '/reklamacije-povrat', changefreq: 'monthly', priority: '0.4' },
-  { path: '/privatnost', changefreq: 'yearly', priority: '0.3' }
+  { path: '/privatnost', changefreq: 'yearly', priority: '0.3' },
+  { path: '/kolacici', changefreq: 'yearly', priority: '0.3' },
+  { path: '/uvjeti-poslovanja', changefreq: 'yearly', priority: '0.3' }
 ];
 
 function escapeXml(value: string) {

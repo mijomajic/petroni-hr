@@ -29,10 +29,12 @@ Oznake: `[x]` tehnički potvrđeno, `[ ]` otvoreno, `N/A` izričito nije primjen
 
 ## Gate C — privatnost i pravni sadržaj (6H-C)
 
-- [ ] Google fontovi i zastavice poslužuju se lokalno ili su pravno/tehnički usklađeni.
-- [ ] BoxNow se ne učitava prije korisnikova izbora i jasne akcije.
-- [ ] Browser storage/cookie inventar odgovara stvarnom kodu i objavljenoj politici.
-- [ ] Politika privatnosti, kolačići, uvjeti kupnje, plaćanje/dostava i reklamacije imaju odobrene HR/EN verzije.
+- [x] Google fontovi i HR/EN zastavice poslužuju se lokalno bez Google/Flagcdn zahtjeva.
+- [x] BoxNow se učitava tek nakon odabira metode i klika za otvaranje službene karte.
+- [x] Browser storage/cookie inventar odgovara kodu i ugrađenoj početnoj politici; nema analitike ni marketing piksela.
+- [x] Za svih pet pravnih dokumenata implementirani su zaštićeni HR/EN nacrti, datum primjene, povijest, zasebna objava i restore bez gubitka povijesti.
+- [ ] Migracija `0038_phase6h_legal_documents.sql` primijenjena je na produkcijski Supabase i admin/browser ponašanje ručno je potvrđeno.
+- [ ] Politika privatnosti, kolačići, uvjeti kupnje, plaćanje/dostava i reklamacije imaju konačne odobrene HR/EN verzije.
 - [ ] Petroni/pravni savjetnik odobrio je tekstove; tehnički tim nije prikazan kao pravni jamac.
 
 ## Gate D — backup i restore (6H-D)

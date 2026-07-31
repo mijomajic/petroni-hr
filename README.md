@@ -58,7 +58,7 @@ npm run build
 
 Supabase migrations are stored in `supabase/migrations/` and must be applied in numeric order. Never edit an already-applied production migration; add a new idempotent migration instead.
 
-Business configuration such as seasons, prices, fees, delivery rules, featured brands and editable page content lives in Supabase and is managed through `/admin`.
+Business configuration such as seasons, prices, fees, delivery rules, featured brands, editable page content and versioned legal documents lives in Supabase and is managed through `/admin`. Migration `0038` adds protected HR/EN legal drafts, publication history and non-destructive restore; legal approval remains a Petroni/counsel responsibility.
 
 ## Deployment
 

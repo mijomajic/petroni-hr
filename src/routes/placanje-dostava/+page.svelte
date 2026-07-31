@@ -1,18 +1,9 @@
 <script lang="ts">
+  import LegalDocumentPage from '$lib/components/legal/LegalDocumentPage.svelte';
   import { locale } from '$lib/stores/locale';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
-
-  const paymentMethods = $derived($locale === 'hr' ? [
-    { name: 'Bankovna doznaka', desc: 'Plaćanje uplatom na bankovni račun tvrtke Petroni d.o.o. Detalji za uplatu dostavljaju se uz potvrdu narudžbe.' },
-    { name: 'Kartično plaćanje (CorvusPay)', desc: 'Uskoro dostupno nakon aktivacije produkcijskih vjerodajnica.' },
-    { name: 'Plaćanje pouzećem', desc: 'Plaćanje dostavljaču prilikom Overseas isporuke, uz dodatnu naknadu od 1 €.' },
-  ] : [
-    { name: 'Bank transfer', desc: 'Payment via transfer to the Petroni d.o.o. bank account. Payment details are sent with the order confirmation.' },
-    { name: 'Card payment (CorvusPay)', desc: 'Coming soon after production credentials are activated.' },
-    { name: 'Cash on delivery', desc: 'Payment to the courier upon Overseas delivery, with an additional €1 fee.' },
-  ]);
 
   const overseas = $derived(data.checkoutConfig.deliveryMethods.find((method) => method.id === 'overseas'));
   const zoneOne = $derived(data.checkoutConfig.overseasZones.find((zone) => zone.id === 'zone_1'));
@@ -33,29 +24,11 @@
   }
 </script>
 
-<svelte:head>
-  <title>Plaćanje i dostava kamping opreme | Petroni Shop</title>
-  <meta name="description" content="Informacije o Petroni načinima plaćanja, dostavi shop narudžbi, osobnom preuzimanju i uvjetima dostave unutar Hrvatske." />
-  <meta property="og:title" content="Plaćanje i dostava kamping opreme | Petroni Shop" />
-  <meta property="og:description" content="Informacije o Petroni načinima plaćanja, dostavi shop narudžbi, osobnom preuzimanju i uvjetima dostave unutar Hrvatske." />
-</svelte:head>
+<LegalDocumentPage document={data.document} eyebrow="Shop" />
 
-<div class="section">
+<div class="section pt-0">
   <div class="container-x max-w-3xl mx-auto">
-    <span class="eyebrow mb-3">Shop</span>
-    <h1 class="section-title mb-10">{$locale === 'hr' ? 'Plaćanje & Dostava' : 'Payment & Shipping'}</h1>
-
-    <h2 class="text-[20px] font-bold text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Načini plaćanja' : 'Payment methods'}</h2>
-    <div class="space-y-4 mb-12">
-      {#each paymentMethods as m}
-        <div class="card p-5">
-          <p class="font-semibold text-[#2b2b2b] mb-1">{m.name}</p>
-          <p class="text-[13px] text-[#6b7178] leading-relaxed">{m.desc}</p>
-        </div>
-      {/each}
-    </div>
-
-    <h2 class="text-[20px] font-bold text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Načini dostave' : 'Shipping options'}</h2>
+    <h2 class="text-[20px] font-bold text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Trenutačne cijene dostave' : 'Current shipping prices'}</h2>
     <div class="space-y-4 mb-8">
       {#if overseas?.enabled && zoneOne && zoneTwo}
         <div class="card p-5">
