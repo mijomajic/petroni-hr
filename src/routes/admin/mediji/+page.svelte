@@ -26,7 +26,7 @@
   <section class="border border-[#e1e3e6] bg-white p-6">
     <h2 class="text-sm font-black uppercase tracking-[0.14em] text-[#2b2b2b]">Dodaj sliku</h2>
     <form method="POST" action="?/upload" enctype="multipart/form-data" class="mt-5 grid gap-5 md:grid-cols-2">
-      <label class="md:col-span-2"><span class="field-label">Slika</span><input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required class="field" /></label>
+      <label class="md:col-span-2"><span class="field-label">Slika</span><input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required class="field media-file-input" /></label>
       <label><span class="field-label">Opis slike — HR</span><input name="alt_hr" class="field" maxlength="240" /></label>
       <label><span class="field-label">Opis slike — EN</span><input name="alt_en" class="field" maxlength="240" /></label>
       <label><span class="field-label">Izvor / porijeklo</span><input name="provenance" class="field" maxlength="500" placeholder="npr. Petroni, fotograf Ime Prezime" /></label>
@@ -57,3 +57,27 @@
     {/if}
   </section>
 </div>
+
+<style>
+  .media-file-input {
+    border: 1px solid #cfd3d8;
+    padding: 0.45rem;
+  }
+
+  .media-file-input::file-selector-button {
+    margin-right: 0.85rem;
+    border: 1px solid #cfd3d8;
+    border-radius: 5px;
+    background: #f7f8f9;
+    padding: 0.55rem 0.85rem;
+    color: #2b2b2b;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .media-file-input::file-selector-button:hover {
+    border-color: #f5c518;
+    background: #fffdf4;
+  }
+</style>
