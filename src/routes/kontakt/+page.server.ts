@@ -1,6 +1,6 @@
-import { getPublishedSitePage } from '$lib/site-pages.server';
+import { getSitePageForRequest } from '$lib/site-page-preview.server';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => ({
-  pageContent: await getPublishedSitePage('contact')
+export const load: PageServerLoad = async ({ locals, url }) => ({
+  pageContent: await getSitePageForRequest('contact', url, locals)
 });

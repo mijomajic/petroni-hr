@@ -3,7 +3,7 @@
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
-  function initialDraft() { return cloneSitePageContent(data.page.content); }
+  function initialDraft() { return cloneSitePageContent(data.draft ?? data.page.content); }
   let draft = $state(initialDraft());
 
   function moveSection(index: number, direction: -1 | 1) {
@@ -52,16 +52,16 @@
     <div>
       <a href="/admin/stranice" class="text-xs font-bold uppercase tracking-[0.14em] text-[#8b9099] hover:text-[#806300]">← Javne stranice</a>
       <h1 class="mt-3 text-3xl font-black uppercase tracking-tight text-[#2b2b2b]">{data.page.label}</h1>
-      <p class="mt-2 max-w-3xl text-sm leading-6 text-[#7a7f86]">Promjene su javne odmah nakon spremanja. Englesko polje može ostati prazno; tada se prikazuje hrvatski sadržaj.</p>
+      <p class="mt-2 max-w-3xl text-sm leading-6 text-[#7a7f86]">Spremanje izrađuje skicu. Englesko polje može ostati prazno; tada se prikazuje hrvatski sadržaj.</p>
     </div>
-    <a href={data.page.route} target="_blank" rel="noreferrer" class="w-fit rounded-md border border-[#dfe1e5] bg-white px-4 py-2.5 text-xs font-bold text-[#5b6168] hover:border-[#aeb2b8] active:-translate-y-px">Otvori javnu stranicu</a>
+    <div class="flex flex-wrap gap-2"><a href={data.page.route} target="_blank" rel="noreferrer" class="w-fit rounded-md border border-[#dfe1e5] bg-white px-4 py-2.5 text-xs font-bold text-[#5b6168] hover:border-[#aeb2b8] active:-translate-y-px">Otvori javnu stranicu</a>{#if data.draft}<a href={`${data.page.route}?preview=draft`} target="_blank" rel="noreferrer" class="w-fit rounded-md border border-[#f0d477] bg-[#fffdf5] px-4 py-2.5 text-xs font-bold text-[#806300] hover:border-[#d3aa20] active:-translate-y-px">Pregledaj skicu</a>{/if}</div>
   </header>
 
   {#if form?.message}
     <div class="mb-6 rounded-md border border-[#eadfba] bg-[#fffdf5] p-4 text-sm text-[#6f5600]" role="status">{form.message}</div>
   {/if}
 
-  <form method="POST" action="?/save">
+  <form method="POST" action="?/saveDraft">
     <input type="hidden" name="content_json" value={JSON.stringify(draft)} />
 
     <section class="mb-8 border-y border-[#e2e4e8] bg-white px-5 py-6">
@@ -149,9 +149,21 @@
 
     <div class="fixed bottom-0 left-64 right-0 border-t border-[#dfe1e5] bg-white/95 px-8 py-4 shadow-[0_-10px_30px_rgba(39,42,47,0.06)] backdrop-blur-sm">
       <div class="mx-auto flex max-w-6xl items-center justify-between gap-4">
-        <p class="text-xs text-[#7a7f86]">Spremanje objavljuje cijelu stranicu odmah.</p>
-        <button class="rounded-md bg-[#f5c518] px-6 py-3 text-xs font-black uppercase tracking-wide text-[#2b2b2b] hover:bg-[#e8b900] active:-translate-y-px">Spremi i objavi</button>
+        <p class="text-xs text-[#7a7f86]">Prvo spremite i pregledajte skicu, a zatim je objavite.</p>
+        <div class="flex gap-2"><button class="rounded-md border border-[#d9dce1] bg-white px-5 py-3 text-xs font-black uppercase tracking-wide text-[#454a50] hover:border-[#f5c518] active:-translate-y-px">Spremi skicu</button><button formaction="?/publishDraft" class="rounded-md bg-[#f5c518] px-5 py-3 text-xs font-black uppercase tracking-wide text-[#2b2b2b] hover:bg-[#e8b900] active:-translate-y-px">Objavi spremljenu skicu</button></div>
       </div>
     </div>
   </form>
+
+  <section class="mt-10 border border-[#e1e3e6] bg-white p-5">
+    <h2 class="text-sm font-black uppercase tracking-[0.14em] text-[#2b2b2b]">Povijest verzija</h2>
+    <div class="mt-4 divide-y divide-[#e7e8eb]">
+      {#each data.versions as version}
+        <div class="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+          <div><span class="font-bold text-[#2b2b2b]">Verzija {version.version_number}</span><span class="ml-2 rounded px-2 py-1 text-[10px] font-black uppercase {version.status === 'published' ? 'bg-green-100 text-green-700' : version.status === 'draft' ? 'bg-[#fff7e0] text-[#9a7600]' : 'bg-[#f1f2f4] text-[#737981]'}">{version.status === 'published' ? 'Objavljeno' : version.status === 'draft' ? 'Skica' : 'Arhivirano'}</span><p class="mt-1 text-xs text-[#7a7f86]">{new Intl.DateTimeFormat('hr-HR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(version.created_at))}</p></div>
+          {#if version.status !== 'draft'}<form method="POST" action="?/restoreVersion"><input type="hidden" name="version_id" value={version.id} /><button class="rounded-md border border-[#d9dce1] px-3 py-2 text-xs font-bold text-[#454a50] hover:border-[#f5c518]">Vrati kao skicu</button></form>{/if}
+        </div>
+      {/each}
+    </div>
+  </section>
 </div>

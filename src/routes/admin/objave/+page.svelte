@@ -61,6 +61,15 @@
           <input type="hidden" name="id" value={post.id} />
           <button class="rounded-md border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50">Briši objavu</button>
         </form>
+        {#if !post.is_published}<a href={`/novosti/${post.slug}?preview=draft`} target="_blank" rel="noreferrer" class="mt-3 inline-block rounded-md border border-[#f0d477] bg-[#fffdf5] px-3 py-2 text-xs font-bold text-[#806300]">Pregledaj skicu</a>{/if}
+        <div class="mt-5 border-t border-[#e7e8eb] pt-4">
+          <h3 class="text-xs font-black uppercase tracking-[0.14em] text-[#5b6168]">Povijest verzija</h3>
+          <div class="mt-3 space-y-2">
+            {#each post.versions as version}
+              <div class="flex flex-wrap items-center justify-between gap-3 text-xs"><span><strong>v{version.version_number}</strong> · {version.status === 'published' ? 'objavljeno' : 'skica'} · {new Intl.DateTimeFormat('hr-HR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(version.created_at))}</span><form method="POST" action="?/restorePostVersion"><input type="hidden" name="version_id" value={version.id} /><button class="rounded border border-[#d9dce1] px-2 py-1 font-bold text-[#454a50] hover:border-[#f5c518]">Vrati kao skicu</button></form></div>
+            {/each}
+          </div>
+        </div>
       </details>
     {/each}
   </section>

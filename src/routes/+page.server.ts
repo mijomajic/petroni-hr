@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
-import { getPublishedSitePage } from '$lib/site-pages.server';
+import { getSitePageForRequest } from '$lib/site-page-preview.server';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, url }) => {
   const [rentals, sales, pageContent] = await Promise.all([
     locals.supabase
       .from('vehicles')
@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       .order('sort_order')
       .limit(6),
     locals.supabase.from('vehicles').select('*').eq('type', 'sale').order('sort_order').limit(3),
-    getPublishedSitePage('home')
+    getSitePageForRequest('home', url, locals)
   ]);
 
   return {

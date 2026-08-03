@@ -64,6 +64,28 @@ export async function getPublishedSitePage(pageKey: SitePageKey): Promise<SitePa
     : cloneSitePageContent(DEFAULT_SITE_PAGES[pageKey]);
 }
 
+/** Used only after the caller has confirmed the current visitor is an admin. */
+export async function getDraftSitePage(pageKey: SitePageKey): Promise<SitePageContent | null> {
+  const { data, error } = await supabaseAdmin
+    .from('site_page_versions')
+    .select('content')
+    .eq('page_key', pageKey)
+    .eq('status', 'draft')
+    .maybeSingle();
+  if (error || !data) return null;
+  return sanitizeSitePageContent(pageKey, data.content);
+}
+
+export async function getSitePageVersions(pageKey: SitePageKey) {
+  const { data, error } = await supabaseAdmin
+    .from('site_page_versions')
+    .select('id,version_number,status,created_at,published_at,restored_from_id')
+    .eq('page_key', pageKey)
+    .order('version_number', { ascending: false });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
 export async function getAllSitePages(): Promise<SitePageRecord[]> {
   return Promise.all((Object.keys(SITE_PAGE_DEFINITIONS) as SitePageKey[]).map(getSitePage));
 }

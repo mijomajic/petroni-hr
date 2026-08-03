@@ -1,13 +1,16 @@
 import { error } from '@sveltejs/kit';
+import { getAdministrator } from '$lib/admin.server';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals, params }) => {
-  const { data: post, error: postError } = await locals.supabase
+export const load: PageServerLoad = async ({ locals, params, url }) => {
+  const preview = url.searchParams.get('preview') === 'draft';
+  if (preview && !(await getAdministrator(locals))) error(404, 'Objava nije pronađena.');
+  let query = locals.supabase
     .from('posts')
     .select('*')
-    .eq('slug', params.slug)
-    .eq('is_published', true)
-    .single();
+    .eq('slug', params.slug);
+  if (!preview) query = query.eq('is_published', true);
+  const { data: post, error: postError } = await query.single();
 
   if (postError || !post) error(404, 'Objava nije pronađena.');
 
