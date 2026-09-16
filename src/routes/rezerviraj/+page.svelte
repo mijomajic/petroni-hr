@@ -9,6 +9,7 @@
   import { renderTermsMarkup } from '$lib/terms-markup';
   import { vehicleThumbnail } from '$lib/vehicle-images';
   import { secondPaymentDueDate, splitPaymentIsEligible } from '$lib/booking-rules';
+  import { BUSINESS, CLIENT_STORAGE_KEYS } from '$lib/config/business';
   import type {
     BookingExtra,
     BookingExtraCategory,
@@ -195,6 +196,32 @@
     }).format(value);
   }
 
+  function pricingLineLabel(item: { type: string; label: string; extra_id?: string; qty?: number }): string {
+    if ($locale === 'hr') return item.label;
+    if (item.type === 'vehicle') return item.label.replace(/^Vozilo/, 'Vehicle').replace('/dan', '/day');
+    if (item.type === 'location') {
+      return item.label
+        .replace(/^Lokacija preuzimanja/, 'Collection location')
+        .replace(/^Lokacija povrata/, 'Return location');
+    }
+    if (item.type === 'sunday_holiday') {
+      return item.label.includes('povrat') ? 'Sunday or holiday fee — return' : 'Sunday or holiday fee — collection';
+    }
+    if (item.type === 'after_hours') {
+      const hours = item.label.match(/\(([^)]+)\)/)?.[1];
+      if (item.label.startsWith('Ranije')) return `Early collection${hours ? ` (${hours})` : ''}`;
+      if (item.label.startsWith('Kasniji')) return `Late return${hours ? ` (${hours})` : ''}`;
+      return 'Out-of-hours handover';
+    }
+    if (item.type === 'extra') {
+      const extra = bookingExtras.find((entry) => entry.id === item.extra_id);
+      const quantity = item.qty ?? 1;
+      const perDay = extra?.price_type === 'per_day' ? ` × ${days} days` : '';
+      return `${extra?.name_en || extra?.name_hr || item.label} × ${quantity}${perDay}`;
+    }
+    return item.label;
+  }
+
   function locationOptionLabel(location: RentalLocation): string {
     const suffix = Number(location.location_fee) > 0
       ? `+${formatMoney(Number(location.location_fee))}`
@@ -308,8 +335,8 @@
       return {
         label: $locale === 'hr' ? 'Po dogovoru' : 'By agreement',
         detail: $locale === 'hr'
-          ? 'Točan termin potvrđuje Petroni prema dostupnosti i logistici.'
-          : 'Petroni confirms the exact time according to availability and logistics.',
+          ? `Točan termin potvrđuje ${BUSINESS.shortName} prema dostupnosti i logistici.`
+          : `${BUSINESS.shortName} confirms the exact time according to availability and logistics.`,
         charged: false,
         tone: 'agreement'
       };
@@ -558,17 +585,17 @@
           ...$booking,
           pricing: selectedPricing,
           total_price: totalPrice,
-          payment_method: paymentMethod,
-          payment_split: paymentSplit,
+          payment_method: BUSINESS.rentalOnlinePaymentsEnabled ? paymentMethod : null,
+          payment_split: BUSINESS.rentalOnlinePaymentsEnabled ? paymentSplit : false,
           terms_accepted: termsAccepted,
           locale: $locale
         }),
       });
       const data = await res.json();
       if (data.success) {
-        sessionStorage.setItem('petroni_booking_result', JSON.stringify(data));
+        sessionStorage.setItem(CLIENT_STORAGE_KEYS.bookingResult, JSON.stringify(data));
         resetBooking();
-        if (data.corvuspay) {
+        if (BUSINESS.rentalOnlinePaymentsEnabled && data.corvuspay) {
           const form = document.createElement('form');
           form.method = 'POST';
           form.action = data.corvuspay.url;
@@ -636,6 +663,7 @@
         ...current,
         selectedVehicle,
         extras,
+        customerMessage: String(current.customerMessage ?? '').slice(0, 2000),
         pickupTime: timeOptions.includes(current.pickupTime) ? current.pickupTime : timeOptions[0],
         dropoffTime: timeOptions.includes(current.dropoffTime) ? current.dropoffTime : timeOptions[0],
         step: selectedVehicleIsStale && current.step > 1 ? 1 : current.step
@@ -692,7 +720,7 @@
             address: '',
             city: '',
             zip: '',
-            country: 'Hrvatska'
+            country: 'Ireland'
           }
         }
       });
@@ -747,10 +775,10 @@
 </script>
 
 <svelte:head>
-  <title>Rezervacija najma kampera u Hrvatskoj | Petroni</title>
-  <meta name="description" content="Online rezervacija Petroni kampera: odaberite lokaciju, datume, vozilo, dodatnu opremu i način plaćanja u nekoliko koraka." />
-  <meta property="og:title" content="Rezervacija najma kampera u Hrvatskoj | Petroni" />
-  <meta property="og:description" content="Online rezervacija Petroni kampera: odaberite lokaciju, datume, vozilo, dodatnu opremu i način plaćanja u nekoliko koraka." />
+  <title>{$locale === 'hr' ? 'Rezervacija najma kampera' : 'Book a camper'} | {BUSINESS.name}</title>
+  <meta name="description" content="Choose dates, location, vehicle, extras and payment method in one clear camper booking flow." />
+  <meta property="og:title" content={`${$locale === 'hr' ? 'Rezervacija najma kampera' : 'Book a camper'} | ${BUSINESS.name}`} />
+  <meta property="og:description" content="Choose dates, location, vehicle, extras and payment method in one clear camper booking flow." />
 </svelte:head>
 
 <div id="booking-wizard-top" class="section scroll-mt-24" style="background:#fafbfc">
@@ -774,7 +802,7 @@
             aria-label={i + 1 < $booking.step ? `${$locale === 'hr' ? 'Vrati se na korak' : 'Return to step'} ${i + 1}: ${step}` : undefined}
           >
             <div class="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold transition-all"
-              style="{$booking.step >= i + 1 ? 'background:#f5c518;color:#fff' : 'background:#fff;color:#b9bdc4;border:2px solid #e2e4e8'}">
+              style="{$booking.step >= i + 1 ? 'background:#c87442;color:#fff' : 'background:#fff;color:#b9bdc4;border:2px solid #e2e4e8'}">
               {#if $booking.step > i + 1}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
               {:else}{i + 1}{/if}
@@ -782,7 +810,7 @@
             <span class="text-[11px] leading-tight max-w-[90px]" style="color:{$booking.step >= i + 1 ? '#2b2b2b' : '#9aa0a8'}">{step}</span>
           </button>
           {#if i < steps.length - 1}
-            <div class="flex-1 h-0.5 mx-2 mt-[-22px]" style="background:{$booking.step > i + 1 ? '#f5c518' : '#e2e4e8'}"></div>
+            <div class="flex-1 h-0.5 mx-2 mt-[-22px]" style="background:{$booking.step > i + 1 ? '#c87442' : '#e2e4e8'}"></div>
           {/if}
         </div>
       {/each}
@@ -793,7 +821,7 @@
       <div class="max-w-4xl mx-auto">
         <div class="card p-6 md:p-8">
           {#if requestedVehicleSlug && $booking.selectedVehicle?.slug === requestedVehicleSlug}
-            <div class="mb-7 flex items-center gap-4 rounded-lg border border-[#f5c518]/50 bg-[#fffaf0] p-4">
+            <div class="mb-7 flex items-center gap-4 rounded-lg border border-[#c87442]/50 bg-[#fffaf0] p-4">
               <img src={vehicleThumbnail($booking.selectedVehicle.images?.[0])} alt="" class="h-16 w-24 shrink-0 rounded-md object-cover" />
               <div>
                 <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#a87900]">{$locale === 'hr' ? 'Odabrano vozilo' : 'Selected vehicle'}</p>
@@ -810,8 +838,8 @@
           {/if}
           <!-- Pickup -->
           <div class="mb-8">
-            <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#f5c518">{$locale === 'hr' ? 'Preuzimanje' : 'Pickup'}</span>
-            <div class="border-t-2 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-color:#f5c518">
+            <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#c87442">{$locale === 'hr' ? 'Preuzimanje' : 'Pickup'}</span>
+            <div class="border-t-2 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-color:#c87442">
               <div class="md:col-span-2">
                 <label class="field-label" for="pickup_location">{$locale === 'hr' ? 'Mjesto preuzimanja vozila' : 'Pickup location'}</label>
                 <select id="pickup_location" class="field" aria-invalid={Boolean(stepOneErrors.pickupLocation)} onchange={() => clearStepOneError('pickupLocation')} bind:value={$booking.pickupLocation}>
@@ -829,8 +857,8 @@
               <div><label class="field-label" for="pickup_date">{$locale === 'hr' ? 'Datum preuzimanja' : 'Pickup date'}</label><input id="pickup_date" type="date" class="field" aria-invalid={Boolean(stepOneErrors.pickupDate)} min={new Date().toISOString().split('T')[0]} oninput={() => clearStepOneError('pickupDate', 'dropoffDate')} bind:value={$booking.pickupDate} />{#if stepOneErrors.pickupDate}<p class="field-error-text">{stepOneErrors.pickupDate}</p>{/if}</div>
               <div>
                 <label class="field-label" for="pickup_time">{$locale === 'hr' ? 'Vrijeme preuzimanja' : 'Pickup time'}</label>
-                <div class="flex gap-2"><select id="pickup_time" class="field" bind:value={$booking.pickupTime}>{#each timeOptions as time}<option value={time}>{time}</option>{/each}</select>
-                  {#if pickupScheduleStatus}<span class="shrink-0 self-center rounded-md px-3 py-2 text-xs font-bold" style={pickupScheduleStatus.tone === 'charged' ? 'background:#fff0ef;color:#b42318' : pickupScheduleStatus.tone === 'agreement' ? 'background:#fff7e0;color:#8a6500' : 'background:#e9f9ef;color:#167a3a'}>{pickupScheduleStatus.label}</span>{/if}
+                <div class="flex flex-col gap-2 sm:flex-row"><select id="pickup_time" class="field" bind:value={$booking.pickupTime}>{#each timeOptions as time}<option value={time}>{time}</option>{/each}</select>
+                  {#if pickupScheduleStatus}<span class="shrink-0 self-start rounded-md px-3 py-2 text-xs font-bold sm:self-center" style={pickupScheduleStatus.tone === 'charged' ? 'background:#fff0ef;color:#b42318' : pickupScheduleStatus.tone === 'agreement' ? 'background:#f5e8df;color:#8a6500' : 'background:#e9f9ef;color:#167a3a'}>{pickupScheduleStatus.label}</span>{/if}
                 </div>
                 {#if pickupScheduleStatus}<p class="mt-1 text-xs text-[#7a7f86]">{pickupScheduleStatus.detail}</p>{/if}
               </div>
@@ -839,8 +867,8 @@
 
           <!-- Return -->
           <div class="mb-8">
-            <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#f5c518">{$locale === 'hr' ? 'Povratak' : 'Return'}</span>
-            <div class="border-t-2 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-color:#f5c518">
+            <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#c87442">{$locale === 'hr' ? 'Povratak' : 'Return'}</span>
+            <div class="border-t-2 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-color:#c87442">
               <div class="md:col-span-2">
                 <label class="field-label" for="dropoff_location">{$locale === 'hr' ? 'Mjesto povratka vozila' : 'Return location'}</label>
                 <select id="dropoff_location" class="field" bind:value={$booking.dropoffLocation}>
@@ -857,8 +885,8 @@
               <div><label class="field-label" for="dropoff_date">{$locale === 'hr' ? 'Datum povratka' : 'Return date'}</label><input id="dropoff_date" type="date" class="field" aria-invalid={Boolean(stepOneErrors.dropoffDate)} min={$booking.pickupDate || new Date().toISOString().split('T')[0]} oninput={() => clearStepOneError('dropoffDate')} bind:value={$booking.dropoffDate} />{#if stepOneErrors.dropoffDate}<p class="field-error-text">{stepOneErrors.dropoffDate}</p>{/if}</div>
               <div>
                 <label class="field-label" for="dropoff_time">{$locale === 'hr' ? 'Vrijeme povratka' : 'Return time'}</label>
-                <div class="flex gap-2"><select id="dropoff_time" class="field" bind:value={$booking.dropoffTime}>{#each timeOptions as time}<option value={time}>{time}</option>{/each}</select>
-                  {#if dropoffScheduleStatus}<span class="shrink-0 self-center rounded-md px-3 py-2 text-xs font-bold" style={dropoffScheduleStatus.tone === 'charged' ? 'background:#fff0ef;color:#b42318' : dropoffScheduleStatus.tone === 'agreement' ? 'background:#fff7e0;color:#8a6500' : 'background:#e9f9ef;color:#167a3a'}>{dropoffScheduleStatus.label}</span>{/if}
+                <div class="flex flex-col gap-2 sm:flex-row"><select id="dropoff_time" class="field" bind:value={$booking.dropoffTime}>{#each timeOptions as time}<option value={time}>{time}</option>{/each}</select>
+                  {#if dropoffScheduleStatus}<span class="shrink-0 self-start rounded-md px-3 py-2 text-xs font-bold sm:self-center" style={dropoffScheduleStatus.tone === 'charged' ? 'background:#fff0ef;color:#b42318' : dropoffScheduleStatus.tone === 'agreement' ? 'background:#f5e8df;color:#8a6500' : 'background:#e9f9ef;color:#167a3a'}>{dropoffScheduleStatus.label}</span>{/if}
                 </div>
                 {#if dropoffScheduleStatus}<p class="mt-1 text-xs text-[#7a7f86]">{dropoffScheduleStatus.detail}</p>{/if}
               </div>
@@ -867,8 +895,8 @@
 
           <!-- Travellers and trip plan -->
           <div class="mb-8">
-            <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#f5c518">{$locale === 'hr' ? 'Putnici i plan puta' : 'Travellers and trip plan'}</span>
-            <div class="border-t-2 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-color:#f5c518">
+            <span class="inline-block px-4 py-1.5 rounded-t-md text-[11px] font-bold uppercase tracking-wide text-white" style="background:#c87442">{$locale === 'hr' ? 'Putnici i plan puta' : 'Travellers and trip plan'}</span>
+            <div class="border-t-2 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5" style="border-color:#c87442">
               <div>
                 <label class="field-label" for="num_adults">{$locale === 'hr' ? 'Broj odraslih' : 'Adults'}</label>
                 <input id="num_adults" type="number" min="1" max="10" class="field" aria-invalid={Boolean(stepOneErrors.numAdults)} oninput={() => clearStepOneError('numAdults', 'numChildren')} bind:value={$booking.numAdults} />
@@ -886,15 +914,15 @@
               </div>
               <div>
                 <label class="field-label" for="destination">{$locale === 'hr' ? 'Odredište / plan puta' : 'Destination / route'}</label>
-                <input id="destination" type="text" class="field" aria-invalid={Boolean(stepOneErrors.destination)} placeholder={$locale === 'hr' ? 'npr. Istra i Kvarner' : 'e.g. Istria and Kvarner'} oninput={() => clearStepOneError('destination')} bind:value={$booking.destination} />
+                <input id="destination" type="text" class="field" aria-invalid={Boolean(stepOneErrors.destination)} placeholder={$locale === 'hr' ? 'npr. planine i obala' : 'e.g. coast and mountains'} oninput={() => clearStepOneError('destination')} bind:value={$booking.destination} />
                 {#if stepOneErrors.destination}<p class="field-error-text">{stepOneErrors.destination}</p>{/if}
               </div>
               <div class="rounded-md border border-[#e2e4e8] p-4">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div><h3 class="text-[15px] font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Planiram prelazak granice' : 'I plan to cross a border'}</h3><p class="mt-1 text-[13px] leading-relaxed text-[#6b7178]">{$locale === 'hr' ? 'Naknada se automatski dodaje u obračun.' : 'The fee is automatically added to the quote.'}</p></div>
                   <div class="flex shrink-0 rounded-lg bg-[#f3f4f6] p-1" role="group" aria-label={$locale === 'hr' ? 'Planiram prelazak granice' : 'I plan to cross a border'}>
-                    <button type="button" aria-pressed={$booking.crossesBorder} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${$booking.crossesBorder ? 'bg-[#f5c518] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.crossesBorder = true}>{$locale === 'hr' ? 'Da' : 'Yes'}</button>
-                    <button type="button" aria-pressed={!$booking.crossesBorder} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${!$booking.crossesBorder ? 'bg-[#f5c518] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.crossesBorder = false}>{$locale === 'hr' ? 'Ne' : 'No'}</button>
+                    <button type="button" aria-pressed={$booking.crossesBorder} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${$booking.crossesBorder ? 'bg-[#c87442] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.crossesBorder = true}>{$locale === 'hr' ? 'Da' : 'Yes'}</button>
+                    <button type="button" aria-pressed={!$booking.crossesBorder} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${!$booking.crossesBorder ? 'bg-[#c87442] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.crossesBorder = false}>{$locale === 'hr' ? 'Ne' : 'No'}</button>
                   </div>
                 </div>
               </div>
@@ -902,8 +930,8 @@
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div><h3 class="text-[15px] font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Putujem na festival' : 'I am travelling to a festival'}</h3><p class="mt-1 text-[13px] leading-relaxed text-[#6b7178]">{$locale === 'hr' ? 'Naknada se automatski dodaje u obračun.' : 'The fee is automatically added to the quote.'}</p></div>
                   <div class="flex shrink-0 rounded-lg bg-[#f3f4f6] p-1" role="group" aria-label={$locale === 'hr' ? 'Putujem na festival' : 'I am travelling to a festival'}>
-                    <button type="button" aria-pressed={$booking.attendsFestival} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${$booking.attendsFestival ? 'bg-[#f5c518] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.attendsFestival = true}>{$locale === 'hr' ? 'Da' : 'Yes'}</button>
-                    <button type="button" aria-pressed={!$booking.attendsFestival} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${!$booking.attendsFestival ? 'bg-[#f5c518] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.attendsFestival = false}>{$locale === 'hr' ? 'Ne' : 'No'}</button>
+                    <button type="button" aria-pressed={$booking.attendsFestival} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${$booking.attendsFestival ? 'bg-[#c87442] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.attendsFestival = true}>{$locale === 'hr' ? 'Da' : 'Yes'}</button>
+                    <button type="button" aria-pressed={!$booking.attendsFestival} class={`min-w-16 rounded-md px-4 py-2 text-sm font-bold transition-colors ${!$booking.attendsFestival ? 'bg-[#c87442] text-[#2b2b2b]' : 'text-[#72777d]'}`} onclick={() => $booking.attendsFestival = false}>{$locale === 'hr' ? 'Ne' : 'No'}</button>
                   </div>
                 </div>
               </div>
@@ -925,8 +953,8 @@
       <div class="max-w-6xl mx-auto space-y-6">
         {#if days > 0}
           <div class="card p-4 flex items-center gap-3 text-sm" style="background:#fffaf0">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span class="text-[#6b7178]"><b class="text-[#2b2b2b]">{$booking.pickupDate}</b> → <b class="text-[#2b2b2b]">{$booking.dropoffDate}</b> <span style="color:#b5890a" class="font-semibold">({days} {$locale === 'hr' ? (days === 1 ? 'dan' : 'dana') : 'days'})</span></span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c87442" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="text-[#6b7178]"><b class="text-[#2b2b2b]">{$booking.pickupDate}</b> → <b class="text-[#2b2b2b]">{$booking.dropoffDate}</b> <span style="color:#9f542e" class="font-semibold">({days} {$locale === 'hr' ? (days === 1 ? 'dan' : 'dana') : 'days'})</span></span>
           </div>
         {/if}
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6">
@@ -934,8 +962,8 @@
           <div class="flex flex-col gap-4">
             {#each availableVehicles as vehicle}
               {@const price = vehiclePricing.get(vehicle.id)}
-              <button onclick={() => selectVehicle(vehicle)} class="card card-interactive text-left overflow-hidden flex flex-row" style="border-color:{$booking.selectedVehicle?.id === vehicle.id ? '#f5c518' : '#ededf0'}">
-                <div class="w-40 sm:w-56 flex-shrink-0 overflow-hidden bg-[#f3f4f6]"><img src={vehicleThumbnail(vehicle.images?.[0])} alt={vehicle.name} width="480" height="360" loading="lazy" class="w-full h-full object-cover" /></div>
+              <button onclick={() => selectVehicle(vehicle)} class="card card-interactive text-left overflow-hidden flex flex-col sm:flex-row" style="border-color:{$booking.selectedVehicle?.id === vehicle.id ? '#c87442' : '#ededf0'}">
+                <div class="aspect-[16/9] w-full flex-shrink-0 overflow-hidden bg-[#f3f4f6] sm:aspect-auto sm:w-56"><img src={vehicleThumbnail(vehicle.images?.[0])} alt={vehicle.name} width="480" height="360" loading="lazy" class="w-full h-full object-cover" /></div>
                 <div class="p-5 flex-1 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_190px] items-center gap-4">
                   <div>
                     <h3 class="font-semibold text-[#2b2b2b] mb-1">{vehicle.name}</h3>
@@ -956,7 +984,7 @@
                       <span class="text-xs text-[#9aa0a8] sm:text-right">{$locale === 'hr' ? 'Osnovna cijena' : 'Base price'}</span>
                     {/if}
                     {#if price?.min_nights_applied}
-                      <span class="text-[10px] font-semibold sm:text-right" style="color:#b5890a">{price.billable_nights} {$locale === 'hr' ? 'obračunatih noćenja' : 'billable nights'}</span>
+                      <span class="text-[10px] font-semibold sm:text-right" style="color:#9f542e">{price.billable_nights} {$locale === 'hr' ? 'obračunatih noćenja' : 'billable nights'}</span>
                     {/if}
                     <span class="btn btn-primary w-full px-4 py-2.5 text-[11px]">{$locale === 'hr' ? 'Odaberi' : 'Select'}</span>
                   </div>
@@ -980,9 +1008,9 @@
                 <div>
                   {#each extraGroups as group}
                     <details class="group" open={group.key === 'ostalo'}>
-                      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 border-b border-[#e7e8eb] px-1 py-4 text-[12px] font-bold uppercase tracking-[0.12em] text-[#68717b] marker:content-none transition-colors hover:text-[#2b2b2b] focus-visible:text-[#2b2b2b] focus-visible:underline focus-visible:decoration-[#f5c518] focus-visible:decoration-2 focus-visible:underline-offset-4">
+                      <summary class="flex cursor-pointer list-none items-center justify-between gap-4 border-b border-[#e7e8eb] px-1 py-4 text-[12px] font-bold uppercase tracking-[0.12em] text-[#68717b] marker:content-none transition-colors hover:text-[#2b2b2b] focus-visible:text-[#2b2b2b] focus-visible:underline focus-visible:decoration-[#c87442] focus-visible:decoration-2 focus-visible:underline-offset-4">
                         <span>{extraGroupLabel(group)}</span>
-                        <svg class="h-5 w-5 shrink-0 text-[#b5890a] transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                        <svg class="h-5 w-5 shrink-0 text-[#9f542e] transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
                       </summary>
                       <div class="mx-2 divide-y divide-[#ededf0]">
                         {#each group.extras as extra}
@@ -1003,7 +1031,7 @@
                                 onclick={() => openExtraInfo = openExtraInfo === extra.id ? null : extra.id}
                               >ⓘ</button>
                               {#if extra.is_required}
-                                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style="background:#fff7e0;color:#b5890a">{$locale === 'hr' ? 'Obavezno' : 'Required'}</span>
+                                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style="background:#f5e8df;color:#9f542e">{$locale === 'hr' ? 'Obavezno' : 'Required'}</span>
                               {:else if autoApplied}
                                 <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded" style="background:#e9f9ef;color:#167a3a">{$locale === 'hr' ? 'Automatski dodano' : 'Automatically added'}</span>
                               {/if}
@@ -1027,7 +1055,7 @@
                               {:else}
                                 <button onclick={() => setExtraQty(extra.id, qty > 0 ? 0 : 1, extra.max_qty)} disabled={extra.is_required}
                                   class="px-4 py-1.5 rounded-md text-[11px] font-bold uppercase cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-                                  style="{qty > 0 ? 'background:#f5c518;color:#fff' : 'background:#f6f7f9;color:#5b6168'}">
+                                  style="{qty > 0 ? 'background:#c87442;color:#fff' : 'background:#f6f7f9;color:#5b6168'}">
                                   {qty > 0 ? ($locale === 'hr' ? 'Odabrano' : 'Selected') : ($locale === 'hr' ? 'Dodaj' : 'Add')}
                                 </button>
                               {/if}
@@ -1055,12 +1083,12 @@
                   </div>
                 {/if}
                 {#if selectedPricing.min_nights_note}
-                  <p class="text-xs leading-relaxed p-3 rounded-md mb-4" style="background:#fff7e0;color:#8a6500">{selectedPricing.min_nights_note}</p>
+                  <p class="text-xs leading-relaxed p-3 rounded-md mb-4" style="background:#f5e8df;color:#8a6500">{$locale === 'hr' ? selectedPricing.min_nights_note : `The minimum stay for this season is ${selectedPricing.billable_nights} nights, which is reflected in the price.`}</p>
                 {/if}
                 <div class="space-y-2 mb-4">
                   {#each selectedPricing.line_items as item}
                     <div class="flex justify-between gap-4 text-sm">
-                      <span class="text-[#7a7f86] leading-snug">{item.label}</span>
+                      <span class="text-[#7a7f86] leading-snug">{pricingLineLabel(item)}</span>
                       <span class="text-[#2b2b2b] whitespace-nowrap">{formatMoney(item.amount)}</span>
                     </div>
                   {/each}
@@ -1072,11 +1100,11 @@
                   </div>
                 {/if}
                 {#if selectedPricing.extra_km_note}
-                  <p class="text-xs leading-relaxed p-3 rounded-md mb-4" style="background:#f6f7f9;color:#6b7178">{selectedPricing.extra_km_note}</p>
+                  <p class="text-xs leading-relaxed p-3 rounded-md mb-4" style="background:#f6f7f9;color:#6b7178">{$locale === 'hr' ? selectedPricing.extra_km_note : `Estimated excess: ${selectedPricing.estimated_extra_km} km (${formatMoney(selectedPricing.estimated_extra_km_cost)}). The final amount is calculated when the vehicle is returned.`}</p>
                 {/if}
                 <div class="pt-3 flex justify-between font-bold text-lg border-t border-[#ededf0] mb-5">
-                  <span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Za plaćanje' : 'Payable total'}</span>
-                  <span style="color:#b5890a">{formatMoney(totalPrice)}</span>
+                  <span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Procijenjeni ukupni iznos' : 'Estimated total'}</span>
+                  <span style="color:#9f542e">{formatMoney(totalPrice)}</span>
                 </div>
                 <button onclick={continueToDriver} class="btn btn-primary w-full">{$locale === 'hr' ? 'Nastavi' : 'Continue'} →</button>
               </div>
@@ -1100,7 +1128,7 @@
         <div class="rounded-lg p-5 mb-7 border border-[#e2e4e8]" style="background:#fafbfc">
           {#if signedIn}
             <div class="flex items-start gap-3">
-              <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0" style="background:#fff7d6;color:#8a6500">✓</div>
+              <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0" style="background:#f5e8df;color:#8a6500">✓</div>
               <div>
                 <p class="font-semibold text-[#2b2b2b]">Prijavljeni ste</p>
                 <p class="text-sm text-[#7a7f86] mt-1">Podaci iz Vašeg profila automatski su popunjeni. Svejedno ih možete urediti za ovu rezervaciju.</p>
@@ -1202,15 +1230,15 @@
             </div>
           {/if}
           <div class="grid grid-cols-2 gap-4 mb-6">
-            <div><p class="field-label">{$locale === 'hr' ? 'Preuzimanje' : 'Pickup'}</p><p class="text-sm text-[#2b2b2b]">{$booking.pickupDate} · {$booking.pickupTime}</p><p class="text-sm font-medium" style="color:#b5890a">{$booking.pickupLocation}</p></div>
-            <div><p class="field-label">{$locale === 'hr' ? 'Povrat' : 'Return'}</p><p class="text-sm text-[#2b2b2b]">{$booking.dropoffDate} · {$booking.dropoffTime}</p><p class="text-sm font-medium" style="color:#b5890a">{$booking.dropoffLocation || $booking.pickupLocation}</p></div>
+            <div><p class="field-label">{$locale === 'hr' ? 'Preuzimanje' : 'Pickup'}</p><p class="text-sm text-[#2b2b2b]">{$booking.pickupDate} · {$booking.pickupTime}</p><p class="text-sm font-medium" style="color:#9f542e">{$booking.pickupLocation}</p></div>
+            <div><p class="field-label">{$locale === 'hr' ? 'Povrat' : 'Return'}</p><p class="text-sm text-[#2b2b2b]">{$booking.dropoffDate} · {$booking.dropoffTime}</p><p class="text-sm font-medium" style="color:#9f542e">{$booking.dropoffLocation || $booking.pickupLocation}</p></div>
             <div><p class="field-label">{$locale === 'hr' ? 'Putnici' : 'Travellers'}</p><p class="text-sm text-[#2b2b2b]">{$booking.numAdults} {$locale === 'hr' ? 'odraslih' : 'adults'} · {$booking.numChildren} {$locale === 'hr' ? 'djece' : 'children'}</p></div>
             <div><p class="field-label">{$locale === 'hr' ? 'Plan puta' : 'Trip plan'}</p><p class="text-sm text-[#2b2b2b]">{$booking.destination} · {$booking.plannedKm} km</p></div>
           </div>
           <div class="space-y-2 mb-6 pb-6 border-b border-[#ededf0]">
             {#each selectedPricing.line_items as item}
               <div class="flex justify-between gap-4 text-sm">
-                <span class="text-[#7a7f86]">{item.label}</span>
+                <span class="text-[#7a7f86]">{pricingLineLabel(item)}</span>
                 <span class="text-[#2b2b2b] whitespace-nowrap">{formatMoney(item.amount)}</span>
               </div>
             {/each}
@@ -1220,31 +1248,53 @@
                 <span class="text-[#2b2b2b] whitespace-nowrap">{formatMoney(selectedPricing.refundable_deposit)}</span>
               </div>
             {/if}
-            <div class="flex justify-between font-bold text-lg pt-2"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Za plaćanje' : 'Payable total'}</span><span style="color:#b5890a">{formatMoney(totalPrice)}</span></div>
+            <div class="flex justify-between font-bold text-lg pt-2"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Procijenjeni ukupni iznos' : 'Estimated total'}</span><span style="color:#9f542e">{formatMoney(totalPrice)}</span></div>
           </div>
           <p class="text-sm text-[#6b7178]"><b class="text-[#2b2b2b]">{$booking.driverDetails.firstName} {$booking.driverDetails.lastName}</b> · {$booking.driverDetails.email} · {$booking.driverDetails.phone}</p>
         </div>
 
         <div class="card card-static p-6 md:p-8">
-          <h2 class="text-lg font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Način plaćanja' : 'Payment method'}</h2>
-          <div class="grid md:grid-cols-2 gap-4 mb-6">
-            <button onclick={() => paymentMethod = 'bank_transfer'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'bank_transfer' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Bankovna uplata' : 'Bank transfer'}</p><p class="text-xs text-[#9aa0a8] mt-1">HUB-3 / PDF417</p></button>
-            <button onclick={() => data.corvuspayAvailable && (paymentMethod = 'corvuspay')} disabled={!data.corvuspayAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'corvuspay' ? '#f5c518' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Kartica' : 'Card'}</p><p class="text-xs text-[#9aa0a8] mt-1">{data.corvuspayAvailable ? 'CorvusPay' : ($locale === 'hr' ? 'Uskoro dostupno' : 'Coming soon')}</p></button>
-          </div>
-          <div class="rounded-md p-4 mb-5 bg-[#f6f7f9] border border-[#ededf0]">
-            {#if splitPaymentEligible}
-              <label class="flex gap-3 items-start cursor-pointer">
-                <input type="checkbox" bind:checked={paymentSplit} class="mt-1" />
-                <span class="text-sm text-[#4c5157]"><b>{$locale === 'hr' ? 'Plaćanje 50/50' : '50/50 payment'}</b><br />{$locale === 'hr' ? `${formatMoney(totalPrice / 2)} sada, a drugi dio najkasnije ${formatDate(splitPaymentDueDate)} (${data.splitPaymentDueDays} dana prije preuzimanja).` : `${formatMoney(totalPrice / 2)} now, with the second half due by ${formatDate(splitPaymentDueDate)} (${data.splitPaymentDueDays} days before pickup).`}</span>
-              </label>
-            {:else}
-              <p class="text-sm leading-relaxed text-[#4c5157]"><b>{$locale === 'hr' ? 'Plaćanje punog iznosa' : 'Full payment'}</b><br />{$locale === 'hr' ? `Plaćanje 50/50 dostupno je samo kada je preuzimanje udaljeno više od ${data.splitPaymentMinAdvanceDays} dana.` : `50/50 payment is available only when pickup is more than ${data.splitPaymentMinAdvanceDays} days away.`}</p>
-            {/if}
-            <div class="mt-4 flex items-center justify-between border-t border-[#e2e4e8] pt-4 text-sm">
-              <span class="font-semibold text-[#4c5157]">{$locale === 'hr' ? 'Za uplatu sada' : 'Due now'}</span>
-              <span class="font-bold text-[#2b2b2b]">{formatMoney(amountDueNow)}</span>
+          {#if BUSINESS.rentalOnlinePaymentsEnabled}
+            <h2 class="text-lg font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Način plaćanja' : 'Payment method'}</h2>
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+              <button onclick={() => paymentMethod = 'bank_transfer'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'bank_transfer' ? '#c87442' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Bankovna uplata' : 'Bank transfer'}</p><p class="text-xs text-[#9aa0a8] mt-1">{$locale === 'hr' ? 'Upute za uplatu' : 'Payment instructions'}</p></button>
+              <button onclick={() => data.corvuspayAvailable && (paymentMethod = 'corvuspay')} disabled={!data.corvuspayAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'corvuspay' ? '#c87442' : '#e2e4e8'}"><p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Kartica' : 'Card'}</p><p class="text-xs text-[#9aa0a8] mt-1">{data.corvuspayAvailable ? 'CorvusPay' : ($locale === 'hr' ? 'Trenutačno nedostupno' : 'Temporarily unavailable')}</p></button>
             </div>
-          </div>
+            <div class="rounded-md p-4 mb-5 bg-[#f6f7f9] border border-[#ededf0]">
+              {#if splitPaymentEligible}
+                <label class="flex gap-3 items-start cursor-pointer">
+                  <input type="checkbox" bind:checked={paymentSplit} class="mt-1" />
+                  <span class="text-sm text-[#4c5157]"><b>{$locale === 'hr' ? 'Plaćanje 50/50' : '50/50 payment'}</b><br />{$locale === 'hr' ? `${formatMoney(totalPrice / 2)} sada, a drugi dio najkasnije ${formatDate(splitPaymentDueDate)} (${data.splitPaymentDueDays} dana prije preuzimanja).` : `${formatMoney(totalPrice / 2)} now, with the second half due by ${formatDate(splitPaymentDueDate)} (${data.splitPaymentDueDays} days before pickup).`}</span>
+                </label>
+              {:else}
+                <p class="text-sm leading-relaxed text-[#4c5157]"><b>{$locale === 'hr' ? 'Plaćanje punog iznosa' : 'Full payment'}</b><br />{$locale === 'hr' ? `Plaćanje 50/50 dostupno je samo kada je preuzimanje udaljeno više od ${data.splitPaymentMinAdvanceDays} dana.` : `50/50 payment is available only when pickup is more than ${data.splitPaymentMinAdvanceDays} days away.`}</p>
+              {/if}
+              <div class="mt-4 flex items-center justify-between border-t border-[#e2e4e8] pt-4 text-sm">
+                <span class="font-semibold text-[#4c5157]">{$locale === 'hr' ? 'Za uplatu sada' : 'Due now'}</span>
+                <span class="font-bold text-[#2b2b2b]">{formatMoney(amountDueNow)}</span>
+              </div>
+            </div>
+          {:else}
+            <h2 class="text-lg font-bold uppercase tracking-wide text-[#2b2b2b] mb-5">{$locale === 'hr' ? 'Pošaljite zahtjev' : 'Send your request'}</h2>
+            <div class="rounded-xl border border-[#ead7ca] bg-[#fbf6f2] p-5 mb-6">
+              <p class="font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Danas se ništa ne naplaćuje' : 'Nothing is charged today'}</p>
+              <p class="mt-2 text-sm leading-6 text-[#60656b]">
+                {$locale === 'hr'
+                  ? 'Provjerit ćemo dostupnost vozila i detalje putovanja, zatim vam se javiti s konačnom potvrdom. Plaćanje dogovaramo izravno nakon potvrde.'
+                  : 'We will review vehicle availability and your trip details, then contact you with final confirmation. Payment is arranged directly after confirmation.'}
+              </p>
+            </div>
+            <label class="block mb-6" for="booking_customer_message">
+              <span class="field-label">{$locale === 'hr' ? 'Poruka ili posebni zahtjevi — opcionalno' : 'Message or special requests — optional'}</span>
+              <textarea
+                id="booking_customer_message"
+                class="field min-h-28 resize-y"
+                maxlength="2000"
+                bind:value={$booking.customerMessage}
+                placeholder={$locale === 'hr' ? 'Recite nam što bi nam pomoglo pri potvrdi putovanja.' : 'Tell us anything that would help us confirm your trip.'}
+              ></textarea>
+            </label>
+          {/if}
           <label class="flex gap-3 items-start mb-5">
             <input type="checkbox" bind:checked={termsAccepted} disabled={!termsScrolled && !termsAccepted} class="mt-1 disabled:opacity-40" required />
             <span class="text-sm text-[#4c5157]">
@@ -1254,7 +1304,7 @@
                 {#if !termsScrolled && !termsAccepted}
                   {$locale === 'hr' ? 'Otvorite uvjete i dođite do kraja teksta prije označavanja.' : 'Open the terms and reach the end of the text before checking this box.'}
                 {:else}
-                  {$locale === 'hr' ? 'Prihvat se bilježi kao revizijski trag; pravnu valjanost treba potvrditi pravni savjetnik.' : 'Acceptance is recorded as an audit trail; legal enforceability should be confirmed by legal counsel.'}
+                  {$locale === 'hr' ? 'Prihvaćena verzija uvjeta bit će povezana s rezervacijom i poslana u potvrdi.' : 'The accepted terms version will be linked to your booking and included with the confirmation.'}
                 {/if}
               </span>
             </span>
@@ -1264,7 +1314,17 @@
           {/if}
           <div class="flex gap-4">
             <button onclick={() => goToStep(3)} class="btn btn-ghost px-6 py-3">← {$locale === 'hr' ? 'Natrag' : 'Back'}</button>
-            <button onclick={submitBooking} disabled={loading} class="btn btn-primary flex-1 disabled:opacity-50">{loading ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…') : `${$locale === 'hr' ? 'Potvrdi rezervaciju' : 'Confirm booking'} — ${formatMoney(amountDueNow)}`}</button>
+            <button onclick={submitBooking} disabled={loading} class="btn btn-primary flex-1 disabled:opacity-50">
+              {#if loading}
+                {BUSINESS.rentalOnlinePaymentsEnabled
+                  ? ($locale === 'hr' ? 'Obrađujem…' : 'Processing…')
+                  : ($locale === 'hr' ? 'Šaljem zahtjev…' : 'Sending request…')}
+              {:else if BUSINESS.rentalOnlinePaymentsEnabled}
+                {$locale === 'hr' ? 'Potvrdi rezervaciju' : 'Confirm booking'} — {formatMoney(amountDueNow)}
+              {:else}
+                {$locale === 'hr' ? 'Pošalji zahtjev za rezervaciju' : 'Send booking request'}
+              {/if}
+            </button>
           </div>
         </div>
       </div>
@@ -1277,11 +1337,11 @@
     <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[88dvh] flex flex-col overflow-hidden shadow-[0_24px_70px_rgba(0,0,0,0.22)]" role="dialog" aria-modal="true" aria-labelledby="terms-title">
       <div class="px-6 md:px-8 py-5 border-b border-[#e8e9eb] flex items-start justify-between gap-5">
         <div>
-          <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#9a7600] mb-2">Petroni</p>
+          <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#9f542e] mb-2">{BUSINESS.name}</p>
           <h2 id="terms-title" class="font-black text-xl md:text-2xl text-[#2b2b2b]">{$locale === 'hr' ? 'Uvjeti najma' : 'Rental terms'}</h2>
           <p class="text-xs text-[#8b9099] mt-1">{$locale === 'hr' ? 'Aktivna verzija' : 'Active version'}: {data.terms?.version}</p>
         </div>
-        <button class="w-10 h-10 rounded-full border border-[#dfe1e4] flex items-center justify-center text-[#5b6168] hover:bg-[#f3f4f6] hover:text-[#25282c] transition-colors active:scale-[0.96]" onclick={() => termsOpen = false} aria-label="Zatvori">
+        <button class="w-10 h-10 rounded-full border border-[#dfe1e4] flex items-center justify-center text-[#5b6168] hover:bg-[#f3f4f6] hover:text-[#25282c] transition-colors active:scale-[0.96]" onclick={() => termsOpen = false} aria-label={$locale === 'hr' ? 'Zatvori' : 'Close'}>
           <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
         </button>
       </div>

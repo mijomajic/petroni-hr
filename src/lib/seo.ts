@@ -1,9 +1,9 @@
 import { env } from '$env/dynamic/public';
+import { BUSINESS } from '$lib/config/business';
 
-export const SITE_URL = normalizeSiteUrl(env.PUBLIC_SITE_URL ?? 'https://petroni-hr.vercel.app');
-export const SITE_NAME = 'Petroni';
-export const DEFAULT_IMAGE =
-  absoluteUrl('/images/vehicles/rimor-evo-sound/01-rimor-evo-1.webp');
+export const SITE_URL = normalizeSiteUrl(env.PUBLIC_SITE_URL ?? 'https://demo.alderwaycampers.com');
+export const SITE_NAME = BUSINESS.name;
+export const DEFAULT_IMAGE = absoluteUrl(BUSINESS.defaultImage);
 
 function normalizeSiteUrl(url: string) {
   return url.replace(/\/+$/, '');
@@ -34,21 +34,18 @@ export function organizationSchema() {
   return {
     '@type': 'LocalBusiness',
     '@id': absoluteUrl('/#organization'),
-    name: 'Petroni',
+    name: BUSINESS.name,
     url: SITE_URL,
-    logo: absoluteUrl('/brand/petroni-logo.png'),
+    logo: absoluteUrl(BUSINESS.logo),
     image: DEFAULT_IMAGE,
-    email: 'info@petroni.hr',
-    telephone: '+385912427247',
+    email: BUSINESS.email,
+    telephone: BUSINESS.phone,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Ul. Slavka Tomerlina 8',
-      addressLocality: 'Sesvete',
-      addressRegion: 'Zagreb',
-      postalCode: '10360',
-      addressCountry: 'HR'
-    },
-    sameAs: ['https://www.facebook.com/petroni.hr', 'https://www.instagram.com/petroni.hr']
+      streetAddress: BUSINESS.address,
+      addressLocality: BUSINESS.locality,
+      postalCode: BUSINESS.postalCode
+    }
   };
 }
 
@@ -59,7 +56,7 @@ export function websiteSchema() {
     name: SITE_NAME,
     url: SITE_URL,
     publisher: { '@id': absoluteUrl('/#organization') },
-    inLanguage: 'hr-HR'
+    inLanguage: BUSINESS.defaultLocale
   };
 }
 

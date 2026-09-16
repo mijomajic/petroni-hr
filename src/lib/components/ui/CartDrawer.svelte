@@ -33,7 +33,7 @@
         <div class="flex flex-col items-center justify-center h-full gap-4 text-[#8b9099]">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           <p class="text-sm">{t.empty}</p>
-          <button onclick={() => open = false} class="text-sm font-semibold" style="color:#b5890a">{t.shop}</button>
+          <button onclick={() => open = false} class="text-sm font-semibold" style="color:#9f542e">{t.shop}</button>
         </div>
       {:else}
         {#each $cart as item (item.id)}
@@ -47,9 +47,9 @@
               <p class="font-medium text-sm text-[#2b2b2b] line-clamp-2 mb-1">{$locale === 'hr' ? item.name_hr : (item.name_en || item.name_hr)}</p>
               <p class="font-semibold text-[#2b2b2b] mb-2">{(item.price * item.qty).toFixed(2)} €</p>
               <div class="flex items-center gap-2">
-                <button onclick={() => updateQty(item.id, item.qty - 1)} class="w-7 h-7 rounded border border-[#e2e4e8] flex items-center justify-center font-bold text-[#2b2b2b] hover:border-[#f5c518]">−</button>
+                <button onclick={() => updateQty(item.id, item.qty - 1)} class="w-7 h-7 rounded border border-[#e2e4e8] flex items-center justify-center font-bold text-[#2b2b2b] hover:border-[#c87442]">−</button>
                 <span class="text-sm w-6 text-center text-[#2b2b2b]">{item.qty}</span>
-                <button onclick={() => updateQty(item.id, item.qty + 1)} class="w-7 h-7 rounded border border-[#e2e4e8] flex items-center justify-center font-bold text-[#2b2b2b] hover:border-[#f5c518]">+</button>
+                <button onclick={() => updateQty(item.id, item.qty + 1)} class="w-7 h-7 rounded border border-[#e2e4e8] flex items-center justify-center font-bold text-[#2b2b2b] hover:border-[#c87442]">+</button>
                 <button onclick={() => removeFromCart(item.id)} class="ml-auto text-xs text-[#8b9099] hover:text-[#e11d48]">{t.remove}</button>
               </div>
             </div>

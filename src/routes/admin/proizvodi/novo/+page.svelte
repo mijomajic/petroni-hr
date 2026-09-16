@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
@@ -9,7 +10,7 @@
   }
 </script>
 
-<svelte:head><title>Novi proizvod — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Novi proizvod — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-5xl">
   <div class="mb-8 flex items-center gap-4">
@@ -45,11 +46,11 @@
       <label class="md:col-span-2"><span class="field-label">Slike, jedan URL po retku</span><textarea name="images" rows="6" class="field font-mono text-xs"></textarea></label>
     </div>
     <label class="mt-5 flex items-center gap-3 text-sm font-bold text-[#2b2b2b]">
-      <input name="is_active" type="checkbox" checked class="h-4 w-4 accent-[#F5C518]" />
+      <input name="is_active" type="checkbox" checked class="h-4 w-4 accent-[#c87442]" />
       Aktivan u shopu
     </label>
     <label class="mt-4 flex items-start gap-3 text-sm text-[#2b2b2b]">
-      <input name="pickup_only" type="checkbox" class="mt-0.5 h-4 w-4 accent-[#F5C518]" />
+      <input name="pickup_only" type="checkbox" class="mt-0.5 h-4 w-4 accent-[#c87442]" />
       <span><b>Samo osobno preuzimanje</b><br /><span class="text-xs text-[#7a7f86]">Narudžba koja sadrži ovaj proizvod neće nuditi Overseas ni BoxNow.</span></span>
     </label>
     <button class="btn btn-primary mt-6 text-black">Spremi proizvod</button>

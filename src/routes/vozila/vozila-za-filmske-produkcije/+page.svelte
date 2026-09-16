@@ -9,10 +9,10 @@
 </script>
 
 <svelte:head>
-  <title>Kamperi za filmske i TV produkcije | Petroni</title>
-  <meta name="description" content="Specijalizirana Petroni vozila za filmske i TV produkcije, reklame i snimanja uz fleksibilne uvjete najma." />
-  <meta property="og:title" content="Kamperi za filmske i TV produkcije | Petroni" />
-  <meta property="og:description" content="Specijalizirana Petroni vozila za filmske i TV produkcije, reklame i snimanja uz fleksibilne uvjete najma." />
+  <title>Kamperi za filmske i TV produkcije | Alderway</title>
+  <meta name="description" content="Specijalizirana Alderway vozila za filmske i TV produkcije, reklame i snimanja uz fleksibilne uvjete najma." />
+  <meta property="og:title" content="Kamperi za filmske i TV produkcije | Alderway" />
+  <meta property="og:description" content="Specijalizirana Alderway vozila za filmske i TV produkcije, reklame i snimanja uz fleksibilne uvjete najma." />
 </svelte:head>
 
 <!-- Hero -->
@@ -25,7 +25,7 @@
       <a href="/vozila" class="hover:text-white/90">{$locale === 'hr' ? 'Vozila' : 'Vehicles'}</a><span>/</span>
       <span class="text-white/90">{$locale === 'hr' ? 'Filmske produkcije' : 'Film productions'}</span>
     </nav>
-    <span class="block text-[11px] font-bold uppercase tracking-[0.2em] mb-3" style="color:#f5c518">{$locale === 'hr' ? 'Specijalizirana flota' : 'Specialised fleet'}</span>
+    <span class="block text-[11px] font-bold uppercase tracking-[0.2em] mb-3" style="color:#c87442">{$locale === 'hr' ? 'Specijalizirana flota' : 'Specialised fleet'}</span>
     <h1 class="text-[30px] md:text-[42px] font-extrabold uppercase leading-[1.1] tracking-tight max-w-2xl" style="color:#ffffff; text-shadow:0 2px 20px rgba(0,0,0,0.8)">
       {$locale === 'hr' ? 'Vozila za filmske produkcije' : 'Vehicles for film productions'}
     </h1>
@@ -49,7 +49,7 @@
       ] as f}
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full" style="background:#fff8d6">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b5890a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d={f.icon}/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9f542e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d={f.icon}/></svg>
           </div>
           <span class="text-[12px] font-semibold text-[#3a3f45]">{f.label}</span>
         </div>

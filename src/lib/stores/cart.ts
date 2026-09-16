@@ -1,5 +1,6 @@
 import { get, writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { CLIENT_STORAGE_KEYS } from '$lib/config/business';
 
 export type CartItem = {
   id: string;
@@ -14,7 +15,7 @@ export type CartItem = {
 };
 
 const initial: CartItem[] = browser
-  ? (JSON.parse(localStorage.getItem('petroni_cart') || '[]') as CartItem[]).map((item) => ({
+  ? (JSON.parse(localStorage.getItem(CLIENT_STORAGE_KEYS.cart) || '[]') as CartItem[]).map((item) => ({
       ...item,
       qty: Math.max(1, Math.min(99, Math.floor(Number(item.qty) || 1))),
       stock: Number.isFinite(Number(item.stock)) ? Math.max(0, Math.floor(Number(item.stock))) : undefined
@@ -25,7 +26,7 @@ export const cart = writable<CartItem[]>(initial);
 
 if (browser) {
   cart.subscribe(value => {
-    localStorage.setItem('petroni_cart', JSON.stringify(value));
+    localStorage.setItem(CLIENT_STORAGE_KEYS.cart, JSON.stringify(value));
   });
 }
 

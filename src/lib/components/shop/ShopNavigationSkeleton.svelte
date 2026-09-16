@@ -7,9 +7,9 @@
     <img src="/images/vehicles/knaus-boxdrive-680me/01-man-1.webp" alt="" width="1440" height="1080" class="shop-skeleton-hero__image" />
     <div class="shop-skeleton-hero__overlay"></div>
     <div class="container-x shop-skeleton-hero__content">
-      <span class="shop-skeleton-eyebrow">{$locale === 'hr' ? 'Kamping oprema' : 'Camping equipment'}</span>
+      <span class="shop-skeleton-eyebrow">{$locale === 'hr' ? 'Dijelovi i oprema' : 'Parts & equipment'}</span>
       <h1>Shop</h1>
-      <p>{$locale === 'hr' ? 'Sve što trebate za savršeno kamping iskustvo' : 'Everything you need for the perfect camping experience'}</p>
+      <p>{$locale === 'hr' ? 'Pouzdani dijelovi i oprema za kampere i kamp prikolice' : 'Reliable parts and touring hardware for campers and caravans'}</p>
     </div>
   </section>
 
@@ -48,8 +48,8 @@
         <section class="shop-skeleton-panel">
           <p>{$locale === 'hr' ? 'Dostava' : 'Shipping'}</p>
           <span>{$locale === 'hr' ? 'Dostava samo unutar EU.' : 'Delivery within EU only.'}</span>
-          <span>{$locale === 'hr' ? 'Dostava izvan HR: na upit.' : 'Delivery outside HR: on request.'}</span>
-          <span>{$locale === 'hr' ? 'Cijena dostave samo za HR.' : 'Shipping price for HR only.'}</span>
+          <span>{$locale === 'hr' ? 'Međunarodna dostava: na upit.' : 'International delivery: on request.'}</span>
+          <span>{$locale === 'hr' ? 'Trošak dostave prikazuje se pri naplati.' : 'Delivery cost is shown at checkout.'}</span>
         </section>
         <section class="shop-skeleton-panel">
           <p>{$locale === 'hr' ? 'Pretraži' : 'Search'}</p>
@@ -71,7 +71,7 @@
   .shop-skeleton-hero__overlay { position: absolute; inset: 0; background: linear-gradient(to right,rgba(0,0,0,.82),rgba(0,0,0,.55) 50%,rgba(0,0,0,.18)); }
   .shop-skeleton-hero__content { position: relative; z-index: 1; }
   .shop-skeleton-eyebrow, .shop-skeleton-hero h1, .shop-skeleton-hero p { display: block; margin: 0; }
-  .shop-skeleton-eyebrow { margin-bottom: .75rem; color: #f5c518; font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+  .shop-skeleton-eyebrow { margin-bottom: .75rem; color: #c87442; font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
   .shop-skeleton-hero h1 { color: #fff; font-size: 32px; font-weight: 800; letter-spacing: -.025em; line-height: 1; text-transform: uppercase; text-shadow: 0 2px 20px rgba(0,0,0,.8); }
   .shop-skeleton-hero p { margin-top: .5rem; color: rgba(255,255,255,.82); font-size: 14px; }
   .shop-skeleton-info { border-bottom: 1px solid #ededf0; background: #fafbfc; }
@@ -82,7 +82,7 @@
   .shop-skeleton-count { display: block; width: 148px; height: 14px; border-radius: 3px; }
   .shop-skeleton-select { display: flex; align-items: center; justify-content: space-between; width: min(220px,100%); height: 42px; padding: 0 .85rem; border: 1px solid #e2e4e8; border-radius: 6px; color: #9aa0a8; font-size: 13px; }
   .shop-skeleton-brands { margin-bottom: 2rem; padding: 1.25rem 0; border-top: 1px solid #e7e8eb; border-bottom: 1px solid #e7e8eb; }
-  .shop-skeleton-brands p, .shop-skeleton-panel p { margin: 0 0 .75rem; color: #b5890a; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+  .shop-skeleton-brands p, .shop-skeleton-panel p { margin: 0 0 .75rem; color: #9f542e; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
   .shop-skeleton-brands p { color: #6b7178; }
   .shop-skeleton-brand-list { display: flex; gap: .5rem; overflow: hidden; }
   .shop-skeleton-brand { display: block; flex: 0 0 98px; height: 38px; border-radius: 6px; }
@@ -97,7 +97,7 @@
   .shop-skeleton-panel { padding: 1.25rem; border: 1px solid #ededf0; border-radius: 10px; background: #fff; }
   .shop-skeleton-panel span { display: block; margin-top: .25rem; color: #a4a9af; font-size: 12px; line-height: 1.5; }
   .shop-skeleton-input { height: 40px; border: 1px solid #e2e4e8; border-radius: 6px; }
-  .shop-skeleton-search-button { margin-top: .75rem; padding: .7rem; border-radius: 5px; background: #f5c518; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-align: center; text-transform: uppercase; }
+  .shop-skeleton-search-button { margin-top: .75rem; padding: .7rem; border-radius: 5px; background: #c87442; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-align: center; text-transform: uppercase; }
   .shop-skeleton-category { height: 27px; margin-top: .35rem; border-radius: 3px; }
   .shimmer { background: linear-gradient(100deg,#f1f0ed 30%,#faf9f7 48%,#f1f0ed 66%); background-size: 220% 100%; animation: shimmer 1.1s ease-in-out infinite; }
   @keyframes shimmer { to { background-position: -220% 0; } }

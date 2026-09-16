@@ -24,13 +24,13 @@ export const actions: Actions = {
     const next = safeNext(form.get('next'));
 
     if (!email || !password) {
-      return fail(400, { error: 'Unesite email adresu i lozinku.', email });
+      return fail(400, { error: 'Enter your email address and password.', email });
     }
 
     const { error } = await locals.supabase.auth.signInWithPassword({ email, password });
     if (error) {
       return fail(400, {
-        error: 'Prijava nije uspjela. Provjerite email adresu i lozinku.',
+        error: 'Sign-in failed. Check your email address and password.',
         email
       });
     }

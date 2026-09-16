@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       address: String(user.user_metadata.address ?? ''),
       city: String(user.user_metadata.city ?? ''),
       zip: String(user.user_metadata.zip ?? ''),
-      country: String(user.user_metadata.country ?? 'Hrvatska')
+      country: String(user.user_metadata.country ?? 'Ireland')
     },
     bookings: bookings.data ?? [],
     orders: orders.data ?? []
@@ -49,7 +49,7 @@ export const actions: Actions = {
     const country = String(form.get('country') ?? '').trim();
 
     if (!firstName || !lastName) {
-      return fail(400, { profileError: 'Ime i prezime su obavezni.' });
+      return fail(400, { profileError: 'First and last name are required.' });
     }
 
     const { error } = await locals.supabase.auth.updateUser({
@@ -65,7 +65,7 @@ export const actions: Actions = {
       }
     });
 
-    if (error) return fail(400, { profileError: 'Profil nije spremljen. Pokušajte ponovno.' });
+    if (error) return fail(400, { profileError: 'Profile could not be saved. Please try again.' });
     return { profileSuccess: true };
   }
 };

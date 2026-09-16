@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { supabaseAdmin } from '$lib/supabase.server';
 import { createOrderConfirmationPdf, createRentalTermsPdf } from '$lib/invoice.server';
 import { absoluteUrl } from '$lib/seo';
+import { BUSINESS } from '$lib/config/business';
 
 async function emailConfig() {
   const { data } = await supabaseAdmin
@@ -11,8 +12,8 @@ async function emailConfig() {
     .in('key', ['admin_email', 'email_from', 'company', 'ibans']);
   const settings = Object.fromEntries((data ?? []).map((row) => [row.key, row.value]));
   return {
-    admin: String(settings.admin_email ?? 'info@petroni.hr'),
-    from: env.RESEND_FROM_EMAIL || String(settings.email_from ?? 'Petroni <onboarding@resend.dev>'),
+    admin: String(settings.admin_email ?? BUSINESS.email),
+    from: env.RESEND_FROM_EMAIL || String(settings.email_from ?? `${BUSINESS.name} <onboarding@resend.dev>`),
     company: (settings.company ?? {}) as {
       name?: string;
       oib?: string;
@@ -49,29 +50,96 @@ const date = (value: unknown) => String(value ?? '').split('-').reverse().join('
 function emailLayout(title: string, content: string, locale: 'hr' | 'en' = 'hr') {
   const tagline = locale === 'hr' ? 'Najam kampera i oprema za putovanja' : 'Camper rental and travel equipment';
   const footer = locale === 'hr'
-    ? 'Za pitanja nam odgovorite na ovaj email ili nam se javite na info@petroni.hr.'
-    : 'Reply to this email if you have a question, or contact us at info@petroni.hr.';
-  return `<div style="margin:0;padding:32px 16px;background:#f5f5f3;font-family:Arial,sans-serif;color:#252525"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:0 auto;background:#ffffff"><tr><td style="padding:28px 32px;background:#252525;color:#ffffff"><div style="font-size:12px;letter-spacing:2px;font-weight:700">PETRONI</div><div style="margin-top:6px;font-size:14px;color:#d7d7d7">${tagline}</div></td></tr><tr><td style="padding:32px"><h1 style="margin:0 0 18px;font-size:26px;line-height:1.2;color:#252525">${title}</h1>${content}</td></tr><tr><td style="padding:20px 32px;background:#f5f5f3;font-size:12px;line-height:1.5;color:#666">${footer}</td></tr></table></div>`;
+    ? `Za pitanja nam odgovorite na ovaj email ili nam se javite na ${BUSINESS.email}.`
+    : `Reply to this email if you have a question, or contact us at ${BUSINESS.email}.`;
+  return `<div style="margin:0;padding:32px 16px;background:#f5f5f3;font-family:Arial,sans-serif;color:#252525"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;margin:0 auto;background:#ffffff"><tr><td style="padding:28px 32px;background:#252525;color:#ffffff"><div style="font-size:12px;letter-spacing:2px;font-weight:700">${escapeHtml(BUSINESS.shortName.toUpperCase())}</div><div style="margin-top:6px;font-size:14px;color:#d7d7d7">${tagline}</div></td></tr><tr><td style="padding:32px"><h1 style="margin:0 0 18px;font-size:26px;line-height:1.2;color:#252525">${title}</h1>${content}</td></tr><tr><td style="padding:20px 32px;background:#f5f5f3;font-size:12px;line-height:1.5;color:#666">${footer}</td></tr></table></div>`;
 }
 
 function detailRows(rows: Array<[string, unknown]>) {
   return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border:1px solid #e6e6e6;border-collapse:collapse">${rows.map(([label, value]) => `<tr><td style="padding:10px 12px;border-bottom:1px solid #e6e6e6;color:#666;font-size:14px">${escapeHtml(label)}</td><td style="padding:10px 12px;border-bottom:1px solid #e6e6e6;text-align:right;font-size:14px;font-weight:700">${escapeHtml(value)}</td></tr>`).join('')}</table>`;
 }
 
-function bookingSummary(booking: Record<string, any>) {
+function bookingSummary(
+  booking: Record<string, any>,
+  locale: 'hr' | 'en' = 'hr',
+  estimated = false
+) {
   const vehicle = booking.vehicles?.name ?? booking.vehicle_name ?? 'Odabrano vozilo';
+  const labels = locale === 'en'
+    ? {
+        number: 'Request reference',
+        vehicle: 'Vehicle',
+        pickup: 'Pickup',
+        return: 'Return',
+        total: estimated ? 'Estimated total' : 'Rental total',
+        deposit: 'Refundable deposit'
+      }
+    : {
+        number: 'Broj zahtjeva',
+        vehicle: 'Vozilo',
+        pickup: 'Preuzimanje',
+        return: 'Povrat',
+        total: estimated ? 'Procijenjeni ukupni iznos' : 'Ukupno za najam',
+        deposit: 'Povratni depozit'
+      };
   return detailRows([
-    ['Broj rezervacije', booking.confirmation_number],
-    ['Vozilo', vehicle],
-    ['Preuzimanje', `${booking.pickup_location}, ${date(booking.pickup_date)} u ${booking.pickup_time}`],
-    ['Povrat', `${booking.dropoff_location}, ${date(booking.dropoff_date)} u ${booking.dropoff_time}`],
-    ['Ukupno za najam', euro(booking.total_price)],
-    ['Povratni depozit', euro(booking.deposit_amount)]
+    [labels.number, booking.confirmation_number],
+    [labels.vehicle, vehicle],
+    [labels.pickup, `${booking.pickup_location}, ${date(booking.pickup_date)} ${locale === 'hr' ? 'u' : 'at'} ${booking.pickup_time}`],
+    [labels.return, `${booking.dropoff_location}, ${date(booking.dropoff_date)} ${locale === 'hr' ? 'u' : 'at'} ${booking.dropoff_time}`],
+    [labels.total, euro(booking.total_price)],
+    [labels.deposit, euro(booking.deposit_amount)]
   ]);
 }
 
-function paymentSummary(booking: Record<string, any>, ibans: Array<{ label?: string; iban?: string }>) {
-  const rows: Array<[string, unknown]> = [['Način plaćanja', booking.payment_method === 'bank_transfer' ? 'Bankovna uplata' : 'Kartično plaćanje']];
+function selectedExtras(booking: Record<string, any>): string[] {
+  const lineItems = Array.isArray(booking.price_breakdown?.line_items)
+    ? booking.price_breakdown.line_items as Array<{ type?: string; label?: string; qty?: number }>
+    : [];
+  return lineItems
+    .filter((item) => item.type === 'extra')
+    .map((item) => `${item.label ?? 'Extra'}${Number(item.qty ?? 1) > 1 ? ` × ${item.qty}` : ''}`);
+}
+
+function extrasSummary(booking: Record<string, any>, locale: 'hr' | 'en') {
+  const extras = selectedExtras(booking);
+  return detailRows([[
+    locale === 'hr' ? 'Odabrani dodaci' : 'Selected extras',
+    extras.length ? extras.join(', ') : (locale === 'hr' ? 'Bez dodataka' : 'No extras selected')
+  ]]);
+}
+
+function adminBookingRequestSummary(booking: Record<string, any>) {
+  const extras = selectedExtras(booking);
+  return detailRows([
+    ['Ime i prezime', `${booking.driver_name ?? ''} ${booking.driver_last_name ?? ''}`.trim()],
+    ['Email', booking.driver_email],
+    ['Telefon', booking.driver_phone],
+    ['Vozilo', booking.vehicles?.name ?? booking.vehicle_name ?? 'Odabrano vozilo'],
+    ['Datumi', `${date(booking.pickup_date)} – ${date(booking.dropoff_date)}`],
+    ['Dodaci', extras.length ? extras.join(', ') : 'Bez dodataka'],
+    ['Procijenjeni ukupni iznos', euro(booking.total_price)],
+    ['Poruka gosta', booking.customer_message || 'Nema dodatne poruke']
+  ]);
+}
+
+function paymentSummary(
+  booking: Record<string, any>,
+  ibans: Array<{ label?: string; iban?: string }>,
+  locale: 'hr' | 'en' = 'hr'
+) {
+  if (!BUSINESS.rentalOnlinePaymentsEnabled || !booking.payment_method) {
+    return detailRows([[
+      locale === 'hr' ? 'Plaćanje' : 'Payment',
+      locale === 'hr' ? 'Dogovara se izravno nakon potvrde dostupnosti' : 'Arranged directly after availability is confirmed'
+    ]]);
+  }
+  const rows: Array<[string, unknown]> = [[
+    locale === 'hr' ? 'Način plaćanja' : 'Payment method',
+    booking.payment_method === 'bank_transfer'
+      ? (locale === 'hr' ? 'Bankovna uplata' : 'Bank transfer')
+      : (locale === 'hr' ? 'Kartično plaćanje' : 'Card payment')
+  ]];
   if (booking.payment_split) {
     rows.push(['Prva rata', euro(booking.first_payment_amount)], ['Druga rata', `${euro(booking.second_payment_amount)} do ${date(booking.second_payment_due_date)}`]);
   } else {
@@ -86,12 +154,12 @@ function paymentSummary(booking: Record<string, any>, ibans: Array<{ label?: str
 function orderSummary(order: Record<string, any>) {
   const items = Array.isArray(order.items) ? order.items : [];
   const itemRows = items.map((item: Record<string, any>) => `<tr><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;font-size:14px">${escapeHtml(item.name_hr ?? item.name ?? item.slug ?? 'Proizvod')} × ${escapeHtml(item.qty ?? item.quantity ?? 1)}</td><td style="padding:10px 0;border-bottom:1px solid #e6e6e6;text-align:right;font-size:14px;font-weight:700">${euro(Number(item.price ?? item.total ?? 0) * Number(item.qty ?? item.quantity ?? 1))}</td></tr>`).join('');
-  const deliveryLabels: Record<string, string> = { overseas: 'Overseas dostava', boxnow: 'BoxNow paketomat', personal_pickup: 'Osobno preuzimanje' };
+  const deliveryLabels: Record<string, string> = { overseas: 'Kurirska dostava', boxnow: 'Paketomat', personal_pickup: 'Osobno preuzimanje' };
   const paymentLabels: Record<string, string> = { bank_transfer: 'Bankovna uplata', corvuspay: 'Kartično plaćanje', cash_on_delivery: 'Plaćanje pouzećem' };
   const surcharge = Number(order.payment_surcharge ?? 0);
   const locker = order.shipping_method === 'boxnow' ? order.shipping_address?.boxnow_locker : null;
   const overseasZone = order.shipping_method === 'overseas' ? order.shipping_address?.overseas_zone_label : null;
-  const breakdown = `<tr><td style="padding:10px 0;font-size:14px">Dostava: ${escapeHtml(deliveryLabels[order.shipping_method] ?? order.shipping_method ?? '-')}${overseasZone ? ` — ${escapeHtml(overseasZone)}` : ''}</td><td style="padding:10px 0;text-align:right;font-size:14px">${euro(order.shipping_cost)}</td></tr>${locker ? `<tr><td style="padding:6px 0;font-size:14px">BoxNow paketomat</td><td style="padding:6px 0;text-align:right;font-size:14px;font-weight:700">${escapeHtml(locker)}</td></tr>` : ''}${surcharge > 0 ? `<tr><td style="padding:6px 0;font-size:14px">Naknada za pouzeće</td><td style="padding:6px 0;text-align:right;font-size:14px">${euro(surcharge)}</td></tr>` : ''}<tr><td style="padding:6px 0;font-size:14px">Plaćanje: ${escapeHtml(paymentLabels[order.payment_method] ?? order.payment_method ?? '-')}</td><td></td></tr>`;
+  const breakdown = `<tr><td style="padding:10px 0;font-size:14px">Dostava: ${escapeHtml(deliveryLabels[order.shipping_method] ?? order.shipping_method ?? '-')}${overseasZone ? ` — ${escapeHtml(overseasZone)}` : ''}</td><td style="padding:10px 0;text-align:right;font-size:14px">${euro(order.shipping_cost)}</td></tr>${locker ? `<tr><td style="padding:6px 0;font-size:14px">Paketomat</td><td style="padding:6px 0;text-align:right;font-size:14px;font-weight:700">${escapeHtml(locker)}</td></tr>` : ''}${surcharge > 0 ? `<tr><td style="padding:6px 0;font-size:14px">Naknada za pouzeće</td><td style="padding:6px 0;text-align:right;font-size:14px">${euro(surcharge)}</td></tr>` : ''}<tr><td style="padding:6px 0;font-size:14px">Plaćanje: ${escapeHtml(paymentLabels[order.payment_method] ?? order.payment_method ?? '-')}</td><td></td></tr>`;
   return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-collapse:collapse">${itemRows}${breakdown}<tr><td style="padding:14px 0;font-size:16px;font-weight:700">Ukupno</td><td style="padding:14px 0;text-align:right;font-size:16px;font-weight:700">${euro(order.total)}</td></tr></table>`;
 }
 
@@ -219,7 +287,7 @@ export async function sendPaymentReconciliationAlert(input: {
           ['CorvusPay referenca', input.providerReference],
           ['Očekivani iznos', euro(input.expectedAmount)],
           ['Status na CorvusPayu', input.providerStatus],
-          ['Status u Petroniju', input.localStatus]
+          ['Lokalni status', input.localStatus]
         ])}<p style="margin:24px 0"><a href="${escapeHtml(absoluteUrl(input.adminPath))}" style="display:inline-block;padding:13px 18px;background:#252525;color:#ffffff;text-decoration:none;font-weight:700">Otvori zapis u administraciji</a></p><p style="font-size:13px;line-height:1.6;color:#666">Ne mijenjajte lokalni status niti radite povrat prije provjere reference, iznosa i statusa u CorvusPay Merchant Portalu.</p>`
       )
     },
@@ -237,8 +305,12 @@ export async function sendBookingReceived(
   terms?: { version?: string | null; content_hr?: string | null; content_en?: string | null }
 ) {
   const config = await emailConfig();
-  const details = bookingSummary(booking);
   const locale: 'hr' | 'en' = booking.locale === 'en' ? 'en' : 'hr';
+  const details = bookingSummary(booking, locale, true);
+  const extras = extrasSummary(booking, locale);
+  const paymentNote = locale === 'hr'
+    ? 'Naplata nije izvršena. Nakon provjere dostupnosti javit ćemo vam se s konačnom potvrdom i izravno dogovoriti plaćanje.'
+    : 'No payment has been taken. After checking availability, we will contact you with final confirmation and arrange payment directly.';
   const termsContent = locale === 'en' ? (terms?.content_en || terms?.content_hr) : terms?.content_hr;
   const termsPdf = termsContent
     ? await createRentalTermsPdf({ version: terms?.version ?? '', content: termsContent, locale })
@@ -255,7 +327,7 @@ export async function sendBookingReceived(
         subject: locale === 'hr' ? `Zaprimili smo zahtjev za rezervaciju ${booking.confirmation_number}` : `We received your booking request ${booking.confirmation_number}`,
         html: emailLayout(
           locale === 'hr' ? 'Zahtjev za rezervaciju je zaprimljen' : 'Your booking request has been received',
-          `<p style="font-size:16px;line-height:1.6">${locale === 'hr' ? `Hvala, ${escapeHtml(booking.driver_name)}. Provjerit ćemo dostupnost i javiti vam se s potvrdom i daljnjim uputama.` : `Thank you, ${escapeHtml(booking.driver_name)}. We will check availability and contact you with confirmation and next steps.`}</p>${details}${paymentSummary(booking, config.ibans)}${termsNote}`,
+          `<p style="font-size:16px;line-height:1.6">${locale === 'hr' ? `Hvala, ${escapeHtml(booking.driver_name)}. Vaš zahtjev čeka provjeru dostupnosti.` : `Thank you, ${escapeHtml(booking.driver_name)}. Your request is pending an availability check.`}</p>${details}${extras}<p style="font-size:14px;line-height:1.6"><strong>${paymentNote}</strong></p>${termsNote}`,
           locale
         ),
         attachments: termsPdf ? [{ filename: locale === 'hr' ? `uvjeti-najma-${booking.confirmation_number}.pdf` : `rental-terms-${booking.confirmation_number}.pdf`, content: Buffer.from(termsPdf) }] : undefined
@@ -263,7 +335,7 @@ export async function sendBookingReceived(
       { bookingId: booking.id, messageType: 'booking_received_customer', recipient: booking.driver_email }
     ),
     send(
-      { from: config.from, replyTo: booking.driver_email, to: config.admin, subject: `Nova rezervacija ${booking.confirmation_number}`, html: emailLayout('Nova rezervacija čeka pregled', `<p style="font-size:15px;line-height:1.6"><strong>${escapeHtml(booking.driver_name)} ${escapeHtml(booking.driver_last_name)}</strong><br>${escapeHtml(booking.driver_email)} · ${escapeHtml(booking.driver_phone)}</p>${details}${paymentSummary(booking, config.ibans)}<p style="font-size:14px">Otvorite administraciju za potpuni pregled podataka vozača, obračuna i e-suglasnosti.</p>`) },
+      { from: config.from, replyTo: booking.driver_email, to: config.admin, subject: `Novi zahtjev za rezervaciju ${booking.confirmation_number}`, html: emailLayout('Zahtjev za rezervaciju čeka pregled', `${adminBookingRequestSummary(booking)}<p style="font-size:14px">Provjerite dostupnost i odgovorite gostu s konačnom potvrdom i dogovorom plaćanja.</p>`) },
       { bookingId: booking.id, messageType: 'booking_received_admin', recipient: config.admin }
     )
   ]);
@@ -275,8 +347,9 @@ export async function sendBookingConfirmed(
   attemptedBy?: string
 ) {
   const config = await emailConfig();
+  const locale: 'hr' | 'en' = booking.locale === 'en' ? 'en' : 'hr';
   return send(
-    { from: config.from, replyTo: config.admin, to: booking.driver_email, subject: `Potvrđena rezervacija ${booking.confirmation_number}`, html: emailLayout('Vaša rezervacija je potvrđena', `<p style="font-size:16px;line-height:1.6">Veselimo se vašem putovanju. Sačuvajte ovaj email; ovdje su najvažniji podaci za preuzimanje vozila.</p>${bookingSummary(booking)}${paymentSummary(booking, config.ibans)}<p style="font-size:14px;line-height:1.6">Ako trebate promijeniti podatke ili imate pitanje prije preuzimanja, odgovorite na ovaj email.</p>`) },
+    { from: config.from, replyTo: config.admin, to: booking.driver_email, subject: `Potvrđena rezervacija ${booking.confirmation_number}`, html: emailLayout('Vaša rezervacija je potvrđena', `<p style="font-size:16px;line-height:1.6">Veselimo se vašem putovanju. Sačuvajte ovaj email; ovdje su najvažniji podaci za preuzimanje vozila.</p>${bookingSummary(booking, locale)}${paymentSummary(booking, config.ibans, locale)}<p style="font-size:14px;line-height:1.6">Ako trebate promijeniti podatke ili imate pitanje prije preuzimanja, odgovorite na ovaj email.</p>`, locale) },
     {
       bookingId: booking.id,
       messageType: 'booking_confirmed_customer',
@@ -406,7 +479,7 @@ export async function sendOrderConfirmation(
       replyTo: config.admin,
       to: order.customer_email,
       subject: `Potvrda narudžbe i plaćanja ${order.confirmation_number ?? ''}`.trim(),
-      html: emailLayout('Narudžba je plaćena i poslana', `<p style="font-size:16px;line-height:1.6">Vaša narudžba <strong>${escapeHtml(order.confirmation_number)}</strong> je poslana. PDF potvrda narudžbe i plaćanja nalazi se u privitku. Ovaj dokument nije službeni fiskalizirani račun.</p>${orderSummary(order)}<p style="font-size:14px;line-height:1.6">Hvala što kupujete kod Petronija.</p>`),
+      html: emailLayout('Narudžba je plaćena i poslana', `<p style="font-size:16px;line-height:1.6">Vaša narudžba <strong>${escapeHtml(order.confirmation_number)}</strong> je poslana. PDF potvrda narudžbe i plaćanja nalazi se u privitku. Dokument je potvrda narudžbe, a ne račun.</p>${orderSummary(order)}<p style="font-size:14px;line-height:1.6">Hvala na kupnji.</p>`),
       attachments: [{ filename: `potvrda-narudzbe-${order.confirmation_number ?? order.id}.pdf`, content: Buffer.from(pdf) }]
     },
     {

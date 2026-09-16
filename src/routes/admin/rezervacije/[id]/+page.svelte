@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
   let { data, form }: PageProps = $props();
 
@@ -9,7 +10,7 @@
   }).format(new Date(value));
 </script>
 
-<svelte:head><title>{data.booking.confirmation_number} — Rezervacije — Petroni</title></svelte:head>
+<svelte:head><title>{data.booking.confirmation_number} — Rezervacije — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="space-y-6">
   <div class="flex items-start justify-between gap-4">
@@ -18,11 +19,11 @@
       <h1 class="text-3xl font-black uppercase mt-4">{data.booking.confirmation_number}</h1>
       <p class="text-sm text-[#7a7f86]">{data.booking.vehicles?.name} · {data.booking.pickup_date} – {data.booking.dropoff_date}</p>
     </div>
-    <span class="px-3 py-2 rounded-xl text-xs font-bold uppercase bg-[#fff7e0] text-[#9a7600]">{data.booking.status}</span>
+    <span class="px-3 py-2 rounded-xl text-xs font-bold uppercase bg-[#f5e8df] text-[#9a7600]">{data.booking.status}</span>
   </div>
 
   {#if form?.message}
-    <div class="p-4 rounded-xl bg-[#fff7e0] text-[#6f5600] text-sm">{form.message}</div>
+    <div class="p-4 rounded-xl bg-[#f5e8df] text-[#6f5600] text-sm">{form.message}</div>
   {/if}
 
   <div class="grid lg:grid-cols-3 gap-6">
@@ -140,7 +141,7 @@
           {#each data.reconciliationIncidents as incident}
             <div class="rounded-xl p-4 text-sm {incident.state === 'open' ? 'bg-[#fff0ed] text-[#8b2f21]' : 'bg-[#f1f7f2] text-[#32633a]'}">
               <b>{incident.state === 'open' ? 'Otvoreno' : 'Riješeno'} · {incident.severity}</b>
-              <p class="mt-1">CorvusPay: {incident.provider_status} · Petroni: {incident.local_status} · {money(incident.expected_amount)}</p>
+              <p class="mt-1">CorvusPay: {incident.provider_status} · Lokalno: {incident.local_status} · {money(incident.expected_amount)}</p>
               <p class="mt-1 break-all text-xs opacity-75">{incident.provider_reference} · {dateTime(incident.last_checked_at)}</p>
             </div>
           {/each}

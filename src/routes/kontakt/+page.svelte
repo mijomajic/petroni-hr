@@ -69,7 +69,7 @@
           <p class="mb-8 text-[14px] text-[#7a7f86]">{tx(contactSection.body)}</p>
 
           {#if sent}
-            <div class="card p-8 text-center"><div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#fff7e0]"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h2 class="mb-1 text-lg font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Poruka je poslana' : 'Message sent'}</h2><p class="text-sm text-[#7a7f86]">{$locale === 'hr' ? 'Javit ćemo Vam se što je prije moguće.' : 'We will get back to you as soon as possible.'}</p></div>
+            <div class="card p-8 text-center"><div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#f5e8df]"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c87442" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h2 class="mb-1 text-lg font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Poruka je poslana' : 'Message sent'}</h2><p class="text-sm text-[#7a7f86]">{$locale === 'hr' ? 'Javit ćemo Vam se što je prije moguće.' : 'We will get back to you as soon as possible.'}</p></div>
           {:else}
             <div class="space-y-5">
               {#if product}<div class="rounded-xl border border-[#eadfba] bg-[#fffaf0] p-4"><p class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9a7600]">{$locale === 'hr' ? 'Upit za proizvod' : 'Product inquiry'}</p><p class="mt-1 text-sm font-semibold text-[#2b2b2b]">{product}</p></div>{/if}
@@ -79,7 +79,7 @@
               <div><label class="field-label" for="contact_topic">{$locale === 'hr' ? 'Tema' : 'Topic'} *</label><select id="contact_topic" class="field" bind:value={topic}><option>{$locale === 'hr' ? 'Prodaja' : 'Sales'}</option><option>{$locale === 'hr' ? 'Najam' : 'Rental'}</option><option>Shop</option><option>{$locale === 'hr' ? 'Servis' : 'Service'}</option></select></div>
               <div><label class="field-label" for="contact_message">{$locale === 'hr' ? 'Poruka' : 'Message'} *</label><textarea id="contact_message" rows="5" class="field resize-none" required bind:value={message}></textarea></div>
               <div class="hidden" aria-hidden="true"><label for="contact_website">Website</label><input id="contact_website" tabindex="-1" autocomplete="off" bind:value={website} /></div>
-              <label class="flex items-start gap-2 text-[13px] text-[#7a7f86]"><input type="checkbox" class="mt-1 accent-[#f5c518]" bind:checked={agree} /><span>{$locale === 'hr' ? 'Prihvaćam Uvjete poslovanja i potvrđujem da sam pročitao/la Politiku privatnosti.' : 'I accept the Terms of Business and confirm that I have read the Privacy Policy.'} <a href="/uvjeti-poslovanja" class="font-semibold text-[#b5890a]">{$locale === 'hr' ? 'Uvjeti' : 'Terms'}</a> · <a href="/privatnost" class="font-semibold text-[#b5890a]">{$locale === 'hr' ? 'Privatnost' : 'Privacy'}</a></span></label>
+              <label class="flex items-start gap-2 text-[13px] text-[#7a7f86]"><input type="checkbox" class="mt-1 accent-[#c87442]" bind:checked={agree} /><span>{$locale === 'hr' ? 'Prihvaćam Uvjete poslovanja i potvrđujem da sam pročitao/la Politiku privatnosti.' : 'I accept the Terms of Business and confirm that I have read the Privacy Policy.'} <a href="/uvjeti-poslovanja" class="font-semibold text-[#9f542e]">{$locale === 'hr' ? 'Uvjeti' : 'Terms'}</a> · <a href="/privatnost" class="font-semibold text-[#9f542e]">{$locale === 'hr' ? 'Privatnost' : 'Privacy'}</a></span></label>
               {#if submitError}<p role="alert" class="rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-3 text-sm text-[#9f1f18]">{submitError}</p>{/if}
               <button type="button" onclick={handleSubmit} disabled={loading} class="btn btn-primary px-8 py-3.5 disabled:opacity-50 active:-translate-y-px">{loading ? ($locale === 'hr' ? 'Šaljem…' : 'Sending…') : ($locale === 'hr' ? 'Pošalji' : 'Send')}</button>
             </div>
@@ -90,11 +90,11 @@
           <div class="mb-6 space-y-3 text-[14px]">
             {#each ['address', 'phone', 'email'] as id}
               {@const item = detail(id)}
-              {#if item}<p><span class="font-bold text-[#2b2b2b]">{tx(item.title)}:</span> {#if item.href}<a href={item.href} class="text-[#6b7178] hover:text-[#b5890a]">{tx(item.body)}</a>{:else}<span class="text-[#6b7178]">{tx(item.body)}</span>{/if}</p>{/if}
+              {#if item}<p><span class="font-bold text-[#2b2b2b]">{tx(item.title)}:</span> {#if item.href}<a href={item.href} class="text-[#6b7178] hover:text-[#9f542e]">{tx(item.body)}</a>{:else}<span class="text-[#6b7178]">{tx(item.body)}</span>{/if}</p>{/if}
             {/each}
             {#if contactNote}<p class="text-[13px] leading-relaxed text-[#8b9099]"><span class="font-bold uppercase text-[#2b2b2b]">{tx(contactNote.title)}:</span> {tx(contactNote.body)}</p>{/if}
           </div>
-          {#if contactMap}<div class="card card-static p-6"><p class="mb-3 text-[12px] font-bold uppercase tracking-widest text-[#b5890a]">{tx(contactMap.title)}</p><p class="mb-5 whitespace-pre-line text-[14px] leading-relaxed text-[#6b7178]">{tx(contactMap.body)}</p>{#if contactMap.href}<a href={contactMap.href} target="_blank" rel="noopener noreferrer" class="btn btn-outline px-5 py-3">{$locale === 'hr' ? 'Otvori u Google Maps' : 'Open in Google Maps'}</a>{/if}</div>{/if}
+          {#if contactMap}<div class="card card-static p-6"><p class="mb-3 text-[12px] font-bold uppercase tracking-widest text-[#9f542e]">{tx(contactMap.title)}</p><p class="mb-5 whitespace-pre-line text-[14px] leading-relaxed text-[#6b7178]">{tx(contactMap.body)}</p>{#if contactMap.href}<a href={contactMap.href} target="_blank" rel="noopener noreferrer" class="btn btn-outline px-5 py-3">{$locale === 'hr' ? 'Otvori u Google Maps' : 'Open in Google Maps'}</a>{/if}</div>{/if}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import { BUSINESS } from '$lib/config/business';
   import { renderTermsMarkup } from '$lib/terms-markup';
   import type { PageProps } from './$types';
 
@@ -59,7 +60,7 @@
   }
 </script>
 
-<svelte:head><title>{data.document.label} — Admin — Petroni</title></svelte:head>
+<svelte:head><title>{data.document.label} — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-6xl">
   <a href="/admin/pravni-dokumenti" class="text-xs font-bold uppercase tracking-wide text-[#8b6b00]">← Pravni dokumenti</a>
@@ -108,7 +109,7 @@
   {#if data.document.draft?.id}
     <section class="mt-7 rounded-2xl border border-[#f0d87a] bg-[#fffaf0] p-6">
       <h2 class="font-black text-[#2b2b2b]">Nacrt v{data.document.draft.version_number} spreman je za objavu</h2>
-      <p class="mt-2 text-sm leading-6 text-[#6f5600]">Objava je trenutna i mijenja HR i EN javni tekst. Datum početka primjene bit će {data.document.draft.effective_date}. Prije objave sadržaj mora odobriti ovlaštena osoba Petronija i, prema potrebi, pravni savjetnik.</p>
+      <p class="mt-2 text-sm leading-6 text-[#6f5600]">Objava je trenutna i mijenja HR i EN javni tekst. Datum početka primjene bit će {data.document.draft.effective_date}. Prije objave sadržaj mora odobriti ovlaštena osoba tvrtke i, prema potrebi, pravni savjetnik.</p>
       <form method="POST" action="?/publish" class="mt-4"><input type="hidden" name="version_id" value={data.document.draft.id} /><button type="submit" class="btn btn-dark">Objavi nacrt</button></form>
     </section>
   {/if}

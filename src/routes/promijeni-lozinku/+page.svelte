@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-  <title>{$locale === 'hr' ? 'Promjena lozinke' : 'Change password'} — Petroni</title>
+  <title>{$locale === 'hr' ? 'Promjena lozinke' : 'Change password'} — Alderway</title>
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 

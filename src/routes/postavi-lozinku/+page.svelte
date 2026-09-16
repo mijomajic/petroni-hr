@@ -15,7 +15,7 @@
 </script>
 
 <svelte:head>
-  <title>{$locale === 'hr' ? 'Postavljanje nove lozinke' : 'Set a new password'} — Petroni</title>
+  <title>{$locale === 'hr' ? 'Postavljanje nove lozinke' : 'Set a new password'} — Alderway</title>
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 

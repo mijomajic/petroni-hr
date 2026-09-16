@@ -4,6 +4,7 @@
   import { absoluteUrl, breadcrumbSchema, graphSchema, jsonLd, truncateText } from '$lib/seo';
   import { vehicleThumbnail } from '$lib/vehicle-images';
   import type { PageProps } from './$types';
+  import { BUSINESS } from '$lib/config/business';
 
   let { data }: PageProps = $props();
   const vehicle: Vehicle = $derived(data.vehicle as Vehicle);
@@ -74,13 +75,13 @@
   const showSpecsSidebar = $derived(
     isRentable && (specEntries.length > 0 || Boolean(vehicle.base_price_per_day) || Boolean(vehicle.sale_price))
   );
-  const metaDescription = $derived(truncateText(desc || `${vehicle.name} u Petroni ponudi vozila za najam i prodaju.`, 155));
+  const metaDescription = $derived(truncateText(desc || `${vehicle.name} in the ${BUSINESS.name} rental fleet.`, 155));
   const vehicleUrl = $derived(absoluteUrl(`/vozila/${vehicle.slug}`));
   const vehicleImages = $derived((vehicle.images ?? []).map(absoluteUrl));
   const vehicleImage = $derived(vehicleImages[0]);
   const vehicleSchema = $derived(graphSchema([
     breadcrumbSchema([
-      { name: 'Petroni', path: '/' },
+      { name: BUSINESS.name, path: '/' },
       { name: 'Vozila', path: '/vozila' },
       { name: vehicle.name, path: `/vozila/${vehicle.slug}` }
     ]),
@@ -109,9 +110,9 @@
 </script>
 
 <svelte:head>
-  <title>{vehicle?.name ?? 'Vozilo'} — Petroni</title>
+  <title>{vehicle?.name ?? 'Vozilo'} — {BUSINESS.name}</title>
   <meta name="description" content={metaDescription} />
-  <meta property="og:title" content={`${vehicle?.name ?? 'Vozilo'} — Petroni`} />
+  <meta property="og:title" content={`${vehicle?.name ?? 'Vozilo'} — ${BUSINESS.name}`} />
   <meta property="og:description" content={metaDescription} />
   {#if vehicleImage}<meta property="og:image" content={vehicleImage} />{/if}
   {@html `<script type="application/ld+json">${jsonLd(vehicleSchema)}</script>`}
@@ -121,8 +122,8 @@
   <div class="container-x">
     {#if vehicle}
       <nav class="flex items-center gap-2 text-xs mb-6 text-[#9aa0a8] flex-wrap">
-        <a href="/" class="hover:text-[#b5890a]">{$locale === 'hr' ? 'Naslovnica' : 'Home'}</a><span>/</span>
-        <a href="/vozila" class="hover:text-[#b5890a]">{$locale === 'hr' ? 'Vozila' : 'Vehicles'}</a><span>/</span>
+        <a href="/" class="hover:text-[#9f542e]">{$locale === 'hr' ? 'Naslovnica' : 'Home'}</a><span>/</span>
+        <a href="/vozila" class="hover:text-[#9f542e]">{$locale === 'hr' ? 'Vozila' : 'Vehicles'}</a><span>/</span>
         <span class="text-[#2b2b2b]">{vehicle.name}</span>
       </nav>
 
@@ -154,7 +155,7 @@
             {#if vehicle.images.length > 1}
               <div class="flex gap-3 mb-6 overflow-x-auto pb-2">
                 {#each vehicle.images as img, i}
-                  <button onclick={() => activeImage = i} class="h-16 w-20 flex-none cursor-pointer overflow-hidden rounded-md border-2 transition-colors" style="border-color:{activeImage === i ? '#f5c518' : '#ededf0'}" aria-label={`${$locale === 'hr' ? 'Prikaži fotografiju' : 'Show photo'} ${i + 1}`}>
+                  <button onclick={() => activeImage = i} class="h-16 w-20 flex-none cursor-pointer overflow-hidden rounded-md border-2 transition-colors" style="border-color:{activeImage === i ? '#c87442' : '#ededf0'}" aria-label={`${$locale === 'hr' ? 'Prikaži fotografiju' : 'Show photo'} ${i + 1}`}>
                     <img src={vehicleThumbnail(img)} alt="" width="480" height="360" loading="lazy" class="w-full h-full object-cover" />
                   </button>
                 {/each}
@@ -166,14 +167,14 @@
           </div>
           <div class="lg:col-span-2 space-y-5">
             <div class="card p-7">
-              <p class="text-[12px] font-bold uppercase tracking-widest mb-4" style="color:#b5890a">{$locale === 'hr' ? 'Cijena najma' : 'Rental price'}</p>
+              <p class="text-[12px] font-bold uppercase tracking-widest mb-4" style="color:#9f542e">{$locale === 'hr' ? 'Cijena najma' : 'Rental price'}</p>
               <p class="text-[22px] font-extrabold text-[#2b2b2b] mb-2">{$locale === 'hr' ? 'Individualna ponuda' : 'Individual quote'}</p>
               <p class="text-[13px] text-[#8b9099] mb-6">{$locale === 'hr' ? 'Cijena ovisi o trajanju i specifičnim zahtjevima produkcije.' : 'Price depends on duration and specific production requirements.'}</p>
               <a href="/kontakt" class="btn btn-primary w-full py-4 mb-3">{$locale === 'hr' ? 'Zatražite ponudu' : 'Request a quote'}</a>
               <a href="/rezerviraj" class="btn btn-outline w-full py-4">{$locale === 'hr' ? 'Rezerviraj' : 'Book'}</a>
             </div>
             <div class="card p-6">
-              <p class="text-[12px] font-bold uppercase tracking-widest mb-4" style="color:#b5890a">{$locale === 'hr' ? 'Uključuje' : 'Includes'}</p>
+              <p class="text-[12px] font-bold uppercase tracking-widest mb-4" style="color:#9f542e">{$locale === 'hr' ? 'Uključuje' : 'Includes'}</p>
               {#each ($locale === 'hr' ? ['Tehnička ispravnost vozila', 'Podrška tima za produksiju', 'Fleksibilno preuzimanje', 'Dostava na lokaciju'] : ['Technical vehicle inspection', 'Production team support', 'Flexible pick-up', 'On-location delivery']) as item}
                 <div class="flex items-center gap-2 py-2 border-b border-[#f0f1f3] last:border-0">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -222,7 +223,7 @@
             {#if vehicle.images.length > 1}
               <div class="flex gap-3 mb-8 overflow-x-auto pb-2">
                 {#each vehicle.images as img, i}
-                  <button onclick={() => activeImage = i} class="h-16 w-20 flex-none cursor-pointer overflow-hidden rounded-md border-2 transition-colors" style="border-color:{activeImage === i ? '#f5c518' : '#ededf0'}" aria-label={`${$locale === 'hr' ? 'Prikaži fotografiju' : 'Show photo'} ${i + 1}`}>
+                  <button onclick={() => activeImage = i} class="h-16 w-20 flex-none cursor-pointer overflow-hidden rounded-md border-2 transition-colors" style="border-color:{activeImage === i ? '#c87442' : '#ededf0'}" aria-label={`${$locale === 'hr' ? 'Prikaži fotografiju' : 'Show photo'} ${i + 1}`}>
                     <img src={vehicleThumbnail(img)} alt="" width="480" height="360" loading="lazy" class="w-full h-full object-cover" />
                   </button>
                 {/each}
@@ -236,7 +237,7 @@
                 <ul class="mt-3 grid gap-2 sm:grid-cols-2">
                   {#each bedDimensions as bed}
                     <li class="flex items-start gap-2 text-[14px] font-semibold leading-relaxed text-[#454a50]">
-                      <span class="mt-[0.55em] h-1.5 w-1.5 flex-none rounded-full bg-[#F5C518]"></span>
+                      <span class="mt-[0.55em] h-1.5 w-1.5 flex-none rounded-full bg-[#c87442]"></span>
                       <span>{bed}</span>
                     </li>
                   {/each}
@@ -273,13 +274,13 @@
                 {#if vehicle.base_price_per_day}
                   <div class="flex items-center justify-between py-2.5 border-b border-[#f0f1f3]">
                     <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{$locale === 'hr' ? 'Cijena od' : 'Price from'}:</span>
-                    <span class="text-[14px] font-bold" style="color:#b5890a">{vehicle.base_price_per_day} €/{$locale === 'hr' ? 'dan' : 'day'}</span>
+                    <span class="text-[14px] font-bold" style="color:#9f542e">{vehicle.base_price_per_day} €/{$locale === 'hr' ? 'dan' : 'day'}</span>
                   </div>
                 {/if}
                 {#if vehicle.sale_price}
                   <div class="flex items-center justify-between py-2.5">
                     <span class="text-[12px] font-bold uppercase tracking-wide text-[#2b2b2b]">{$locale === 'hr' ? 'Prodajna cijena' : 'Sale price'}:</span>
-                    <span class="text-[14px] font-bold" style="color:#b5890a">{vehicle.sale_price.toLocaleString('hr-HR')} €</span>
+                    <span class="text-[14px] font-bold" style="color:#9f542e">{vehicle.sale_price.toLocaleString('hr-HR')} €</span>
                   </div>
                 {/if}
               </div>
@@ -290,7 +291,7 @@
     {:else}
       <div class="text-center py-20 text-[#8b9099]">
         <p>{$locale === 'hr' ? 'Vozilo nije pronađeno.' : 'Vehicle not found.'}</p>
-        <a href="/vozila" class="mt-4 inline-block text-sm underline" style="color:#b5890a">{$locale === 'hr' ? 'Natrag na vozila' : 'Back to vehicles'}</a>
+        <a href="/vozila" class="mt-4 inline-block text-sm underline" style="color:#9f542e">{$locale === 'hr' ? 'Natrag na vozila' : 'Back to vehicles'}</a>
       </div>
     {/if}
   </div>

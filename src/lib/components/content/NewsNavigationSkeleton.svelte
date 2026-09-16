@@ -7,7 +7,7 @@
     <header class="news-navigation-skeleton__header">
       <span class="eyebrow mb-3">{$locale === 'hr' ? 'Priče, vodiči i novosti' : 'Stories, guides and news'}</span>
       <h1 class="section-title">{$locale === 'hr' ? 'Iz svijeta kampiranja' : 'From the world of camping'}</h1>
-      <p>{$locale === 'hr' ? 'Praktični savjeti, novosti iz Petronija i ideje za sigurnije, opuštenije putovanje.' : 'Practical advice, news from Petroni and ideas for safer, more relaxed travel.'}</p>
+      <p>{$locale === 'hr' ? 'Praktični savjeti, novosti iz Alderwaya i ideje za sigurnije, opuštenije putovanje.' : 'Practical advice, news from Alderway and ideas for safer, more relaxed travel.'}</p>
     </header>
 
     <section class="news-navigation-skeleton__featured">
@@ -54,7 +54,7 @@
   .news-navigation-skeleton__title--short { width: 66%; }
   .news-navigation-skeleton__body { width: 88%; height: 11px; margin-top: 1.2rem; border-radius: 2px; }
   .news-navigation-skeleton__body--short { width: 62%; margin-top: .45rem; }
-  .news-navigation-skeleton__link { margin-top: 1.75rem; color: #f5c518; font-size: 14px; font-weight: 700; }
+  .news-navigation-skeleton__link { margin-top: 1.75rem; color: #c87442; font-size: 14px; font-weight: 700; }
   .news-navigation-skeleton__latest { display: flex; align-items: end; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid #dedfdf; }
   .news-navigation-skeleton__latest h2 { margin: 0; color: #2b2b2b; font-size: 20px; }
   .news-navigation-skeleton__latest span { width: 45px; height: 10px; border-radius: 2px; }

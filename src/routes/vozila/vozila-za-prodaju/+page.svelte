@@ -3,6 +3,7 @@
   import { locale } from '$lib/stores/locale';
   import VehicleCard from '$lib/components/ui/VehicleCard.svelte';
   import type { PageProps } from './$types';
+  import { BUSINESS } from '$lib/config/business';
 
   let { data }: PageProps = $props();
   const vehicles = $derived.by<Vehicle[]>(() => {
@@ -23,10 +24,8 @@
 </script>
 
 <svelte:head>
-  <title>Kamperi i karavani za prodaju u Hrvatskoj | Petroni</title>
-  <meta name="description" content="Petroni vozila za prodaju s fotografijama, specifikacijama i ključnim informacijama za odabir kampera ili karavana." />
-  <meta property="og:title" content="Kamperi i karavani za prodaju u Hrvatskoj | Petroni" />
-  <meta property="og:description" content="Petroni vozila za prodaju s fotografijama, specifikacijama i ključnim informacijama za odabir kampera ili karavana." />
+  <title>{$locale === 'hr' ? 'Vozila za prodaju' : 'Vehicles for sale'} | {BUSINESS.name}</title>
+  <meta name="description" content="Selected ex-rental campers with clear specifications, service history and direct support." />
 </svelte:head>
 
 <div class="section">
@@ -35,15 +34,15 @@
       <h1 class="section-title">{$locale === 'hr' ? 'Vozila za prodaju' : 'Vehicles for sale'}</h1>
       <p class="lead mt-4 max-w-3xl mx-auto">
         {$locale === 'hr'
-          ? 'U ponudi Petroni vozila za prodaju nalazi se proširen izbor vozila opremljenih za sve — uz detaljne specifikacije, fotografije i ključne informacije za svaki model. Pronađite savršeno vozilo za sebe.'
-          : 'The Petroni for-sale offer features a wide selection of vehicles for everyone — with detailed specifications, photos and key info for every model. Find the perfect vehicle for you.'}
+          ? 'Povremeno nudimo odabrana vozila iz naše flote, uz jasne specifikacije, povijest održavanja i izravnu podršku našeg tima.'
+          : 'We occasionally offer selected vehicles from our fleet, with clear specifications, maintenance history and direct support from our team.'}
       </p>
     </div>
 
     {#if vehicles.length === 0}
       <div class="text-center py-20 card">
         <p class="text-sm mb-4 text-[#7a7f86]">{$locale === 'hr' ? 'Trenutno nema vozila za prodaju.' : 'No vehicles for sale at the moment.'}</p>
-        <a href="/kontakt" class="text-sm font-bold underline" style="color:#b5890a">{$locale === 'hr' ? 'Kontaktirajte nas za više informacija' : 'Contact us for more information'}</a>
+        <a href="/kontakt" class="text-sm font-bold underline" style="color:#9f542e">{$locale === 'hr' ? 'Kontaktirajte nas za više informacija' : 'Contact us for more information'}</a>
       </div>
     {:else}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
@@ -53,10 +52,5 @@
       </div>
     {/if}
 
-    <div class="mt-10 text-center">
-      <a href="https://www.njuskalo.hr/trgovina/ronicaravans" target="_blank" rel="noopener" class="btn btn-outline px-7 py-3.5">
-        {$locale === 'hr' ? 'Petroni oglasi na Njuškalu' : 'Petroni listings on Njuškalo'}
-      </a>
-    </div>
   </div>
 </div>

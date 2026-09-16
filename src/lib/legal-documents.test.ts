@@ -39,16 +39,12 @@ test('legal Markdown rendering escapes administrator-supplied HTML', () => {
   assert.match(html, /<strong>Sigurna stavka<\/strong>/);
 });
 
-test('fonts and language flags are local and BoxNow is loaded only by an explicit action', () => {
+test('fonts are local and the parcel-locker provider is loaded only by an explicit action', () => {
   const appHtml = readFileSync(projectFile('src/app.html'), 'utf8');
   const header = readFileSync(projectFile('src/lib/components/layout/Header.svelte'), 'utf8');
   const checkout = readFileSync(projectFile('src/routes/checkout/+page.svelte'), 'utf8');
   assert.doesNotMatch(appHtml, /fonts\.(?:googleapis|gstatic)\.com/);
   assert.doesNotMatch(header, /flagcdn\.com/);
-  assert.match(header, /\/flags\/hr\.svg/);
-  assert.match(header, /\/flags\/gb\.svg/);
-  assert.ok(existsSync(projectFile('static/flags/hr.svg')));
-  assert.ok(existsSync(projectFile('static/flags/gb.svg')));
   assert.ok(existsSync(projectFile('static/fonts/poppins/poppins-400-latin-ext.woff2')));
 
   const loaderStart = checkout.indexOf('function openBoxNowMap()');

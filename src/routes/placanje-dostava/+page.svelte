@@ -14,8 +14,8 @@
       name: $locale === 'hr' ? method.label_hr : method.label_en,
       price: `${method.price.toFixed(2)} €`,
       desc: method.id === 'personal_pickup'
-        ? ($locale === 'hr' ? 'Preuzimanje u našem skladištu u Sesvetama, Zagreb.' : 'Pickup at our warehouse in Sesvete, Zagreb.')
-        : ($locale === 'hr' ? 'Preuzimanje u odabranom BoxNow paketomatu, 2–4 radna dana.' : 'Pickup at your selected BoxNow locker, 2–4 business days.')
+        ? ($locale === 'hr' ? 'Preuzimanje u našem glavnom centru u Northmereu.' : 'Pickup at our Northmere Basecamp.')
+        : ($locale === 'hr' ? 'Preuzimanje u odabranom paketomatu, 2–4 radna dana.' : 'Pickup at your selected parcel locker, 2–4 business days.')
     })));
 
   function tierLabel(min: number, max: number | null) {
@@ -33,15 +33,15 @@
       {#if overseas?.enabled && zoneOne && zoneTwo}
         <div class="card p-5">
           <div class="mb-4">
-            <p class="font-semibold text-[#2b2b2b] mb-1">Overseas Express</p>
-            <p class="text-[13px] text-[#6b7178] leading-relaxed">{$locale === 'hr' ? 'Dostava kurirskom službom unutar Hrvatske, 2–4 radna dana. Zona se određuje prema poštanskom broju adrese dostave.' : 'Courier delivery within Croatia in 2–4 business days. The zone is determined from the delivery postal code.'}</p>
+            <p class="font-semibold text-[#2b2b2b] mb-1">{$locale === 'hr' ? 'Kurirska dostava' : 'Courier delivery'}</p>
+            <p class="text-[13px] text-[#6b7178] leading-relaxed">{$locale === 'hr' ? 'Standardna dostava kurirskom službom u podržanim zonama, obično 2–4 radna dana.' : 'Standard courier delivery to supported zones, usually within 2–4 business days.'}</p>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full min-w-[520px] text-sm">
               <thead><tr class="border-b border-[#e5e7eb] text-left text-xs uppercase tracking-wide text-[#7a7f86]"><th class="py-2 pr-4">{$locale === 'hr' ? 'Vrijednost košarice' : 'Cart value'}</th><th class="px-3 py-2">{$locale === 'hr' ? zoneOne.label_hr : zoneOne.label_en}</th><th class="px-3 py-2">{$locale === 'hr' ? zoneTwo.label_hr : zoneTwo.label_en}</th></tr></thead>
               <tbody>
                 {#each zoneOne.tiers as tier, index}
-                  <tr class="border-b border-[#eef0f2] last:border-0"><td class="py-2.5 pr-4 text-[#5b6168]">{tierLabel(tier.min, tier.max)}</td><td class="px-3 py-2.5 font-bold text-[#b5890a]">{tier.price.toFixed(2)} €</td><td class="px-3 py-2.5 font-bold text-[#b5890a]">{(zoneTwo.tiers[index]?.price ?? overseas.price).toFixed(2)} €</td></tr>
+                  <tr class="border-b border-[#eef0f2] last:border-0"><td class="py-2.5 pr-4 text-[#5b6168]">{tierLabel(tier.min, tier.max)}</td><td class="px-3 py-2.5 font-bold text-[#9f542e]">{tier.price.toFixed(2)} €</td><td class="px-3 py-2.5 font-bold text-[#9f542e]">{(zoneTwo.tiers[index]?.price ?? overseas.price).toFixed(2)} €</td></tr>
                 {/each}
                 {#if data.checkoutConfig.freeShippingThreshold > 0}<tr class="border-t-2 border-[#f0d87a] bg-[#fffaf0]"><td class="py-2.5 pr-4 font-semibold text-[#6f5600]">{data.checkoutConfig.freeShippingThreshold.toFixed(2)} € +</td><td class="px-3 py-2.5 font-bold text-[#6f5600]">0.00 €</td><td class="px-3 py-2.5 font-bold text-[#6f5600]">0.00 €</td></tr>{/if}
               </tbody>
@@ -56,14 +56,14 @@
             <p class="font-semibold text-[#2b2b2b] mb-1">{s.name}</p>
             <p class="text-[13px] text-[#6b7178] leading-relaxed">{s.desc}</p>
           </div>
-          <span class="font-bold text-lg" style="color:#b5890a">{s.price}</span>
+          <span class="font-bold text-lg" style="color:#9f542e">{s.price}</span>
         </div>
       {/each}
     </div>
 
     {#if data.checkoutConfig.freeShippingThreshold > 0}
       <div class="card p-5" style="background:#fffaf0">
-        <p class="text-[13px] text-[#6b7178]">{$locale === 'hr' ? `Besplatna Overseas dostava za narudžbe od ${data.checkoutConfig.freeShippingThreshold.toFixed(2)} €.` : `Free Overseas delivery for orders from €${data.checkoutConfig.freeShippingThreshold.toFixed(2)}.`}</p>
+        <p class="text-[13px] text-[#6b7178]">{$locale === 'hr' ? `Besplatna kurirska dostava za narudžbe od ${data.checkoutConfig.freeShippingThreshold.toFixed(2)} €.` : `Free courier delivery for orders from €${data.checkoutConfig.freeShippingThreshold.toFixed(2)}.`}</p>
       </div>
     {/if}
   </div>

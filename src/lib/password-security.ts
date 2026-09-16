@@ -1,6 +1,6 @@
 export const PASSWORD_MIN_LENGTH = 8;
-export const PASSWORD_RECOVERY_COOKIE = 'petroni_password_recovery';
-export const PASSWORD_RECOVERY_INTENT_COOKIE = 'petroni_password_recovery_intent';
+export const PASSWORD_RECOVERY_COOKIE = 'alderway_password_recovery';
+export const PASSWORD_RECOVERY_INTENT_COOKIE = 'alderway_password_recovery_intent';
 
 export type PasswordContext = 'account' | 'admin';
 
@@ -20,7 +20,7 @@ export function passwordRecoveryPath(context: PasswordContext): string {
 export function isPasswordRecoveryPath(value: string): boolean {
   if (!value.startsWith('/') || value.startsWith('//')) return false;
   try {
-    return new URL(value, 'https://petroni.invalid').pathname === '/postavi-lozinku';
+    return new URL(value, 'https://alderway.invalid').pathname === '/postavi-lozinku';
   } catch {
     return false;
   }

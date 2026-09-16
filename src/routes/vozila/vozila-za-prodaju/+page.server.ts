@@ -1,6 +1,9 @@
 import type { PageServerLoad } from './$types';
+import { useStaticDemoData } from '$lib/demo-mode.server';
 
 export const load: PageServerLoad = async ({ locals }) => {
+  if (useStaticDemoData) return { vehicles: [], loadError: null };
+
   let { data, error } = await locals.supabase
     .from('vehicles')
     .select('*')

@@ -25,13 +25,13 @@ export const actions: Actions = {
     const values = { firstName, lastName, email, phone };
 
     if (!firstName || !lastName || !email || !phone || !password || !passwordConfirm) {
-      return fail(400, { error: 'Ispunite sva obavezna polja.', values });
+      return fail(400, { error: 'Complete all required fields.', values });
     }
     if (password.length < 8) {
-      return fail(400, { error: 'Lozinka mora sadržavati najmanje 8 znakova.', values });
+      return fail(400, { error: 'Password must contain at least 8 characters.', values });
     }
     if (password !== passwordConfirm) {
-      return fail(400, { error: 'Lozinke se ne podudaraju.', values });
+      return fail(400, { error: 'Passwords do not match.', values });
     }
 
     const { data, error } = await locals.supabase.auth.signUp({
@@ -47,7 +47,7 @@ export const actions: Actions = {
           address: '',
           city: '',
           zip: '',
-          country: 'Hrvatska'
+          country: 'Ireland'
         }
       }
     });
@@ -55,8 +55,8 @@ export const actions: Actions = {
     if (error) {
       return fail(400, {
         error: error.message.toLowerCase().includes('already')
-          ? 'Račun s ovom email adresom već postoji.'
-          : 'Registracija trenutačno nije uspjela. Pokušajte ponovno.',
+          ? 'An account with this email address already exists.'
+          : 'Registration was unsuccessful. Please try again.',
         values
       });
     }

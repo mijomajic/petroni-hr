@@ -17,12 +17,12 @@
 
   const title = $derived($locale === 'hr' ? post.title_hr : (post.title_en || post.title_hr));
   const content = $derived($locale === 'hr' ? post.content_hr : (post.content_en || post.content_hr));
-  const metaDescription = $derived(truncateText(post.excerpt_hr || content, 155));
+  const metaDescription = $derived(truncateText(($locale === 'hr' ? post.excerpt_hr : post.content_en) || content, 155));
   const postUrl = $derived(absoluteUrl(`/novosti/${post.slug}`));
   const articleSchema = $derived(graphSchema([
     organizationSchema(),
     breadcrumbSchema([
-      { name: 'Petroni', path: '/' },
+      { name: 'Alderway', path: '/' },
       { name: 'Novosti', path: '/novosti' },
       { name: title, path: `/novosti/${post.slug}` }
     ]),
@@ -34,7 +34,7 @@
       image: post.cover_image ? [post.cover_image] : undefined,
       datePublished: post.published_at ?? post.created_at,
       dateModified: post.published_at ?? post.created_at,
-      author: { '@type': 'Organization', name: 'Petroni' },
+      author: { '@type': 'Organization', name: 'Alderway' },
       publisher: { '@id': absoluteUrl('/#organization') },
       mainEntityOfPage: postUrl
     }
@@ -42,9 +42,9 @@
 </script>
 
 <svelte:head>
-  <title>{title || 'Novost'} — Petroni</title>
+  <title>{title || 'Novost'} — Alderway</title>
   <meta name="description" content={metaDescription} />
-  <meta property="og:title" content={`${title || 'Novost'} — Petroni`} />
+  <meta property="og:title" content={`${title || 'Novost'} — Alderway`} />
   <meta property="og:description" content={metaDescription} />
   <meta property="og:type" content="article" />
   {#if post.cover_image}<meta property="og:image" content={post.cover_image} />{/if}
@@ -55,8 +55,8 @@
   <div class="container-x max-w-3xl mx-auto">
     {#if post}
       <nav class="flex items-center gap-2 text-xs mb-6 text-[#9aa0a8] uppercase flex-wrap">
-        <a href="/" class="hover:text-[#b5890a]">{$locale === 'hr' ? 'Početna stranica' : 'Home'}</a><span>/</span>
-        <a href="/novosti" class="hover:text-[#b5890a]">{$locale === 'hr' ? 'Novosti' : 'News'}</a><span>/</span>
+        <a href="/" class="hover:text-[#9f542e]">{$locale === 'hr' ? 'Početna stranica' : 'Home'}</a><span>/</span>
+        <a href="/novosti" class="hover:text-[#9f542e]">{$locale === 'hr' ? 'Novosti' : 'News'}</a><span>/</span>
         <span class="text-[#2b2b2b]">{title}</span>
       </nav>
 
@@ -79,7 +79,7 @@
       </div>
 
       <div class="mt-10 pt-8 border-t border-[#ededf0]">
-        <a href="/novosti" class="inline-flex items-center gap-2 text-sm font-bold" style="color:#b5890a">
+        <a href="/novosti" class="inline-flex items-center gap-2 text-sm font-bold" style="color:#9f542e">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           {$locale === 'hr' ? 'Sve novosti' : 'All news'}
         </a>
@@ -98,7 +98,7 @@
           </div>
           <div class="p-5">
             <p class="text-[12px] text-[#9aa0a8] mb-1">{r.date}</p>
-            <h3 class="font-semibold text-[15px] text-[#2b2b2b] leading-snug group-hover:text-[#b5890a] transition-colors">{r.title}</h3>
+            <h3 class="font-semibold text-[15px] text-[#2b2b2b] leading-snug group-hover:text-[#9f542e] transition-colors">{r.title}</h3>
           </div>
         </a>
       {/each}

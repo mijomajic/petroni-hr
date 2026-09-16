@@ -1,8 +1,19 @@
 import { error } from '@sveltejs/kit';
 import { getAdministrator } from '$lib/admin.server';
 import type { PageServerLoad } from './$types';
+import { DEMO_POSTS } from '$lib/demo-data';
+import { useStaticDemoData } from '$lib/demo-mode.server';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
+  if (useStaticDemoData) {
+    const post = DEMO_POSTS.find((item) => item.slug === params.slug);
+    if (!post) error(404, 'Objava nije pronađena.');
+    return {
+      post,
+      relatedPosts: DEMO_POSTS.filter((item) => item.id !== post.id).slice(0, 3)
+    };
+  }
+
   const preview = url.searchParams.get('preview') === 'draft';
   if (preview && !(await getAdministrator(locals))) error(404, 'Objava nije pronađena.');
   let query = locals.supabase

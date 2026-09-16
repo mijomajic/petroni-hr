@@ -19,14 +19,17 @@ import {
 } from './backup-lib.mjs';
 
 const repositoryRoot = resolve(new URL('../..', import.meta.url).pathname);
-const projectRef = process.env.PETRONI_SUPABASE_PROJECT_REF;
-if (!projectRef) throw new Error('Postavi PETRONI_SUPABASE_PROJECT_REF na odobreni produkcijski projekt.');
-const artifactDirectory = await assertArtifactOutsideRepository(process.env.PETRONI_BACKUP_DIR ?? '', repositoryRoot);
+const projectRef = process.env.RENTAL_SUPABASE_PROJECT_REF;
+if (!projectRef) throw new Error('Set RENTAL_SUPABASE_PROJECT_REF to the approved production project.');
+const artifactDirectory = await assertArtifactOutsideRepository(
+	process.env.RENTAL_BACKUP_DIR ?? '',
+	repositoryRoot
+);
 const passphrase = await readPassphrase();
 const postgresBin = await findPostgresBin();
 const startedAt = new Date();
 const baseName = artifactBaseName(startedAt);
-const workRoot = await createTempDirectory('petroni-backup-');
+const workRoot = await createTempDirectory('rental-backup-');
 const payloadRoot = join(workRoot, baseName);
 const databaseRoot = join(payloadRoot, 'database');
 const storageRoot = join(payloadRoot, 'storage');
@@ -95,9 +98,9 @@ try {
 	}
 	await writeJson(join(payloadRoot, 'storage-paths.json'), { paths: remotePaths });
 
-	await copyFile(join(repositoryRoot, 'docs/go-live/environment-recovery.md'), join(recoveryRoot, 'environment-recovery.md'));
+	await copyFile(join(repositoryRoot, 'docs/deployment.md'), join(recoveryRoot, 'deployment.md'));
 	const includedRecoverySecrets = await copyOptionalRecoverySecrets(
-		process.env.PETRONI_RECOVERY_SECRETS_FILE,
+		process.env.RENTAL_RECOVERY_SECRETS_FILE,
 		repositoryRoot,
 		join(recoveryRoot, 'secrets.env')
 	);

@@ -13,7 +13,7 @@ test('empty database content expands to the complete safe page defaults', () => 
   assert.equal(home.sections.length, DEFAULT_SITE_PAGES.home.sections.length);
   assert.equal(home.sections[0].id, 'hero');
   assert.equal(home.sections[0].visible, true);
-  assert.match(home.title.hr, /Petroni/);
+  assert.match(home.title.hr, /Alderway/);
 });
 
 test('admin section order and visibility are preserved while unknown sections are rejected', () => {
@@ -53,7 +53,7 @@ test('unsafe links are replaced and new FAQ items keep validated bilingual text'
   const sanitizedFaq = sanitizeSitePageContent('faq', faqSource).sections.find(
     (section) => section.id === 'faq'
   );
-  assert.equal(sanitizedContact?.items?.[1].href, 'tel:+385912427247');
+  assert.equal(sanitizedContact?.items?.[1].href, 'tel:+35316872048');
   assert.equal(sanitizedFaq?.items?.at(-2)?.id, 'custom-question');
   assert.equal(sanitizedFaq?.items?.at(-2)?.title?.en, 'New question');
   assert.equal(sanitizedFaq?.items?.at(-1)?.id, 'custom-question-2');
@@ -66,8 +66,8 @@ test('English content falls back to Croatian only at render time', () => {
 
 test('homepage hero keeps distinct Croatian and English CMS headlines', () => {
   const hero = DEFAULT_SITE_PAGES.home.sections.find((section) => section.id === 'hero');
-  assert.match(localizedText(hero?.title, 'hr'), /^Putujte bez granica/);
-  assert.match(localizedText(hero?.title, 'en'), /^Travel without borders/);
+  assert.match(localizedText(hero?.title, 'hr'), /^Više ceste/);
+  assert.match(localizedText(hero?.title, 'en'), /^More road/);
 });
 
 test('only explicit CMS page keys are accepted', () => {

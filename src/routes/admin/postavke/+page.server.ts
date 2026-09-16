@@ -1,4 +1,5 @@
 import { fail } from '@sveltejs/kit';
+import { BUSINESS } from '$lib/config/business';
 import { checkboxField, numberField, textField } from '$lib/admin-cms.server';
 import { recordAdminEvent, requireAdministrator } from '$lib/admin.server';
 import { normalizeCheckoutConfig, normalizePostalCodes, OVERSEAS_TIER_RANGES, type OverseasShippingZone } from '$lib/shop-checkout';
@@ -52,8 +53,8 @@ export const load: PageServerLoad = async () => {
   const zoneTwo = zone(checkout, 'zone_2');
   return {
     settings: {
-      admin_email: String(settings.admin_email ?? 'info@petroni.hr'),
-      email_from: String(settings.email_from ?? 'Petroni <onboarding@resend.dev>'),
+      admin_email: String(settings.admin_email ?? BUSINESS.email),
+      email_from: String(settings.email_from ?? `${BUSINESS.name} <onboarding@resend.dev>`),
       free_shipping_threshold: Number(settings.free_shipping_threshold ?? 1000),
       min_driver_age: Number(settings.min_driver_age ?? 28),
       km_per_day_included: Number(settings.km_per_day_included ?? 300),
@@ -131,8 +132,8 @@ export const actions: Actions = {
     ];
 
     const updates: Record<string, unknown> = {
-      admin_email: textField(form, 'admin_email') || 'info@petroni.hr',
-      email_from: textField(form, 'email_from') || 'Petroni <onboarding@resend.dev>',
+      admin_email: textField(form, 'admin_email') || BUSINESS.email,
+      email_from: textField(form, 'email_from') || `${BUSINESS.name} <onboarding@resend.dev>`,
       company,
       ibans,
       free_shipping_threshold: Math.max(0, numberField(form, 'free_shipping_threshold') ?? 1000),
@@ -144,8 +145,8 @@ export const actions: Actions = {
       booking_time_selection_end: bookingTimeEnd,
       shop_featured_brands: featuredBrands,
       shop_shipping_methods: {
-        overseas: { enabled: checkboxField(form, 'overseas_enabled'), price: overseasTiers[0].zoneOnePrice, allows_cod: checkboxField(form, 'overseas_allows_cod'), label_hr: 'Overseas dostava', label_en: 'Overseas delivery' },
-        boxnow: { enabled: checkboxField(form, 'boxnow_enabled'), price: numberField(form, 'boxnow_price') ?? 9, allows_cod: checkboxField(form, 'boxnow_allows_cod'), label_hr: 'BoxNow paketomat', label_en: 'BoxNow locker' },
+        overseas: { enabled: checkboxField(form, 'overseas_enabled'), price: overseasTiers[0].zoneOnePrice, allows_cod: checkboxField(form, 'overseas_allows_cod'), label_hr: 'Kurirska dostava', label_en: 'Courier delivery' },
+        boxnow: { enabled: checkboxField(form, 'boxnow_enabled'), price: numberField(form, 'boxnow_price') ?? 9, allows_cod: checkboxField(form, 'boxnow_allows_cod'), label_hr: 'Paketomat', label_en: 'Parcel locker' },
         personal_pickup: { enabled: checkboxField(form, 'personal_pickup_enabled'), price: 0, allows_cod: checkboxField(form, 'personal_pickup_allows_cod'), label_hr: 'Osobno preuzimanje', label_en: 'Personal pickup' }
       },
       shop_overseas_zones: {

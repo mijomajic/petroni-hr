@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
 
   let { form }: PageProps = $props();
 </script>
 
-<svelte:head><title>Novo vozilo — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Novo vozilo — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-5xl">
   <div class="mb-8 flex items-center gap-4">
@@ -70,11 +71,11 @@
 
     <div class="mt-5 space-y-3">
       <label class="flex items-center gap-3 text-sm font-bold text-[#2b2b2b]">
-        <input name="is_available" type="checkbox" checked class="h-4 w-4 accent-[#F5C518]" />
+        <input name="is_available" type="checkbox" checked class="h-4 w-4 accent-[#c87442]" />
         Dostupno na javnim stranicama i u rezervacijama
       </label>
       <label class="flex items-center gap-3 text-sm font-bold text-[#2b2b2b]">
-        <input name="is_for_sale" type="checkbox" checked class="h-4 w-4 accent-[#F5C518]" />
+        <input name="is_for_sale" type="checkbox" checked class="h-4 w-4 accent-[#c87442]" />
         Prikaži i među vozilima za prodaju
       </label>
       <p class="pl-7 text-xs leading-relaxed text-[#8b9099]">Ova oznaka ne mijenja tip vozila: kamper za najam ostaje dostupan za rezervacije.</p>

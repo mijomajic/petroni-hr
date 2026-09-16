@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
@@ -12,7 +13,7 @@
   }
 </script>
 
-<svelte:head><title>Obavijesti o dostupnosti — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Obavijesti o dostupnosti — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-[1500px]">
   <header class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -28,7 +29,7 @@
 
   <nav class="mb-6 flex flex-wrap gap-2" aria-label="Status prijava">
     {#each [{ key: 'pending', label: 'Čeka' }, { key: 'sent', label: 'Poslano' }, { key: 'cancelled', label: 'Otkazano' }] as item}
-      <a href="?status={item.key}" class="rounded-md border px-4 py-2 text-xs font-bold {data.status === item.key ? 'border-[#f5c518] bg-[#fff7d6] text-[#725700]' : 'border-[#dfe1e5] bg-white text-[#5b6168]'}">{item.label}</a>
+      <a href="?status={item.key}" class="rounded-md border px-4 py-2 text-xs font-bold {data.status === item.key ? 'border-[#c87442] bg-[#f5e8df] text-[#704025]' : 'border-[#dfe1e5] bg-white text-[#5b6168]'}">{item.label}</a>
     {/each}
   </nav>
 
@@ -47,14 +48,14 @@
           {#each data.notifications as notification}
             {@const item = product(notification)}
             <tr class="align-top">
-              <td class="px-5 py-4"><a href="/admin/proizvodi/{notification.product_id}" class="font-bold text-[#2b2b2b] hover:text-[#806300]">{item?.name_hr ?? 'Obrisan proizvod'}</a><p class="mt-1 text-xs text-[#8b9099]">Zaliha: {item?.stock ?? '—'}</p></td>
+              <td class="px-5 py-4"><a href="/admin/proizvodi/{notification.product_id}" class="font-bold text-[#2b2b2b] hover:text-[#7f4327]">{item?.name_hr ?? 'Obrisan proizvod'}</a><p class="mt-1 text-xs text-[#8b9099]">Zaliha: {item?.stock ?? '—'}</p></td>
               <td class="px-5 py-4"><p class="font-medium text-[#454a50]">{notification.email}</p><p class="mt-1 text-xs uppercase text-[#8b9099]">{notification.locale}</p></td>
               <td class="px-5 py-4 text-[#5b6168]">{dateTime(notification.requested_at)}{#if notification.notified_at}<p class="mt-1 text-xs text-[#27824a]">Poslano {dateTime(notification.notified_at)}</p>{/if}</td>
-              <td class="px-5 py-4"><span class="rounded px-2 py-1 text-xs font-bold {notification.status === 'sent' ? 'bg-[#eaf7ef] text-[#207240]' : notification.status === 'pending' ? 'bg-[#fff7d6] text-[#725700]' : 'bg-[#f1f2f4] text-[#6b7178]'}">{notification.status === 'sent' ? 'Poslano' : notification.status === 'pending' ? 'Čeka' : 'Otkazano'}</span>{#if notification.last_error}<p class="mt-2 max-w-xs text-xs leading-relaxed text-[#9f1f18]">{notification.last_error}</p>{/if}</td>
+              <td class="px-5 py-4"><span class="rounded px-2 py-1 text-xs font-bold {notification.status === 'sent' ? 'bg-[#eaf7ef] text-[#207240]' : notification.status === 'pending' ? 'bg-[#f5e8df] text-[#704025]' : 'bg-[#f1f2f4] text-[#6b7178]'}">{notification.status === 'sent' ? 'Poslano' : notification.status === 'pending' ? 'Čeka' : 'Otkazano'}</span>{#if notification.last_error}<p class="mt-2 max-w-xs text-xs leading-relaxed text-[#9f1f18]">{notification.last_error}</p>{/if}</td>
               <td class="px-5 py-4 text-[#5b6168]">{notification.attempt_count}</td>
               <td class="px-5 py-4 text-right">
                 {#if notification.status === 'pending'}
-                  <form method="POST" action="?/sendForProduct"><input type="hidden" name="product_id" value={notification.product_id} /><button class="rounded-md border border-[#d9dce1] px-3 py-2 text-xs font-bold text-[#454a50] hover:border-[#f5c518]">Pošalji za proizvod</button></form>
+                  <form method="POST" action="?/sendForProduct"><input type="hidden" name="product_id" value={notification.product_id} /><button class="rounded-md border border-[#d9dce1] px-3 py-2 text-xs font-bold text-[#454a50] hover:border-[#c87442]">Pošalji za proizvod</button></form>
                 {:else}<span class="text-xs text-[#a0a4aa]">—</span>{/if}
               </td>
             </tr>

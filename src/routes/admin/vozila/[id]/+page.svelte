@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
   const vehicle = $derived(data.vehicle);
 </script>
 
-<svelte:head><title>{vehicle.name} — Admin — Petroni</title></svelte:head>
+<svelte:head><title>{vehicle.name} — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-6xl">
   <div class="mb-8 flex items-center justify-between gap-4">
@@ -19,7 +20,7 @@
   </div>
 
   {#if form?.message}
-    <div class="mb-6 rounded-xl bg-[#fff7e0] p-4 text-sm text-[#6f5600]">{form.message}</div>
+    <div class="mb-6 rounded-xl bg-[#f5e8df] p-4 text-sm text-[#6f5600]">{form.message}</div>
   {/if}
 
   <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -75,11 +76,11 @@
 
       <div class="mt-5 space-y-3">
         <label class="flex items-center gap-3 text-sm font-bold text-[#2b2b2b]">
-          <input name="is_available" type="checkbox" checked={vehicle.is_available} class="h-4 w-4 accent-[#F5C518]" />
+          <input name="is_available" type="checkbox" checked={vehicle.is_available} class="h-4 w-4 accent-[#c87442]" />
           Dostupno na javnim stranicama i u rezervacijama
         </label>
         <label class="flex items-center gap-3 text-sm font-bold text-[#2b2b2b]">
-          <input name="is_for_sale" type="checkbox" checked={vehicle.is_for_sale} class="h-4 w-4 accent-[#F5C518]" />
+          <input name="is_for_sale" type="checkbox" checked={vehicle.is_for_sale} class="h-4 w-4 accent-[#c87442]" />
           Prikaži i među vozilima za prodaju
         </label>
         <p class="pl-7 text-xs leading-relaxed text-[#8b9099]">Ova oznaka ne mijenja tip vozila: kamper za najam ostaje dostupan za rezervacije.</p>

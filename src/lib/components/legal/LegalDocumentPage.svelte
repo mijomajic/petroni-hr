@@ -3,7 +3,7 @@
   import { renderTermsMarkup } from '$lib/terms-markup';
   import type { LegalDocumentVersion } from '$lib/legal-documents';
 
-  let { document, eyebrow = 'Petroni' }: { document: LegalDocumentVersion; eyebrow?: string } = $props();
+  let { document, eyebrow = 'Alderway' }: { document: LegalDocumentVersion; eyebrow?: string } = $props();
   const title = $derived($locale === 'hr' ? document.title_hr : document.title_en);
   const summary = $derived($locale === 'hr' ? document.summary_hr : document.summary_en);
   const content = $derived($locale === 'hr' ? document.content_hr : document.content_en);
@@ -13,9 +13,9 @@
 </script>
 
 <svelte:head>
-  <title>{title} — Petroni</title>
+  <title>{title} — Alderway</title>
   <meta name="description" content={summary} />
-  <meta property="og:title" content={`${title} — Petroni`} />
+  <meta property="og:title" content={`${title} — Alderway`} />
   <meta property="og:description" content={summary} />
 </svelte:head>
 
@@ -28,13 +28,6 @@
       {$locale === 'hr' ? 'Verzija' : 'Version'} {document.version_label}
       · {$locale === 'hr' ? 'primjenjuje se od' : 'effective from'} {formattedDate}
     </p>
-    {#if document.uses_fallback}
-      <div class="mb-8 rounded-xl border border-[#f0d87a] bg-[#fffaf0] p-4 text-sm leading-6 text-[#6f5600]">
-        {$locale === 'hr'
-          ? 'Prikazana je tehnička početna verzija. Konačni tekst i pravnu ocjenu potvrđuju Petroni i pravni savjetnik.'
-          : 'This is the technical baseline version. Petroni and its legal adviser remain responsible for final wording and legal review.'}
-      </div>
-    {/if}
     <article class="legal-document rounded-2xl border border-[#e7e8eb] bg-white p-6 md:p-9">
       {@html renderTermsMarkup(content)}
     </article>

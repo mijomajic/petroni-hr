@@ -17,7 +17,7 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
 
-const MAGIC = Buffer.from('PETRONI-BACKUP-V1\n', 'utf8');
+const MAGIC = Buffer.from('ALDERWAY-BACKUP-V1\n', 'utf8');
 const AUTH_TAG_BYTES = 16;
 const SCRYPT_OPTIONS = { N: 2 ** 18, r: 8, p: 1, maxmem: 512 * 1024 * 1024 };
 
@@ -57,7 +57,7 @@ export async function run(command, args, options = {}) {
 
 export async function findPostgresBin() {
 	const candidates = [
-		process.env.PETRONI_POSTGRES_BIN,
+		process.env.RENTAL_POSTGRES_BIN,
 		'/opt/homebrew/opt/postgresql@17/bin',
 		'/usr/local/opt/postgresql@17/bin'
 	].filter(Boolean);
@@ -73,23 +73,24 @@ export async function findPostgresBin() {
 	}
 
 	throw new Error(
-		'PostgreSQL 17 alati nisu pronađeni. Instaliraj `brew install postgresql@17` ili postavi PETRONI_POSTGRES_BIN.'
+		'PostgreSQL 17 tools were not found. Install `brew install postgresql@17` or set RENTAL_POSTGRES_BIN.'
 	);
 }
 
 export async function readPassphrase() {
-	let passphrase = process.env.PETRONI_BACKUP_PASSPHRASE;
-	if (process.env.PETRONI_BACKUP_PASSPHRASE_FILE) {
-		const passphraseStat = await stat(process.env.PETRONI_BACKUP_PASSPHRASE_FILE);
+	let passphrase = process.env.RENTAL_BACKUP_PASSPHRASE;
+	const passphraseFile = process.env.RENTAL_BACKUP_PASSPHRASE_FILE;
+	if (passphraseFile) {
+		const passphraseStat = await stat(passphraseFile);
 		if ((passphraseStat.mode & 0o077) !== 0) {
-			throw new Error('PETRONI_BACKUP_PASSPHRASE_FILE mora imati dozvole 600.');
+			throw new Error('RENTAL_BACKUP_PASSPHRASE_FILE must have mode 600.');
 		}
-		passphrase = await readFile(process.env.PETRONI_BACKUP_PASSPHRASE_FILE, 'utf8');
+		passphrase = await readFile(passphraseFile, 'utf8');
 	}
 	passphrase = passphrase?.replace(/[\r\n]+$/, '');
 	if (!passphrase || passphrase.length < 20) {
 		throw new Error(
-		'Postavi PETRONI_BACKUP_PASSPHRASE_FILE ili PETRONI_BACKUP_PASSPHRASE s najmanje 20 znakova.'
+		'Set RENTAL_BACKUP_PASSPHRASE_FILE or RENTAL_BACKUP_PASSPHRASE to a value of at least 20 characters.'
 		);
 	}
 	return passphrase;
@@ -218,7 +219,7 @@ export async function ensurePrivateDirectory(path) {
 
 export async function copyOptionalRecoverySecrets(source, repositoryRoot, destination) {
 	if (!source) return false;
-	if (!isAbsolute(source)) throw new Error('PETRONI_RECOVERY_SECRETS_FILE mora biti apsolutna putanja.');
+	if (!isAbsolute(source)) throw new Error('RENTAL_RECOVERY_SECRETS_FILE must be an absolute path.');
 	const resolvedSource = resolve(source);
 	const resolvedRepo = resolve(repositoryRoot);
 	const repoRelative = relative(resolvedRepo, resolvedSource);
@@ -249,14 +250,14 @@ export async function assertArtifactOutsideRepository(artifactDirectory, reposit
 	const resolvedRepo = resolve(repositoryRoot);
 	const repoRelative = relative(resolvedRepo, resolvedArtifact);
 	if (repoRelative === '' || (!repoRelative.startsWith('..') && !isAbsolute(repoRelative))) {
-		throw new Error('PETRONI_BACKUP_DIR mora biti izvan Git repozitorija.');
+		throw new Error('RENTAL_BACKUP_DIR must be outside the Git repository.');
 	}
 	await ensurePrivateDirectory(resolvedArtifact);
 	return resolvedArtifact;
 }
 
 export function artifactBaseName(timestamp = new Date()) {
-	return `petroni-${timestamp.toISOString().replace(/[:.]/g, '-')}`;
+	return `rental-${timestamp.toISOString().replace(/[:.]/g, '-')}`;
 }
 
 export { basename, dirname, join, resolve, stat, writeFile };

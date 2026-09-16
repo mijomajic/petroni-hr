@@ -355,9 +355,9 @@ export const actions: Actions = {
         return fail(503, { message: 'Automatska provjera nije dostupna. Provjerite transakciju u CorvusPay Merchant Portalu i API certifikat.' });
       }
       if (result.incidentId) {
-        return fail(409, { message: `Statusi se ne podudaraju: CorvusPay ${result.providerStatus}, Petroni ${result.localStatus}. Ne mijenjajte ništa bez ručne provjere reference i iznosa.` });
+        return fail(409, { message: `Statusi se ne podudaraju: CorvusPay ${result.providerStatus}, lokalno ${result.localStatus}. Ne mijenjajte ništa bez ručne provjere reference i iznosa.` });
       }
-      return { message: `CorvusPay i Petroni su usklađeni (${result.providerStatus}/${result.localStatus}).` };
+      return { message: `CorvusPay i lokalni zapis su usklađeni (${result.providerStatus}/${result.localStatus}).` };
     } catch (caught) {
       return fail(500, { message: caught instanceof Error ? caught.message : 'CorvusPay provjera nije uspjela.' });
     }

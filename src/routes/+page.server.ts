@@ -1,7 +1,17 @@
 import type { PageServerLoad } from './$types';
 import { getSitePageForRequest } from '$lib/site-page-preview.server';
+import { DEMO_VEHICLES } from '$lib/demo-data';
+import { useStaticDemoData } from '$lib/demo-mode.server';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
+  if (useStaticDemoData) {
+    return {
+      rentalVehicles: DEMO_VEHICLES.slice(0, 6),
+      saleVehicles: [],
+      pageContent: await getSitePageForRequest('home', url, locals)
+    };
+  }
+
   const [rentals, sales, pageContent] = await Promise.all([
     locals.supabase
       .from('vehicles')

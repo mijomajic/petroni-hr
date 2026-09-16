@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
@@ -18,7 +19,7 @@
   }
 </script>
 
-<svelte:head><title>Proizvodi — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Proizvodi — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div>
   <div class="mb-8 flex items-start justify-between gap-4">
@@ -30,7 +31,7 @@
   </div>
 
   {#if form?.message}
-    <div class="mb-6 rounded-xl bg-[#fff7e0] p-4 text-sm text-[#6f5600]">{form.message}</div>
+    <div class="mb-6 rounded-xl bg-[#f5e8df] p-4 text-sm text-[#6f5600]">{form.message}</div>
   {/if}
 
   <form method="GET" class="mb-6 grid gap-3 rounded-2xl border border-[#e7e8eb] bg-white p-4 lg:grid-cols-[1fr_240px_180px_160px_auto]">
@@ -78,7 +79,7 @@
               <td class="px-4 py-3 font-mono text-xs text-[#7a7f86]">{product.sku ?? '-'}</td>
               <td class="px-4 py-3 text-[#5b6168]">{product.brand ?? '-'}</td>
               <td class="px-4 py-3 text-[#5b6168]">{product.product_categories?.[0]?.name_hr ?? '-'}</td>
-              <td class="px-4 py-3 font-bold text-[#b5890a]">{Number(product.price).toFixed(2)} EUR</td>
+              <td class="px-4 py-3 font-bold text-[#9f542e]">{Number(product.price).toFixed(2)} EUR</td>
               <td class="px-4 py-3 text-[#5b6168]">{product.stock}</td>
               <td class="px-4 py-3">
                 <form method="POST" action="?/toggle">
@@ -134,7 +135,7 @@
               </select>
             </label>
             <div class="md:col-span-2 flex gap-2">
-              <button form="category-{category.id}" class="rounded-md bg-[#F5C518] px-3 py-2 text-xs font-bold text-black">Spremi</button>
+              <button form="category-{category.id}" class="rounded-md bg-[#c87442] px-3 py-2 text-xs font-bold text-black">Spremi</button>
               <form method="POST" action="?/deleteCategory" onsubmit={(event) => { if (!confirm('Obrisati kategoriju?')) event.preventDefault(); }}>
                 <input type="hidden" name="id" value={category.id} />
                 <button class="rounded-md border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50">Briši</button>

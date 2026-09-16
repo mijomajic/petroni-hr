@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { Vehicle } from '$lib/supabase';
+import { CLIENT_STORAGE_KEYS } from '$lib/config/business';
 
 export type BookingState = {
   step: number;
@@ -31,6 +32,7 @@ export type BookingState = {
     country: string;
   };
   extras: Record<string, number>;
+  customerMessage: string;
   totalPrice: number;
 };
 
@@ -56,18 +58,19 @@ const defaultState: BookingState = {
     phone: '',
     dateOfBirth: '',
     licenseNumber: '',
-    licenseCountry: 'HR',
+    licenseCountry: 'IE',
     address: '',
     city: '',
     zip: '',
-    country: 'Hrvatska',
+    country: 'Ireland',
   },
   extras: {},
+  customerMessage: '',
   totalPrice: 0,
 };
 
 const stored: Partial<BookingState> = browser
-  ? JSON.parse(sessionStorage.getItem('petroni_booking') || '{}')
+  ? JSON.parse(sessionStorage.getItem(CLIENT_STORAGE_KEYS.booking) || '{}')
   : {};
 
 const initial: BookingState = {
@@ -83,7 +86,7 @@ export const booking = writable<BookingState>(initial);
 
 if (browser) {
   booking.subscribe(value => {
-    sessionStorage.setItem('petroni_booking', JSON.stringify(value));
+    sessionStorage.setItem(CLIENT_STORAGE_KEYS.booking, JSON.stringify(value));
   });
 }
 

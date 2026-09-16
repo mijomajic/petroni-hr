@@ -44,7 +44,7 @@
 
 <nav aria-label={$locale === 'hr' ? 'Kategorije proizvoda' : 'Product categories'}>
   {#if currentSlug}
-    <a href={clearCategoryHref()} class="mb-3 flex items-center justify-center rounded-md border border-[#e2e4e8] px-3 py-2 text-[12px] font-bold text-[#6b7178] transition-colors hover:border-[#F5C518] hover:text-[#806300]">
+    <a href={clearCategoryHref()} class="mb-3 flex items-center justify-center rounded-md border border-[#e2e4e8] px-3 py-2 text-[12px] font-bold text-[#6b7178] transition-colors hover:border-[#c87442] hover:text-[#7f4327]">
       {$locale === 'hr' ? 'Očisti kategoriju' : 'Clear category'}
     </a>
   {/if}
@@ -54,8 +54,8 @@
       <li class="border-b border-[#f0f1f3] pb-2 last:border-0 last:pb-0">
         {#if children.length > 0}
           <details open={branchIsCurrent(category)} class="group">
-            <summary class="flex cursor-pointer list-none items-center justify-between rounded-md px-2 py-2 text-[13px] font-bold uppercase leading-snug text-[#454a50] transition-colors hover:bg-[#fafbfc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F5C518]">
-              <span class:text-[#b5890a]={branchIsCurrent(category)} class="pr-2">{label(category)}</span>
+            <summary class="flex cursor-pointer list-none items-center justify-between rounded-md px-2 py-2 text-[13px] font-bold uppercase leading-snug text-[#454a50] transition-colors hover:bg-[#fafbfc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c87442]">
+              <span class:text-[#9f542e]={branchIsCurrent(category)} class="pr-2">{label(category)}</span>
               <svg class="shrink-0 transition-transform group-open:rotate-90" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
             </summary>
             <ul class="ml-2 border-l border-[#e4e6e9] pl-3">
@@ -63,8 +63,8 @@
                 <a
                   href={categoryHref(category.slug)}
                   aria-current={category.slug === currentSlug ? 'page' : undefined}
-                  class="block rounded-md px-2 py-1.5 text-[12px] font-bold leading-snug transition-colors hover:bg-[#fafbfc] hover:text-[#b5890a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F5C518]"
-                  class:text-[#b5890a]={category.slug === currentSlug}
+                  class="block rounded-md px-2 py-1.5 text-[12px] font-bold leading-snug transition-colors hover:bg-[#fafbfc] hover:text-[#9f542e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c87442]"
+                  class:text-[#9f542e]={category.slug === currentSlug}
                   class:text-[#545a61]={category.slug !== currentSlug}
                 >{$locale === 'hr' ? 'Svi proizvodi' : 'All products'}</a>
               </li>
@@ -73,9 +73,9 @@
                   <a
                     href={categoryHref(child.slug)}
                     aria-current={child.slug === currentSlug ? 'page' : undefined}
-                    class="block rounded-md px-2 py-1.5 text-[12px] leading-snug transition-colors hover:bg-[#fafbfc] hover:text-[#b5890a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F5C518]"
+                    class="block rounded-md px-2 py-1.5 text-[12px] leading-snug transition-colors hover:bg-[#fafbfc] hover:text-[#9f542e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c87442]"
                     class:font-bold={child.slug === currentSlug}
-                    class:text-[#b5890a]={child.slug === currentSlug}
+                    class:text-[#9f542e]={child.slug === currentSlug}
                     class:text-[#6b7178]={child.slug !== currentSlug}
                   >{label(child)}</a>
                 </li>
@@ -86,8 +86,8 @@
           <a
             href={categoryHref(category.slug)}
             aria-current={category.slug === currentSlug ? 'page' : undefined}
-            class="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-bold uppercase leading-snug transition-colors hover:bg-[#fafbfc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F5C518]"
-            class:text-[#b5890a]={category.slug === currentSlug}
+            class="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-bold uppercase leading-snug transition-colors hover:bg-[#fafbfc] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c87442]"
+            class:text-[#9f542e]={category.slug === currentSlug}
             class:text-[#454a50]={category.slug !== currentSlug}
           >
             <span>{label(category)}</span>

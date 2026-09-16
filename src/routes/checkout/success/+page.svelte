@@ -3,6 +3,7 @@
   import { page } from '$app/state';
   import { clearCart } from '$lib/stores/cart';
   import { locale } from '$lib/stores/locale';
+  import { CLIENT_STORAGE_KEYS } from '$lib/config/business';
 
   let result: any = $state(null);
   const paymentResult = $derived(page.url.searchParams.get('payment'));
@@ -10,8 +11,8 @@
 
   function deliveryLabel(method: string) {
     const labels: Record<string, [string, string]> = {
-      overseas: ['Overseas dostava', 'Overseas delivery'],
-      boxnow: ['BoxNow paketomat', 'BoxNow locker'],
+      overseas: ['Kurirska dostava', 'Courier delivery'],
+      boxnow: ['Paketomat', 'Parcel locker'],
       personal_pickup: ['Osobno preuzimanje', 'Personal pickup']
     };
     return labels[method]?.[$locale === 'hr' ? 0 : 1] ?? method;
@@ -27,14 +28,14 @@
   }
 
   onMount(() => {
-    const raw = sessionStorage.getItem('petroni_order_result');
+    const raw = sessionStorage.getItem(CLIENT_STORAGE_KEYS.orderResult);
     if (raw) result = JSON.parse(raw);
     if (paymentResult === 'success') clearCart();
   });
 </script>
 
 <svelte:head>
-  <title>{cancelled ? ($locale === 'hr' ? 'Plaćanje otkazano' : 'Payment cancelled') : ($locale === 'hr' ? 'Narudžba zaprimljena' : 'Order received')} — Petroni</title>
+  <title>{cancelled ? ($locale === 'hr' ? 'Plaćanje otkazano' : 'Payment cancelled') : ($locale === 'hr' ? 'Narudžba zaprimljena' : 'Order received')} — Alderway</title>
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
@@ -83,7 +84,7 @@
                   <div><dt class="text-xs uppercase tracking-wide text-[#92979d]">IBAN</dt><dd class="mt-1 break-all font-semibold tabular-nums">{transfer.iban}</dd></div>
                   <div class="grid grid-cols-2 gap-3"><div><dt class="text-xs uppercase tracking-wide text-[#92979d]">{$locale === 'hr' ? 'Iznos' : 'Amount'}</dt><dd class="mt-1 font-semibold">{Number(transfer.amount).toFixed(2)} EUR</dd></div><div><dt class="text-xs uppercase tracking-wide text-[#92979d]">{$locale === 'hr' ? 'Poziv' : 'Reference'}</dt><dd class="mt-1 break-all font-semibold">{transfer.reference}</dd></div></div>
                 </dl>
-                <div class="mt-5 rounded-lg bg-white p-2"><img src={transfer.barcode} alt="HUB-3 PDF417 za {transfer.bank}" class="w-full" /></div>
+                <div class="mt-5 rounded-lg bg-white p-2"><img src={transfer.barcode} alt="Bank transfer payment code for {transfer.bank}" class="w-full" /></div>
               </article>
             {/each}
           </div>

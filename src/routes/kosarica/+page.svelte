@@ -39,7 +39,7 @@
 </script>
 
 <svelte:head>
-  <title>{$locale === 'hr' ? 'Košarica' : 'Cart'} — Petroni</title>
+  <title>{$locale === 'hr' ? 'Košarica' : 'Cart'} — Alderway</title>
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
@@ -63,9 +63,9 @@
               </div>
               <div class="flex-1">
                 <p class="font-medium text-[#2b2b2b] mb-1">{$locale === 'hr' ? item.name_hr : (item.name_en || item.name_hr)}</p>
-                <p class="font-semibold mb-3" style="color:#b5890a">{(item.price * item.qty).toFixed(2)} €</p>
+                <p class="font-semibold mb-3" style="color:#9f542e">{(item.price * item.qty).toFixed(2)} €</p>
                 {#if item.pickup_only}
-                  <p class="mb-3 inline-flex rounded-md bg-[#fff7e0] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#7a5d00]">{$locale === 'hr' ? 'Samo osobno preuzimanje' : 'Pickup only'}</p>
+                  <p class="mb-3 inline-flex rounded-md bg-[#f5e8df] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#7a5d00]">{$locale === 'hr' ? 'Samo osobno preuzimanje' : 'Pickup only'}</p>
                 {/if}
                 <div class="flex items-center gap-3">
                   <div class="flex items-center rounded-md overflow-hidden border border-[#e2e4e8]">
@@ -105,7 +105,7 @@
             <div class="space-y-3 mb-5">
               <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Međuzbroj' : 'Subtotal'}</span><span class="text-[#2b2b2b]">{total.toFixed(2)} €</span></div>
               <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Dostava' : 'Shipping'}</span><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Izračun pri naplati' : 'At checkout'}</span></div>
-              <div class="pt-3 flex justify-between font-bold text-lg border-t border-[#ededf0]"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span><span style="color:#b5890a">{total.toFixed(2)} €</span></div>
+              <div class="pt-3 flex justify-between font-bold text-lg border-t border-[#ededf0]"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span><span style="color:#9f542e">{total.toFixed(2)} €</span></div>
             </div>
             {#if stockMessage}<p class="mb-4 rounded-lg border border-[#f0d49b] bg-[#fffaf0] p-3 text-sm text-[#805b12]">{stockMessage}</p>{/if}
             {#if hasUnavailableItems || checkingStock}

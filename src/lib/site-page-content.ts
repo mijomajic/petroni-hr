@@ -1,3 +1,5 @@
+import { BUSINESS } from '$lib/config/business';
+
 export type SitePageKey = 'home' | 'about' | 'contact' | 'faq';
 
 export type LocalizedText = {
@@ -63,40 +65,30 @@ const t = (hr: string, en: string): LocalizedText => ({ hr, en });
 
 export const DEFAULT_SITE_PAGES: Record<SitePageKey, SitePageContent> = {
   home: {
-    title: t('Petroni — Najam i prodaja kampera i karavana', 'Petroni — Camper and caravan rental and sales'),
+    title: t(`${BUSINESS.name} — premium najam kampera`, `${BUSINESS.name} — premium camper hire`),
     seoDescription: t(
-      'Petroni – najam i prodaja vrhunskih kampera i karavana. 19 godina iskustva, 20+ vozila, lokacije diljem Hrvatske i Europe.',
-      'Petroni camper and caravan rental and sales. 19 years of experience, 20+ vehicles and locations across Croatia and Europe.'
+      'Pažljivo pripremljeni kamperi, jasne cijene i praktična podrška za putovanja bez žurbe.',
+      'Thoughtfully prepared campers, clear pricing and practical support for road trips without the rush.'
     ),
     sections: [
       {
         id: 'hero', type: 'hero', label: 'Glavni banner', visible: true, variant: 'home',
-        title: t('Putujte bez granica,\nživite bez ograničenja.', 'Travel without borders,\nlive without limits.'),
-        body: t('Otkrijte slobodu ceste s vrhunskim kamperima i karavanima. Vaša avantura počinje ovdje.', 'Discover the freedom of the road with premium campers and caravans. Your adventure starts here.'),
-        image: '/images/vehicles/rimor-evo-sound/01-rimor-evo-1.webp',
-        imageAlt: t('Petroni kamper na putovanju', 'Petroni camper on the road'),
+        title: t('Više ceste.\nManje žurbe.', 'More road.\nLess rush.'),
+        body: t('Premium kamperi, jasna pravila i podrška stvarnih ljudi — od prve pretrage do povratka ključeva.', 'Premium campers, clear terms and support from real people — from your first search to the moment you return the keys.'),
+        image: '/images/brand/alderway-hero.webp',
+        imageAlt: t('Moderan kamper uz planinsko jezero u zoru', 'Modern camper beside a mountain lake at dawn'),
         ctaLabel: t('Rezerviraj', 'Book now'), ctaHref: '/rezerviraj'
       },
       {
         id: 'rentals', type: 'vehicle_grid', label: 'Vozila za najam', visible: true, variant: 'rental',
-        eyebrow: t('Prihvatite izazov, doživite avanturu', 'Embrace the challenge, experience the adventure'),
-        title: t('Naša vozila', 'Our vehicles'),
-        body: t('Zanima Vas više?', 'Want to see more?'),
-        ctaLabel: t('Pogledajte sva vozila u našoj ponudi.', 'Browse all vehicles in our offer.'), ctaHref: '/vozila/najam-kampera'
+        eyebrow: t('Odaberite svoj način putovanja', 'Choose how you want to travel'),
+        title: t('Kamperi spremni za cestu', 'Campers ready for the road'),
+        body: t('Trebate više prostora za odluku?', 'Need more room to decide?'),
+        ctaLabel: t('Usporedite cijelu flotu.', 'Compare the full fleet.'), ctaHref: '/vozila/najam-kampera'
       },
+      { id: 'partners', type: 'logo_grid', label: 'Partneri', visible: false, items: [] },
       {
-        id: 'partners', type: 'logo_grid', label: 'Partneri', visible: true,
-        items: [
-          { id: 'udruga-kampista', title: t('Udruga Kampista Hrvatske', 'Croatian Campers Association'), image: '/partners/logos/udruga-kampista.png', href: 'https://udrugakampista.hr/' },
-          { id: 'polidor', title: t('Polidor Camping Resort', 'Polidor Camping Resort'), image: '/partners/logos/polidor.png', href: 'https://www.campingpolidor.com/' },
-          { id: 'jadranka', title: t('Jadranka Camping — Cres & Lošinj', 'Jadranka Camping — Cres & Lošinj'), image: 'https://www.camps-cres-losinj.com/assets/images/interface/logo.svg', href: 'https://www.camps-cres-losinj.com/' },
-          { id: 'plitvice', title: t('Camping Plitvice', 'Camping Plitvice'), image: 'https://campingplitvice.hr/wp-content/uploads/2019/08/campingplitvice_logo.png', href: 'https://campingplitvice.hr/' },
-          { id: 'amadria', title: t('Amadria Park Camping Šibenik', 'Amadria Park Camping Šibenik'), image: 'https://www.amcham.hr/storage/upload/gen_blog/amadria_park_logo-500x400_9557.jpg', href: 'https://www.amadriapark.com/hr/sibenik/camping/' },
-          { id: 'camping-hr', title: t('Kamping udruženje Hrvatske', 'Croatian Camping Union'), image: '/partners/logos/kamping-udruzenje.jpg', href: 'https://www.camping.hr/hr' }
-        ]
-      },
-      {
-        id: 'sales', type: 'vehicle_grid', label: 'Vozila za prodaju', visible: true, variant: 'sale',
+        id: 'sales', type: 'vehicle_grid', label: 'Vozila za prodaju', visible: false, variant: 'sale',
         eyebrow: t('Tražite vlastitog ljubimca na 4 kotača?', 'Looking for your own home on wheels?'),
         title: t('Vozila za prodaju', 'Vehicles for sale'),
         body: t('Zanima Vas više?', 'Want to see more?'),
@@ -104,46 +96,31 @@ export const DEFAULT_SITE_PAGES: Record<SitePageKey, SitePageContent> = {
       },
       {
         id: 'advantages', type: 'feature_grid', label: 'Glavne prednosti', visible: true,
-        eyebrow: t('Putujte s nama', 'Travel with us'), title: t('Glavne prednosti', 'Key advantages'),
+        eyebrow: t('Dobro putovanje počinje prije polaska', 'A good trip starts before departure'), title: t('Sve bitno, bez sitnih slova', 'Everything that matters, clearly handled'),
         items: [
-          { id: 'transparent', icon: 'card', title: t('Bez skrivenih troškova', 'No hidden costs'), body: t('Kod nas uvijek unaprijed znate konačnu cijenu usluge, bez neugodnih iznenađenja i dodatnih naknada.', 'You always know the final price upfront — no surprises or extra fees.') },
-          { id: 'locations', icon: 'pin', title: t('Diljem Hrvatske i Europe', 'Across Croatia & Europe'), body: t('Vozilo možete preuzeti ili vratiti na više unaprijed dogovorenih lokacija diljem čitave Hrvatske i Europe.', 'Pick up or return your vehicle at agreed locations across Croatia and Europe.') },
-          { id: 'support', icon: 'star', title: t('100% zadovoljstvo', '100% satisfaction'), body: t('Naš je cilj da svako Vaše putovanje protekne sigurno i ugodno, uz potpunu podršku našeg tima.', 'Our goal is for every trip to be safe and pleasant, with full support from our team.') }
+          { id: 'transparent', icon: 'card', title: t('Jasna cijena', 'Clear pricing'), body: t('Sezonske cijene, obvezne naknade i dodaci prikazani su prije potvrde rezervacije.', 'Seasonal rates, required fees and optional extras are shown before you confirm.') },
+          { id: 'locations', icon: 'pin', title: t('Fleksibilno preuzimanje', 'Flexible collection'), body: t('Odaberite glavno preuzimno mjesto ili zatražite dogovoreni transfer na odabranu lokaciju.', 'Collect from our touring hub or request an agreed transfer to a selected location.') },
+          { id: 'support', icon: 'star', title: t('Pripremljeno s pažnjom', 'Prepared with care'), body: t('Svako vozilo prolazi pregled, detaljno čišćenje i osobno upoznavanje prije polaska.', 'Every vehicle is inspected, thoroughly cleaned and handed over with a personal walkthrough.') }
         ]
       },
       {
         id: 'gallery', type: 'image_strip', label: 'Galerija', visible: true,
         items: [
-          { id: 'gallery-1', image: '/images/home-gallery/01-krevet-u-kombiju.webp', alt: t('Krevet u Petroni kombi kamperu', 'Bed in a Petroni camper van') },
-          { id: 'gallery-2', image: '/images/home-gallery/02-kuhinja-u-kombiju.webp', alt: t('Kuhinja u Petroni kombi kamperu', 'Kitchen in a Petroni camper van') },
-          { id: 'gallery-3', image: '/images/home-gallery/03-prostrani-krevet.webp', alt: t('Prostrani krevet u kamperu', 'Spacious camper bed') },
-          { id: 'gallery-4', image: '/images/home-gallery/04-detalj-interijera.webp', alt: t('Detalj interijera kampera', 'Camper interior detail') },
-          { id: 'gallery-5', image: '/images/home-gallery/05-kupaonica.webp', alt: t('Kupaonica u kamperu', 'Camper bathroom') },
-          { id: 'gallery-6', image: '/images/home-gallery/06-hladnjak.webp', alt: t('Hladnjak u kamperu', 'Camper refrigerator') },
-          { id: 'gallery-7', image: '/images/home-gallery/07-kamper-interijer.webp', alt: t('Interijer Petroni kampera', 'Petroni camper interior') },
-          { id: 'gallery-8', image: '/images/home-gallery/08-prostor-za-blagovanje.webp', alt: t('Prostor za blagovanje u kamperu', 'Camper dining area') },
-          { id: 'gallery-9', image: '/images/home-gallery/09-kamper-dnevni-prostor.webp', alt: t('Dnevni prostor kampera', 'Camper lounge') },
-          { id: 'gallery-10', image: '/images/home-gallery/10-kampiranje-uz-kamper.webp', alt: t('Kampiranje uz Petroni kamper', 'Camping beside a Petroni camper') },
-          { id: 'gallery-11', image: '/images/home-gallery/11-tenda-kampera.webp', alt: t('Tenda Petroni kampera', 'Petroni camper awning') },
-          { id: 'gallery-12', image: '/images/home-gallery/12-detalj-prednjeg-svjetla.webp', alt: t('Detalj Petroni kampera', 'Petroni camper detail') },
-          { id: 'gallery-13', image: '/images/home-gallery/13-sjedeca-garnitura.webp', alt: t('Sjedeća garnitura u kamperu', 'Camper seating area') },
-          { id: 'gallery-14', image: '/images/home-gallery/14-spavaca-soba.webp', alt: t('Spavaća soba u kamperu', 'Camper bedroom') },
-          { id: 'gallery-15', image: '/images/home-gallery/15-druzenje-uz-kamper.webp', alt: t('Druženje uz Petroni kamper', 'Enjoying time beside a Petroni camper') },
-          { id: 'gallery-16', image: '/images/home-gallery/16-radni-prostor-u-kombiju.webp', alt: t('Radni prostor u kombi kamperu', 'Workspace in a camper van') },
-          { id: 'gallery-17', image: '/images/home-gallery/17-pranje-posuda.webp', alt: t('Kuhinja u upotrebi', 'Camper kitchen in use') },
-          { id: 'gallery-18', image: '/images/home-gallery/18-kuhinjski-pretinac.webp', alt: t('Kuhinjski pretinac kampera', 'Camper kitchen drawer') }
+          { id: 'gallery-1', image: '/images/brand/alderway-lifestyle.webp', alt: t('Doručak uz kamper na mirnoj lokaciji', 'Breakfast beside a camper in a quiet setting') },
+          { id: 'gallery-2', image: '/images/brand/alderway-interior.webp', alt: t('Topao i funkcionalan interijer kampera', 'Warm and practical camper interior') },
+          { id: 'gallery-3', image: '/images/brand/alderway-hero.webp', alt: t('Kamper uz planinsko jezero', 'Camper beside a mountain lake') }
         ]
       },
       {
         id: 'stats', type: 'stats', label: 'Brojke', visible: true,
         items: [
-          { id: 'users', value: 546, suffix: '', title: t('Zadovoljnih korisnika', 'Satisfied customers') },
-          { id: 'years', value: 19, suffix: '', title: t('Godina putovanja', 'Years of travel') },
-          { id: 'vehicles', value: 20, suffix: '+', title: t('Raspoloživih vozila', 'Available vehicles') }
+          { id: 'users', value: 1842, suffix: '', title: t('Završenih putovanja', 'Trips completed') },
+          { id: 'years', value: 11, suffix: '', title: t('Godina na cesti', 'Years on the road') },
+          { id: 'vehicles', value: 9, suffix: '', title: t('Pažljivo odabranih vozila', 'Carefully selected vehicles') }
         ]
       },
       {
-        id: 'brands', type: 'logo_marquee', label: 'Brendovi vozila i opreme', visible: true,
+        id: 'brands', type: 'logo_marquee', label: 'Brendovi vozila i opreme', visible: false,
         items: [
           { id: 'rimor', title: t('RIMOR', 'RIMOR'), image: '/partners/logos/rimor.svg', href: 'https://www.rimor.it/it/en' },
           { id: 'caravans-international', title: t('CARAVANS INT.', 'CARAVANS INT.'), image: '/partners/logos/caravans-international.svg', href: 'https://www.caravansinternational.it/fr/' },
@@ -158,53 +135,50 @@ export const DEFAULT_SITE_PAGES: Record<SitePageKey, SitePageContent> = {
     ]
   },
   about: {
-    title: t('O Petroniju – iskustvo za vaš put kamperom | Petroni', 'About Petroni – experience for your camper journey | Petroni'),
-    seoDescription: t('Upoznajte Petroni, obiteljski tim s dugogodišnjim iskustvom u najmu i prodaji kampera, karavana i kamping opreme.', 'Meet Petroni, a family team with long-standing experience in camper and caravan rental, sales and camping equipment.'),
+    title: t(`O nama | ${BUSINESS.name}`, `About us | ${BUSINESS.name}`),
+    seoDescription: t('Upoznajte tim koji bira, priprema i podržava svako Alderway putovanje.', 'Meet the team that selects, prepares and supports every Alderway trip.'),
     sections: [
-      { id: 'hero', type: 'hero', label: 'Glavni banner', visible: true, variant: 'inner', eyebrow: t('Upoznajte nas', 'Get to know us'), title: t('O nama', 'About us'), image: '/images/about/onama3.webp', imageAlt: t('Moni s gostima uz Petroni kamper', 'Moni with guests beside a Petroni camper') },
-      { id: 'story-1', type: 'split_content', label: 'Priča — obiteljska tradicija', visible: true, variant: 'image-right', eyebrow: t('Tko smo', 'Who we are'), title: t('Obiteljska tradicija', 'A family tradition'), body: t('Petroni d.o.o. hrvatska je tvrtka specijalizirana za najam i prodaju kampera, karavana i opreme za kamping. S više od 19 godina iskustva, mi smo Vaš pouzdani partner za sva kamping putovanja.\n\nNaša misija je pružiti Vam slobodu ceste uz maksimalnu udobnost i sigurnost. Svako naše vozilo prolazi strog tehnički pregled prije iznajmljivanja.', 'Petroni d.o.o. is a Croatian company specialised in the rental and sale of campers, caravans and camping equipment. With over 19 years of experience, we are your reliable partner for every camping trip.\n\nOur mission is to give you the freedom of the road with maximum comfort and safety. Every vehicle undergoes a strict technical inspection before rental.'), image: '/images/about/onama1.webp', imageAlt: t('Moni i gošća uživaju uz Petroni kamper', 'Moni and a guest beside a Petroni camper') },
-      { id: 'story-2', type: 'split_content', label: 'Priča — iskustvo', visible: true, variant: 'image-left', eyebrow: t('Naše iskustvo', 'Our experience'), title: t('19 godina putovanja', '19 years of travelling'), body: t('Kroz godine smo izgradili povjerenje stotina zadovoljnih korisnika. Osim najma, nudimo i kompletan asortiman kamping opreme u našem online shopu — od elektrike i plinske opreme do namještaja i sanitarija. Naš tim stoji Vam na raspolaganju za savjet i podršku tijekom cijelog putovanja.', 'Over the years we have earned the trust of hundreds of satisfied customers. Besides rentals, we offer a complete range of camping equipment in our online shop — from electrical and gas equipment to furniture and sanitary products. Our team is available for advice and support throughout your trip.'), image: '/images/about/onama2.webp', imageAlt: t('Moni uz Petroni kamper', 'Moni beside a Petroni camper') },
+      { id: 'hero', type: 'hero', label: 'Glavni banner', visible: true, variant: 'inner', eyebrow: t('Alderway pristup', 'The Alderway approach'), title: t('Dobro putovanje počinje dobrim vozilom', 'A good journey starts with a good vehicle'), image: '/images/brand/alderway-lifestyle.webp', imageAlt: t('Par priprema doručak uz kamper', 'A couple prepares breakfast beside a camper') },
+      { id: 'story-1', type: 'split_content', label: 'Priča — pristup', visible: true, variant: 'image-right', eyebrow: t('Zašto postojimo', 'Why we exist'), title: t('Manje logistike, više putovanja', 'Less logistics, more travelling'), body: t('Alderway je nastao iz jednostavne ideje: najam kampera trebao bi biti jednako ugodan kao i samo putovanje. Zato biramo praktične rasporede, održavamo malu i raznoliku flotu te sve važne troškove pokazujemo prije rezervacije.\n\nSvako vozilo pregledavamo, čistimo i osobno pripremamo. Prije polaska prolazimo sve sustave i odgovaramo na pitanja bez žurbe.', 'Alderway began with a simple idea: hiring a camper should feel as enjoyable as the trip itself. We choose practical layouts, keep a small and varied fleet, and show every important cost before booking.\n\nEvery vehicle is inspected, cleaned and prepared by hand. Before departure, we walk you through the systems and answer questions without rushing.'), image: '/images/brand/alderway-interior.webp', imageAlt: t('Pažljivo uređen interijer kampera', 'Thoughtfully prepared camper interior') },
+      { id: 'story-2', type: 'split_content', label: 'Priča — podrška', visible: true, variant: 'image-left', eyebrow: t('Način rada', 'How we work'), title: t('Stvarna podrška, prije i tijekom puta', 'Real support, before and during your trip'), body: t('Naš mali tim poznaje svako vozilo i njegove detalje. Pomažemo odabrati odgovarajući raspored, planirati kilometražu i pripremiti dodatnu opremu, a tijekom putovanja ostajemo dostupni za praktična pitanja.\n\nRezultat je jednostavan proces rezervacije i kamper u kojem se možete osjećati kao kod kuće od prvog dana.', 'Our small team knows every vehicle and its details. We help you choose the right layout, plan realistic mileage and prepare useful extras, then remain available for practical questions while you travel.\n\nThe result is a straightforward booking process and a camper that feels familiar from day one.'), image: '/images/brand/alderway-lifestyle.webp', imageAlt: t('Opušteno jutro uz kamper', 'A relaxed morning beside a camper') },
       { id: 'testimonials', type: 'testimonials', label: 'Mišljenja korisnika', visible: true, eyebrow: t('Povjerenje', 'Trust'), title: t('Mišljenja naših korisnika', 'What our customers say'), items: [
-        { id: 'quote-1', body: t('Vrhunsko iskustvo od prvog kontakta do povratka kampera. Sve preporuke!', 'A top experience from first contact to returning the camper. Highly recommended!') },
-        { id: 'quote-2', body: t('Profesionalan tim i besprijekorno održavano vozilo. Putovanje za pamćenje.', 'Professional team and an impeccably maintained vehicle. A trip to remember.') },
-        { id: 'quote-3', body: t('Najam je bio jednostavan, a podrška dostupna u svakom trenutku. Hvala!', 'Renting was simple and support was available at all times. Thank you!') }
+        { id: 'quote-1', body: t('Od rezervacije do povratka sve je bilo jasno. Kamper je bio besprijekorno pripremljen.', 'Everything was clear from booking to return. The camper was impeccably prepared.') },
+        { id: 'quote-2', body: t('Dobili smo iskren savjet o veličini vozila i odabrali točno ono što nam je trebalo.', 'We received honest advice on vehicle size and chose exactly what we needed.') },
+        { id: 'quote-3', body: t('Brz odgovor kada nam je usput zatrebala pomoć i odličan vodič prije polaska.', 'A quick answer when we needed help on the road and a great walkthrough before departure.') }
       ] },
-      { id: 'cta', type: 'split_cta', label: 'Završni poziv na rezervaciju', visible: true, title: t('S kamperom nema žurbe', 'No rush with a camper'), body: t('Otkrijte slobodu putovanja bez rasporeda i ograničenja. Bilo da planirate vikend izlet ili dugo putovanje Europom — mi smo tu da Vaše putovanje učinimo bezbrižnim.', 'Discover the freedom of travelling without a schedule or limits. Whether you are planning a weekend getaway or a long journey across Europe — we are here to make your trip carefree.'), image: '/images/vehicles/rimor-evo-sound/05-eso-11.webp', imageAlt: t('Petroni Rimor EVO Sound kamper', 'Petroni Rimor EVO Sound camper'), ctaLabel: t('Rezerviraj', 'Book now'), ctaHref: '/rezerviraj' }
+      { id: 'cta', type: 'split_cta', label: 'Završni poziv na rezervaciju', visible: true, title: t('Kamo biste prvo otišli?', 'Where would you go first?'), body: t('Od kompaktnih kombija za dvoje do prostranih obiteljskih kampera, pronađite raspored koji odgovara vašem putovanju.', 'From compact vans for two to roomy family motorhomes, find the layout that fits your trip.'), image: '/images/brand/alderway-hero.webp', imageAlt: t('Kamper spreman za put', 'Camper ready for the road'), ctaLabel: t('Provjeri dostupnost', 'Check availability'), ctaHref: '/rezerviraj' }
     ]
   },
   contact: {
-    title: t('Kontakt za najam kampera, prodaju i shop | Petroni', 'Contact for camper rental, sales and shop | Petroni'),
-    seoDescription: t('Kontaktirajte Petroni za najam kampera, prodaju vozila, shop narudžbe i podršku. Adresa, telefon i email na jednom mjestu.', 'Contact Petroni for camper rental, vehicle sales, shop orders and support. Address, phone and email in one place.'),
+    title: t(`Kontakt | ${BUSINESS.name}`, `Contact | ${BUSINESS.name}`),
+    seoDescription: t('Kontaktirajte Alderway tim za rezervacije, odabir vozila i podršku prije puta.', 'Contact the Alderway team for bookings, vehicle advice and pre-trip support.'),
     sections: [
       { id: 'contact', type: 'contact', label: 'Kontakt i obrazac', visible: true, title: t('Kontaktirajte nas', 'Contact us'), body: t('Naš tim s veseljem stoji na raspolaganju za sva Vaša pitanja.', 'Our team is happy to answer any of your questions.'), items: [
-        { id: 'address', title: t('Adresa', 'Address'), body: t('Ul. Slavka Tomerlina 8, 10360 Sesvete', 'Ul. Slavka Tomerlina 8, 10360 Sesvete') },
-        { id: 'phone', title: t('Telefon', 'Phone'), body: t('+385912427247', '+385912427247'), href: 'tel:+385912427247' },
-        { id: 'email', title: t('Email', 'Email'), body: t('info@petroni.hr', 'info@petroni.hr'), href: 'mailto:info@petroni.hr' },
-        { id: 'note', title: t('Napomena', 'Note'), body: t('Molimo Vas da nas za sve upite kontaktirate isključivo putem e-maila ili telefonskim pozivom. WhatsApp poruke nisu podržane kao službeni kanal komunikacije.', 'Please contact us only by email or phone call. WhatsApp messages are not supported as an official channel.') },
-        { id: 'map', title: t('Lokacija', 'Location'), body: t('Petroni d.o.o.\nUl. Slavka Tomerlina 8, 10360 Sesvete', 'Petroni d.o.o.\nUl. Slavka Tomerlina 8, 10360 Sesvete'), href: 'https://www.google.com/maps/search/?api=1&query=Ul.%20Slavka%20Tomerlina%208%2C%2010360%20Sesvete' }
+        { id: 'address', title: t('Adresa', 'Address'), body: t(BUSINESS.address, BUSINESS.address) },
+        { id: 'phone', title: t('Telefon', 'Phone'), body: t(BUSINESS.phone, BUSINESS.phone), href: BUSINESS.phoneHref },
+        { id: 'email', title: t('Email', 'Email'), body: t(BUSINESS.email, BUSINESS.email), href: `mailto:${BUSINESS.email}` },
+        { id: 'note', title: t('Radno vrijeme', 'Opening hours'), body: t('Pon–Pet 08:00–18:00 · Sub 09:00–13:00 · Preuzimanja po dogovoru', 'Mon–Fri 08:00–18:00 · Sat 09:00–13:00 · Collections by appointment') },
+        { id: 'map', title: t('Preuzimno mjesto', 'Touring hub'), body: t(`${BUSINESS.name}\n${BUSINESS.address}`, `${BUSINESS.name}\n${BUSINESS.address}`), href: BUSINESS.mapUrl }
       ] }
     ]
   },
   faq: {
-    title: t('Česta pitanja o najmu kampera i shopu | Petroni', 'Frequently asked questions about camper rental and shop | Petroni'),
-    seoDescription: t('Pronađite odgovore na česta pitanja o najmu kampera, rezervacijama, prodaji, servisu, kamping opremi i webshop narudžbama.', 'Find answers to common questions about camper rental, bookings, sales, service, camping equipment and webshop orders.'),
+    title: t(`Česta pitanja o najmu kampera | ${BUSINESS.name}`, `Camper hire questions | ${BUSINESS.name}`),
+    seoDescription: t('Odgovori o rezervacijama, vozačima, pologu, osiguranju, preuzimanju i opremi.', 'Answers about bookings, drivers, deposits, insurance, collection and equipment.'),
     sections: [
       { id: 'faq', type: 'faq', label: 'Česta pitanja', visible: true, eyebrow: t('Pomoć', 'Help'), title: t('FAQ', 'FAQ'), items: [
-        { id: 'booking', title: t('Kako mogu rezervirati kamper?', 'How can I book a camper?'), body: t('Kamper možete rezervirati putem naše web stranice ili e-mailom na info@petroni.hr.', 'You can book a camper on our website or by email at info@petroni.hr.') },
+        { id: 'booking', title: t('Kako mogu rezervirati kamper?', 'How can I book a camper?'), body: t(`Najbrže je koristiti online rezervaciju. Za pomoć pri odabiru pišite na ${BUSINESS.email}.`, `The fastest option is our online booking flow. For help choosing a vehicle, email ${BUSINESS.email}.`) },
         { id: 'documents', title: t('Koja dokumentacija je potrebna prilikom preuzimanja rezerviranog vozila?', 'What documents are required when collecting a reserved vehicle?'), body: t('Potrebna je važeća vozačka dozvola B kategorije, osobni dokument (osobna iskaznica ili putovnica) i kreditna kartica za depozit. Vozač mora imati najmanje 25 godina.', 'You need a valid category B driving licence, an identity document (ID card or passport), and a credit card for the deposit. The driver must be at least 25 years old.') },
         { id: 'cancellation', title: t('Kakva je politika otkazivanja rezervacije?', 'What is the booking cancellation policy?'), body: t('Politika otkazivanja ovisi o vrsti rezervacije i vremenu obavijesti o otkazivanju. Detalji su navedeni u uvjetima najma vozila.', 'The cancellation policy depends on the type of booking and the notice period. Details are set out in the vehicle rental terms.') },
         { id: 'border', title: t('Mogu li putovati izvan zemlje s iznajmljenim kamperom?', 'Can I travel abroad with a rented camper?'), body: t('Da, putovanje izvan zemlje obično je moguće, ali prije puta provjerite s našim osobljem moguća ograničenja i dodatne troškove.', 'Yes, travel abroad is usually possible, but please check possible restrictions and additional costs with our team before departure.') },
         { id: 'included', title: t('Što je uključeno u cijenu najma?', 'What is included in the rental price?'), body: t('U cijenu su uključeni 24/7 telefonska asistencija, obvezno osiguranje, kasko uz ugovoreno sudjelovanje u šteti, osiguranje putnika, kemikalije za WC, jedna plinska boca, puna čista voda, prazna prljava voda i WC kazeta, radio, crijevo, električni kabel s adapterom i nivelatori. Kilometraža je ograničena na 300 km dnevno, odnosno 900 km za vikend.', 'The price includes 24/7 telephone assistance, compulsory insurance, agreed comprehensive cover, passenger insurance, toilet chemicals, one gas bottle, fresh water, an empty waste-water tank and toilet cassette, radio, hose, power cable and adapter, and levellers. Mileage is limited to 300 km per day or 900 km for a weekend.') },
         { id: 'hidden-costs', title: t('Postoje li skriveni troškovi?', 'Are there hidden costs?'), body: t('Ne. Svi troškovi u ponudi ili potvrdi su konačni. Dodatni troškovi mogu nastati samo ako promijenite rezervaciju ili u slučaju štete, nedostatka goriva, cestarina ili prekoračene kilometraže. Dodatni kilometar naplaćuje se 0,30 EUR/km.', 'No. All costs shown in your quote or confirmation are final. Additional costs may arise only if you change the booking or in the event of damage, missing fuel, tolls or excess mileage. Excess mileage is charged at EUR 0.30/km.') },
         { id: 'one-way', title: t('Mogu li preuzeti kamper na jednom mjestu i vratiti ga na drugo?', 'Can I collect the camper in one place and return it in another?'), body: t('Naravno. Najam možete završiti na drugom mjestu od mjesta preuzimanja. Za različita mjesta preuzimanja i vraćanja naplaćuje se naknada za transfer.', 'Of course. You can finish your rental at a different location from collection. A transfer fee applies when collection and return locations differ.') },
-        { id: 'airport-transfer', title: t('Nudite li transfere kampera na aerodrom?', 'Do you offer camper transfers to airports?'), body: t('Da. Nudimo transfere na aerodrome u Hrvatskoj (Zagreb, Rijeka-Krk, Zadar, Split, Dubrovnik i Pula), Sloveniji (Ljubljana), Mađarskoj (Budimpešta) i Austriji (Beč).', 'Yes. We offer transfers to airports in Croatia (Zagreb, Rijeka-Krk, Zadar, Split, Dubrovnik and Pula), Slovenia (Ljubljana), Hungary (Budapest) and Austria (Vienna).') },
+        { id: 'airport-transfer', title: t('Nudite li dostavu vozila?', 'Do you offer vehicle delivery?'), body: t('Da, za odabrane lokacije i uz prethodni dogovor. Dostupne opcije i naknade prikazuju se u rezervaciji.', 'Yes, to selected locations by prior arrangement. Available options and fees are shown in the booking flow.') },
         { id: 'preparation-fee', title: t('Što znači trošak pripreme pri rezervaciji kampera?', 'What does the preparation fee mean?'), body: t('Trošak pripreme pokriva kompletno čišćenje kampera, kemikalije za WC, pun tank čiste vode, jednu punu plinsku bocu, set za čišćenje i AdBlue. Pri preuzimanju naše osoblje detaljno objašnjava korištenje kampera.', 'The preparation fee covers a complete camper clean, toilet chemicals, a full fresh-water tank, one full gas bottle, a cleaning set and AdBlue. At collection, our staff will explain the camper’s use in detail.') },
         { id: 'short-rental', title: t('Mogu li iznajmiti kamper na 2 dana?', 'Can I rent a camper for 2 days?'), body: t('Nažalost, ne. U visokoj sezoni minimalni najam je 10 noćenja, u srednjoj 7 noći, a u niskoj 5 noći. Za više informacija slobodno nas kontaktirajte.', 'Unfortunately not. The minimum rental is 10 nights in high season, 7 nights in mid-season and 5 nights in low season. Contact us for more information.') },
         { id: 'deposit', title: t('Plaćam li depozit prilikom preuzimanja vozila?', 'Do I pay a deposit when collecting the vehicle?'), body: t('Da. Depozit se plaća prilikom preuzimanja isključivo karticom. Zadržava se tijekom putovanja i može se koristiti za dodatne troškove pri povratku. Ako je vozilo vraćeno neoštećeno i u skladu s uvjetima najma, depozit se vraća u roku od 15 dana, ovisno o banci.', 'Yes. The deposit is paid by card only when collecting the vehicle. It is held during the trip and may cover return-related charges. If the vehicle is returned undamaged and in line with the rental terms, the deposit is returned within 15 days, depending on the bank.') },
-        { id: 'travel-area', title: t('Gdje mi je dopušteno putovati?', 'Where am I allowed to travel?'), body: t('Možete putovati u zemlje EU i na hrvatske otoke. Pošaljite nam upit za detaljne informacije o mogućnostima putovanja i eventualnim dodatnim troškovima.', 'You can travel to EU countries and Croatian islands. Send us an enquiry for detailed travel information and possible additional costs.') },
-        { id: 'truma-service', title: t('Ne radi mi Truma grijanje/bojler. Nudite li servis?', 'My Truma heating/boiler is not working. Do you provide service?'), body: t('Da. Ovlašteni smo servis u Hrvatskoj za uređaje ugrađene u kampere i kamp-kućice. Javite nam se i dogovorite termin, a naše educirano osoblje pomoći će otkloniti problem.', 'Yes. We are an authorised service provider in Croatia for equipment installed in campers and caravans. Contact us to arrange an appointment and our trained staff will help resolve the issue.') },
-        { id: 'camper-conversion', title: t('Kupio/la sam kombi i želim ga pretvoriti u kamper. Možete li mi pomoći?', 'I bought a van and want to convert it into a camper. Can you help?'), body: t('Da. Uz servis nudimo i izradu kampera prema vašim željama. Uz konzultaciju s našim osobljem možemo zajedno pronaći odgovarajuće rješenje.', 'Yes. Alongside service, we offer camper conversions tailored to your wishes. Our team can help you find the right solution.') },
-        { id: 'special-order', title: t('Tražim određeni artikl za kamper, ali ga nemate. Može li se naručiti preko vas?', 'I am looking for a camper item that you do not have. Can it be ordered through you?'), body: t('Da. Pošaljite nam upit i pokušat ćemo nabaviti traženi artikl preko naše mreže dobavljača.', 'Yes. Send us an enquiry and we will try to source the item through our supplier network.') }
+        { id: 'travel-area', title: t('Gdje mi je dopušteno putovati?', 'Where am I allowed to travel?'), body: t('Međunarodna putovanja obično su dopuštena uz prethodnu najavu. Ograničenja i eventualne naknade potvrđujemo prije polaska.', 'International travel is normally allowed with advance notice. We confirm any restrictions or charges before departure.') }
       ] }
     ]
   }

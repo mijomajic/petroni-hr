@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { BUSINESS } from '$lib/config/business';
 import { sendContactInquiry } from '$lib/email.server';
 import type { RequestHandler } from './$types';
 
@@ -32,6 +33,6 @@ export const POST: RequestHandler = async ({ request, url }) => {
     product,
     productUrl: productPath.startsWith('/') ? `${url.origin}${productPath}` : undefined
   });
-  if (!sent) return json({ success: false, error: 'Poruku trenutno nije moguće poslati. Javite nam se na info@petroni.hr.' }, { status: 502 });
+  if (!sent) return json({ success: false, error: `Poruku trenutno nije moguće poslati. Javite nam se na ${BUSINESS.email}.` }, { status: 502 });
   return json({ success: true });
 };

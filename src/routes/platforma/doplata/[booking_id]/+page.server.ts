@@ -1,4 +1,5 @@
 import { error } from '@sveltejs/kit';
+import { BUSINESS } from '$lib/config/business';
 import { supabaseAdmin } from '$lib/supabase.server';
 import { corvuspayAvailable, hub3BarcodeDataUrl, hub3Payload, type IbanSetting } from '$lib/payments.server';
 import { validateSecondPaymentToken } from '$lib/payment-tokens.server';
@@ -29,7 +30,7 @@ export const load: PageServerLoad = async ({ params, url, setHeaders }) => {
   const bankTransfers = await Promise.all(((settings.ibans ?? []) as IbanSetting[]).map(async (account) => {
     const payload = hub3Payload({
       amount: Number(booking.second_payment_amount),
-      recipient: company.name ?? 'Petroni d.o.o.',
+      recipient: company.name ?? BUSINESS.legalName,
       address: company.address ?? '',
       iban: account.iban,
       reference: booking.confirmation_number,

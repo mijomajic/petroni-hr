@@ -1,9 +1,10 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
   let { data }: PageProps = $props();
 </script>
 
-<svelte:head><title>Rezervacije — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Rezervacije — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div>
   <div class="flex items-center justify-between mb-8">
@@ -25,7 +26,7 @@
         <option value="cancelled">Otkazane</option>
         <option value="completed">Završene</option>
       </select>
-      <button class="px-4 py-2 rounded-xl text-sm font-bold bg-[#F5C518] text-black">Filtriraj</button>
+      <button class="px-4 py-2 rounded-xl text-sm font-bold bg-[#c87442] text-black">Filtriraj</button>
     </form>
   </div>
 
@@ -50,15 +51,15 @@
                 <td class="px-4 py-3 text-[#2b2b2b]">{b.vehicles?.[0]?.name ?? '—'}</td>
                 <td class="px-4 py-3" style="color: #7a7f86">{b.pickup_date}</td>
                 <td class="px-4 py-3" style="color: #7a7f86">{b.dropoff_date}</td>
-                <td class="px-4 py-3 font-bold" style="color: #F5C518">€{b.total_price}</td>
+                <td class="px-4 py-3 font-bold" style="color: #c87442">€{b.total_price}</td>
                 <td class="px-4 py-3">
                   <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
-                    style="{b.status === 'confirmed' ? 'background: rgba(22,163,74,0.15); color: #16a34a' : b.status === 'pending' ? 'background: rgba(245,197,24,0.15); color: #F5C518' : b.status === 'cancelled' ? 'background: rgba(239,68,68,0.1); color: #ef4444' : 'background: rgba(100,100,100,0.15); color: #7a7f86'}">
+                    style="{b.status === 'confirmed' ? 'background: rgba(22,163,74,0.15); color: #16a34a' : b.status === 'pending' ? 'background: rgba(245,197,24,0.15); color: #c87442' : b.status === 'cancelled' ? 'background: rgba(239,68,68,0.1); color: #ef4444' : 'background: rgba(100,100,100,0.15); color: #7a7f86'}">
                     {b.status}
                   </span>
                 </td>
                 <td class="px-4 py-3">
-                  <a href="/admin/rezervacije/{b.id}" class="inline-flex px-4 py-2 rounded-lg text-xs font-bold bg-[#F5C518] text-black">Pregledaj sve detalje</a>
+                  <a href="/admin/rezervacije/{b.id}" class="inline-flex px-4 py-2 rounded-lg text-xs font-bold bg-[#c87442] text-black">Pregledaj sve detalje</a>
                 </td>
               </tr>
             {/each}

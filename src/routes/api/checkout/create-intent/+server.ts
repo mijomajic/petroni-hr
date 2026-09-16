@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { BUSINESS } from '$lib/config/business';
 import { supabaseAdmin } from '$lib/supabase.server';
 import {
   corvuspayAvailable,
@@ -58,14 +59,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     return json({ success: false, error: 'Jedno ili više polja kupca je predugačko.' }, { status: 400 });
   }
   if (deliveryMethod === 'boxnow' && !/^[A-Za-z0-9_-]{1,80}$/.test(customerRecord.boxnow_locker_id)) {
-    return json({ success: false, error: 'Odaberite valjan BoxNow paketomat putem karte.' }, { status: 400 });
+    return json({ success: false, error: 'Odaberite valjan paketomat putem karte.' }, { status: 400 });
   }
 
   if (!['bank_transfer', 'corvuspay', 'cash_on_delivery'].includes(paymentMethod)) {
     return json({ success: false, error: 'Odaberite valjan način plaćanja.' }, { status: 400 });
   }
   if (paymentMethod === 'corvuspay' && !corvuspayAvailable()) {
-    return json({ success: false, error: 'CorvusPay je uskoro dostupan. Odaberite bankovnu uplatu.' }, { status: 503 });
+    return json({ success: false, error: 'Kartično plaćanje trenutačno nije dostupno. Odaberite bankovnu uplatu.' }, { status: 503 });
   }
   if (!items.length) {
     return json({ success: false, error: 'Košarica je prazna.' }, { status: 400 });
@@ -195,7 +196,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     response.bankTransfers = await Promise.all(((settings.ibans ?? []) as IbanSetting[]).map(async (account) => {
       const payload = hub3Payload({
         amount: totals.total,
-        recipient: company.name ?? 'Petroni d.o.o.',
+        recipient: company.name ?? BUSINESS.legalName,
         address: company.address ?? '',
         iban: account.iban,
         reference: confirmationNumber,
@@ -214,7 +215,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     });
     if (!redirect) {
       await supabaseAdmin.from('orders').delete().eq('id', order.id);
-      return json({ success: false, error: 'CorvusPay je uskoro dostupan. Odaberite bankovnu uplatu.' }, { status: 503 });
+      return json({ success: false, error: 'Kartično plaćanje trenutačno nije dostupno. Odaberite bankovnu uplatu.' }, { status: 503 });
     }
     const providerReference = corvuspayShopOrderNumber(order.id);
     await Promise.all([

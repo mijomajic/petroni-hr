@@ -4,6 +4,7 @@
   import { locale } from '$lib/stores/locale';
   import type { BookingExtra, RentalLocation, Season, SeasonPrice, Vehicle } from '$lib/supabase';
   import type { PageProps } from './$types';
+  import { BUSINESS } from '$lib/config/business';
 
   type VehicleGroup = {
     name: string;
@@ -16,8 +17,6 @@
     maximumPrice: number | null;
   };
 
-  const categoryOrder = ['ELITE', 'COMFORT', 'DUO 4x4', 'ECO', 'KAMP PRIKOLICE'];
-
   let { data }: PageProps = $props();
   const vehicles = $derived(data.vehicles as Vehicle[]);
   const seasons = $derived(data.seasons as Season[]);
@@ -28,17 +27,23 @@
   );
 
   const vehicleGroups = $derived.by(() => {
-    const groups: VehicleGroup[] = categoryOrder
-      .map((name) => ({
-        name,
-        id: categoryId(name),
-        vehicles: vehicles.filter((vehicle) => vehicle.category === name)
-      }))
-      .filter((group) => group.vehicles.length > 0);
+    const categoryNames = Array.from(
+      new Set(vehicles.map((vehicle) => vehicle.category?.trim()).filter((category): category is string => Boolean(category)))
+    );
 
-    const uncategorized = vehicles.filter((vehicle) => !categoryOrder.includes(vehicle.category ?? ''));
+    const groups: VehicleGroup[] = categoryNames.map((name) => ({
+      name,
+      id: categoryId(name),
+      vehicles: vehicles.filter((vehicle) => vehicle.category?.trim() === name)
+    }));
+
+    const uncategorized = vehicles.filter((vehicle) => !vehicle.category?.trim());
     if (uncategorized.length > 0) {
-      groups.push({ name: 'OSTALO', id: 'ostalo', vehicles: uncategorized });
+      groups.push({
+        name: $locale === 'hr' ? 'OSTALA VOZILA' : 'OTHER VEHICLES',
+        id: 'other-vehicles',
+        vehicles: uncategorized
+      });
     }
 
     return groups;
@@ -63,12 +68,12 @@
 
   const description = $derived(
     $locale === 'hr'
-      ? 'Najam kampera i kamp prikolica u Hrvatskoj uz Petroni: pregled vozila, kategorija, kapaciteta i sezonskih cijena.'
-      : 'Camper and caravan rental in Croatia with Petroni: explore vehicles, categories, capacities and seasonal prices.'
+      ? 'Pregledajte Alderway kampere, kapacitete, rasporede i sezonske cijene te rezervirajte online.'
+      : 'Explore Alderway campers, capacities, layouts and seasonal pricing, then book online.'
   );
   const pageSchema = $derived(graphSchema([
     breadcrumbSchema([
-      { name: 'Petroni', path: '/' },
+      { name: BUSINESS.name, path: '/' },
       { name: $locale === 'hr' ? 'Vozila' : 'Vehicles', path: '/vozila' },
       { name: $locale === 'hr' ? 'Najam kampera' : 'Camper rental', path: '/vozila/najam-kampera' }
     ]),
@@ -133,24 +138,24 @@
 </script>
 
 <svelte:head>
-  <title>{$locale === 'hr' ? 'Najam kampera u Hrvatskoj – rezervirajte online | Petroni' : 'Camper rental in Croatia – book online | Petroni'}</title>
+  <title>{$locale === 'hr' ? 'Najam kampera – rezervirajte online' : 'Camper hire – book online'} | {BUSINESS.name}</title>
   <meta name="description" content={description} />
-  <meta property="og:title" content={$locale === 'hr' ? 'Najam kampera u Hrvatskoj – rezervirajte online | Petroni' : 'Camper rental in Croatia – book online | Petroni'} />
+  <meta property="og:title" content={`${$locale === 'hr' ? 'Najam kampera – rezervirajte online' : 'Camper hire – book online'} | ${BUSINESS.name}`} />
   <meta property="og:description" content={description} />
   {@html `<script type="application/ld+json">${jsonLd(pageSchema)}</script>`}
 </svelte:head>
 
 <main>
-  <section class="section pb-10 sm:pb-14">
+  <section class="pb-7 pt-12 sm:pb-8 sm:pt-14">
     <div class="container-x">
       <nav class="mb-5 flex items-center gap-2 text-xs text-[#9aa0a8]" aria-label={$locale === 'hr' ? 'Putanja stranice' : 'Breadcrumb'}>
-        <a href="/" class="hover:text-[#b5890a]">{$locale === 'hr' ? 'Naslovnica' : 'Home'}</a><span>/</span>
-        <a href="/vozila" class="hover:text-[#b5890a]">{$locale === 'hr' ? 'Vozila' : 'Vehicles'}</a><span>/</span>
+        <a href="/" class="hover:text-[#9f542e]">{$locale === 'hr' ? 'Naslovnica' : 'Home'}</a><span>/</span>
+        <a href="/vozila" class="hover:text-[#9f542e]">{$locale === 'hr' ? 'Vozila' : 'Vehicles'}</a><span>/</span>
         <span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Najam kampera' : 'Camper rental'}</span>
       </nav>
 
       <div class="max-w-3xl">
-        <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#b5890a]">Petroni rental</p>
+        <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#9f542e]">{BUSINESS.name}</p>
         <h1 class="section-title mb-3">{$locale === 'hr' ? 'Najam kampera' : 'Camper rental'}</h1>
         <p class="lead">{$locale === 'hr' ? 'Pronađite kamper ili kamp prikolicu za svoje sljedeće putovanje.' : 'Find the camper or caravan for your next journey.'}</p>
       </div>
@@ -160,7 +165,7 @@
           {#each vehicleGroups as group}
             <a
               href={`#${group.id}`}
-              class="rounded-full border border-[#dedfe3] bg-white px-4 py-2 text-xs font-bold tracking-[0.08em] text-[#44484e] transition-colors hover:border-[#f5c518] hover:bg-[#fffbea] hover:text-[#7c6100]"
+              class="rounded-full border border-[#dedfe3] bg-white px-4 py-2 text-xs font-bold tracking-[0.08em] text-[#44484e] transition-colors hover:border-[#c87442] hover:bg-[#fffbea] hover:text-[#7c6100]"
             >
               {group.name}
               <span class="ml-1 text-[#9aa0a8]">{group.vehicles.length}</span>
@@ -171,7 +176,7 @@
     </div>
   </section>
 
-  <section class="pb-16 sm:pb-24" aria-labelledby="fleet-heading">
+  <section class="pb-12 sm:pb-16" aria-labelledby="fleet-heading">
     <div class="container-x">
       <h2 id="fleet-heading" class="sr-only">{$locale === 'hr' ? 'Vozila za najam' : 'Rental vehicles'}</h2>
 
@@ -184,7 +189,7 @@
           {$locale === 'hr' ? 'Trenutačno nema objavljenih vozila za najam.' : 'There are currently no published rental vehicles.'}
         </div>
       {:else}
-        <div class="space-y-16 sm:space-y-20">
+        <div class="space-y-12 sm:space-y-14">
           {#each vehicleGroups as group}
             <section id={group.id} class="scroll-mt-28" aria-labelledby={`${group.id}-heading`}>
               <div class="mb-6 flex items-center gap-4 sm:mb-8">
@@ -206,7 +211,7 @@
       {/if}
 
       {#if vehicles.length > 0}
-        <div class="mt-14 flex justify-center sm:mt-18">
+        <div class="mt-10 flex justify-center sm:mt-12">
           <a href="/rezerviraj" class="btn btn-primary px-8 py-3.5">
             {$locale === 'hr' ? 'Provjeri termine i rezerviraj' : 'Check dates and book'}
           </a>
@@ -216,10 +221,10 @@
   </section>
 
   {#if seasonSummaries.length > 0 || equipment.length > 0 || locations.length > 0}
-    <section class="border-y border-[#e9eaed] bg-[#f7f8f9] py-16 sm:py-24" aria-labelledby="rental-info-heading">
+    <section class="border-y border-[#e9eaed] bg-[#f7f8f9] py-12 sm:py-16" aria-labelledby="rental-info-heading">
       <div class="container-x">
         <div class="mb-10 max-w-3xl sm:mb-14">
-          <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#b5890a]">{$locale === 'hr' ? 'Prije rezervacije' : 'Before booking'}</p>
+          <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#9f542e]">{$locale === 'hr' ? 'Prije rezervacije' : 'Before booking'}</p>
           <h2 id="rental-info-heading" class="text-3xl font-black tracking-tight text-[#252525] sm:text-4xl">
             {$locale === 'hr' ? 'Sve važno na jednom mjestu' : 'Everything important in one place'}
           </h2>

@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import { vehicleThumbnail } from '$lib/vehicle-images';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
 </script>
 
-<svelte:head><title>Vozila — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Vozila — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div>
   <div class="mb-8 flex items-start justify-between gap-4">
@@ -17,7 +18,7 @@
   </div>
 
   {#if form?.message}
-    <div class="mb-6 rounded-xl bg-[#fff7e0] p-4 text-sm text-[#6f5600]">{form.message}</div>
+    <div class="mb-6 rounded-xl bg-[#f5e8df] p-4 text-sm text-[#6f5600]">{form.message}</div>
   {/if}
 
   <section class="overflow-hidden rounded-2xl border border-[#ededf0] bg-white">
@@ -47,7 +48,7 @@
               <td class="px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#7a7f86]">{vehicle.type}</td>
               <td class="px-4 py-3 text-xs font-bold uppercase text-[#7a7f86]">{vehicle.category ?? '-'}</td>
               <td class="px-4 py-3 text-[#5b6168]">{vehicle.seats ?? '-'} sjedala / {vehicle.beds ?? '-'} ležaja</td>
-              <td class="px-4 py-3 font-bold text-[#b5890a]">
+              <td class="px-4 py-3 font-bold text-[#9f542e]">
                 {vehicle.type === 'rental' ? `${vehicle.base_price_per_day ?? 0} EUR/dan` : `${vehicle.sale_price ?? 0} EUR`}
               </td>
               <td class="px-4 py-3">
@@ -60,7 +61,7 @@
                 </form>
               </td>
               <td class="px-4 py-3">
-                <span class="rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-widest {vehicle.type === 'sale' || vehicle.is_for_sale ? 'bg-[#fff7d6] text-[#806300]' : 'bg-[#f1f2f4] text-[#7a7f86]'}">
+                <span class="rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-widest {vehicle.type === 'sale' || vehicle.is_for_sale ? 'bg-[#f5e8df] text-[#7f4327]' : 'bg-[#f1f2f4] text-[#7a7f86]'}">
                   {vehicle.type === 'sale' || vehicle.is_for_sale ? 'Na prodaju' : 'Nije u prodaji'}
                 </span>
               </td>

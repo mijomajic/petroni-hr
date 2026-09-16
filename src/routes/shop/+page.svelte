@@ -53,18 +53,18 @@
     goto($page.url.pathname, { keepFocus: true, noScroll: true, replaceState: true });
   }
   const description = $derived($locale === 'hr'
-    ? 'Petroni shop za kamping opremu, dijelove za kampere i karavane, dodatnu opremu i proizvode za putovanja.'
-    : 'Petroni shop for camping equipment, camper and caravan parts, travel accessories and outdoor products.');
+    ? 'Alderway shop za kamping opremu, dijelove za kampere i karavane, dodatnu opremu i proizvode za putovanja.'
+    : 'Alderway shop for camping equipment, camper and caravan parts, travel accessories and outdoor products.');
   const shopSchema = $derived(graphSchema([
     breadcrumbSchema([
-      { name: 'Petroni', path: '/' },
+      { name: 'Alderway', path: '/' },
       { name: 'Shop', path: '/shop' }
     ]),
     {
       '@type': 'CollectionPage',
       '@id': `${absoluteUrl('/shop')}#collection`,
-      name: 'Petroni Shop',
-      description: 'Petroni shop za kamping opremu, dijelove za kampere i karavane, dodatnu opremu i proizvode za putovanja.',
+      name: 'Alderway Shop',
+      description: 'Alderway shop za kamping opremu, dijelove za kampere i karavane, dodatnu opremu i proizvode za putovanja.',
       mainEntity: {
         '@type': 'ItemList',
         itemListElement: products.slice(0, 24).map((product, index) => ({
@@ -80,21 +80,21 @@
 </script>
 
 <svelte:head>
-  <title>{$locale === 'hr' ? 'Kamping oprema i dijelovi za kamper' : 'Camping equipment and camper parts'} | Petroni Shop</title>
+  <title>{$locale === 'hr' ? 'Kamping oprema i dijelovi za kamper' : 'Camping equipment and camper parts'} | Alderway Shop</title>
   <meta name="description" content={description} />
-  <meta property="og:title" content={`${$locale === 'hr' ? 'Kamping oprema i dijelovi za kamper' : 'Camping equipment and camper parts'} | Petroni Shop`} />
+  <meta property="og:title" content={`${$locale === 'hr' ? 'Kamping oprema i dijelovi za kamper' : 'Camping equipment and camper parts'} | Alderway Shop`} />
   <meta property="og:description" content={description} />
   {@html `<script type="application/ld+json">${jsonLd(shopSchema)}</script>`}
 </svelte:head>
 
 <!-- Hero banner -->
 <section class="relative h-[220px] md:h-[280px] flex items-center overflow-hidden">
-  <img src="/images/vehicles/knaus-boxdrive-680me/01-man-1.webp" alt="" width="1440" height="1080" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover" />
+  <img src="/images/products/rv-parts/shop-parts-hero.webp" alt="" width="1800" height="603" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover" />
   <div class="absolute inset-0" style="background:linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.18) 100%)"></div>
   <div class="container-x relative z-10">
-    <span class="block text-[11px] font-bold uppercase tracking-[0.2em] mb-3" style="color:#f5c518">{$locale === 'hr' ? 'Kamping oprema' : 'Camping equipment'}</span>
+    <span class="block text-[11px] font-bold uppercase tracking-[0.2em] mb-3" style="color:#c87442">{$locale === 'hr' ? 'Dijelovi i oprema' : 'Parts & equipment'}</span>
     <h1 class="text-[32px] md:text-[46px] font-extrabold uppercase tracking-tight" style="color:#ffffff; text-shadow:0 2px 20px rgba(0,0,0,0.8)">Shop</h1>
-    <p class="mt-2 text-[14px]" style="color:rgba(255,255,255,0.82)">{$locale === 'hr' ? 'Sve što trebate za savršeno kamping iskustvo' : 'Everything you need for the perfect camping experience'}</p>
+    <p class="mt-2 text-[14px]" style="color:rgba(255,255,255,0.82)">{$locale === 'hr' ? 'Pouzdani dijelovi i oprema za kampere i kamp prikolice' : 'Reliable parts and touring hardware for campers and caravans'}</p>
   </div>
 </section>
 
@@ -144,17 +144,17 @@
       <!-- Products -->
       <div class="flex-1">
         {#if loading}
-          <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div class="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
             {#each Array(12) as _}<div class="rounded-lg aspect-square animate-pulse bg-[#f1f2f4]"></div>{/each}
           </div>
         {:else if products.length === 0}
           <div class="py-20 text-center card">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" class="mx-auto mb-5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
             <p class="font-semibold text-[#5b6168] mb-2">{$locale === 'hr' ? 'Nema proizvoda' : 'No products'}</p>
-            <p class="text-[13px] text-[#9aa0a8] mb-6">{$locale === 'hr' ? 'Proizvodi se dodaju — provjerite uskoro.' : 'Products are being added — check back soon.'}</p>
+            <p class="text-[13px] text-[#9aa0a8] mb-6">{$locale === 'hr' ? 'Nema proizvoda koji odgovaraju odabranim filtrima.' : 'No products match the selected filters.'}</p>
           </div>
         {:else}
-          <div data-testid="shop-product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div data-testid="shop-product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
             {#each products as product}<ProductCard {product} />{/each}
           </div>
 
@@ -179,15 +179,15 @@
 
         <!-- Shipping info -->
         <div class="card p-5">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-[#b5890a] mb-3">{$locale === 'hr' ? 'Dostava' : 'Shipping'}</p>
+          <p class="text-[11px] font-bold uppercase tracking-widest text-[#9f542e] mb-3">{$locale === 'hr' ? 'Dostava' : 'Shipping'}</p>
           <p class="text-[12px] text-[#6b7178] leading-relaxed mb-1">{$locale === 'hr' ? 'Dostava samo unutar EU.' : 'Delivery within EU only.'}</p>
-          <p class="text-[12px] text-[#6b7178] leading-relaxed mb-1">{$locale === 'hr' ? 'Dostava izvan HR: na upit.' : 'Delivery outside HR: on request.'}</p>
-          <p class="text-[12px] text-[#6b7178] leading-relaxed">{$locale === 'hr' ? 'Cijena dostave samo za HR.' : 'Shipping price for HR only.'}</p>
+          <p class="text-[12px] text-[#6b7178] leading-relaxed mb-1">{$locale === 'hr' ? 'Međunarodna dostava: na upit.' : 'International delivery: on request.'}</p>
+          <p class="text-[12px] text-[#6b7178] leading-relaxed">{$locale === 'hr' ? 'Trošak dostave prikazuje se pri naplati.' : 'Delivery cost is shown at checkout.'}</p>
         </div>
 
         <!-- Search -->
         <div class="card p-5">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-[#b5890a] mb-3">{$locale === 'hr' ? 'Pretraži' : 'Search'}</p>
+          <p class="text-[11px] font-bold uppercase tracking-widest text-[#9f542e] mb-3">{$locale === 'hr' ? 'Pretraži' : 'Search'}</p>
           <div class="relative">
             <input type="text" placeholder={$locale === 'hr' ? 'Pretraži proizvode…' : 'Search products…'} bind:value={search}
               class="field pr-10 text-[13px]" onkeydown={(event) => { if (event.key === 'Enter') applyFilters(1); }} />
@@ -200,13 +200,13 @@
 
         <!-- Categories -->
         <div class="card p-5">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-[#b5890a] mb-3">{$locale === 'hr' ? 'Kategorije' : 'Categories'}</p>
+          <p class="text-[11px] font-bold uppercase tracking-widest text-[#9f542e] mb-3">{$locale === 'hr' ? 'Kategorije' : 'Categories'}</p>
           <CategoryNavigation categories={allCategories} />
         </div>
 
         <!-- Price range -->
         <div class="card p-5">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-[#b5890a] mb-3">{$locale === 'hr' ? 'Cijena' : 'Price'}</p>
+          <p class="text-[11px] font-bold uppercase tracking-widest text-[#9f542e] mb-3">{$locale === 'hr' ? 'Cijena' : 'Price'}</p>
           <div class="flex items-center gap-2 mb-3">
             <input type="number" min="0" placeholder={$locale === 'hr' ? 'Min' : 'Min'} bind:value={minPrice} onchange={() => applyFilters(1)}
               class="field text-[13px]" />
@@ -214,7 +214,7 @@
             <input type="number" min="0" placeholder={$locale === 'hr' ? 'Max' : 'Max'} bind:value={maxPrice} onchange={() => applyFilters(1)}
               class="field text-[13px]" />
           </div>
-          <button onclick={resetFilters} class="w-full rounded-md border border-[#e2e4e8] px-3 py-2 text-[12px] font-bold text-[#6b7178] transition-colors hover:border-[#F5C518] hover:text-[#806300]">{$locale === 'hr' ? 'Očisti filtere' : 'Clear filters'}</button>
+          <button onclick={resetFilters} class="w-full rounded-md border border-[#e2e4e8] px-3 py-2 text-[12px] font-bold text-[#6b7178] transition-colors hover:border-[#c87442] hover:text-[#7f4327]">{$locale === 'hr' ? 'Očisti filtere' : 'Clear filters'}</button>
         </div>
 
       </aside>

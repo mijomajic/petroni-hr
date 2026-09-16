@@ -47,16 +47,16 @@
 
   <div class="px-3 pb-4 flex flex-col flex-1">
     <a href="/product/{product.slug}">
-      <h3 class="text-[13px] font-medium text-[#3a3f45] leading-snug line-clamp-2 min-h-[2.4em] mb-2 hover:text-[#b5890a] transition-colors">{name}</h3>
+      <h3 class="text-[13px] font-medium text-[#3a3f45] leading-snug line-clamp-2 min-h-[2.4em] mb-2 hover:text-[#9f542e] transition-colors">{name}</h3>
     </a>
     <p class="text-[15px] font-semibold text-[#2b2b2b] mb-3">{product.price.toFixed(2)} €</p>
     {#if product.pickup_only}
-      <p class="mb-3 rounded-md bg-[#fff7e0] px-2 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#7a5d00]">{$locale === 'hr' ? 'Samo osobno preuzimanje' : 'Pickup only'}</p>
+      <p class="mb-3 rounded-md bg-[#f5e8df] px-2 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#7a5d00]">{$locale === 'hr' ? 'Samo osobno preuzimanje' : 'Pickup only'}</p>
     {/if}
     {#if product.stock === 0}
       <StockNotificationForm productId={product.id} compact />
     {:else}
-      <button onclick={handleAdd} class="btn mt-auto min-h-11 w-full whitespace-nowrap px-2 py-2.5 text-[10px] tracking-[0.025em]" style="background:{added ? '#16a34a' : '#f5c518'};color:#fff">
+      <button onclick={handleAdd} class="btn mt-auto min-h-11 w-full whitespace-nowrap px-2 py-2.5 text-[10px] tracking-[0.025em]" style="background:{added ? '#16a34a' : '#c87442'};color:#fff">
         {added ? ($locale === 'hr' ? 'Dodano' : 'Added') : limitReached ? ($locale === 'hr' ? 'Maks. količina' : 'Max. quantity') : addLabel}
       </button>
     {/if}

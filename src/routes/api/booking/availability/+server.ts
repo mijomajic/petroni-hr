@@ -1,6 +1,8 @@
 import { json } from '@sveltejs/kit';
 import { getUnavailableVehicleIds } from '$lib/pricing.server';
 import type { RequestHandler } from './$types';
+import { dev } from '$app/environment';
+import { useStaticDemoData } from '$lib/demo-mode.server';
 
 export const GET: RequestHandler = async ({ url }) => {
   const vehicleId = url.searchParams.get('vehicleId');
@@ -22,10 +24,15 @@ export const GET: RequestHandler = async ({ url }) => {
     return json({ available: false, error: 'Neispravni parametri dostupnosti.' }, { status: 400 });
   }
 
+  if (useStaticDemoData) {
+    return json({ available: vehicleId ? true : undefined, unavailableVehicleIds: [] });
+  }
+
   let unavailableVehicleIds: string[];
   try {
     unavailableVehicleIds = await getUnavailableVehicleIds(vehicleIds, pickupDate, dropoffDate);
   } catch {
+    if (dev) return json({ available: vehicleId ? true : undefined, unavailableVehicleIds: [] });
     return json({ available: false, error: 'Provjera dostupnosti nije uspjela.' }, { status: 500 });
   }
 

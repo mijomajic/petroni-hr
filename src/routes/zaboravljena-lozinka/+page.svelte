@@ -16,7 +16,7 @@
 </script>
 
 <svelte:head>
-  <title>{$locale === 'hr' ? 'Zaboravljena lozinka' : 'Forgot password'} — Petroni</title>
+  <title>{$locale === 'hr' ? 'Zaboravljena lozinka' : 'Forgot password'} — Alderway</title>
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
@@ -31,7 +31,7 @@
 
       {#if form?.sent}
         <div class="rounded-xl bg-white p-7 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.5)] md:p-9">
-          <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#fff7e0] text-[#9a7600]">
+          <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#f5e8df] text-[#9a7600]">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m4 4 16 0 0 16-16 0Z"/><path d="m4 6 8 6 8-6"/></svg>
           </div>
           <h2 class="text-lg font-bold text-[#2b2b2b]">{$locale === 'hr' ? 'Provjerite email' : 'Check your email'}</h2>
@@ -45,7 +45,7 @@
           <div class="space-y-2">
             <label class="field-label" for="recovery_email">{$locale === 'hr' ? 'Email adresa' : 'Email address'}</label>
             <input id="recovery_email" name="email" type="email" autocomplete="email" class="field" value={form?.email ?? ''} required />
-            <p class="text-xs leading-relaxed text-[#8b9099]">{$locale === 'hr' ? 'Upotrijebite adresu kojom se prijavljujete u Petroni.' : 'Use the address you use to sign in to Petroni.'}</p>
+            <p class="text-xs leading-relaxed text-[#8b9099]">{$locale === 'hr' ? 'Upotrijebite adresu kojom se prijavljujete u Alderway.' : 'Use the address you use to sign in to Alderway.'}</p>
           </div>
 
           {#if errorMessage}
@@ -58,7 +58,7 @@
         </form>
       {/if}
 
-      <a href={loginPath} class="mt-6 block text-sm font-semibold text-[#f5c518] hover:underline">← {$locale === 'hr' ? 'Natrag na prijavu' : 'Back to sign in'}</a>
+      <a href={loginPath} class="mt-6 block text-sm font-semibold text-[#c87442] hover:underline">← {$locale === 'hr' ? 'Natrag na prijavu' : 'Back to sign in'}</a>
     </div>
   </div>
 </section>

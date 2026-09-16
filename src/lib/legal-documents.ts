@@ -64,11 +64,11 @@ export const DEFAULT_LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocumentVers
     document_key: 'privacy',
     title_hr: 'Politika privatnosti',
     title_en: 'Privacy Policy',
-    summary_hr: 'Kako Petroni prikuplja, koristi, čuva i štiti osobne podatke u najmu kampera, korisničkim računima i webshopu. Konačni tekst odobravaju Petroni i pravni savjetnik.',
-    summary_en: 'How Petroni collects, uses, retains and protects personal data in camper rental, user accounts and the webshop. Petroni and its legal adviser remain responsible for final approval.',
+    summary_hr: 'Kako Alderway prikuplja, koristi, čuva i štiti osobne podatke u najmu kampera, korisničkim računima i webshopu. Objavljena verzija primjenjuje se od navedenog datuma.',
+    summary_en: 'How Alderway collects, uses, retains and protects personal data in camper rental, user accounts and the webshop. The published version applies from its stated effective date.',
     content_hr: `## Voditelj obrade i kontakt
 
-Voditelj obrade je Petroni d.o.o., Ul. Slavka Tomerlina 8, 10360 Sesvete, Hrvatska. Za pitanja, zahtjeve za pristup, ispravak, brisanje ili druga prava obratite se na info@petroni.hr ili +385 91 242 7247.
+Voditelj obrade je Alderway Campers, 18 Alder Way, Northmere, N04 R2Y6, Irska. Za pitanja, zahtjeve za pristup, ispravak, brisanje ili druga prava obratite se na hello@alderwaycampers.com ili +353 1 687 2048.
 
 ## Podaci koje obrađujemo
 
@@ -87,7 +87,7 @@ Podatke obrađujemo radi radnji prije ugovora i izvršenja ugovora, ispunjenja p
 
 ## Primatelji i pružatelji usluga
 
-Kada je nužno, podatke mogu obrađivati Supabase, Vercel, Resend i povezana email infrastruktura, CorvusPay, banke, Overseas Express, BoxNow, knjigovodstvo, pravni ili IT savjetnici i nadležna tijela. Petroni ne pohranjuje pune podatke platnih kartica.
+Kada je nužno, podatke mogu obrađivati pružatelji hostinga, baze podataka, transakcijske e-pošte, kartičnog plaćanja, banke, dostavne i paketomat usluge, knjigovodstvo, pravni ili IT savjetnici i nadležna tijela. Alderway ne pohranjuje pune podatke platnih kartica.
 
 ## Međunarodni prijenosi
 
@@ -99,7 +99,7 @@ Podaci se čuvaju onoliko koliko je potrebno za račun ili uslugu, računovodstv
 
 ## Vaša prava
 
-Možete zatražiti pristup, ispravak, brisanje, ograničenje, prenosivost, prigovor ili povlačenje privole kada je primjenjivo. Radi zaštite možemo zatražiti provjeru identiteta. Možete se obratiti i Agenciji za zaštitu osobnih podataka Republike Hrvatske.
+Možete zatražiti pristup, ispravak, brisanje, ograničenje, prenosivost, prigovor ili povlačenje privole kada je primjenjivo. Radi zaštite možemo zatražiti provjeru identiteta. Možete se obratiti i Irskoj komisiji za zaštitu podataka.
 
 ## Sigurnost i djeca
 
@@ -107,15 +107,15 @@ Primjenjujemo kontrolu pristupa, serversku provjeru cijena, sigurnosne zapise i 
 
 ## Promjene politike
 
-Objavljena verzija, datum početka primjene i povijest promjena vode se u zaštićenom Petroni administracijskom sustavu.`,
+Objavljena verzija, datum početka primjene i povijest promjena vode se u zaštićenom Alderway administracijskom sustavu.`,
     content_en: `## Controller and contact
 
-The controller is Petroni d.o.o., Ul. Slavka Tomerlina 8, 10360 Sesvete, Croatia. For questions or requests for access, correction, deletion or other rights, contact info@petroni.hr or +385 91 242 7247.
+The controller is Alderway Campers, 18 Alder Way, Northmere, N04 R2Y6, Ireland. For questions or requests for access, correction, deletion or other rights, contact hello@alderwaycampers.com or +353 1 687 2048.
 
 ## Data we process
 
 - Account and login data, rental and driver details, webshop order and delivery data, back-in-stock requests, payments, invoices, complaints and customer communications.
-- Rental consent records include the time, IP address, accepted version and linked booking. This is an audit trail, not a guarantee of legal enforceability.
+- Rental consent records include the time, IP address, accepted version and linked booking so the agreed terms can be reproduced with the reservation.
 - Technical data includes necessary cookies, security and error logs, and browser storage used for language, cart and booking drafts.
 
 ## Purposes and legal bases
@@ -124,23 +124,23 @@ We process data for pre-contract steps and contract performance, legal obligatio
 
 ## Recipients, transfers and retention
 
-Where necessary, data may be processed by Supabase, Vercel, Resend and related email infrastructure, CorvusPay, banks, Overseas Express, BoxNow, accounting, legal or IT advisers and public authorities. Petroni does not store full card details. Some providers may process data outside the EEA using available safeguards. Data is retained only as long as needed for the service, legal duties, security and claims.
+Where necessary, data may be processed by hosting, database, transactional email, hosted card-payment, banking, courier and parcel-locker providers, as well as accounting, legal or IT advisers and public authorities. Alderway does not store full card details. Some providers may process data outside the EEA using available safeguards. Data is retained only as long as needed for the service, legal duties, security and claims.
 
 ## Your rights
 
-You may request access, correction, deletion, restriction, portability, objection or withdrawal of consent where applicable. Identity verification may be required. You may also contact the Croatian Personal Data Protection Agency.
+You may request access, correction, deletion, restriction, portability, objection or withdrawal of consent where applicable. Identity verification may be required. You may also contact the Irish Data Protection Commission.
 
 ## Changes
 
-The published version, effective date and change history are maintained in the protected Petroni administration system.`
+The published version, effective date and change history are maintained in the protected Alderway administration system.`
   },
   cookies: {
     ...BASE_VERSION,
     document_key: 'cookies',
     title_hr: 'Kolačići i pohrana preglednika',
     title_en: 'Cookies and Browser Storage',
-    summary_hr: 'Popis tehnički nužnih kolačića i podataka koje Petroni aplikacija čuva u pregledniku. Trenutačno nema analitičkih ni marketinških kolačića.',
-    summary_en: 'An inventory of technically necessary cookies and browser storage used by Petroni. There are currently no analytics or advertising cookies.',
+    summary_hr: 'Popis tehnički nužnih kolačića i podataka koje Alderway aplikacija čuva u pregledniku. Trenutačno nema analitičkih ni marketinških kolačića.',
+    summary_en: 'An inventory of technically necessary cookies and browser storage used by Alderway. There are currently no analytics or advertising cookies.',
     content_hr: `## Što se trenutačno koristi
 
 - Supabase Auth postavlja nužne sesijske kolačiće za prijavu i zaštitu korisničkih i administratorskih računa.
@@ -150,11 +150,11 @@ The published version, effective date and change history are maintained in the p
 
 ## Analitika i marketing
 
-Petroni trenutačno ne učitava Google Analytics, marketinške piksele ni oglasne kolačiće. Za nužne funkcije ne prikazuje se obmanjujući banner za privolu. Ako se uvede neobavezna analitika ili marketing, ti se alati ne smiju učitati prije odgovarajućeg izbora korisnika.
+Alderway trenutačno ne učitava Google Analytics, marketinške piksele ni oglasne kolačiće. Za nužne funkcije ne prikazuje se obmanjujući banner za privolu. Ako se uvede neobavezna analitika ili marketing, ti se alati ne smiju učitati prije odgovarajućeg izbora korisnika.
 
 ## Vanjske usluge
 
-Fontovi i jezične zastavice poslužuju se lokalno. BoxNow karta ne učitava se pri otvaranju stranice, nego tek kada kupac izabere BoxNow i klikne otvaranje službene karte. Vanjske poveznice prema kartama, društvenim mrežama i partnerima kontaktiraju te stranice tek nakon klika.
+Fontovi i grafički elementi poslužuju se lokalno. Karta paketomata ne učitava se pri otvaranju stranice, nego tek kada kupac odabere dostavu u paketomat i otvori kartu. Vanjske poveznice prema kartama i partnerima kontaktiraju te stranice tek nakon klika.
 
 ## Upravljanje podacima u pregledniku
 
@@ -168,7 +168,7 @@ Košaricu možete isprazniti u sučelju. Ostalu lokalnu ili sesijsku pohranu i k
 
 ## Analytics, marketing and external services
 
-Petroni currently loads no Google Analytics, advertising pixels or marketing cookies. Local fonts and language flags do not contact third parties. The BoxNow map loads only after the customer selects BoxNow and opens the official map. External maps, social networks and partner sites are contacted only after the user follows their links.
+Alderway currently loads no Google Analytics, advertising pixels or marketing cookies. Local fonts and interface assets do not contact third parties. The parcel-locker map loads only after the customer selects locker delivery and opens the map. External maps and partner sites are contacted only after the user follows their links.
 
 ## Controls
 
@@ -179,15 +179,15 @@ The cart can be cleared in the interface. Other browser data and cookies can be 
     document_key: 'shop_terms',
     title_hr: 'Uvjeti poslovanja webshopa',
     title_en: 'Webshop Terms of Business',
-    summary_hr: 'Osnovna pravila naručivanja u Petroni webshopu. Konačnu verziju prije go-livea moraju potvrditi Petroni i pravni savjetnik.',
-    summary_en: 'Core rules for ordering from the Petroni webshop. Petroni and its legal adviser must approve the final version before go-live.',
+    summary_hr: 'Osnovna pravila naručivanja, plaćanja, dostave i povrata u Alderway webshopu.',
+    summary_en: 'Core rules for ordering from the Alderway webshop. The published version applies from its stated effective date.',
     content_hr: `## Prodavatelj i kontakt
 
-Petroni d.o.o., Ul. Slavka Tomerlina 8, 10360 Sesvete, Hrvatska. Kontakt: info@petroni.hr i +385 91 242 7247.
+Alderway Campers, 18 Alder Way, Northmere, N04 R2Y6, Irska. Kontakt: hello@alderwaycampers.com i +353 1 687 2048.
 
 ## Proizvodi, cijene i dostupnost
 
-Prikazane cijene izražene su u eurima. Dostupnost i ukupni iznos ponovno se provjeravaju na serveru prije spremanja narudžbe. Očita pogreška u cijeni, opisu ili zalihi ne stvara obvezu isporuke po pogrešnom podatku; Petroni će kupca obavijestiti i ponuditi nastavak ili otkazivanje.
+Prikazane cijene izražene su u eurima. Dostupnost i ukupni iznos ponovno se provjeravaju na serveru prije spremanja narudžbe. Očita pogreška u cijeni, opisu ili zalihi ne stvara obvezu isporuke po pogrešnom podatku; Alderway će kupca obavijestiti i ponuditi nastavak ili otkazivanje.
 
 ## Narudžba i potvrda
 
@@ -195,11 +195,11 @@ Slanje narudžbe znači da je zahtjev zaprimljen na obradu. Automatska poruka po
 
 ## Plaćanje i dostava
 
-Dostupni načini, cijene, rokovi i ograničenja prikazuju se na stranici Plaćanje i dostava te u checkoutu. Kod kartičnog plaćanja korisnik se preusmjerava na CorvusPay; Petroni ne pohranjuje pune podatke kartice.
+Dostupni načini, cijene, rokovi i ograničenja prikazuju se na stranici Plaćanje i dostava te u checkoutu. Kod kartičnog plaćanja korisnik se preusmjerava na CorvusPay; Alderway ne pohranjuje pune podatke kartice.
 
 ## Povrat, prigovor i materijalni nedostatak
 
-Postupak je opisan na stranici Reklamacije i povrat. Ovaj tehnički početni tekst ne ograničava prava koja kupcu pripadaju po obveznim propisima.
+Postupak je opisan na stranici Reklamacije i povrat. Ovi uvjeti ne ograničavaju prava koja kupcu pripadaju po obveznim propisima.
 
 ## Privatnost
 
@@ -207,90 +207,90 @@ Obrada osobnih podataka opisana je u Politici privatnosti i dokumentu Kolačići
 
 ## Mjerodavno pravo i izmjene
 
-Primjenjuje se pravo Republike Hrvatske i obvezna pravila zaštite potrošača. Na narudžbu se primjenjuje verzija objavljena s datumom početka primjene u trenutku naručivanja. Konačni pravni tekst i svaki kasniji sadržaj odobravaju Petroni i pravni savjetnik.`,
+Primjenjuje se pravo Irske i obvezna pravila zaštite potrošača. Na narudžbu se primjenjuje verzija objavljena s datumom početka primjene u trenutku naručivanja. Svaka objavljena izmjena sadrži datum početka primjene.`,
     content_en: `## Seller and contact
 
-Petroni d.o.o., Ul. Slavka Tomerlina 8, 10360 Sesvete, Croatia. Contact: info@petroni.hr and +385 91 242 7247.
+Alderway Campers, 18 Alder Way, Northmere, N04 R2Y6, Ireland. Contact: hello@alderwaycampers.com and +353 1 687 2048.
 
 ## Products, prices and availability
 
-Prices are displayed in euros. Availability and totals are checked again on the server before an order is stored. An obvious error in price, description or stock does not create an obligation to supply using incorrect information; Petroni will contact the customer and offer continuation or cancellation.
+Prices are displayed in euros. Availability and totals are checked again on the server before an order is stored. An obvious error in price, description or stock does not create an obligation to supply using incorrect information; Alderway will contact the customer and offer continuation or cancellation.
 
 ## Orders, payment and delivery
 
-Submitting an order records a request for processing. An automated receipt message does not necessarily constitute final acceptance or dispatch. Available payment and delivery methods, prices and restrictions are shown on the Payment and Shipping page and at checkout. Full card details are not stored by Petroni.
+Submitting an order records a request for processing. An automated receipt message does not necessarily constitute final acceptance or dispatch. Available payment and delivery methods, prices and restrictions are shown on the Payment and Shipping page and at checkout. Full card details are not stored by Alderway.
 
 ## Returns, complaints and privacy
 
-The process is described on the Complaints and Returns page. This technical baseline does not limit mandatory consumer rights. Personal-data processing is described in the Privacy Policy and Cookies and Browser Storage document.
+The process is described on the Complaints and Returns page. These terms do not limit mandatory consumer rights. Personal-data processing is described in the Privacy Policy and Cookies and Browser Storage document.
 
 ## Applicable version
 
-The version published with the effective date at the time of ordering applies. Petroni and its legal adviser remain responsible for approving the final legal text.`
+The version published with the effective date at the time of ordering applies. Each published update includes its effective date.`
   },
   delivery_payment: {
     ...BASE_VERSION,
     document_key: 'delivery_payment',
     title_hr: 'Plaćanje i dostava',
     title_en: 'Payment and Shipping',
-    summary_hr: 'Načini plaćanja, dostave i preuzimanja. Važeće cijene izračunavaju se iz Petroni poslovnih postavki i prikazane su niže.',
-    summary_en: 'Payment, delivery and pickup methods. Current prices are calculated from Petroni business settings and shown below.',
+    summary_hr: 'Načini plaćanja, dostave i preuzimanja. Važeće cijene izračunavaju se iz Alderway poslovnih postavki i prikazane su niže.',
+    summary_en: 'Payment, delivery and pickup methods. Current prices are calculated from Alderway business settings and shown below.',
     content_hr: `## Plaćanje
 
 Checkout prikazuje samo trenutačno omogućene metode. Bankovna uplata izvršava se prema podacima iz potvrde. Plaćanje pouzećem dostupno je samo za podržane dostavne metode i može uključivati prikazanu naknadu. Kartično plaćanje koristi CorvusPay kada je usluga tehnički i poslovno omogućena.
 
 ## Dostava i osobno preuzimanje
 
-Overseas cijena ovisi o zoni, poštanskom broju i vrijednosti košarice. BoxNow ima zasebnu cijenu, a paketomat kupac bira na službenoj karti koja se učitava tek nakon klika. Proizvodi označeni samo za osobno preuzimanje ne mogu se poslati dostavnom službom.
+Cijena kurirske dostave ovisi o zoni, poštanskom broju i vrijednosti košarice. Dostava u paketomat ima zasebnu cijenu, a paketomat kupac bira na karti koja se učitava tek nakon klika. Proizvodi označeni samo za osobno preuzimanje ne mogu se poslati dostavnom službom.
 
 ## Rokovi i praćenje
 
-Prikazani rokovi dostave su procjene i mogu ovisiti o zalihi, uplati, dostavljaču, adresi i izvanrednim okolnostima. Petroni šalje potvrdu i daljnje upute na email kupca.`,
+Prikazani rokovi dostave su procjene i mogu ovisiti o zalihi, uplati, dostavljaču, adresi i izvanrednim okolnostima. Alderway šalje potvrdu i daljnje upute na email kupca.`,
     content_en: `## Payment
 
 Checkout shows only currently enabled methods. Bank transfers use the details in the confirmation. Cash on delivery is available only for supported methods and may include the displayed fee. Card payment uses CorvusPay when technically and commercially enabled.
 
 ## Delivery and pickup
 
-Overseas pricing depends on zone, postcode and cart value. BoxNow has a separate price and its official locker map loads only after the customer opens it. Pickup-only products cannot be sent by a delivery provider.
+Courier pricing depends on zone, postcode and cart value. Parcel-locker delivery has a separate price, and its map loads only after the customer opens it. Pickup-only products cannot be sent by a delivery provider.
 
 ## Timing
 
-Displayed delivery times are estimates and may depend on stock, payment, the carrier, address and exceptional circumstances. Petroni sends confirmation and further instructions by email.`
+Displayed delivery times are estimates and may depend on stock, payment, the carrier, address and exceptional circumstances. Alderway sends confirmation and further instructions by email.`
   },
   returns_complaints: {
     ...BASE_VERSION,
     document_key: 'returns_complaints',
     title_hr: 'Reklamacije i povrat',
     title_en: 'Complaints and Returns',
-    summary_hr: 'Postupak za povrat proizvoda, oštećenje u transportu i reklamacije u Petroni webshopu.',
-    summary_en: 'Process for product returns, transit damage and complaints in the Petroni webshop.',
+    summary_hr: 'Postupak za povrat proizvoda, oštećenje u transportu i reklamacije u Alderway webshopu.',
+    summary_en: 'Process for product returns, transit damage and complaints in the Alderway webshop.',
     content_hr: `## Povrat proizvoda
 
-Za povrat se javite na info@petroni.hr s predmetom „POVRAT PROIZVODA” kako biste dobili upute. Robu vratite bez nepotrebnog odgađanja, odgovarajuće zaštićenu i uz podatke potrebne za povezivanje s narudžbom. Zakonska prava kupca ne ograničavaju se ovim uputama.
+Za povrat se javite na hello@alderwaycampers.com s predmetom „POVRAT PROIZVODA” kako biste dobili upute. Robu vratite bez nepotrebnog odgađanja, odgovarajuće zaštićenu i uz podatke potrebne za povezivanje s narudžbom. Zakonska prava kupca ne ograničavaju se ovim uputama.
 
 ## Oštećen ili neispravan proizvod
 
-Obavijestite Petroni što prije. Radi brže obrade priložite fotografije proizvoda, ambalaže, transportne kutije i vidljivog oštećenja te sačuvajte proizvod i ambalažu do završetka postupka. Preporučeni brzi rok za prijavu transportnog oštećenja ne ograničava zakonska prava.
+Obavijestite Alderway što prije. Radi brže obrade priložite fotografije proizvoda, ambalaže, transportne kutije i vidljivog oštećenja te sačuvajte proizvod i ambalažu do završetka postupka. Preporučeni brzi rok za prijavu transportnog oštećenja ne ograničava zakonska prava.
 
 ## Obrada zahtjeva
 
-Petroni će pregledati dostavljene podatke i, kada je potrebno, vraćenu robu. O rješenju, zamjeni, popravku, umanjenju cijene ili povratu kupac će biti obaviješten prema primjenjivim pravilima i okolnostima zahtjeva.
+Alderway će pregledati dostavljene podatke i, kada je potrebno, vraćenu robu. O rješenju, zamjeni, popravku, umanjenju cijene ili povratu kupac će biti obaviješten prema primjenjivim pravilima i okolnostima zahtjeva.
 
 ## Obrazac
 
-Postojeći obrazac za povrat dostupan je putem poveznice na ovoj stranici. Konačni postupak i tekst treba potvrditi Petroni ili pravni savjetnik.`,
+Postojeći obrazac za povrat dostupan je putem poveznice na ovoj stranici. Primjenjuje se postupak objavljen na ovoj stranici.`,
     content_en: `## Product returns
 
-Contact info@petroni.hr with the subject “PRODUCT RETURN” for instructions. Return goods without unnecessary delay, suitably protected and with information that links them to the order. These instructions do not restrict mandatory consumer rights.
+Contact hello@alderwaycampers.com with the subject “PRODUCT RETURN” for instructions. Return goods without unnecessary delay, suitably protected and with information that links them to the order. These instructions do not restrict mandatory consumer rights.
 
 ## Damaged or defective products
 
-Notify Petroni as soon as possible. To speed up processing, include photos of the product, packaging, shipping box and visible damage, and retain the product and packaging until the process is complete. A recommended quick notice for transit damage does not limit statutory rights.
+Notify Alderway as soon as possible. To speed up processing, include photos of the product, packaging, shipping box and visible damage, and retain the product and packaging until the process is complete. A recommended quick notice for transit damage does not limit statutory rights.
 
 ## Handling the request
 
-Petroni will review the submitted information and, where needed, the returned goods. The customer will be informed about the applicable resolution. Petroni or its legal adviser must approve the final process and wording.`
+Alderway will review the submitted information and, where needed, the returned goods. The customer will be informed about the applicable resolution. The process published on this page applies.`
   }
 };
 

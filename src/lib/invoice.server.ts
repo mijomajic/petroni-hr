@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { BUSINESS } from '$lib/config/business';
 
 const PDF_PAGE: [number, number] = [595.28, 841.89];
 
@@ -68,7 +69,7 @@ export async function createRentalTermsPdf(input: {
     page = pdf.addPage(PDF_PAGE);
     const { height } = page.getSize();
     page.drawRectangle({ x: 0, y: height - 92, width: PDF_PAGE[0], height: 92, color: dark });
-    page.drawText('PETRONI', { x: margin, y: height - 52, size: 24, font: bold, color: yellow });
+    page.drawText(pdfSafeText(BUSINESS.shortName.toUpperCase()), { x: margin, y: height - 52, size: 24, font: bold, color: yellow });
     page.drawText(title, { x: margin, y: height - 74, size: 9, font: bold, color: rgb(1, 1, 1) });
     page.drawText(subtitle, { x: margin, y: height - 106, size: 8.5, font: regular, color: rgb(0.36, 0.36, 0.36) });
     y = height - 130;
@@ -77,7 +78,7 @@ export async function createRentalTermsPdf(input: {
   const footer = () => {
     if (!page) return;
     page.drawLine({ start: { x: margin, y: 42 }, end: { x: PDF_PAGE[0] - margin, y: 42 }, thickness: 0.5, color: rgb(0.82, 0.82, 0.82) });
-    page.drawText(`Petroni - ${title} - ${pageNumber}`, { x: margin, y: 27, size: 7.5, font: regular, color: rgb(0.42, 0.42, 0.42) });
+    page.drawText(pdfSafeText(`${BUSINESS.shortName} - ${title} - ${pageNumber}`), { x: margin, y: 27, size: 7.5, font: regular, color: rgb(0.42, 0.42, 0.42) });
   };
 
   addPage();
@@ -147,15 +148,15 @@ export async function createOrderConfirmationPdf(input: {
   const yellow = rgb(0.96, 0.77, 0.09);
   const clean = (value: unknown) => String(value ?? '').replace(/[^\x20-\x7E]/g, '');
   page.drawRectangle({ x: 0, y: height - 115, width, height: 115, color: rgb(0.12, 0.12, 0.12) });
-  page.drawText('PETRONI', { x: 48, y: height - 67, size: 28, font: bold, color: yellow });
+  page.drawText(clean(BUSINESS.shortName.toUpperCase()), { x: 48, y: height - 67, size: 28, font: bold, color: yellow });
   page.drawText('POTVRDA NARUDZBE', { x: 369, y: height - 64, size: 12, font: bold, color: rgb(1, 1, 1) });
   let y = height - 155;
   const text = (value: string, x = 48, size = 10, font = regular) => {
     page.drawText(clean(value), { x, y, size, font, color: rgb(0.18, 0.18, 0.18) });
   };
-  text(input.company.name || 'Petroni d.o.o.', 48, 12, bold);
+  text(input.company.name || BUSINESS.legalName, 48, 12, bold);
   y -= 17; text(input.company.address || '');
-  y -= 15; text(input.company.oib ? `OIB: ${input.company.oib}` : '');
+  y -= 15; text(input.company.oib ? `Tax ID: ${input.company.oib}` : '');
   y -= 15; text([input.company.email, input.company.phone].filter(Boolean).join('  |  '));
   y -= 15; text(input.company.website || '');
   y = height - 155; text(`Broj: ${input.number}`, 350, 10, bold);
@@ -179,7 +180,7 @@ export async function createOrderConfirmationPdf(input: {
     page.drawLine({ start: { x: 48, y: y + 7 }, end: { x: 547, y: y + 7 }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
   }
   y -= 18;
-  const deliveryLabels: Record<string, string> = { overseas: 'Overseas dostava', boxnow: 'BoxNow paketomat', personal_pickup: 'Osobno preuzimanje' };
+  const deliveryLabels: Record<string, string> = { overseas: 'Kurirska dostava', boxnow: 'Paketomat', personal_pickup: 'Osobno preuzimanje' };
   const paymentLabels: Record<string, string> = { bank_transfer: 'Bankovna uplata', corvuspay: 'Karticno placanje', cash_on_delivery: 'Placanje pouzecem' };
   text(`Dostava (${deliveryLabels[input.deliveryMethod ?? ''] ?? input.deliveryMethod ?? '-'}): ${Number(input.shippingCost ?? 0).toFixed(2)} EUR`, 315);
   y -= 16;
@@ -199,7 +200,7 @@ export async function createOrderConfirmationPdf(input: {
   accountLines.forEach((line, index) => {
     page.drawText(clean(line).slice(0, 92), { x: 48, y: 76 - index * 11, size: 7.5, font: regular, color: rgb(0.4, 0.4, 0.4) });
   });
-  page.drawText('OVAJ DOKUMENT NIJE SLUZBENI FISKALIZIRANI RACUN.', { x: 48, y: 36, size: 8, font: bold, color: rgb(0.42, 0.24, 0.04) });
+  page.drawText('OVAJ DOKUMENT JE POTVRDA NARUDZBE, NE RACUN.', { x: 48, y: 36, size: 8, font: bold, color: rgb(0.42, 0.24, 0.04) });
   page.drawText('Hvala na povjerenju.', { x: 48, y: 21, size: 8, font: regular, color: rgb(0.4, 0.4, 0.4) });
   return pdf.save();
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
@@ -12,7 +13,7 @@
   }
 </script>
 
-<svelte:head><title>Mediji — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Mediji — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-6xl pb-16">
   <header class="mb-8">
@@ -29,7 +30,7 @@
       <label class="md:col-span-2"><span class="field-label">Slika</span><input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required class="field media-file-input" /></label>
       <label><span class="field-label">Opis slike — HR</span><input name="alt_hr" class="field" maxlength="240" /></label>
       <label><span class="field-label">Opis slike — EN</span><input name="alt_en" class="field" maxlength="240" /></label>
-      <label><span class="field-label">Izvor / porijeklo</span><input name="provenance" class="field" maxlength="500" placeholder="npr. Petroni, fotograf Ime Prezime" /></label>
+      <label><span class="field-label">Izvor / porijeklo</span><input name="provenance" class="field" maxlength="500" placeholder={`npr. ${BUSINESS.shortName}, fotograf Ime Prezime`} /></label>
       <label><span class="field-label">Licenca / napomena</span><input name="license_note" class="field" maxlength="500" placeholder="npr. interno odobreno za web" /></label>
       <div class="md:col-span-2 flex flex-wrap items-center gap-4"><button class="btn btn-primary px-6 py-3">Spremi sliku</button><p class="text-xs text-[#7a7f86]">JPG, PNG, WebP ili AVIF · do 15 MB</p></div>
     </form>
@@ -49,7 +50,7 @@
               <p class="mt-2 text-xs text-[#7a7f86]">{asset.width} × {asset.height} · {fileSize(Number(asset.original_bytes))}</p>
               {#if asset.provenance}<p class="mt-2 text-xs leading-5 text-[#5b6168]"><span class="font-bold">Izvor:</span> {asset.provenance}</p>{/if}
               <label class="mt-4 block"><span class="field-label">Javni URL</span><input readonly value={asset.public_url} class="field text-xs" /></label>
-              <div class="mt-3 flex flex-wrap gap-2"><button type="button" onclick={() => copyUrl(asset.public_url)} class="rounded-md border border-[#d9dce1] px-3 py-2 text-xs font-bold text-[#454a50] hover:border-[#f5c518]">Kopiraj URL</button>{#if asset.status === 'active'}<form method="POST" action="?/archive" onsubmit={(event) => { if (!confirm('Arhivirati sliku? Neće se obrisati, ali više se ne bi trebala koristiti u novom sadržaju.')) event.preventDefault(); }}><input type="hidden" name="id" value={asset.id} /><button class="rounded-md border border-[#efc5c2] px-3 py-2 text-xs font-bold text-[#9f1f18] hover:bg-red-50">Arhiviraj</button></form>{/if}</div>
+              <div class="mt-3 flex flex-wrap gap-2"><button type="button" onclick={() => copyUrl(asset.public_url)} class="rounded-md border border-[#d9dce1] px-3 py-2 text-xs font-bold text-[#454a50] hover:border-[#c87442]">Kopiraj URL</button>{#if asset.status === 'active'}<form method="POST" action="?/archive" onsubmit={(event) => { if (!confirm('Arhivirati sliku? Neće se obrisati, ali više se ne bi trebala koristiti u novom sadržaju.')) event.preventDefault(); }}><input type="hidden" name="id" value={asset.id} /><button class="rounded-md border border-[#efc5c2] px-3 py-2 text-xs font-bold text-[#9f1f18] hover:bg-red-50">Arhiviraj</button></form>{/if}</div>
             </div>
           </article>
         {/each}
@@ -77,7 +78,7 @@
   }
 
   .media-file-input::file-selector-button:hover {
-    border-color: #f5c518;
+    border-color: #c87442;
     background: #fffdf4;
   }
 </style>

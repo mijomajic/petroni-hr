@@ -18,12 +18,12 @@
 
   const name = $derived($locale === 'hr' ? product.name_hr : (product.name_en || product.name_hr));
   const desc = $derived($locale === 'hr' ? product.description_hr : (product.description_en || product.description_hr));
-  const metaDescription = $derived(truncateText(desc || `${name} u Petroni shopu za kamping opremu i dijelove.`, 155));
+  const metaDescription = $derived(truncateText(desc || `${name} u Alderway shopu za kamping opremu i dijelove.`, 155));
   const productUrl = $derived(absoluteUrl(`/product/${product.slug}`));
   const productImage = $derived(product.images?.[0] || undefined);
   const productSchema = $derived(graphSchema([
     breadcrumbSchema([
-      { name: 'Petroni', path: '/' },
+      { name: 'Alderway', path: '/' },
       { name: 'Shop', path: '/shop' },
       { name, path: `/product/${product.slug}` }
     ]),
@@ -59,9 +59,9 @@
 </script>
 
 <svelte:head>
-  <title>{name || ($locale === 'hr' ? 'Proizvod' : 'Product')} — Shop — Petroni</title>
+  <title>{name || ($locale === 'hr' ? 'Proizvod' : 'Product')} — Shop — Alderway</title>
   <meta name="description" content={metaDescription} />
-  <meta property="og:title" content={`${name || ($locale === 'hr' ? 'Proizvod' : 'Product')} — Shop — Petroni`} />
+  <meta property="og:title" content={`${name || ($locale === 'hr' ? 'Proizvod' : 'Product')} — Shop — Alderway`} />
   <meta property="og:description" content={metaDescription} />
   <meta property="og:type" content="product" />
   {#if productImage}<meta property="og:image" content={productImage} />{/if}
@@ -72,12 +72,12 @@
   <div class="container-x">
     {#if loading}
       <div class="h-96 flex items-center justify-center">
-        <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color:#f5c518;border-top-color:transparent"></div>
+        <div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color:#c87442;border-top-color:transparent"></div>
       </div>
     {:else if product}
       <nav class="flex items-center gap-2 text-xs mb-8 text-[#9aa0a8] uppercase flex-wrap">
-        <a href="/" class="hover:text-[#b5890a]">{$locale === 'hr' ? 'Početna stranica' : 'Home'}</a><span>/</span>
-        <a href="/shop" class="hover:text-[#b5890a]">Shop</a><span>/</span>
+        <a href="/" class="hover:text-[#9f542e]">{$locale === 'hr' ? 'Početna stranica' : 'Home'}</a><span>/</span>
+        <a href="/shop" class="hover:text-[#9f542e]">Shop</a><span>/</span>
         <span class="text-[#2b2b2b]">{name}</span>
       </nav>
 
@@ -94,7 +94,7 @@
           {#if product.images?.length > 1}
             <div class="flex gap-3">
               {#each product.images as img, i}
-                <button onclick={() => activeImg = i} class="w-16 h-16 cursor-pointer rounded-md overflow-hidden border-2 bg-white p-1" style="border-color:{activeImg === i ? '#f5c518' : '#ededf0'}">
+                <button onclick={() => activeImg = i} class="w-16 h-16 cursor-pointer rounded-md overflow-hidden border-2 bg-white p-1" style="border-color:{activeImg === i ? '#c87442' : '#ededf0'}">
                   <img src={img} alt="" class="w-full h-full object-contain" />
                 </button>
               {/each}
@@ -124,7 +124,7 @@
                 <span class="px-4 font-semibold text-[#2b2b2b] w-12 text-center">{qty}</span>
                 <button onclick={() => qty = Math.min(product.stock, qty + 1)} disabled={qty >= product.stock} class="px-4 py-3 font-bold text-[#2b2b2b] hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-35">+</button>
               </div>
-              <button onclick={handleAdd} class="btn flex-1 py-3.5" style="background:{added ? '#16a34a' : '#f5c518'};color:#fff">
+              <button onclick={handleAdd} class="btn flex-1 py-3.5" style="background:{added ? '#16a34a' : '#c87442'};color:#fff">
                 {added ? ($locale === 'hr' ? 'Dodano u košaricu' : 'Added to cart') : ($locale === 'hr' ? 'Dodaj u košaricu' : 'Add to cart')}
               </button>
             </div>
@@ -145,7 +145,7 @@
             {#if desc}
               <p class="text-[14px] leading-relaxed text-[#6b7178]">{desc}</p>
             {:else}
-              <p class="text-[14px] text-[#9aa0a8]">{$locale === 'hr' ? 'Opis proizvoda uskoro.' : 'Product description coming soon.'}</p>
+              <p class="text-[14px] text-[#9aa0a8]">{$locale === 'hr' ? 'Za specifikacije i kompatibilnost obratite se našem timu.' : 'Contact our team for specifications and compatibility.'}</p>
             {/if}
           </div>
         </div>
@@ -162,7 +162,7 @@
     {:else}
       <div class="text-center py-20 text-[#8b9099]">
         <p>{$locale === 'hr' ? 'Proizvod nije pronađen.' : 'Product not found.'}</p>
-        <a href="/shop" class="mt-4 inline-block text-sm underline" style="color:#b5890a">{$locale === 'hr' ? 'Natrag na shop' : 'Back to shop'}</a>
+        <a href="/shop" class="mt-4 inline-block text-sm underline" style="color:#9f542e">{$locale === 'hr' ? 'Natrag na shop' : 'Back to shop'}</a>
       </div>
     {/if}
   </div>

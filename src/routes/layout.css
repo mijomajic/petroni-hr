@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* Poppins is served by Petroni so a page view does not contact Google Fonts. */
+/* Poppins is self-hosted so a page view does not contact Google Fonts. */
 @font-face {
   font-family: 'Poppins';
   font-style: normal;
@@ -99,16 +99,15 @@
 }
 
 @theme {
-  /* Light brand palette — matches petroni.hr */
-  --color-bg: #ffffff;
-  --color-bg-soft: #f6f7f9;
-  --color-bg-dark: #2b2b2b;
-  --color-accent: #f5c518;
-  --color-accent-hover: #e6b50c;
-  --color-ink: #2b2b2b;
-  --color-text: #5b6168;
-  --color-muted: #8b9099;
-  --color-border: #e7e8eb;
+  --color-bg: #fbfaf7;
+  --color-bg-soft: #f3efe8;
+  --color-bg-dark: #1f3a32;
+  --color-accent: #c87442;
+  --color-accent-hover: #ad6036;
+  --color-ink: #1f3a32;
+  --color-text: #59645f;
+  --color-muted: #7e8984;
+  --color-border: #e4ded4;
   --color-card: #ffffff;
   --font-family-sans: 'Poppins', system-ui, -apple-system, sans-serif;
 }
@@ -126,8 +125,8 @@ html {
 
 body {
   font-family: var(--font-family-sans);
-  background-color: #ffffff;
-  color: #5b6168;
+  background-color: #fbfaf7;
+  color: #59645f;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -140,7 +139,7 @@ main {
 /* Keep in @layer base so Tailwind utility classes (text-white etc.) can override */
 @layer base {
   h1, h2, h3, h4, h5, h6 {
-    color: #2b2b2b;
+    color: #1f3a32;
     margin: 0;
   }
 }
@@ -150,9 +149,14 @@ a {
   text-decoration: none;
 }
 
+:focus-visible {
+  outline: 3px solid rgba(173, 96, 54, 0.7);
+  outline-offset: 3px;
+}
+
 ::selection {
-  background-color: #f5c518;
-  color: #2b2b2b;
+  background-color: #c87442;
+  color: #ffffff;
 }
 
 /* ── Custom scrollbar ─────────────────────────────── */
@@ -167,7 +171,7 @@ a {
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #f5c518;
+  background: #c87442;
 }
 
 /* ════════════════════════════════════════════════════
@@ -199,7 +203,7 @@ a {
 /* Yellow uppercase caption that sits above section titles */
 .eyebrow {
   display: block;
-  color: #f5c518;
+  color: #c87442;
   font-weight: 700;
   font-size: 0.78rem;
   letter-spacing: 0.18em;
@@ -207,7 +211,7 @@ a {
 }
 
 .section-title {
-  color: #2b2b2b;
+  color: #1f3a32;
   font-weight: 700;
   font-size: clamp(1.8rem, 3.4vw, 2.6rem);
   line-height: 1.12;
@@ -216,7 +220,7 @@ a {
 }
 
 .lead {
-  color: #6b7178;
+  color: #65716b;
   font-size: 0.95rem;
   line-height: 1.7;
 }
@@ -241,37 +245,37 @@ a {
 .btn:active { transform: translateY(1px); }
 
 .btn-primary {
-  background: #f5c518;
+  background: #ad6036;
   color: #ffffff;
-  box-shadow: 0 6px 18px rgba(245, 197, 24, 0.28);
+  box-shadow: 0 6px 18px rgba(200, 116, 66, 0.24);
 }
 .btn-primary:hover {
-  background: #e6b50c;
-  box-shadow: 0 8px 22px rgba(245, 197, 24, 0.4);
+  background: #8f4a29;
+  box-shadow: 0 8px 22px rgba(200, 116, 66, 0.3);
 }
 
 .btn-dark {
-  background: #2b2b2b;
+  background: #1f3a32;
   color: #ffffff;
 }
 .btn-dark:hover { background: #000000; }
 
 .btn-outline {
   background: transparent;
-  color: #2b2b2b;
-  border-color: #2b2b2b;
+  color: #1f3a32;
+  border-color: #1f3a32;
 }
 .btn-outline:hover {
-  background: #2b2b2b;
+  background: #1f3a32;
   color: #ffffff;
 }
 
 .btn-ghost {
   background: #fff;
-  color: #2b2b2b;
+  color: #1f3a32;
   border-color: #e7e8eb;
 }
-.btn-ghost:hover { border-color: #f5c518; color: #b5890a; }
+.btn-ghost:hover { border-color: #c87442; color: #9f542e; }
 
 /* ── Cards ────────────────────────────────────────── */
 .card {
@@ -308,14 +312,14 @@ a {
   border-radius: 6px;
   padding: 0.7rem 0.9rem;
   font-size: 0.9rem;
-  color: #2b2b2b;
+  color: #1f3a32;
   transition: border-color .2s ease, box-shadow .2s ease;
 }
 .field::placeholder { color: #aeb3ba; }
 .field:focus {
   outline: none;
-  border-color: #f5c518;
-  box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.18);
+  border-color: #c87442;
+  box-shadow: 0 0 0 3px rgba(200, 116, 66, 0.17);
 }
 
 /* ════════════════════════════════════════════════════

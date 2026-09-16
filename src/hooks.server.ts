@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { env } from '$env/dynamic/public';
 import type { Handle } from '@sveltejs/kit';
 import { legacyRedirectDecision } from '$lib/legacy-redirects';
+import { publicSupabaseConfigured } from '$lib/demo-mode.server';
 
 function safeReferrer(value: string | null) {
   if (!value) return undefined;
@@ -55,8 +56,8 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   event.locals.supabase = createServerClient(
-    env.PUBLIC_SUPABASE_URL,
-    env.PUBLIC_SUPABASE_ANON_KEY,
+    env.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+    env.PUBLIC_SUPABASE_ANON_KEY || 'placeholder',
     {
       cookies: {
         getAll: () => event.cookies.getAll(),
@@ -70,6 +71,8 @@ export const handle: Handle = async ({ event, resolve }) => {
   );
 
   event.locals.safeGetSession = async () => {
+    if (!publicSupabaseConfigured) return { session: null, user: null };
+
     const {
       data: { session }
     } = await event.locals.supabase.auth.getSession();

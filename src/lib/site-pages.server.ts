@@ -7,6 +7,7 @@ import {
   type SitePageContent,
   type SitePageKey
 } from '$lib/site-page-content';
+import { useStaticDemoData } from '$lib/demo-mode.server';
 
 export type SitePageRecord = {
   key: SitePageKey;
@@ -21,6 +22,19 @@ export type SitePageRecord = {
 
 export async function getSitePage(pageKey: SitePageKey): Promise<SitePageRecord> {
   const definition = SITE_PAGE_DEFINITIONS[pageKey];
+  if (useStaticDemoData) {
+    return {
+      key: pageKey,
+      label: definition.label,
+      route: definition.route,
+      content: cloneSitePageContent(DEFAULT_SITE_PAGES[pageKey]),
+      is_published: true,
+      updated_at: null,
+      updated_by: null,
+      uses_fallback: true
+    };
+  }
+
   const { data, error } = await supabaseAdmin
     .from('site_pages')
     .select('key,label,route,content,is_published,updated_at,updated_by')
@@ -66,6 +80,8 @@ export async function getPublishedSitePage(pageKey: SitePageKey): Promise<SitePa
 
 /** Used only after the caller has confirmed the current visitor is an admin. */
 export async function getDraftSitePage(pageKey: SitePageKey): Promise<SitePageContent | null> {
+  if (useStaticDemoData) return null;
+
   const { data, error } = await supabaseAdmin
     .from('site_page_versions')
     .select('content')

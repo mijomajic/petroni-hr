@@ -13,7 +13,7 @@
       {#if section.image}<img src={section.image} alt={tx(section.imageAlt)} class="absolute inset-0 h-full w-full object-cover object-center" />{/if}
       <div class="absolute inset-0 bg-[rgba(39,42,47,0.68)]"></div>
       <div class="relative px-4 text-center">
-        {#if tx(section.eyebrow)}<span class="mb-4 block text-[11px] font-bold uppercase tracking-[0.22em] text-[#f5c518]">{tx(section.eyebrow)}</span>{/if}
+        {#if tx(section.eyebrow)}<span class="mb-4 block text-[11px] font-bold uppercase tracking-[0.22em] text-[#c87442]">{tx(section.eyebrow)}</span>{/if}
         <h1 class="text-4xl font-extrabold uppercase tracking-wide text-white md:text-6xl" style="text-shadow:0 2px 20px rgba(0,0,0,0.9), 0 0 60px rgba(0,0,0,0.5)">{tx(section.title)}</h1>
       </div>
     </section>
@@ -32,7 +32,7 @@
     <section class="section bg-[#fafbfc]">
       <div class="container-x">
         <div class="mb-12 text-center">{#if tx(section.eyebrow)}<span class="eyebrow mb-3">{tx(section.eyebrow)}</span>{/if}<h2 class="section-title">{tx(section.title)}</h2></div>
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">{#each section.items ?? [] as item}<div class="card card-static p-7"><svg width="32" height="32" viewBox="0 0 24 24" fill="#f5c518" class="mb-4"><path d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z"/></svg><p class="text-[14px] italic leading-relaxed text-[#5b6168]">“{tx(item.body)}”</p></div>{/each}</div>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">{#each section.items ?? [] as item}<div class="card card-static p-7"><svg width="32" height="32" viewBox="0 0 24 24" fill="#c87442" class="mb-4"><path d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z"/></svg><p class="text-[14px] italic leading-relaxed text-[#5b6168]">“{tx(item.body)}”</p></div>{/each}</div>
       </div>
     </section>
   {:else if section.type === 'split_cta'}

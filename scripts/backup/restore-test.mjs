@@ -17,7 +17,7 @@ const archive = resolve(process.argv[2] ?? '');
 if (!process.argv[2]) throw new Error('Uporaba: npm run backup:restore-test -- /apsolutna/putanja/backup.tar.gz.enc');
 const passphrase = await readPassphrase();
 const postgresBin = await findPostgresBin();
-const workRoot = await createTempDirectory('petroni-restore-');
+const workRoot = await createTempDirectory('alderway-restore-');
 const tarPath = join(workRoot, 'backup.tar.gz');
 const extractRoot = join(workRoot, 'extracted');
 const databaseData = join(workRoot, 'postgres');
@@ -36,7 +36,7 @@ async function freePort() {
 	});
 }
 
-function psqlArgs(socket, port, database = 'petroni_restore') {
+function psqlArgs(socket, port, database = 'alderway_restore') {
 	return ['-X', '-v', 'ON_ERROR_STOP=1', '-h', socket, '-p', String(port), '-U', 'postgres', '-d', database];
 }
 
@@ -70,7 +70,7 @@ try {
 		{ quiet: true, label: 'Pokretanje izolirane PostgreSQL baze' }
 	);
 	databaseStarted = true;
-	await run(join(postgresBin, 'createdb'), ['-h', socketRoot, '-p', String(port), '-U', 'postgres', 'petroni_restore'], {
+	await run(join(postgresBin, 'createdb'), ['-h', socketRoot, '-p', String(port), '-U', 'postgres', 'alderway_restore'], {
 		quiet: true,
 		label: 'Izrada izolirane restore baze'
 	});
@@ -156,7 +156,9 @@ create publication supabase_realtime;
 		storage_bytes_verified: manifest.storage.bytes,
 		result: 'pass'
 	};
-	const evidenceDirectory = resolve(process.env.PETRONI_RESTORE_EVIDENCE_DIR ?? dirname(archive));
+	const evidenceDirectory = resolve(
+		process.env.RENTAL_RESTORE_EVIDENCE_DIR ?? dirname(archive)
+	);
 	await mkdir(evidenceDirectory, { recursive: true, mode: 0o700 });
 	const evidencePath = join(evidenceDirectory, `${basename(archive, '.tar.gz.enc')}.restore-evidence.json`);
 	await writeJson(evidencePath, evidence);

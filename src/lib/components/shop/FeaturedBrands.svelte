@@ -33,7 +33,7 @@
         {$locale === 'hr' ? 'Istaknuti brendovi' : 'Featured brands'}
       </h2>
       {#if activeBrand}
-        <a href={brandHref('')} data-sveltekit-noscroll onclick={(event) => selectBrand(event, '')} class="text-[11px] font-bold text-[#806300] underline-offset-4 hover:underline">
+        <a href={brandHref('')} data-sveltekit-noscroll onclick={(event) => selectBrand(event, '')} class="text-[11px] font-bold text-[#7f4327] underline-offset-4 hover:underline">
           {$locale === 'hr' ? 'Prikaži sve' : 'Show all'}
         </a>
       {/if}
@@ -45,7 +45,7 @@
           data-sveltekit-noscroll
           onclick={(event) => selectBrand(event, productBrand)}
           aria-current={activeBrand.toLocaleLowerCase('hr') === productBrand.toLocaleLowerCase('hr') ? 'true' : undefined}
-          class="shrink-0 rounded-md border px-4 py-2.5 text-xs font-black uppercase tracking-[0.06em] transition duration-200 active:translate-y-px {activeBrand.toLocaleLowerCase('hr') === productBrand.toLocaleLowerCase('hr') ? 'border-[#f5c518] bg-[#fff7d6] text-[#725700]' : 'border-[#dfe1e5] bg-white text-[#3f444a] hover:border-[#aeb2b8]'}"
+          class="shrink-0 rounded-md border px-4 py-2.5 text-xs font-black uppercase tracking-[0.06em] transition duration-200 active:translate-y-px {activeBrand.toLocaleLowerCase('hr') === productBrand.toLocaleLowerCase('hr') ? 'border-[#c87442] bg-[#f5e8df] text-[#704025]' : 'border-[#dfe1e5] bg-white text-[#3f444a] hover:border-[#aeb2b8]'}"
         >
           {productBrand}
         </a>

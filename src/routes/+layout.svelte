@@ -9,12 +9,13 @@
   import { locale } from '$lib/stores/locale';
   import ShopNavigationSkeleton from '$lib/components/shop/ShopNavigationSkeleton.svelte';
   import NewsNavigationSkeleton from '$lib/components/content/NewsNavigationSkeleton.svelte';
+  import { BUSINESS } from '$lib/config/business';
 
   let { children } = $props();
   const isAdmin = $derived($page.url.pathname.startsWith('/admin'));
   const canonicalUrl = $derived(absoluteUrl(canonicalPath($page.url.pathname)));
   const hasSearchParams = $derived($page.url.searchParams.toString().length > 0);
-  const defaultDescription = 'Petroni nudi najam i prodaju kampera i karavana, kamping opremu, podršku za putovanja i lokacije diljem Hrvatske i Europe.';
+  const defaultDescription = BUSINESS.description;
 
   let observer: IntersectionObserver | undefined;
   let navigationTimer: ReturnType<typeof setTimeout> | undefined;
@@ -31,8 +32,8 @@
     document.documentElement.classList.add('js');
 
     const legacyLocale = new URL(window.location.href).searchParams.get('lang');
-    if (legacyLocale === 'en') {
-      locale.set('en');
+    if (legacyLocale === 'en' || legacyLocale === 'hr') {
+      locale.set(legacyLocale);
       const cleanUrl = new URL(window.location.href);
       cleanUrl.searchParams.delete('lang');
       window.history.replaceState(window.history.state, '', `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
@@ -91,16 +92,16 @@
 </script>
 
 <svelte:head>
-  <link rel="icon" href="/brand/petroni-logo.png" />
-  <link rel="apple-touch-icon" href="/brand/petroni-logo.png" />
+  <link rel="icon" href={BUSINESS.mark} />
+  <link rel="apple-touch-icon" href={BUSINESS.mark} />
   <link rel="manifest" href="/site.webmanifest" />
   <link rel="canonical" href={canonicalUrl} />
-  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="#1f3a32" />
   <meta property="og:site_name" content={SITE_NAME} />
   <meta property="og:url" content={canonicalUrl} />
   <meta property="og:image" content={DEFAULT_IMAGE} />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Petroni — Najam i prodaja kampera i karavana" />
+  <meta name="twitter:title" content={`${BUSINESS.name} — ${BUSINESS.tagline}`} />
   <meta name="twitter:description" content={defaultDescription} />
   <meta name="twitter:image" content={DEFAULT_IMAGE} />
   {#if isAdmin}
@@ -122,6 +123,6 @@
 </div>
 
 <style>
-  .route-progress { position: fixed; z-index: 60; top: 0; left: 0; height: 3px; width: 38%; background: #e2a80a; box-shadow: 0 1px 8px rgba(226,168,10,.38); animation: route-progress 1.2s cubic-bezier(.16,1,.3,1) infinite; }
+  .route-progress { position: fixed; z-index: 60; top: 0; left: 0; height: 3px; width: 38%; background: #c87442; box-shadow: 0 1px 8px rgba(200,116,66,.38); animation: route-progress 1.2s cubic-bezier(.16,1,.3,1) infinite; }
   @keyframes route-progress { 0% { transform: translateX(-110%); } 100% { transform: translateX(370%); } }
 </style>

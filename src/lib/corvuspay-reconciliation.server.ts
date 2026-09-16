@@ -95,7 +95,7 @@ export async function reconcileCorvuspayReference(
   options: { trigger: ReconciliationTrigger; sendAlert?: boolean }
 ): Promise<CorvuspayReconciliationResult> {
   const payment = await localPayment(providerReference);
-  if (!payment) throw new Error('CorvusPay referenca nije povezana s Petroni zapisom.');
+  if (!payment) throw new Error('CorvusPay referenca nije povezana s lokalnim zapisom.');
 
   const apiConfigured = corvuspayStatusApiAvailable();
   const provider = apiConfigured

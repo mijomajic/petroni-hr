@@ -1,16 +1,16 @@
 {
-  "name": "Petroni",
-  "short_name": "Petroni",
-  "description": "Najam i prodaja kampera i karavana te shop za kamping opremu.",
+  "name": "Alderway Campers",
+  "short_name": "Alderway",
+  "description": "Premium camper hire with clear online booking.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#fbfaf7",
+  "theme_color": "#1f3a32",
   "icons": [
     {
-      "src": "https://xcdwougdkczypzkcsobg.supabase.co/storage/v1/object/public/petroni-assets/images/2024/03/cropped-Group-3-270x270.jpg",
-      "sizes": "270x270",
-      "type": "image/jpeg",
+      "src": "/brand/alderway-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]

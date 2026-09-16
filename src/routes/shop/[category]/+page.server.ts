@@ -3,6 +3,8 @@ import { withAvailableStock, type AvailableProduct } from '$lib/shop-stock.serve
 import { getFeaturedPublicProductBrands, getUsedPublicCategoryIds } from '$lib/product-brands.server';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { DEMO_PRODUCTS, DEMO_PRODUCT_CATEGORIES } from '$lib/demo-data';
+import { useStaticDemoData } from '$lib/demo-mode.server';
 
 const PAGE_SIZE = 24;
 
@@ -37,6 +39,38 @@ export const load: PageServerLoad = async ({ params, url }) => {
   const maxPrice = getNumberParam(url, 'max');
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
+
+  if (useStaticDemoData) {
+    const category = DEMO_PRODUCT_CATEGORIES.find((item) => item.slug === params.category);
+    if (!category) error(404, 'Kategorija nije pronađena.');
+    let demoProducts = DEMO_PRODUCTS.filter((product) => {
+      const searchable = `${product.name_hr} ${product.name_en ?? ''} ${product.sku ?? ''} ${product.brand ?? ''}`.toLowerCase();
+      return product.category_id === category.id
+        && (!query || searchable.includes(query.toLowerCase()))
+        && (!brand || product.brand?.toLowerCase() === brand.toLowerCase())
+        && (minPrice === undefined || product.price >= minPrice)
+        && (maxPrice === undefined || product.price <= maxPrice);
+    });
+    if (sort === 'price_asc') demoProducts = demoProducts.toSorted((a, b) => a.price - b.price);
+    if (sort === 'price_desc') demoProducts = demoProducts.toSorted((a, b) => b.price - a.price);
+    const total = demoProducts.length;
+
+    return {
+      category,
+      categories: DEMO_PRODUCT_CATEGORIES,
+      featuredBrands: ['Alderway Essentials'],
+      products: demoProducts.slice(from, to + 1),
+      total,
+      page,
+      pageSize: PAGE_SIZE,
+      sort,
+      query,
+      brand,
+      minPrice: url.searchParams.get('min') ?? '',
+      maxPrice: url.searchParams.get('max') ?? '',
+      loadError: null
+    };
+  }
 
   const [{ data: category }, { data: categories }] = await Promise.all([
     supabaseAdmin.from('product_categories').select('*').eq('slug', params.category).single(),

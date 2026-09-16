@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
@@ -7,7 +8,7 @@
   );
 </script>
 
-<svelte:head><title>Dodatne opcije — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Dodatne opcije — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-[1500px]">
   <header class="mb-8">
@@ -55,7 +56,7 @@
               <p class="text-[11px] font-bold uppercase tracking-[.14em] text-[#9a7600]">{categoryLabel[extra.category ?? 'ostalo'] ?? 'Ostalo'}</p>
               <p class="mt-1 font-semibold text-[#2b2b2b]">{extra.name_hr}</p>
             </div>
-            <span class="rounded-md bg-[#fff7d6] px-3 py-1.5 text-sm font-bold tabular-nums text-[#806300]">{Number(extra.price).toFixed(2)} €</span>
+            <span class="rounded-md bg-[#f5e8df] px-3 py-1.5 text-sm font-bold tabular-nums text-[#7f4327]">{Number(extra.price).toFixed(2)} €</span>
           </div>
           <div class="grid gap-4 sm:grid-cols-2">
             <label><span class="field-label">Naziv HR</span><input name="name_hr" class="field" value={extra.name_hr} required /></label>
@@ -70,7 +71,7 @@
             <label><span class="field-label">Redoslijed unutar kategorije</span><input name="sort_order" type="number" class="field" value={extra.sort_order} /></label>
           </div>
           <div class="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-[#ededf0] pt-4">
-            <label class="flex items-center gap-2 text-sm font-semibold text-[#454a50]"><input type="checkbox" name="is_required" checked={extra.is_required} class="h-4 w-4 accent-[#F5C518]" /> Obavezna stavka</label>
+            <label class="flex items-center gap-2 text-sm font-semibold text-[#454a50]"><input type="checkbox" name="is_required" checked={extra.is_required} class="h-4 w-4 accent-[#c87442]" /> Obavezna stavka</label>
             <div class="flex items-center gap-4">
               <button type="submit" formaction="?/deleteExtra" onclick={(event) => { if (!confirm('Obrisati dodatnu opciju?')) event.preventDefault(); }} class="text-sm font-semibold text-red-600 hover:underline">Obriši</button>
               <button class="btn btn-primary px-5 py-2.5 text-black">Spremi opciju</button>
@@ -97,7 +98,7 @@
         <label class="md:col-span-2"><span class="field-label">Opis EN</span><textarea name="description_en" rows="3" class="field"></textarea></label>
       </div>
       <div class="mt-5 flex flex-wrap items-center justify-between gap-4">
-        <label class="flex items-center gap-2 text-sm font-semibold text-[#454a50]"><input name="is_required" type="checkbox" class="h-4 w-4 accent-[#F5C518]" /> Obavezna stavka</label>
+        <label class="flex items-center gap-2 text-sm font-semibold text-[#454a50]"><input name="is_required" type="checkbox" class="h-4 w-4 accent-[#c87442]" /> Obavezna stavka</label>
         <button class="btn btn-dark px-6 py-3">Dodaj opciju</button>
       </div>
     </form>

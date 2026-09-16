@@ -2,8 +2,20 @@ import { supabaseAdmin } from '$lib/supabase.server';
 import { withAvailableStock, type AvailableProduct } from '$lib/shop-stock.server';
 import { getFeaturedPublicProductBrands, getUsedPublicCategoryIds } from '$lib/product-brands.server';
 import type { PageServerLoad } from './$types';
+import { DEMO_PRODUCTS, DEMO_PRODUCT_CATEGORIES } from '$lib/demo-data';
+import { useStaticDemoData } from '$lib/demo-mode.server';
 
 const PAGE_SIZE = 24;
+
+const DEMO_CATALOGUE = (() => {
+  const categoryGroups = DEMO_PRODUCT_CATEGORIES.map((category) =>
+    DEMO_PRODUCTS.filter((product) => product.category_id === category.id)
+  );
+  const longestGroup = Math.max(0, ...categoryGroups.map((group) => group.length));
+  return Array.from({ length: longestGroup }, (_, productIndex) =>
+    categoryGroups.map((group) => group[productIndex]).filter(Boolean)
+  ).flat();
+})();
 
 function getNumberParam(url: URL, key: string) {
   const rawValue = url.searchParams.get(key);
@@ -21,6 +33,34 @@ export const load: PageServerLoad = async ({ url }) => {
   const maxPrice = getNumberParam(url, 'max');
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
+
+  if (useStaticDemoData) {
+    let demoProducts = DEMO_CATALOGUE.filter((product) => {
+      const searchable = `${product.name_hr} ${product.name_en ?? ''} ${product.sku ?? ''} ${product.brand ?? ''}`.toLowerCase();
+      return (!query || searchable.includes(query.toLowerCase()))
+        && (!brand || product.brand?.toLowerCase() === brand.toLowerCase())
+        && (minPrice === undefined || product.price >= minPrice)
+        && (maxPrice === undefined || product.price <= maxPrice);
+    });
+    if (sort === 'price_asc') demoProducts = demoProducts.toSorted((a, b) => a.price - b.price);
+    if (sort === 'price_desc') demoProducts = demoProducts.toSorted((a, b) => b.price - a.price);
+    const total = demoProducts.length;
+
+    return {
+      products: demoProducts.slice(from, to + 1),
+      categories: DEMO_PRODUCT_CATEGORIES,
+      featuredBrands: ['Alderway Essentials'],
+      total,
+      page,
+      pageSize: PAGE_SIZE,
+      sort,
+      query,
+      brand,
+      minPrice: url.searchParams.get('min') ?? '',
+      maxPrice: url.searchParams.get('max') ?? '',
+      loadError: null
+    };
+  }
 
   let productsQuery = supabaseAdmin
     .from('shop_products_available')

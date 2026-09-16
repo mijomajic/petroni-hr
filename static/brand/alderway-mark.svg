@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title">
+  <title id="title">Alderway Campers</title>
+  <rect width="96" height="96" rx="20" fill="#1F3A32"/>
+  <path fill="#F4EFE7" d="M48 20 20 72h12l6-11h20l6 11h12L48 20Zm0 20 6 12H42l6-12Z"/>
+  <path fill="#C87442" d="M15 75c22-11 45-12 66-3v4H15Z"/>
+</svg>

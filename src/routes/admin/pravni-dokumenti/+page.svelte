@@ -1,9 +1,10 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
   let { data }: PageProps = $props();
 </script>
 
-<svelte:head><title>Pravni dokumenti — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Pravni dokumenti — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-6xl">
   <div class="mb-8">
@@ -13,7 +14,7 @@
   </div>
 
   <div class="mb-7 rounded-xl border border-[#f0d87a] bg-[#fffaf0] p-4 text-sm leading-6 text-[#6f5600]">
-    Sustav tehnički vodi sadržaj i povijest. Petroni i pravni savjetnik odgovorni su za konačnu provjeru i odobrenje teksta prije objave.
+    Sustav tehnički vodi sadržaj i povijest. Ovlaštena osoba i pravni savjetnik odgovorni su za konačnu provjeru i odobrenje teksta prije objave.
   </div>
 
   <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

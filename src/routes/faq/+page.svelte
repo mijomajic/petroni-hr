@@ -11,7 +11,7 @@
   const title = $derived(localizedText(content.title, $locale));
   const description = $derived(localizedText(content.seoDescription, $locale));
   const faqSchema = $derived(graphSchema([
-    breadcrumbSchema([{ name: 'Petroni', path: '/' }, { name: 'FAQ', path: '/faq' }]),
+    breadcrumbSchema([{ name: 'Alderway', path: '/' }, { name: 'FAQ', path: '/faq' }]),
     {
       '@type': 'FAQPage',
       mainEntity: (section?.items ?? []).map((item) => ({

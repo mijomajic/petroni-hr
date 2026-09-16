@@ -3,10 +3,8 @@
 </script>
 
 <svelte:head>
-  <title>Uvjeti najma kampera i prikolica | Petroni</title>
-  <meta name="description" content="Informacije o Petroni uvjetima najma kampera i prikazu punih uvjeta tijekom procesa online rezervacije." />
-  <meta property="og:title" content="Uvjeti najma kampera i prikolica | Petroni" />
-  <meta property="og:description" content="Informacije o Petroni uvjetima najma kampera i prikazu punih uvjeta tijekom procesa online rezervacije." />
+  <title>{$locale === 'hr' ? 'Uvjeti najma kampera' : 'Motorhome rental terms'} | Alderway</title>
+  <meta name="description" content={$locale === 'hr' ? 'Informacije o Alderway uvjetima najma i prihvaćanju uvjeta tijekom rezervacije.' : 'Information about Alderway rental terms and acceptance during online booking.'} />
 </svelte:head>
 
 <div class="section">

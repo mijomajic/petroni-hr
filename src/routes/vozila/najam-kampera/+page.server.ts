@@ -1,5 +1,7 @@
 import type { BookingExtra, RentalLocation, Season, SeasonPrice, Vehicle } from '$lib/supabase';
 import type { PageServerLoad } from './$types';
+import { DEMO_EXTRAS, DEMO_LOCATIONS, DEMO_SEASONS, DEMO_SEASON_PRICES, DEMO_VEHICLES } from '$lib/demo-data';
+import { useStaticDemoData } from '$lib/demo-mode.server';
 
 type QueryResult<T> = {
   data: T | null;
@@ -25,6 +27,18 @@ async function safeQuery<T>(
 }
 
 export const load: PageServerLoad = async ({ locals }) => {
+  if (useStaticDemoData) {
+    return {
+      vehicles: DEMO_VEHICLES,
+      seasons: DEMO_SEASONS,
+      seasonPrices: DEMO_SEASON_PRICES,
+      extras: DEMO_EXTRAS,
+      locations: DEMO_LOCATIONS,
+      loadError: null,
+      partialLoadError: null
+    };
+  }
+
   const [vehicles, seasons, seasonPrices, extras, locations] = await Promise.all([
     safeQuery<Vehicle[]>(
       locals.supabase

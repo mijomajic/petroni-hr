@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import { BUSINESS } from '$lib/config/business';
   import { renderTermsMarkup } from '$lib/terms-markup';
   import type { PageProps } from './$types';
 
@@ -66,7 +67,7 @@
   }
 </script>
 
-<svelte:head><title>Uvjeti najma — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Uvjeti najma — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-5xl">
   <div class="mb-8">
@@ -76,7 +77,7 @@
   </div>
 
   {#if form?.message}
-    <div class="mb-6 p-4 rounded-xl bg-[#fff7e0] text-[#6f5600] text-sm">{form.message}</div>
+    <div class="mb-6 p-4 rounded-xl bg-[#f5e8df] text-[#6f5600] text-sm">{form.message}</div>
   {/if}
 
   <form method="POST" action="?/save" class="bg-white border border-[#e7e8eb] rounded-2xl p-6 md:p-8">

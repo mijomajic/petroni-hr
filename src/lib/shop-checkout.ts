@@ -40,8 +40,8 @@ export const OVERSEAS_TIER_RANGES = [
 ] as const;
 
 const DEFAULT_DELIVERY_METHODS: ShopDeliveryOption[] = [
-  { id: 'overseas', label_hr: 'Overseas dostava', label_en: 'Overseas delivery', price: 11, enabled: true, allows_cod: true },
-  { id: 'boxnow', label_hr: 'BoxNow paketomat', label_en: 'BoxNow locker', price: 9, enabled: true, allows_cod: false },
+  { id: 'overseas', label_hr: 'Kurirska dostava', label_en: 'Courier delivery', price: 11, enabled: true, allows_cod: true },
+  { id: 'boxnow', label_hr: 'Paketomat', label_en: 'Parcel locker', price: 9, enabled: true, allows_cod: false },
   { id: 'personal_pickup', label_hr: 'Osobno preuzimanje', label_en: 'Personal pickup', price: 0, enabled: true, allows_cod: false }
 ];
 

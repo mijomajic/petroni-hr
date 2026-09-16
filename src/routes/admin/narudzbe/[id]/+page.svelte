@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
@@ -10,8 +11,8 @@
   }
 
   const deliveryLabels: Record<string, string> = {
-    overseas: 'Overseas dostava',
-    boxnow: 'BoxNow paketomat',
+    overseas: 'Kurirska dostava',
+    boxnow: 'Paketomat',
     personal_pickup: 'Osobno preuzimanje'
   };
   const paymentLabels: Record<string, string> = {
@@ -21,7 +22,7 @@
   };
 </script>
 
-<svelte:head><title>Narudžba {order.confirmation_number ?? order.id.slice(0, 8)} — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Narudžba {order.confirmation_number ?? order.id.slice(0, 8)} — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-6xl">
   <div class="mb-8 flex items-center gap-4">
@@ -33,7 +34,7 @@
   </div>
 
   {#if form?.message}
-    <div class="mb-6 rounded-xl bg-[#fff7e0] p-4 text-sm text-[#6f5600]">{form.message}</div>
+    <div class="mb-6 rounded-xl bg-[#f5e8df] p-4 text-sm text-[#6f5600]">{form.message}</div>
   {/if}
 
   <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -45,7 +46,7 @@
             <div class="grid gap-2 py-3 md:grid-cols-[1fr_90px_120px]">
               <p class="font-bold text-[#2b2b2b]">{item.name ?? item.name_hr ?? item.slug ?? 'Proizvod'}</p>
               <p class="text-sm text-[#7a7f86]">Količina: {item.quantity ?? item.qty ?? 1}</p>
-              <p class="font-bold text-[#b5890a]">{Number(item.total ?? item.price ?? 0).toFixed(2)} EUR</p>
+              <p class="font-bold text-[#9f542e]">{Number(item.total ?? item.price ?? 0).toFixed(2)} EUR</p>
             </div>
           {/each}
           {#if items.length === 0}
@@ -108,7 +109,7 @@
           <div><span class="field-label">Dostava</span><p>{Number(order.shipping_cost).toFixed(2)} EUR</p></div>
           <div><span class="field-label">Plaćanje</span><p>{paymentLabels[order.payment_method] ?? order.payment_method ?? '-'}</p></div>
           {#if Number(order.payment_surcharge) > 0}<div><span class="field-label">Naknada za pouzeće</span><p>{Number(order.payment_surcharge).toFixed(2)} EUR</p></div>{/if}
-          <div class="col-span-2"><span class="field-label">Ukupno</span><p class="text-xl font-black text-[#b5890a]">{Number(order.total).toFixed(2)} EUR</p></div>
+          <div class="col-span-2"><span class="field-label">Ukupno</span><p class="text-xl font-black text-[#9f542e]">{Number(order.total).toFixed(2)} EUR</p></div>
         </div>
       </section>
 
@@ -138,7 +139,7 @@
         <form method="POST" action="?/retryConfirmation" class="mt-5">
           <button class="btn btn-ghost w-full">Ponovno pošalji potvrdu</button>
         </form>
-        <p class="mt-4 text-xs text-[#8b9099]">PDF potvrda narudžbe i plaćanja automatski se šalje kada je narudžba plaćena i označena kao završena/poslana. Ne predstavlja službeni fiskalizirani račun.</p>
+        <p class="mt-4 text-xs text-[#8b9099]">PDF potvrda narudžbe i plaćanja automatski se šalje kada je narudžba plaćena i označena kao završena/poslana. Dokument je potvrda narudžbe, a ne račun.</p>
       </section>
 
       {#if order.payment_method === 'corvuspay'}
@@ -161,7 +162,7 @@
               {#each data.reconciliationIncidents as incident}
                 <div class="rounded-xl p-3 text-xs {incident.state === 'open' ? 'bg-[#fff0ed] text-[#8b2f21]' : 'bg-[#f1f7f2] text-[#32633a]'}">
                   <b>{incident.state === 'open' ? 'Otvoreno' : 'Riješeno'} · {incident.severity}</b>
-                  <p class="mt-1">CorvusPay: {incident.provider_status} · Petroni: {incident.local_status}</p>
+                  <p class="mt-1">CorvusPay: {incident.provider_status} · Lokalno: {incident.local_status}</p>
                   <p class="mt-1">{Number(incident.expected_amount).toFixed(2)} EUR</p>
                 </div>
               {/each}

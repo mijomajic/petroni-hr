@@ -32,7 +32,6 @@ const exactCroatianRedirects: Readonly<Record<string, string>> = {
   '/search-results': '/rezerviraj',
   '/priprema-kampera-za-zimu': '/novosti/priprema-kampera-za-zimu',
   '/priprema-kamp-prikolice-za-zimski-san': '/novosti/priprema-kamp-prikolice-za-zimu',
-  '/camping-center-petroni-postao-ovlasteni-servis-za-alde-grijanje-u-hrvatskoj': '/novosti/camping-center-petroni-alde-servis',
   '/klima-uredaj-plein-aircon-12v': '/novosti/klima-uredaj-plein-aircon-12v',
   '/camper-trolley-za-jednostavno-manevriranje-sa-prikolicama': '/novosti/camper-trolley'
 };
@@ -94,7 +93,7 @@ const vehicleTargets: Readonly<Record<string, string>> = {
   'make-up-truck-21-work-stations-peugeot-boxer': 'make-up-truck-peugeot-boxer',
   'make-up-van-iveco-daily-irisbus': 'make-up-van-iveco-daily-irisbus',
   'mclouis-mc4-873': 'mclouis-mc4-873',
-  'petrovan-53-4x4': 'petrovan-53-4x4',
+  'petrovan-53-4x4': 'alderway-ridge-4x4',
   'rimor-evo-sound': 'rimor-evo-sound',
   'rimor-kilig-50': 'rimor-kilig-50',
   'roller-team-kronos-277m': 'roller-team-kronos-277m',

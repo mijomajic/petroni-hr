@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import { cloneSitePageContent, type SitePageItem, type SitePageSection } from '$lib/site-page-content';
   import type { PageProps } from './$types';
 
@@ -45,16 +46,16 @@
   }
 </script>
 
-<svelte:head><title>{data.page.label} — Javne stranice — Admin — Petroni</title></svelte:head>
+<svelte:head><title>{data.page.label} — Javne stranice — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-6xl pb-28">
   <header class="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
     <div>
-      <a href="/admin/stranice" class="text-xs font-bold uppercase tracking-[0.14em] text-[#8b9099] hover:text-[#806300]">← Javne stranice</a>
+      <a href="/admin/stranice" class="text-xs font-bold uppercase tracking-[0.14em] text-[#8b9099] hover:text-[#7f4327]">← Javne stranice</a>
       <h1 class="mt-3 text-3xl font-black uppercase tracking-tight text-[#2b2b2b]">{data.page.label}</h1>
       <p class="mt-2 max-w-3xl text-sm leading-6 text-[#7a7f86]">Spremanje izrađuje skicu. Englesko polje može ostati prazno; tada se prikazuje hrvatski sadržaj.</p>
     </div>
-    <div class="flex flex-wrap gap-2"><a href={data.page.route} target="_blank" rel="noreferrer" class="w-fit rounded-md border border-[#dfe1e5] bg-white px-4 py-2.5 text-xs font-bold text-[#5b6168] hover:border-[#aeb2b8] active:-translate-y-px">Otvori javnu stranicu</a>{#if data.draft}<a href={`${data.page.route}?preview=draft`} target="_blank" rel="noreferrer" class="w-fit rounded-md border border-[#f0d477] bg-[#fffdf5] px-4 py-2.5 text-xs font-bold text-[#806300] hover:border-[#d3aa20] active:-translate-y-px">Pregledaj skicu</a>{/if}</div>
+    <div class="flex flex-wrap gap-2"><a href={data.page.route} target="_blank" rel="noreferrer" class="w-fit rounded-md border border-[#dfe1e5] bg-white px-4 py-2.5 text-xs font-bold text-[#5b6168] hover:border-[#aeb2b8] active:-translate-y-px">Otvori javnu stranicu</a>{#if data.draft}<a href={`${data.page.route}?preview=draft`} target="_blank" rel="noreferrer" class="w-fit rounded-md border border-[#f0d477] bg-[#fffdf5] px-4 py-2.5 text-xs font-bold text-[#7f4327] hover:border-[#d3aa20] active:-translate-y-px">Pregledaj skicu</a>{/if}</div>
   </header>
 
   {#if form?.message}
@@ -83,7 +84,7 @@
               <div><h2 class="font-black text-[#2b2b2b]">{section.label}</h2><p class="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-[#9aa0a8]">{section.type}</p></div>
             </div>
             <div class="flex items-center gap-2">
-              <label class="mr-2 flex items-center gap-2 text-xs font-bold text-[#5b6168]"><input type="checkbox" bind:checked={section.visible} class="h-4 w-4 accent-[#f5c518]" /> Vidljiva</label>
+              <label class="mr-2 flex items-center gap-2 text-xs font-bold text-[#5b6168]"><input type="checkbox" bind:checked={section.visible} class="h-4 w-4 accent-[#c87442]" /> Vidljiva</label>
               <button type="button" aria-label="Pomakni sekciju gore" disabled={sectionIndex === 0} onclick={() => moveSection(sectionIndex, -1)} class="h-9 w-9 border border-[#dfe1e5] bg-white text-[#5b6168] disabled:opacity-30 active:-translate-y-px">↑</button>
               <button type="button" aria-label="Pomakni sekciju dolje" disabled={sectionIndex === draft.sections.length - 1} onclick={() => moveSection(sectionIndex, 1)} class="h-9 w-9 border border-[#dfe1e5] bg-white text-[#5b6168] disabled:opacity-30 active:-translate-y-px">↓</button>
             </div>
@@ -114,7 +115,7 @@
 
             {#if section.items}
               <div class="border-t border-[#e7e8eb] pt-6">
-                <div class="mb-4 flex items-center justify-between gap-4"><h3 class="text-xs font-black uppercase tracking-[0.14em] text-[#5b6168]">Stavke ({section.items.length})</h3>{#if canAddItems(section)}<button type="button" onclick={() => addItem(section)} class="rounded-md border border-[#d9dce1] px-3 py-2 text-xs font-bold text-[#454a50] hover:border-[#f5c518] active:-translate-y-px">Dodaj stavku</button>{/if}</div>
+                <div class="mb-4 flex items-center justify-between gap-4"><h3 class="text-xs font-black uppercase tracking-[0.14em] text-[#5b6168]">Stavke ({section.items.length})</h3>{#if canAddItems(section)}<button type="button" onclick={() => addItem(section)} class="rounded-md border border-[#d9dce1] px-3 py-2 text-xs font-bold text-[#454a50] hover:border-[#c87442] active:-translate-y-px">Dodaj stavku</button>{/if}</div>
                 <div class="space-y-4">
                   {#each section.items as item, itemIndex (item.id)}
                     <div class="border-l-2 border-[#e0e2e6] bg-[#fafbfc] px-4 py-4">
@@ -150,7 +151,7 @@
     <div class="fixed bottom-0 left-64 right-0 border-t border-[#dfe1e5] bg-white/95 px-8 py-4 shadow-[0_-10px_30px_rgba(39,42,47,0.06)] backdrop-blur-sm">
       <div class="mx-auto flex max-w-6xl items-center justify-between gap-4">
         <p class="text-xs text-[#7a7f86]">Prvo spremite i pregledajte skicu, a zatim je objavite.</p>
-        <div class="flex gap-2"><button class="rounded-md border border-[#d9dce1] bg-white px-5 py-3 text-xs font-black uppercase tracking-wide text-[#454a50] hover:border-[#f5c518] active:-translate-y-px">Spremi skicu</button><button formaction="?/publishDraft" class="rounded-md bg-[#f5c518] px-5 py-3 text-xs font-black uppercase tracking-wide text-[#2b2b2b] hover:bg-[#e8b900] active:-translate-y-px">Objavi spremljenu skicu</button></div>
+        <div class="flex gap-2"><button class="rounded-md border border-[#d9dce1] bg-white px-5 py-3 text-xs font-black uppercase tracking-wide text-[#454a50] hover:border-[#c87442] active:-translate-y-px">Spremi skicu</button><button formaction="?/publishDraft" class="rounded-md bg-[#c87442] px-5 py-3 text-xs font-black uppercase tracking-wide text-[#2b2b2b] hover:bg-[#e8b900] active:-translate-y-px">Objavi spremljenu skicu</button></div>
       </div>
     </div>
   </form>
@@ -160,8 +161,8 @@
     <div class="mt-4 divide-y divide-[#e7e8eb]">
       {#each data.versions as version}
         <div class="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
-          <div><span class="font-bold text-[#2b2b2b]">Verzija {version.version_number}</span><span class="ml-2 rounded px-2 py-1 text-[10px] font-black uppercase {version.status === 'published' ? 'bg-green-100 text-green-700' : version.status === 'draft' ? 'bg-[#fff7e0] text-[#9a7600]' : 'bg-[#f1f2f4] text-[#737981]'}">{version.status === 'published' ? 'Objavljeno' : version.status === 'draft' ? 'Skica' : 'Arhivirano'}</span><p class="mt-1 text-xs text-[#7a7f86]">{new Intl.DateTimeFormat('hr-HR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(version.created_at))}</p></div>
-          {#if version.status !== 'draft'}<form method="POST" action="?/restoreVersion"><input type="hidden" name="version_id" value={version.id} /><button class="rounded-md border border-[#d9dce1] px-3 py-2 text-xs font-bold text-[#454a50] hover:border-[#f5c518]">Vrati kao skicu</button></form>{/if}
+          <div><span class="font-bold text-[#2b2b2b]">Verzija {version.version_number}</span><span class="ml-2 rounded px-2 py-1 text-[10px] font-black uppercase {version.status === 'published' ? 'bg-green-100 text-green-700' : version.status === 'draft' ? 'bg-[#f5e8df] text-[#9a7600]' : 'bg-[#f1f2f4] text-[#737981]'}">{version.status === 'published' ? 'Objavljeno' : version.status === 'draft' ? 'Skica' : 'Arhivirano'}</span><p class="mt-1 text-xs text-[#7a7f86]">{new Intl.DateTimeFormat('hr-HR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(version.created_at))}</p></div>
+          {#if version.status !== 'draft'}<form method="POST" action="?/restoreVersion"><input type="hidden" name="version_id" value={version.id} /><button class="rounded-md border border-[#d9dce1] px-3 py-2 text-xs font-bold text-[#454a50] hover:border-[#c87442]">Vrati kao skicu</button></form>{/if}
         </div>
       {/each}
     </div>

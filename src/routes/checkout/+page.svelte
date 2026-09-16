@@ -5,6 +5,7 @@
   import { locale } from '$lib/stores/locale';
   import { calculateShopOrderTotals, deliverySupportsCashOnDelivery, overseasZoneForPostalCode, type ShopDeliveryMethod, type ShopPaymentMethod } from '$lib/shop-checkout';
   import type { PageProps } from './$types';
+  import { CLIENT_STORAGE_KEYS } from '$lib/config/business';
 
   let { data }: PageProps = $props();
   let name = $state('');
@@ -13,7 +14,7 @@
   let address = $state('');
   let city = $state('');
   let zip = $state('');
-  let country = $state('Hrvatska');
+  let country = $state('Ireland');
   let boxnowLockerId = $state('');
   let boxnowLockerAddress = $state('');
   let boxnowLockerPostalCode = $state('');
@@ -162,7 +163,7 @@
       if (!country.trim()) errors.country = required;
     }
     if (deliveryMethod === 'boxnow' && (!boxnowLockerId || !boxnowLockerAddress)) {
-      errors.boxnowLocker = $locale === 'hr' ? 'Odaberite paketomat na BoxNow karti.' : 'Select a locker on the BoxNow map.';
+      errors.boxnowLocker = $locale === 'hr' ? 'Odaberite paketomat na karti.' : 'Select a parcel locker on the map.';
     }
     fieldErrors = errors;
     if (Object.keys(errors).length) {
@@ -224,7 +225,7 @@
       });
       const data = await res.json();
       if (data.success) {
-        sessionStorage.setItem('petroni_order_result', JSON.stringify(data));
+        sessionStorage.setItem(CLIENT_STORAGE_KEYS.orderResult, JSON.stringify(data));
         if (data.corvuspay) {
           const form = document.createElement('form');
           form.method = 'POST';
@@ -256,7 +257,7 @@
 </script>
 
 <svelte:head>
-  <title>{$locale === 'hr' ? 'Narudžba' : 'Checkout'} — Petroni</title>
+  <title>{$locale === 'hr' ? 'Narudžba' : 'Checkout'} — Alderway</title>
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
@@ -273,25 +274,25 @@
             <div><label for="checkout_email" class="field-label">Email *</label><input id="checkout_email" type="email" autocomplete="email" class="field" aria-invalid={Boolean(fieldErrors.email)} oninput={() => clearFieldError('email')} bind:value={email} />{#if fieldErrors.email}<p class="checkout-field-error">{fieldErrors.email}</p>{/if}</div>
             <div><label for="checkout_phone" class="field-label">{$locale === 'hr' ? 'Telefon' : 'Phone'} *</label><input id="checkout_phone" type="tel" autocomplete="tel" class="field" aria-invalid={Boolean(fieldErrors.phone)} oninput={() => clearFieldError('phone')} bind:value={phone} />{#if fieldErrors.phone}<p class="checkout-field-error">{fieldErrors.phone}</p>{/if}</div>
             <div class:hidden={deliveryMethod !== 'boxnow'} class="md:col-span-2 rounded-lg border border-[#eed68a] bg-[#fffaf0] p-4">
-                  <span class="field-label">{$locale === 'hr' ? 'BoxNow paketomat' : 'BoxNow locker'} *</span>
+                  <span class="field-label">{$locale === 'hr' ? 'Paketomat' : 'Parcel locker'} *</span>
                   {#if boxnowLockerId && boxnowLockerAddress}
                     <div class="mb-3 rounded-md border border-[#d7c267] bg-white p-3" aria-live="polite">
                       <p class="text-sm font-bold text-[#2b2b2b]">{boxnowLockerAddress}</p>
-                      <p class="mt-1 text-xs text-[#6f5600]">{boxnowLockerPostalCode ? `${boxnowLockerPostalCode} · ` : ''}BoxNow ID: {boxnowLockerId}</p>
+                      <p class="mt-1 text-xs text-[#6f5600]">{boxnowLockerPostalCode ? `${boxnowLockerPostalCode} · ` : ''}{$locale === 'hr' ? 'Oznaka' : 'Reference'}: {boxnowLockerId}</p>
                     </div>
                   {/if}
                   <button id="boxnow-locker-button" type="button" onclick={openBoxNowMap} class="btn btn-dark w-full disabled:cursor-wait disabled:opacity-60">
                     {boxnowLockerId
                       ? ($locale === 'hr' ? 'Promijeni paketomat' : 'Change locker')
                       : boxnowWidgetLoading
-                        ? ($locale === 'hr' ? 'Učitavam BoxNow kartu…' : 'Loading BoxNow map…')
+                        ? ($locale === 'hr' ? 'Učitavam kartu paketomata…' : 'Loading parcel-locker map…')
                         : ($locale === 'hr' ? 'Odaberi paketomat na karti' : 'Select locker on map')}
                   </button>
                   {#if fieldErrors.boxnowLocker}<p class="checkout-field-error">{fieldErrors.boxnowLocker}</p>{/if}
                   {#if boxnowWidgetError}
-                    <p class="mt-2 text-xs leading-relaxed text-[#9f1f18]">{$locale === 'hr' ? 'BoxNow karta se nije učitala. Osvježite stranicu ili odaberite drugi način dostave.' : 'The BoxNow map did not load. Refresh the page or select another delivery method.'}</p>
+                    <p class="mt-2 text-xs leading-relaxed text-[#9f1f18]">{$locale === 'hr' ? 'Karta paketomata nije se učitala. Osvježite stranicu ili odaberite drugi način dostave.' : 'The parcel-locker map did not load. Refresh the page or select another delivery method.'}</p>
                   {:else}
-                    <p class="mt-2 text-xs leading-relaxed text-[#6f5600]">{$locale === 'hr' ? 'BoxNow se učitava tek kada otvorite kartu. Time se vaš preglednik povezuje sa službenom BoxNow uslugom.' : 'BoxNow loads only when you open the map. This connects your browser to the official BoxNow service.'}</p>
+                    <p class="mt-2 text-xs leading-relaxed text-[#6f5600]">{$locale === 'hr' ? 'Karta se učitava tek kada je otvorite. Time se preglednik povezuje s uslugom paketomata.' : 'The map loads only when you open it. This connects your browser to the parcel-locker service.'}</p>
                   {/if}
             </div>
             {#if deliveryMethod !== 'personal_pickup'}
@@ -300,7 +301,7 @@
               <div><label for="checkout_zip" class="field-label">{$locale === 'hr' ? 'Poštanski broj' : 'ZIP'} *</label><input id="checkout_zip" autocomplete="postal-code" class="field" aria-invalid={Boolean(fieldErrors.zip)} oninput={() => clearFieldError('zip')} bind:value={zip} />{#if fieldErrors.zip}<p class="checkout-field-error">{fieldErrors.zip}</p>{/if}</div>
               <div class="md:col-span-2"><label for="checkout_country" class="field-label">{$locale === 'hr' ? 'Država' : 'Country'} *</label><input id="checkout_country" autocomplete="country-name" class="field" aria-invalid={Boolean(fieldErrors.country)} oninput={() => clearFieldError('country')} bind:value={country} />{#if fieldErrors.country}<p class="checkout-field-error">{fieldErrors.country}</p>{/if}</div>
             {:else}
-              <p class="md:col-span-2 rounded-lg bg-[#fffaf0] p-4 text-sm text-[#6f5600]">{$locale === 'hr' ? 'Adresa dostave nije potrebna. Petroni će vam potvrditi termin i lokaciju osobnog preuzimanja.' : 'A delivery address is not required. Petroni will confirm the personal pickup time and location.'}</p>
+              <p class="md:col-span-2 rounded-lg bg-[#fffaf0] p-4 text-sm text-[#6f5600]">{$locale === 'hr' ? 'Adresa dostave nije potrebna. Alderway će vam potvrditi termin i lokaciju osobnog preuzimanja.' : 'A delivery address is not required. Alderway will confirm the personal pickup time and location.'}</p>
             {/if}
           </div>
         </div>
@@ -312,36 +313,36 @@
           {/if}
           <div class="grid grid-cols-1 gap-3">
             {#each enabledDeliveryMethods as method}
-              <button type="button" onclick={() => deliveryMethod = method.id} class="flex items-center justify-between rounded-md p-4 text-left" style="border:2px solid {deliveryMethod === method.id ? '#f5c518' : '#e2e4e8'}">
+              <button type="button" onclick={() => deliveryMethod = method.id} class="flex items-center justify-between rounded-md p-4 text-left" style="border:2px solid {deliveryMethod === method.id ? '#c87442' : '#e2e4e8'}">
                 <span>
                   <b class="text-sm text-[#2b2b2b]">{$locale === 'hr' ? method.label_hr : method.label_en}</b>
                   {#if method.id === 'overseas'}
                     <small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? activeOverseasZone?.label_hr : activeOverseasZone?.label_en}{#if data.checkoutConfig.freeShippingThreshold > 0} · {$locale === 'hr' ? 'besplatno od' : 'free from'} {data.checkoutConfig.freeShippingThreshold.toFixed(2)} €{/if}</small>
                   {:else if method.id === 'boxnow'}
-                    <small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? 'Paketomat birate na službenoj BoxNow karti.' : 'Choose a locker on the official BoxNow map.'}</small>
+                    <small class="mt-1 block text-[#7a7f86]">{$locale === 'hr' ? 'Paketomat birate na karti pružatelja dostave.' : 'Choose a locker on the delivery provider’s map.'}</small>
                   {/if}
                 </span>
-                <span class="font-bold text-[#b5890a]">{deliveryPrice(method.id).toFixed(2)} €</span>
+                <span class="font-bold text-[#9f542e]">{deliveryPrice(method.id).toFixed(2)} €</span>
               </button>
             {/each}
           </div>
           {#if enabledDeliveryMethods.length === 0}
-            <p class="mt-3 rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-3 text-sm text-[#9f1f18]">{$locale === 'hr' ? 'Za ovu košaricu trenutačno nema dostupnog načina preuzimanja. Kontaktirajte Petroni prije naručivanja.' : 'No delivery or pickup method is currently available for this cart. Contact Petroni before ordering.'}</p>
+            <p class="mt-3 rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-3 text-sm text-[#9f1f18]">{$locale === 'hr' ? 'Za ovu košaricu trenutačno nema dostupnog načina preuzimanja. Kontaktirajte Alderway prije naručivanja.' : 'No delivery or pickup method is currently available for this cart. Contact Alderway before ordering.'}</p>
           {/if}
         </div>
 
         <div class="card card-static p-7">
           <h2 class="text-base font-bold uppercase tracking-wide text-[#2b2b2b] mb-4">{$locale === 'hr' ? 'Plaćanje' : 'Payment'}</h2>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <button type="button" onclick={() => paymentMethod = 'bank_transfer'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'bank_transfer' ? '#f5c518' : '#e2e4e8'}">
+            <button type="button" onclick={() => paymentMethod = 'bank_transfer'} class="p-4 rounded-md text-center" style="border:2px solid {paymentMethod === 'bank_transfer' ? '#c87442' : '#e2e4e8'}">
               <p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Bankovna uplata' : 'Bank transfer'}</p>
-              <p class="text-xs text-[#9aa0a8] mt-1">HUB-3 / PDF417</p>
+              <p class="text-xs text-[#9aa0a8] mt-1">{$locale === 'hr' ? 'Upute za uplatu' : 'Payment instructions'}</p>
             </button>
-            <button type="button" onclick={() => data.corvuspayAvailable && (paymentMethod = 'corvuspay')} disabled={!data.corvuspayAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'corvuspay' ? '#f5c518' : '#e2e4e8'}">
+            <button type="button" onclick={() => data.corvuspayAvailable && (paymentMethod = 'corvuspay')} disabled={!data.corvuspayAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'corvuspay' ? '#c87442' : '#e2e4e8'}">
               <p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Kartica' : 'Card'}</p>
-              <p class="text-xs text-[#9aa0a8] mt-1">{data.corvuspayAvailable ? 'CorvusPay' : ($locale === 'hr' ? 'Uskoro dostupno' : 'Coming soon')}</p>
+              <p class="text-xs text-[#9aa0a8] mt-1">{data.corvuspayAvailable ? 'CorvusPay' : ($locale === 'hr' ? 'Trenutačno nedostupno' : 'Temporarily unavailable')}</p>
             </button>
-            <button type="button" onclick={() => codAvailable && (paymentMethod = 'cash_on_delivery')} disabled={!codAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'cash_on_delivery' ? '#f5c518' : '#e2e4e8'}">
+            <button type="button" onclick={() => codAvailable && (paymentMethod = 'cash_on_delivery')} disabled={!codAvailable} class="p-4 rounded-md text-center disabled:opacity-50" style="border:2px solid {paymentMethod === 'cash_on_delivery' ? '#c87442' : '#e2e4e8'}">
               <p class="font-semibold text-[#2b2b2b] text-sm">{$locale === 'hr' ? 'Pouzeće' : 'Cash on delivery'}</p>
               <p class="text-xs text-[#9aa0a8] mt-1">{codAvailable ? `+${data.checkoutConfig.cashOnDeliverySurcharge.toFixed(2)} €` : ($locale === 'hr' ? 'Nije dostupno za ovu dostavu' : 'Unavailable for this delivery')}</p>
             </button>
@@ -365,7 +366,7 @@
             <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Međuzbroj' : 'Subtotal'}</span><span class="text-[#2b2b2b]">{subtotal.toFixed(2)} €</span></div>
             <div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Dostava' : 'Delivery'}</span><span class="text-[#2b2b2b]">{totals.shippingCost.toFixed(2)} €</span></div>
             {#if totals.paymentSurcharge > 0}<div class="flex justify-between text-sm"><span class="text-[#7a7f86]">{$locale === 'hr' ? 'Naknada za pouzeće' : 'Cash-on-delivery fee'}</span><span class="text-[#2b2b2b]">{totals.paymentSurcharge.toFixed(2)} €</span></div>{/if}
-            <div class="flex justify-between font-bold text-lg"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span><span style="color:#b5890a">{total.toFixed(2)} €</span></div>
+            <div class="flex justify-between font-bold text-lg"><span class="text-[#2b2b2b]">{$locale === 'hr' ? 'Ukupno' : 'Total'}</span><span style="color:#9f542e">{total.toFixed(2)} €</span></div>
           </div>
           {#if submitError}
             <p id="checkout-error" role="alert" class="mb-4 rounded-lg border border-[#f2b8b5] bg-[#fff6f5] p-3 text-sm text-[#9f1f18]">{submitError}</p>

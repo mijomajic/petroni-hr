@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
 </script>
 
-<svelte:head><title>Narudžbe — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Narudžbe — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div>
   <div class="mb-8">
@@ -31,11 +32,11 @@
                 <p class="text-xs text-[#7a7f86]">{order.customer_email}</p>
               </td>
               <td class="px-4 py-3 text-xs text-[#7a7f86]">{new Date(order.created_at).toLocaleDateString('hr-HR')}</td>
-              <td class="px-4 py-3 font-bold text-[#b5890a]">{Number(order.total).toFixed(2)} EUR</td>
-              <td class="px-4 py-3"><span class="rounded-full bg-[#fff7e0] px-2 py-1 text-[10px] font-bold uppercase text-[#9a7600]">{order.status}</span></td>
-              <td class="px-4 py-3"><span class="rounded-full {order.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-[#fff7e0] text-[#9a7600]'} px-2 py-1 text-[10px] font-bold uppercase">{order.payment_status}</span></td>
+              <td class="px-4 py-3 font-bold text-[#9f542e]">{Number(order.total).toFixed(2)} EUR</td>
+              <td class="px-4 py-3"><span class="rounded-full bg-[#f5e8df] px-2 py-1 text-[10px] font-bold uppercase text-[#9a7600]">{order.status}</span></td>
+              <td class="px-4 py-3"><span class="rounded-full {order.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-[#f5e8df] text-[#9a7600]'} px-2 py-1 text-[10px] font-bold uppercase">{order.payment_status}</span></td>
               <td class="px-4 py-3 text-xs text-[#7a7f86]">{order.invoice_sent ? 'Poslan' : 'Nije poslan'}</td>
-              <td class="px-4 py-3"><a href="/admin/narudzbe/{order.id}" class="rounded-md bg-[#F5C518] px-3 py-2 text-xs font-bold text-black">Otvori</a></td>
+              <td class="px-4 py-3"><a href="/admin/narudzbe/{order.id}" class="rounded-md bg-[#c87442] px-3 py-2 text-xs font-bold text-black">Otvori</a></td>
             </tr>
           {/each}
         </tbody>

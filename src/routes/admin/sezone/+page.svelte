@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { BUSINESS } from '$lib/config/business';
   import type { PageProps } from './$types';
   let { data, form }: PageProps = $props();
   const priceMap = $derived(new Map(data.prices.map((price) => [`${price.season_id}:${price.vehicle_id}`, price.price_per_day])));
 </script>
 
-<svelte:head><title>Sezone i cijene — Admin — Petroni</title></svelte:head>
+<svelte:head><title>Sezone i cijene — Admin — {BUSINESS.shortName}</title></svelte:head>
 
 <div class="max-w-[1500px]">
   <header class="mb-8">

@@ -37,15 +37,12 @@
     </div>
   </a>
 
-  <div class="px-5 pt-5 pb-1 flex items-center justify-center min-h-[72px] text-center">
-    <h3 class="font-semibold text-[17px] leading-snug text-[#2b2b2b] text-center">{vehicle.name}</h3>
-  </div>
-
-  <div class="px-5 py-5 flex flex-col flex-1 items-center text-center">
+  <div class="flex flex-1 flex-col items-center px-5 pb-5 pt-4 text-center">
+    <h3 class="mb-2 flex min-h-11 items-center text-center text-[17px] font-semibold leading-snug text-[#2b2b2b]">{vehicle.name}</h3>
     {#if desc}
-      <p class="text-[13.5px] leading-relaxed text-[#7a7f86] mb-5 line-clamp-3">{desc}</p>
+      <p class="mb-4 line-clamp-3 text-[13.5px] leading-relaxed text-[#7a7f86]">{desc}</p>
     {:else}
-      <p class="text-[13.5px] leading-relaxed text-[#7a7f86] mb-5">
+      <p class="mb-4 text-[13.5px] leading-relaxed text-[#7a7f86]">
         {vehicle.name} — {$locale === 'hr' ? 'detalji o vozilu, oprema i udobnost.' : 'vehicle details, equipment and comfort.'}
       </p>
     {/if}

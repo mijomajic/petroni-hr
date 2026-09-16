@@ -13,9 +13,9 @@
   }
 
   function postExcerpt(post: Post) {
-    return post.excerpt_hr || ($locale === 'hr'
-      ? 'Pročitajte najnovije informacije, savjete i priče iz Petronija.'
-      : 'Read the latest information, advice and stories from Petroni.');
+    if ($locale === 'hr') return post.excerpt_hr || 'Pročitajte najnovije informacije, savjete i priče iz Alderwaya.';
+    const source = post.content_en || post.content_hr || '';
+    return source.length > 165 ? `${source.slice(0, 162).trimEnd()}…` : source || 'Read the latest advice and stories from Alderway.';
   }
 
   function postDate(value: string | null) {
@@ -27,10 +27,10 @@
 </script>
 
 <svelte:head>
-  <title>Novosti, savjeti i ideje za kampiranje | Petroni</title>
-  <meta name="description" content="Petroni novosti, savjeti i informacije iz svijeta kampiranja, kampera, karavana, putovanja i kamping opreme." />
-  <meta property="og:title" content="Novosti, savjeti i ideje za kampiranje | Petroni" />
-  <meta property="og:description" content="Petroni novosti, savjeti i informacije iz svijeta kampiranja, kampera, karavana, putovanja i kamping opreme." />
+  <title>{$locale === 'hr' ? 'Putni vodiči i ideje' : 'Road-trip guides and ideas'} | Alderway</title>
+  <meta name="description" content={$locale === 'hr' ? 'Praktični vodiči za najam kampera i opuštena putovanja.' : 'Practical guides for motorhome hire and more relaxed road trips.'} />
+  <meta property="og:title" content={$locale === 'hr' ? 'Putni vodiči i ideje | Alderway' : 'Road-trip guides and ideas | Alderway'} />
+  <meta property="og:description" content={$locale === 'hr' ? 'Praktični vodiči za najam kampera i opuštena putovanja.' : 'Practical guides for motorhome hire and more relaxed road trips.'} />
 </svelte:head>
 
 <main class="section bg-[#fbfbfa]">
@@ -38,7 +38,7 @@
     <header class="mb-10 max-w-2xl md:mb-14">
       <span class="eyebrow mb-3">{$locale === 'hr' ? 'Priče, vodiči i novosti' : 'Stories, guides and news'}</span>
       <h1 class="section-title text-wrap-balance">{$locale === 'hr' ? 'Iz svijeta kampiranja' : 'From the world of camping'}</h1>
-      <p class="mt-4 max-w-xl text-[15px] leading-7 text-[#747980]">{$locale === 'hr' ? 'Praktični savjeti, novosti iz Petronija i ideje za sigurnije, opuštenije putovanje.' : 'Practical advice, news from Petroni and ideas for safer, more relaxed travel.'}</p>
+      <p class="mt-4 max-w-xl text-[15px] leading-7 text-[#747980]">{$locale === 'hr' ? 'Praktični savjeti, novosti iz Alderwaya i ideje za sigurnije, opuštenije putovanje.' : 'Practical advice, news from Alderway and ideas for safer, more relaxed travel.'}</p>
     </header>
 
     {#if featured}
@@ -49,10 +49,10 @@
           {/if}
         </div>
         <div class="flex flex-col justify-end p-7 md:p-10">
-          {#if postDate(featured.published_at)}<p class="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#f5c518]">{postDate(featured.published_at)}</p>{/if}
+          {#if postDate(featured.published_at)}<p class="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#c87442]">{postDate(featured.published_at)}</p>{/if}
           <h2 class="text-wrap-balance text-2xl font-bold leading-tight text-white md:text-3xl">{postTitle(featured)}</h2>
           <p class="mt-4 line-clamp-3 text-sm leading-6 text-white/65">{postExcerpt(featured)}</p>
-          <span class="mt-7 inline-flex items-center gap-2 text-sm font-bold text-[#f5c518]">{$locale === 'hr' ? 'Pročitaj članak' : 'Read article'} <span aria-hidden="true">→</span></span>
+          <span class="mt-7 inline-flex items-center gap-2 text-sm font-bold text-[#c87442]">{$locale === 'hr' ? 'Pročitaj članak' : 'Read article'} <span aria-hidden="true">→</span></span>
         </div>
       </a>
     {/if}

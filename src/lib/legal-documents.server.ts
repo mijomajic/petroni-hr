@@ -9,6 +9,7 @@ import {
   type LegalDocumentStatus,
   type LegalDocumentVersion
 } from '$lib/legal-documents';
+import { useStaticDemoData } from '$lib/demo-mode.server';
 
 type LegalDocumentRow = {
   key: string;
@@ -52,6 +53,8 @@ function normalizeVersion(row: Record<string, unknown>, key: LegalDocumentKey): 
 }
 
 export async function getPublishedLegalDocument(key: LegalDocumentKey): Promise<LegalDocumentVersion> {
+  if (useStaticDemoData) return cloneLegalDocument(DEFAULT_LEGAL_DOCUMENTS[key]);
+
   const { data, error } = await supabaseAdmin
     .from('legal_document_versions')
     .select('*')
