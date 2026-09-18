@@ -24,6 +24,11 @@ function shouldLogPublic404(pathname: string) {
   );
 }
 
+function canEmbedOnEastline(pathname: string) {
+  return !['/admin', '/api', '/auth', '/checkout', '/platforma', '/postavi-lozinku', '/rezerviraj/success']
+    .some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
   const legacyDecision = legacyRedirectDecision(event.url.pathname, event.url.searchParams);
   if (legacyDecision?.status === 308) {
@@ -94,7 +99,16 @@ export const handle: Handle = async ({ event, resolve }) => {
   });
 
   response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  if (canEmbedOnEastline(event.url.pathname)) {
+    response.headers.delete('X-Frame-Options');
+    response.headers.set(
+      'Content-Security-Policy',
+      "frame-ancestors 'self' https://eastline-consulting.com https://www.eastline-consulting.com"
+    );
+  } else {
+    response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+    response.headers.set('Content-Security-Policy', "frame-ancestors 'self'");
+  }
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
