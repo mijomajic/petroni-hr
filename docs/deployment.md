@@ -6,9 +6,9 @@ This repository supports two deployment modes from the same codebase.
 
 Use this mode for the Eastline master demo or a temporary client preview.
 
-1. Import the repository into Vercel and deploy the `main` branch.
-2. Set `PUBLIC_DEMO_MODE=true`.
-3. Set `PUBLIC_SITE_URL` to the final HTTPS deployment origin.
+1. Authenticate Wrangler with `npx wrangler login`, then run `npm run deploy`, or connect `main` to Cloudflare Builds.
+2. Keep `PUBLIC_DEMO_MODE=true` in `wrangler.jsonc`.
+3. Set `PUBLIC_SITE_URL` to the final HTTPS deployment origin in the Cloudflare Worker settings.
 4. Leave Supabase, Resend and CorvusPay values empty unless those services are intentionally being demonstrated.
 5. Run the public smoke test below after the deployment is ready.
 
@@ -20,12 +20,14 @@ Use this mode when the client needs persistent bookings, transactional email and
 
 1. Create a Supabase project and apply every SQL file in `supabase/migrations/` in numeric order.
 2. Confirm that `0042_alderway_demo_rebrand.sql` has completed successfully.
-3. Set `PUBLIC_DEMO_MODE=false`.
-4. Configure `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_KEY`.
-5. Configure `RESEND_API_KEY` and a verified `RESEND_FROM_EMAIL` sender.
+3. Set `PUBLIC_DEMO_MODE=false` in the Cloudflare Worker environment.
+4. Configure `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY`; store `SUPABASE_SERVICE_KEY` with `wrangler secret put`.
+5. Store `RESEND_API_KEY` as a Worker secret and configure a verified `RESEND_FROM_EMAIL` sender.
 6. Set `PUBLIC_SITE_URL` to the canonical HTTPS origin.
 7. Create the first administrator through the approved Supabase/admin onboarding process.
 8. Configure `CRON_SECRET` if the scheduled reconciliation route remains enabled.
+
+The old Vercel HTTP cron is intentionally not copied into the standalone demo because request-only rentals do not use CorvusPay reconciliation. A payment-enabled client deployment can call the protected reconciliation endpoint from a Cloudflare Cron Trigger or another scheduler.
 
 The standard rental flow does not charge customers online. `rentalOnlinePaymentsEnabled` in `src/lib/config/business.ts` stays `false`; the company confirms availability and arranges payment directly. CorvusPay variables are only required for a client project that explicitly enables online payments.
 

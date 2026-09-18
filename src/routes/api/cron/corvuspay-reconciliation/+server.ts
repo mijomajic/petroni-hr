@@ -4,8 +4,6 @@ import { json } from '@sveltejs/kit';
 import { runCorvuspayReconciliation } from '$lib/corvuspay-reconciliation.server';
 import type { RequestHandler } from './$types';
 
-export const config = { maxDuration: 60 };
-
 function authorized(request: Request): boolean {
   const secret = env.CRON_SECRET;
   const received = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';

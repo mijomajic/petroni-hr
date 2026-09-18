@@ -19,7 +19,7 @@
   <header class="mb-8">
     <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#9a7600]">Sadržaj</p>
     <h1 class="mt-2 text-3xl font-black uppercase tracking-tight text-[#2b2b2b]">Medijska biblioteka</h1>
-    <p class="mt-2 max-w-3xl text-sm leading-6 text-[#7a7f86]">Original se sprema privatno, a za javnu stranicu nastaje optimizirana WebP verzija. Uz svaku sliku evidentirajte izvor i pravo korištenja.</p>
+    <p class="mt-2 max-w-3xl text-sm leading-6 text-[#7a7f86]">Original se sprema privatno, a odvojena javna kopija zadržava format i puni prikaz slike. Uz svaku sliku evidentirajte izvor i pravo korištenja.</p>
   </header>
 
   {#if form?.message}<div class="mb-6 rounded-md border border-[#eadfba] bg-[#fffdf5] p-4 text-sm text-[#6f5600]" role="status">{form.message}</div>{/if}

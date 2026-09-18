@@ -5,14 +5,15 @@ import test from 'node:test';
 
 const projectFile = (...parts: string[]) => resolve(process.cwd(), ...parts);
 
-test('media library keeps originals private and serves only optimised derivatives publicly', () => {
-  const migration = readFileSync(projectFile('supabase/migrations/0040_phase6hf_media_library.sql'), 'utf8');
+test('media library keeps originals private and serves a separate public copy', () => {
+  const migration = readFileSync(projectFile('supabase/migrations/0043_alderway_media_buckets.sql'), 'utf8');
   const upload = readFileSync(projectFile('src/routes/admin/mediji/+page.server.ts'), 'utf8');
-  assert.match(migration, /'petroni-media-originals', 'petroni-media-originals', false/);
-  assert.match(migration, /'petroni-media', 'petroni-media', true/);
-  assert.match(migration, /Public read Petroni media derivatives/);
-  assert.match(upload, /limitInputPixels: 40_000_000/);
-  assert.match(upload, /webp\(\{ quality: 84 \}\)/);
+  assert.match(migration, /'alderway-media-originals', 'alderway-media-originals', false/);
+  assert.match(migration, /'alderway-media', 'alderway-media', true/);
+  assert.match(migration, /Public read Alderway media/);
+  assert.match(upload, /imageDimensions\(original, file\.type\)/);
+  assert.match(upload, /BUSINESS\.media\.originalsBucket/);
+  assert.match(upload, /BUSINESS\.media\.publicBucket/);
   assert.match(upload, /createHash\('sha256'\)/);
   assert.match(upload, /status: 'archived'/);
 });

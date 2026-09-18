@@ -9,7 +9,7 @@ The standard rental setup is request-only: customers select a vehicle, dates and
 - Node.js 22 or newer
 - npm
 - A Supabase project for live catalogue, authentication and administration
-- A Vercel project for production deployment
+- A Cloudflare account for production deployment
 
 ## Local setup
 
@@ -46,7 +46,7 @@ When Supabase is not configured, the public site automatically uses the bundled 
 | `RENTAL_BACKUP_DIR` | Private backup directory outside this repository |
 | `RENTAL_BACKUP_PASSPHRASE_FILE` | Mode-600 passphrase file outside this repository |
 
-Keep server-only values in local `.env` and encrypted Vercel environment variables. `.env.example` contains names and safe placeholders only.
+Keep server-only values in local `.env` and encrypted Cloudflare Worker secrets. `.env.example` contains names and safe placeholders only.
 
 ## Verification
 
@@ -74,7 +74,9 @@ Business configuration such as seasons, prices, fees, delivery rules, editable p
 
 ## Deployment
 
-The application can be deployed by Vercel from the `main` branch. For a standalone sales demo, set `PUBLIC_DEMO_MODE=true` and `PUBLIC_SITE_URL` to the deployment origin; public browsing and the request-booking experience then work without Supabase. Configure Supabase, Resend and the documented server-only variables when persistent admin, database records and real transactional email are required. CorvusPay credentials are not required for the standard request-only rental setup. If online payments are deliberately enabled for a client, the production credentials and callback URLs must match the final canonical domain.
+The application is configured for Cloudflare Workers with the official SvelteKit adapter. Run `npm run deploy` after authenticating Wrangler, or connect the repository to Cloudflare Builds for deployments from `main`. For a standalone sales demo, `PUBLIC_DEMO_MODE=true` is already set in `wrangler.jsonc`; set `PUBLIC_SITE_URL` to the final HTTPS origin. Public browsing and the request-booking experience then work without Supabase.
+
+Configure Supabase, Resend and the documented server-only values when persistent admin, database records and real transactional email are required. Use `wrangler secret put <NAME>` for secrets, and set non-secret environment values in the Cloudflare dashboard or `wrangler.jsonc`. CorvusPay credentials are not required for the standard request-only rental setup. If online payments are deliberately enabled for a client, the production credentials and callback URLs must match the final canonical domain.
 
 The current production payment variables are intentionally empty until a merchant owner supplies and approves real credentials and the mTLS API certificate.
 

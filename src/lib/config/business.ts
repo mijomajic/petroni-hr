@@ -15,6 +15,10 @@ export const BUSINESS = {
   mark: '/brand/alderway-mark.svg',
   defaultImage: '/images/brand/alderway-hero.webp',
   storagePrefix: 'alderway',
+  media: {
+    originalsBucket: 'alderway-media-originals',
+    publicBucket: 'alderway-media'
+  },
   bookingReferencePrefix: 'ALD',
   rentalOnlinePaymentsEnabled: false as boolean,
   currency: 'EUR',
